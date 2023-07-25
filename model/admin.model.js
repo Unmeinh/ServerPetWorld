@@ -6,7 +6,7 @@ let AdminSchema = new db.mongoose.Schema(
         passwordAdmin:{type:String,required:true},
         avatarAdmin:{type:String,required:false},
         statusAdmin:{type:String,require:true},
-        email:{type:String,required:true,index:{
+        emailAdmin:{type:String,required:true,index:{
             unique:true
         }}
     },
