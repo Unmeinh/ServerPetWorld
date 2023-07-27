@@ -4,15 +4,15 @@ var router = express.Router();
 
 router.get('/', UserShopCtrl.listUserShop);
 
-router.get('/detail/:idUser', UserShopCtrl.detailUserShop);
+router.get('/detail', UserShopCtrl.detailUserShop);//bổ sung /:idUserShop khi làm
 
 router.get('/add',UserShopCtrl.addUserShop);
 router.post('/add', UserShopCtrl.addUserShop);
 
-router.get('/edit/:idUser', UserShopCtrl.editUserShop);
-router.put('/edit/:idUser', UserShopCtrl.editUserShop);
+router.get('/edit', UserShopCtrl.editUserShop);//bổ sung /:idUserShop khi làm
+router.put('/edit', UserShopCtrl.editUserShop);//bổ sung /:idUserShop khi làm
 
-router.get('/delete/:idUser',UserShopCtrl.deleteUserShop);
-router.delete('/delete/:idUser',UserShopCtrl.deleteUserShop);
+router.get('/delete',UserShopCtrl.deleteUserShop);//bổ sung /:idUserShop khi làm
+router.delete('/delete',UserShopCtrl.deleteUserShop);//bổ sung /:idUserShop khi làm
 
 module.exports = router;

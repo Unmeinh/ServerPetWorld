@@ -4,8 +4,9 @@ exports.listAdmin = async (req, res, next) => {
     if (req.method == 'GET') {
         try {
             let listAdmin = await mdAdmin.AdminModel.find();
+            let countAllAdmin = await mdAdmin.AdminModel.count();
             msg = 'Lấy danh sách admin thành công';
-            return res.render('Admin/listAdmin', { listAdmin: listAdmin, msg: msg });
+            return res.render('Admin/listAdmin', { listAdmin: listAdmin,countAllAdmin,countAllAdmin, msg: msg });
         } catch (error) {
             msg = '' + error.message;
             console.log('Không lấy được danh sách  admin: ' + error.message);
