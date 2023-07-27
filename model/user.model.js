@@ -1,7 +1,7 @@
 let db = require('./db');
 let UserSchema = new db.mongoose.Schema(
     {
-        username:{type:String,required:true},
+        usernameUser:{type:String,required:true},
         passwordUser:{type:String,required:true},
         fullname:{type:String,required:false},
         emailUser:{type:String,required:false,index:{

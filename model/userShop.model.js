@@ -10,7 +10,8 @@ let UserShopSchema = new db.mongoose.Schema(
         statusShopUS:{type:String,required:false},
         locationUS:{type:String,required:false},
         createdAt:{type:Date,required:false}, 
-        arr_Shop:{type:Array,required:false}   
+        arr_Shop:{type:Array,required:false},
+        fullname:{type:String,required:true}, 
     },
     {
         collection:'UserShop'
