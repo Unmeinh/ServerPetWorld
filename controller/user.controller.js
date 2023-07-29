@@ -4,8 +4,9 @@ exports.listUser = async (req, res, next) => {
     if (req.method == 'GET') {
         try {
             let listUser = await mdUser.UserModel.find();
+            let countAllUser = await mdUser.UserModel.count();
             msg = 'Lấy danh sách user thành công';
-            return res.render('User/listUser', { listUser: listUser, msg: msg });
+            return res.render('User/listUser', { listUser: listUser,countAllUser:countAllUser, msg: msg });
         } catch (error) {
             msg = '' + error.message;
             console.log('Không lấy được danh sách  user: ' + msg);

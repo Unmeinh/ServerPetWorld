@@ -2,7 +2,7 @@ let db = require('./db');
 let AdminSchema = new db.mongoose.Schema(
     {
         nameAdmin:{type:String,required:true},
-        username:{type:String,required:true},
+        usernameAdmin:{type:String,required:true},
         passwordAdmin:{type:String,required:true},
         avatarAdmin:{type:String,required:false},
         statusAdmin:{type:String,require:true},

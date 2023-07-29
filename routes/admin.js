@@ -4,15 +4,15 @@ var router = express.Router();
 
 router.get('/', AdminCtrl.listAdmin);
 
-router.get('/detail/:idAdmin', AdminCtrl.detailAdmin);
+router.get('/detail', AdminCtrl.detailAdmin);//bổ sung /:idAdmin khi làm 
 
 router.get('/add', AdminCtrl.addAdmin);
 router.post('/add', AdminCtrl.addAdmin);
 
-router.get('/edit/:idAdmin', AdminCtrl.editAdmin);
-router.put('/edit/:idAdmin', AdminCtrl.editAdmin);
+router.get('/edit', AdminCtrl.editAdmin); //bổ sung /:idAdmin khi làm 
+router.put('/edit', AdminCtrl.editAdmin);//bổ sung /:idAdmin khi làm 
 
-router.get('/delete/:idAdmin',AdminCtrl.deleteAdmin);
-router.delete('/delete/:idAdmin',AdminCtrl.deleteAdmin);
+router.get('/delete',AdminCtrl.deleteAdmin);//bổ sung /:idAdmin khi làm 
+router.delete('/delete',AdminCtrl.deleteAdmin);//bổ sung /:idAdmin khi làm 
 
 module.exports = router;
