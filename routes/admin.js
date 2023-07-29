@@ -1,9 +1,18 @@
 var express = require('express');
+var AdminCtrl = require('../controller/admin.controller');
 var router = express.Router();
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-});
+router.get('/', AdminCtrl.listAdmin);
+
+router.get('/detail', AdminCtrl.detailAdmin);//bổ sung /:idAdmin khi làm 
+
+router.get('/add', AdminCtrl.addAdmin);
+router.post('/add', AdminCtrl.addAdmin);
+
+router.get('/edit', AdminCtrl.editAdmin); //bổ sung /:idAdmin khi làm 
+router.put('/edit', AdminCtrl.editAdmin);//bổ sung /:idAdmin khi làm 
+
+router.get('/delete',AdminCtrl.deleteAdmin);//bổ sung /:idAdmin khi làm 
+router.delete('/delete',AdminCtrl.deleteAdmin);//bổ sung /:idAdmin khi làm 
 
 module.exports = router;
