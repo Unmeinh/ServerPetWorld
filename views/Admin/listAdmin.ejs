@@ -1,63 +1,72 @@
 <%- include('../inc/top',{title:'Quản lý tài khoản Admin'}) %>
-  <div class="container-fluid " style="width: 98%;" >
+  <div class="container-fluid " style="width: 98%;">
     <div class="row col m-3">
 
-      <form class="row col-3 me-2" method="post">
-        <div style="background-color: #F0F4F8;border-radius: 25px;align-items: center;" class="row col">
+      <form action="" class="row col-3 me-2" method="get">
+        <div style="background-color: #F0F4F8;border-radius: 25px;align-items: center;" class="row">
           <div style="width: 10%;">
             <button type="submit" style="border: none;"><img src="https://cdn-icons-png.flaticon.com/128/622/622669.png"
                 style="width: 20px;height: 20px;"></button>
           </div>
           <div style="width: 90%;">
-            <input style="border-radius: 20px;border: #F0F4F8;background-color: #F0F4F8;border-radius: 25px;;"
-              class="form-control" placeholder="Nhập từ khóa">
+            <input name="filterSearch"
+              style="border: none;background-color: #F0F4F8;border-radius: 25px; box-shadow: none;" class="form-control"
+              placeholder="Nhập từ khóa">
           </div>
         </div>
 
       </form>
 
       <div class="row col-3 me-5">
-        <select class="form-select" style="background-color:  #F0F4F8;border-radius: 20px;">
-          <option selected disabled>Sắp xếp theo</option>
-          <option value="1">Sắp xếp từ a-z</option>
-          <option value="2">Sắp xếp từ z-a</option>
-
-        </select>
+        <form action="" method="get">
+          <select name="ChangeUser" class="form-select"
+            style="background-color:  #F0F4F8;border-radius: 20px;border: none;box-shadow: none;">
+            <option selected disabled>Sắp xếp theo</option>
+            <option value="1">Sắp xếp từ a-z</option>
+            <option value="2">Sắp xếp từ z-a</option>
+          </select>
+        </form>
       </div>
       <div class="row col-4">
 
       </div>
       <div class="row col-2 ms-1" style="align-items: center;">
         <a href="http://localhost:3000/admin/add"
-          style="text-decoration: none; background-color: #F582AE; border-radius: 20px;text-align: center;padding: 8px;">
+          style="text-decoration: none; background-color: #F582AE; border-radius: 6px;text-align: center;padding: 7px;">
           <span style="color: white;font-weight: bold;">Thêm admin</span>
         </a>
       </div>
     </div>
 
-    <table class="table" style="border: white; ">
 
-      <tr style="background-color: #8BD3DD;">
-        <th scope="col">Họ tên</th>
-        <th scope="col">Email</th>
-        <th scope="col">Username</th>
-        <th scope="col"></th>
+    <table class="table table-curved" style="border: white;">
+
+      <tr style="background: #8BD3DD;border-radius: 15px;">
+        <th style="border-radius: 6px 0 0 6px;">Họ tên</th>
+        <th>Email</th>
+        <th>Username</th>
+        <th style="border-radius: 0 6px 6px 0;"></th>
       </tr>
 
-      <tr>
-       
-        <% listAdmin.forEach((row)=>{ %>
-          <td style="display: flex;flex-direction: row;"> <img src=" <%= row.avatarAdmin %>" style="width: 50px;height: 50px;border-radius: 8px;">
-             
-              <div class="box" style="line-height: 8px;margin: 5px;">
-                <p><%= row.nameAdmin %></p>
-                <a href="http://localhost:3000/admin/edit" style="text-decoration: none;color: rgb(171, 169, 169);">Sửa</a>
-                <span> | </span>
-                <a href="http://localhost:3000/admin/delete" style="text-decoration: none;color: rgb(171, 169, 169);">Xóa</a>
-              </div>
-             
-            
-           
+
+
+
+      <% listAdmin.forEach((row)=>{ %>
+        <tr>
+          <td style="display: flex;flex-direction: row;"> <img src=" <%= row.avatarAdmin %>"
+              style="width: 50px;height: 50px;border-radius: 8px;">
+
+            <div class="box" style="line-height: 8px;margin: 5px;">
+              <p>
+                <%= row.nameAdmin %>
+              </p>
+
+              <a href="http://localhost:3000/admin/delete"
+                style="text-decoration: none;color: rgb(171, 169, 169);">Xóa</a>
+            </div>
+
+
+
           </td>
           <td>
             <%= row.emailAdmin %>
@@ -65,19 +74,21 @@
           <td>
             <%= row.usernameAdmin %>
           </td>
-          <td><a href="http://localhost:3000/admin/detail"
+          <td><a href="http://localhost:3000/admin/detail/<%= row._id%>"
               style="background-color: #F582AE;padding: 8px;border-radius: 10px;text-decoration: none;color: white; font-weight: bold;">Chi
               tiết</a></td>
-          <% }) %>
-        
+        </tr>
+        <% }) %>
 
-      </tr>
+
+
 
     </table>
 
-    <div style="display: flex; flex-direction: row; align-items: center;justify-content: space-between;position:absolute ; bottom: 0; width: 96%;">
+    <div
+      style="display: flex; flex-direction: row; align-items: center;justify-content: space-between;position:absolute ; bottom: 0; width: 96%;">
       <p> Số bản ghi: <span style="font-weight: bold;">
-          <%= countAllAdmin %>
+        <%= countNowAdmin %>/<%= countAllAdmin %>
         </span></p>
 
       <nav>

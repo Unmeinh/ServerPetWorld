@@ -1,3 +1,4 @@
+require('dotenv').config();
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -7,6 +8,8 @@ var logger = require('morgan');
 var adminRouter= require('./routes/admin');
 var usersRouter = require('./routes/user');
 var usersShopRouter = require('./routes/userShop');
+//api
+var userApiRouter = require('./routes/api/userApi');
 
 var app = express();
 
@@ -23,6 +26,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/admin',adminRouter);
 app.use('/user', usersRouter);
 app.use('/user-shop', usersShopRouter);
+app.use('/api/user', userApiRouter);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
@@ -36,7 +40,18 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  if(req.originalUrl.indexOf('/api')==0)
+  {
+    res.json({
+      success:false,
+      msg:err.message,
+      status:err.status
+    })
+  }
+  else{
+    res.render('error');
+  }
+  
 });
 
 module.exports = app;

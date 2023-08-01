@@ -29,7 +29,7 @@
       </div>
       <div class="row col-2 ms-1" style="align-items: center;">
         <a href="http://localhost:3000/user-shop/add"
-          style="text-decoration: none; background-color: #F582AE; border-radius: 20px;text-align: center;padding: 8px;">
+          style="text-decoration: none; background-color: #F582AE; border-radius: 6px;text-align: center;padding: 7px;">
           <span style="color: white;font-weight: bold;">Thêm user shop</span>
         </a>
       </div>
@@ -38,17 +38,18 @@
     <table class="table" style="border: white; ">
 
       <tr style="background-color: #8BD3DD;">
-        <th scope="col">Tài khoản shop</th>
-        <th scope="col">Email</th>
-        <th scope="col">Địa chỉ</th>
+        <th style="border-radius: 6px 0 0 6px;">Tài khoản shop</th>
+        <th>Email</th>
+        <th>Địa chỉ</th>
         
-        <th scope="col">Số điện thoại</th>
-        <th scope="col"></th>
+        <th>Số điện thoại</th>
+        <th style="border-radius: 0 6px 6px 0;"></th>
       </tr>
 
-      <tr>
+     
        
         <% listUserShop.forEach((row)=>{ %>
+          <tr>
           <td style="display: flex;flex-direction: row;"> <img src=" <%= row.avatarUser %>" style="width: 50px;height: 50px;border-radius: 8px;">
              
               <div class="box" style="line-height: 8px;margin: 5px;">
@@ -77,10 +78,11 @@
           <td><a href="http://localhost:3000/user-shop/detail"
               style="background-color: #F582AE;padding: 8px;border-radius: 10px;text-decoration: none;color: white; font-weight: bold;">Chi
               tiết</a></td>
+            </tr>
           <% }) %>
         
 
-      </tr>
+      
 
     </table>
 
