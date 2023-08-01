@@ -1,5 +1,5 @@
 <%- include('../inc/top',{title:'Quản lý người dùng'}) %>
-  <div class="container-fluid " style="width: 98%;" >
+  <div class="container-fluid " style="width: 98%;">
     <div class="row col m-3">
 
       <form class="row col-3 me-2" method="post">
@@ -29,7 +29,7 @@
       </div>
       <div class="row col-2 ms-1" style="align-items: center;">
         <a href="http://localhost:3000/user/add"
-          style="text-decoration: none; background-color: #F582AE; border-radius: 20px;text-align: center;padding: 8px;">
+          style="text-decoration: none; background-color: #F582AE; border-radius: 6px;text-align: center;padding: 7px;">
           <span style="color: white;font-weight: bold;">Thêm người dùng</span>
         </a>
       </div>
@@ -38,35 +38,40 @@
     <table class="table" style="border: white; ">
 
       <tr style="background-color: #8BD3DD;">
-        <th scope="col">Người dùng</th>
-        <th scope="col">Email</th>
-        <th scope="col">Địa chỉ</th>
-        <th scope="col">Số điện thoại</th>
-        <th scope="col"></th>
+        <th style="border-radius: 6px  0  0 6px;">Người dùng</th>
+        <th>Email</th>
+        <th>Địa chỉ</th>
+        <th>Số điện thoại</th>
+        <th style="border-radius: 0 6px 6px 0;"></th>
       </tr>
 
-      <tr>
-       
-        <% listUser.forEach((row)=>{ %>
-          <td style="display: flex;flex-direction: row;"> <img src=" <%= row.avatarUser %>" style="width: 50px;height: 50px;border-radius: 8px;">
-             
-              <div class="box" style="line-height: 8px;margin: 5px;">
-                <p><%= row.fullname %></p>
-                <a href="http://localhost:3000/user/edit" style="text-decoration: none;color: rgb(171, 169, 169);">Sửa</a>
-                <span> | </span>
-                <a href="http://localhost:3000/user/delete" style="text-decoration: none;color: rgb(171, 169, 169);">Xóa</a>
-              </div>
-             
-            
-           
+
+
+      <% listUser.forEach((row)=>{ %>
+        <tr>
+          <td style="display: flex;flex-direction: row;"> <img src=" <%= row.avatarUser %>"
+              style="width: 50px;height: 50px;border-radius: 8px;">
+
+            <div class="box" style="line-height: 8px;margin: 5px;">
+              <p>
+                <%= row.fullname %>
+              </p>
+              <a href="http://localhost:3000/user/edit" style="text-decoration: none;color: rgb(171, 169, 169);">Sửa</a>
+              <span> | </span>
+              <a href="http://localhost:3000/user/delete"
+                style="text-decoration: none;color: rgb(171, 169, 169);">Xóa</a>
+            </div>
+
+
+
           </td>
           <td>
-            
-                <%= row.emailUser %>
-           
+
+            <%= row.emailUser %>
+
           </td>
           <td>
-           
+
             <%= row.locationUser %>
           </td>
           <td>
@@ -75,14 +80,16 @@
           <td><a href="http://localhost:3000/user/detail"
               style="background-color: #F582AE;padding: 8px;border-radius: 10px;text-decoration: none;color: white; font-weight: bold;">Chi
               tiết</a></td>
-          <% }) %>
-        
+        </tr>
+        <% }) %>
 
-      </tr>
+
+
 
     </table>
 
-    <div style="display: flex; flex-direction: row; align-items: center;justify-content: space-between;position:absolute ; bottom: 0; width: 96%;">
+    <div
+      style="display: flex; flex-direction: row; align-items: center;justify-content: space-between;position:absolute ; bottom: 0; width: 96%;">
       <p> Số bản ghi: <span style="font-weight: bold;">
           <%= countAllUser %>
         </span></p>

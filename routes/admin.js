@@ -4,7 +4,7 @@ var router = express.Router();
 
 router.get('/', AdminCtrl.listAdmin);
 
-router.get('/detail', AdminCtrl.detailAdmin);//bổ sung /:idAdmin khi làm 
+router.get('/detail/:idAdmin', AdminCtrl.detailAdmin);//bổ sung /:idAdmin khi làm 
 
 router.get('/add', AdminCtrl.addAdmin);
 router.post('/add', AdminCtrl.addAdmin);

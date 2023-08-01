@@ -3,12 +3,10 @@ let AdminSchema = new db.mongoose.Schema(
     {
         nameAdmin:{type:String,required:true},
         usernameAdmin:{type:String,required:true},
+        emailAdmin:{type:String,required:true,index:{unique:true}},
         passwordAdmin:{type:String,required:true},
         avatarAdmin:{type:String,required:false},
-        statusAdmin:{type:String,require:true},
-        emailAdmin:{type:String,required:true,index:{
-            unique:true
-        }}
+        statusAdmin:{type:String,require:false},
     },
     {
         collection:'Admin'
