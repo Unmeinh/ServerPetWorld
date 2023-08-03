@@ -5,16 +5,14 @@ require('dotenv').config();
 const chuoi_ki_hieu_bi_mat = process.env.TOKEN_SEC_KEY
 let UserSchema = new db.mongoose.Schema(
     {
-        usernameUser:{type:String,required:true},
+        usernameUser:{type:String,required:true,index:{unique:true}},
         passwordUser:{type:String,required:true},
         fullname:{type:String,required:false},
-        emailUser:{type:String,required:false,index:{
-            unique:true
-        }},
-        phoneNumber:{type:Number,required:true},
+        emailUser:{type:String,required:false},
+        phoneNumber:{type:Number,required:true,index:{unique:true}},
         birthdayUser:{type:Date,required:false},
         locationUser:{type:Array,required:false},
-        avatarUser:{type:Array,required:false},
+        avatarUser:{type:String,required:false},
         description:{type:String,required:false},
         statusUser:{type:String,required:false},
         nicknameUser:{type:String,required:false},

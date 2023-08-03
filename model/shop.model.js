@@ -4,7 +4,7 @@ let ShopSchema = new db.mongoose.Schema(
         emailShop:{type:String,required:true},
         idUserShop:{type:db.mongoose.Schema.Types.ObjectId,ref:'UserShopModel'},
         locationShop:{type:String,required:true},
-        avatarShop:{type:Array,required:true},
+        avatarShop:{type:String,required:true},
         descriptionShop:{type:String,required:true}, 
         statusShop:{type:String,required:true}, 
         followers:{type:Array,required:false},

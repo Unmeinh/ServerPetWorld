@@ -34,7 +34,7 @@ exports.registUser = async (req, res, next) => {
       let newUser = new mdUser.UserModel();
       newUser.usernameUser = req.body.usernameUser;
       newUser.phoneNumber = req.body.phoneNumber;
-
+     
       const salt = await bcrypt.genSalt(10);
       newUser.passwordUser = await bcrypt.hash(req.body.passwordUser, salt);
       await newUser.generateAuthToken();
