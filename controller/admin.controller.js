@@ -9,10 +9,7 @@ exports.listAdmin = async (req, res, next) => {
             {
                 filterSearch={nameAdmin: req.query.filterSearch};
             }
-            if(req.body.ChangeUser==1)
-            {
-
-            }
+    
             let listAdmin = await mdAdmin.AdminModel.find(filterSearch);
             let countNowAdmin = await mdAdmin.AdminModel.count(filterSearch);
             let countAllAdmin = await mdAdmin.AdminModel.count();
@@ -37,6 +34,11 @@ exports.addAdmin = async (req, res, next) => {
     let msg='';
     if(req.method=='POST')
     {
+        if(req.body.repasswordAdmin!= req.body.passwordAdmin)
+        {
+            msg="Mật khẩu không trùng khớp";
+            return res.render('Admin/addAdmin',{msg:msg});
+        }
         let newObj = new mdAdmin.AdminModel();
         newObj.nameAdmin = req.body.nameAdmin;
         newObj.usernameAdmin = req.body.usernameAdmin;
@@ -48,8 +50,32 @@ exports.addAdmin = async (req, res, next) => {
             msg='Thêm admin thành công!';
            return res.redirect('/admin')
         } catch (error) {
-            msg="Thêm admin thất bại! " +error.message;
-            
+            console.log(error.message);
+             if(error.message.match(new RegExp('.+`usernameAdmin` is require+.')))
+            {
+                msg='Tên đăng nhập đang trống!';
+            }
+            else if(error.message.match(new RegExp('.+`emailAdmin` is require+.')))
+            {
+                msg='Email đang trống!';
+            }
+            else if(error.message.match(new RegExp('.+`passwordAdmin` is require+.')))
+            {
+                msg='Mật khẩu đang trống!';
+            }
+            else if(error.message.match(new RegExp('.+index: usernameAdmin+.')))
+            {
+                msg= 'Username đã tồn tại - Nhập lại username!';
+            }
+            else if(error.message.match(new RegExp('.+index: emailAdmin+.')))
+            {
+                msg='Email đã tồn tại - Nhập lại email!';
+            }
+           
+            else{
+                msg=error.message;
+            }
+           
         }
     }
     res.render('Admin/addAdmin',{msg:msg});
