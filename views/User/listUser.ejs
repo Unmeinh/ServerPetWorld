@@ -1,112 +1,183 @@
 <%- include('../inc/top',{title:'Quản lý người dùng'}) %>
-  <div class="container-fluid " style="width: 98%;" >
-    <div class="row col m-3">
+  <div class="container-fluid " style="width: 98%;">
+    <% if (msg) { %>
+      <div class="alert alert-success" id="msgAlert" role="alert">
+        <%= msg %>
+      </div>
+      <% } %>
+        <div class="row col m-3">
 
-      <form class="row col-3 me-2" method="post">
-        <div style="background-color: #F0F4F8;border-radius: 25px;align-items: center;" class="row col">
-          <div style="width: 10%;">
-            <button type="submit" style="border: none;"><img src="https://cdn-icons-png.flaticon.com/128/622/622669.png"
-                style="width: 20px;height: 20px;"></button>
+          <form class="row col-3 me-2" method="GET">
+            <div style="background-color: #F0F4F8;border-radius: 25px;align-items: center;" class="row col">
+              <div style="width: 10%;">
+                <button type="submit" style="border: none;"><img
+                    src="https://cdn-icons-png.flaticon.com/128/622/622669.png"
+                    style="width: 20px;height: 20px;"></button>
+              </div>
+              <div style="width: 90%;">
+                <input name="filterSearch"
+                  style="border-radius: 20px;border: #F0F4F8;background-color: #F0F4F8;border-radius: 25px;;"
+                  class="form-control" placeholder="Nhập từ khóa">
+              </div>
+            </div>
+
+          </form>
+
+          <div class="row col-3 me-5">
+            <form action="" method="get">
+              <select name="ChangeUser" class="form-select"
+                style="background-color:  #F0F4F8;border-radius: 20px;border: none;box-shadow: none;">
+                <option selected disabled>Sắp xếp theo</option>
+                <option value="1">Sắp xếp từ a-z</option>
+                <option value="2">Sắp xếp từ z-a</option>
+              </select>
+            </form>
           </div>
-          <div style="width: 90%;">
-            <input style="border-radius: 20px;border: #F0F4F8;background-color: #F0F4F8;border-radius: 25px;;"
-              class="form-control" placeholder="Nhập từ khóa">
+          <div class="row col-4">
+
+          </div>
+          <div class="row col-2 ms-1" style="align-items: center;">
+            <a href="http://localhost:3000/user/add"
+              style="text-decoration: none; background-color: #F582AE; border-radius: 10px;text-align: center;padding: 8px;">
+              <span style="color: white;font-weight: bold;">Thêm người dùng</span>
+            </a>
           </div>
         </div>
 
-      </form>
+        <table class="table" style="border: white; ">
 
-      <div class="row col-3 me-5">
-        <select class="form-select" style="background-color:  #F0F4F8;border-radius: 20px;">
-          <option selected disabled>Sắp xếp theo</option>
-          <option value="1">Sắp xếp từ a-z</option>
-          <option value="2">Sắp xếp từ z-a</option>
+          <tr style="background-color: #8BD3DD; ">
+            <th scope="col">Người dùng</th>
+            <th scope="col">Email</th>
+            <th scope="col">Địa chỉ</th>
+            <th scope="col">Số điện thoại</th>
+            <th scope="col"></th>
+          </tr>
 
-        </select>
-      </div>
-      <div class="row col-4">
 
-      </div>
-      <div class="row col-2 ms-1" style="align-items: center;">
-        <a href="http://localhost:3000/user/add"
-          style="text-decoration: none; background-color: #F582AE; border-radius: 20px;text-align: center;padding: 8px;">
-          <span style="color: white;font-weight: bold;">Thêm người dùng</span>
-        </a>
-      </div>
-    </div>
 
-    <table class="table" style="border: white; ">
+          <% listUser.forEach((row)=>{ %>
+            <tr>
+              <td style="display: flex;flex-direction: row;"> <img src=" <%= row.avatarUser %>"
+                  style="width: 50px;height: 50px;border-radius: 8px;">
 
-      <tr style="background-color: #8BD3DD;">
-        <th scope="col">Người dùng</th>
-        <th scope="col">Email</th>
-        <th scope="col">Địa chỉ</th>
-        <th scope="col">Số điện thoại</th>
-        <th scope="col"></th>
-      </tr>
+                <div class="box" style="line-height: 8px;margin: 5px;">
+                  <p>
+                    <%= row.fullname %>
+                  </p>
 
-      <tr>
-       
-        <% listUser.forEach((row)=>{ %>
-          <td style="display: flex;flex-direction: row;"> <img src=" <%= row.avatarUser %>" style="width: 50px;height: 50px;border-radius: 8px;">
-             
-              <div class="box" style="line-height: 8px;margin: 5px;">
-                <p><%= row.fullname %></p>
-                <a href="http://localhost:3000/user/edit" style="text-decoration: none;color: rgb(171, 169, 169);">Sửa</a>
-                <span> | </span>
-                <a href="http://localhost:3000/user/delete" style="text-decoration: none;color: rgb(171, 169, 169);">Xóa</a>
+                  <a href="" data-bs-toggle="modal" data-bs-target="#ModalDeleteUser" data-bs-whatever="@mdo"
+                    data-id="<%= row._id %>" style="text-decoration: none;color: rgb(171, 169, 169);">Xóa</a>
+
+
+                </div>
+
+
+
+              </td>
+              <!-- xóa -->
+
+
+              <div class="modal fade" id="ModalDeleteUser" tabindex="-1" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h1 class="modal-title fs-5" id="exampleModalLabel">Xóa người dùng</h1>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <span>Bạn có muốn xóa người dùng <h4>
+                          <%= row.fullname %>
+                        </h4></span>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                          Không
+                        </button>
+                        <button type="button" class="btn btn-primary" id="btnDeleteUser">Có</button>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
               </div>
-             
-            
-           
-          </td>
-          <td>
-            
+              <form method="POST" name="delete-form"></form>
+              <td>
+
                 <%= row.emailUser %>
-           
-          </td>
-          <td>
-           
-            <%= row.locationUser %>
-          </td>
-          <td>
-            <%= row.phoneNumber %>
-          </td>
-          <td><a href="http://localhost:3000/user/detail"
-              style="background-color: #F582AE;padding: 8px;border-radius: 10px;text-decoration: none;color: white; font-weight: bold;">Chi
-              tiết</a></td>
-          <% }) %>
-        
 
-      </tr>
+              </td>
+              <td>
 
-    </table>
-
-    <div style="display: flex; flex-direction: row; align-items: center;justify-content: space-between;position:absolute ; bottom: 0; width: 96%;">
-      <p> Số bản ghi: <span style="font-weight: bold;">
-          <%= countAllUser %>
-        </span></p>
-
-      <nav>
-        <ul class="pagination">
-          <li class="page-item">
-            <a class="page-link" href="#" aria-label="Previous">
-              <span aria-hidden="true">&laquo;</span>
-            </a>
-          </li>
-          <li class="page-item"><a class="page-link" href="#">1</a></li>
-          <li class="page-item"><a class="page-link" href="#">2</a></li>
-          <li class="page-item"><a class="page-link" href="#">3</a></li>
-          <li class="page-item">
-            <a class="page-link" href="#" aria-label="Next">
-              <span aria-hidden="true">&raquo;</span>
-            </a>
-          </li>
-        </ul>
-      </nav>
+                <%= row.locationUser %>
+              </td>
+              <td>
+                <%= row.phoneNumber %>
+              </td>
+              <td><a href="http://localhost:3000/user/detail/<%= row._id %>"
+                  style="background-color: #F582AE;padding: 8px;border-radius: 10px;text-decoration: none;color: white; font-weight: bold;">Chi
+                  tiết</a></td>
+            </tr>
+            <% }) %>
 
 
-    </div>
 
+
+        </table>
+
+
+
+
+        <div
+          style="display: flex; flex-direction: row; align-items: center;justify-content: space-between;position:absolute ; bottom: 0; width: 96%;">
+          <p> Số bản ghi: <span style="font-weight: bold;">
+              <%= countAllUser %>
+            </span></p>
+
+          <nav>
+            <ul class="pagination">
+              <li class="page-item">
+                <a class="page-link" href="#" aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+              </li>
+              <li class="page-item"><a class="page-link" href="#">1</a></li>
+              <li class="page-item"><a class="page-link" href="#">2</a></li>
+              <li class="page-item"><a class="page-link" href="#">3</a></li>
+              <li class="page-item">
+                <a class="page-link" href="#" aria-label="Next">
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+
+
+        </div>
   </div>
+  <script>
+    //sử dụng để lưu ID của sản phẩm sẽ bị xóa
+    var UserId;
+    var deleteForm = document.forms['delete-form']
+    const deleteModal = document.getElementById('ModalDeleteUser')
+    const btnDeleteUser = document.getElementById('btnDeleteUser');
+    deleteModal.addEventListener('show.bs.modal', event => {
+      //tham chiếu đến phần tử đã kích hoạt sự kiện đang được xử lý là xóa ID 
+      const button = event.relatedTarget
+      //lấy giá trị ID của thuộc tính data-id khi bấm vào icon xóa trên table
+      const id = button.getAttribute('data-id')
+      UserId = id;
+      console.log(id);
+
+    })
+    btnDeleteUser.onclick = function () {
+      //thay đổi thuộc tính action của form rồi biến productID thành 1 URL mới và form được gửi đến để xóa sản phẩm
+      deleteForm.action = '/user/' + UserId;
+      deleteForm.submit();
+    }
+    setTimeout(function () {
+      document.getElementById('msgAlert').style.display = 'none';
+    }, 5000);
+  </script>
   <%- include('../inc/bottom') %>

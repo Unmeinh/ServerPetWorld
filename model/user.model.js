@@ -3,15 +3,17 @@ let UserSchema = new db.mongoose.Schema(
     {
         usernameUser:{type:String,required:true},
         passwordUser:{type:String,required:true},
-        fullname:{type:String,required:false},
-        emailUser:{type:String,required:false,index:{
+        fullname:{type:String,required:true},
+        emailUser:{type:String,required:true,index:{
             unique:true
         }},
+        // emailUser:{type:String,required:true},
         phoneNumber:{type:Number,required:true},
         birthdayUser:{type:Date,required:false},
         locationUser:{type:Array,required:false},
         avatarUser:{type:Array,required:false},
         description:{type:String,required:false},
+        genderUser:{type:String,required:false},
         statusUser:{type:String,required:false},
         nicknameUser:{type:String,required:false},
         followers:{type:Array,required:false},

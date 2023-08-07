@@ -8,51 +8,50 @@
             <div class="col-sm-5">
             </div>
         </div>
-        <form>
+        <% if (msg) { %>
+            <div class="alert alert-danger"  id="msgAlert" role="alert">
+                <%= msg %>
+            </div>
+        <% } %>
+        <form action=" " method="post"  >
             <div class="form-group row m-2">
-                <label for="username" form="bold" class="col-sm-3 col-form-label">Tên người dùng (bắt buộc)</label>
+                <label for="username" class="col-sm-3 col-form-label">Tên đăng nhập (bắt buộc)</label>
                 <div class="col-sm-5">
-                    <input type="text" class="form-control" id="username" required>
+                    <input type="text" class="form-control" id="username" name="usernameUser"  >
+                </div>
+            </div>
+            <div class="form-group row m-2">
+                <label for="fullname" class="col-sm-3 col-form-label">Họ và tên</label>
+                <div class="col-sm-5">
+                    <input type="text" class="form-control"  name="fullname"  required>
                 </div>
             </div>
             <div class="form-group row  m-2">
                 <label for="phone" class="col-sm-3 col-form-label">Số điện thoại</label>
                 <div class="col-sm-5">
-                    <input type="tel" class="form-control" id="phone">
+                    <input type="tel" class="form-control"  name="phoneNumber" required>
                 </div>
             </div>
             <div class="form-group row  m-2">
+                <label for="phone" class="col-sm-3 col-form-label">Email</label>
+                <div class="col-sm-5">
+                    <input type="text" class="form-control"  name="emailUser"  required>               
+                </div>
+            </div>
+            <div class="form-group row m-2">
                 <label class="col-sm-3 col-form-label">Ngày sinh</label>
                 <div class="col-sm-5">
                     <div class="row">
                         <div class="col">
-                            <select class="form-control" id="day">
-                                <!-- Các tùy chọn ngày -->
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                            </select>
-                        </div>
-                        <div class="col">
-                            <select class="form-control" id="month">
-                                <!-- Các tùy chọn tháng -->
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                            </select>
-                        </div>
-                        <div class="col">
-                            <select class="form-control" id="year">
-                                <!-- Các tùy chọn năm -->
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                            </select>
+                            <input type="date" class="form-control" id="birthdayUser" name="birthdayUser" >
                         </div>
                     </div>
                 </div>
             </div>
             <div class="form-group row m-2">
-                <label for="address" class="col-sm-3 col-form-label">Địa chỉ</label>
+                <label for="message-text" class="col-sm-3 col-form-label">Địa chỉ</label>
                 <div class="col-sm-5">
-                    <input type="text" class="form-control" id="address">
+                    <input type="text" class="form-control" name="locationUser" required>
                 </div>
             </div>
             <div class="form-group row m-2">
@@ -60,7 +59,7 @@
                 <div class="col-sm-2">
                     <div class="row">
                         <div class="col">
-                            <select class="form-control" id="gioitinh">
+                            <select class="form-control" name="genderUser" >
                                 <!-- Các tùy chọn ngày -->
                                 <option value="Nam">Nam</option>
                                 <option value="Nữ">Nữ</option>
@@ -73,28 +72,32 @@
             <div class="form-group row m-2">
                 <label for="password" class="col-sm-3 col-form-label">Mật khẩu</label>
                 <div class="col-sm-5">
-                    <input type="password" class="form-control " id="password">
+                    <input type="password" class="form-control " name="passwordUser" required>
+                </div>
+            </div>
+            <div class="form-group row m-2 " style="align-items: center;">
+                <label for="username" class="col-sm-3 col-form-label">Gửi thông báo đến người dùng</label>
+                <div class="col-sm-8">
+                    <input class="form-check-input" type="checkbox" value="" id="checkbox" style="margin-left: 1px;">
+                    <label style="margin-left: 20px; color: #001858;"> Gửi cho thành viên mới đăng ký chứa email chứa thông
+                        tin tài khoản của họ</label>
+                </div>
+            </div>
+            <div class="form-group row m-2">
+                <div class="col-sm-10">
+                    <button style="background-color: #F582AE;" type="submit" class="btn btn-secondary ">Thêm người dùng mới</button>
+                    <button style=" background-color: #001858" type="button" class="btn btn-secondary">Hủy bỏ</button>
                 </div>
             </div>
         </form>
-        <div class="form-group row m-2 " style="align-items: center;">
-            <label for="username" class="col-sm-3 col-form-label">Gửi thông báo đến người dùng</label>
-            <div class="col-sm-8">
-                <input class="form-check-input" type="checkbox" value="" id="checkbox" style="margin-left: 1px;">
-                <label style="margin-left: 20px; color: #001858;"> Gửi cho thành viên mới đăng ký chứa email chứa thông
-                    tin tài khoản của họ</label>
-                </label>
-            </div>
-        </div>
-        <div class="form-group row m-2">
-            <div class="col-sm-10">
-                <button style="background-color: #F582AE;" type="submit" class="btn btn-secondary ">Thêm người dùng
-                    mới</button>
-                <button style=" background-color: #001858" ; type="button" class="btn btn-secondary">Hủy bỏ</button>
-            </div>
-        </div>
+        
     </div>
 
+    <script>
+        setTimeout(function() {
+        document.getElementById('msgAlert').style.display = 'none';
+    }, 5000);
+    </script>
     <!-- <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script> -->
