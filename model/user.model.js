@@ -1,7 +1,7 @@
 let db = require('./db');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-require('dotenv').config();
+// require('dotenv').config();
 const chuoi_ki_hieu_bi_mat = process.env.TOKEN_SEC_KEY
 let UserSchema = new db.mongoose.Schema(
     {
