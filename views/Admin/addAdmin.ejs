@@ -2,64 +2,78 @@
     <div class="container mt-2">
 
         <div class="form-group row m-2">
-            <label for="nameAdmin" class="col-sm-5 col-form-label" style="color: #848485;">Tạo một người dùng mới và thêm
+            <label for="nameAdmin" class="col-sm-5 col-form-label" style="color: #848485;">Tạo một người dùng mới và
+                thêm
                 vào trang mạng này.
             </label>
             <div class="col-sm-5">
             </div>
         </div>
-        <form method="post">
-            <div class="form-group row  m-2">
-                <label for="nameAdmin" form="bold" class="col-sm-3 col-form-label">Tên admin(bắt buộc)</label>
-                <div class="col-sm-5">
-                    <input name="nameAdmin" type="text" class="form-control" id="nameAdmin" required>
-                </div>
+        <% if(msg) { %>
+            <div class="row">
+                <span class="p-3"
+                    style="background-color: rgb(175, 214, 239); border-radius: 10px;color: red;font-weight: bold;">
+                    <%= msg %>
+                </span>
             </div>
-            <div class="form-group row m-2">
-                <label for="usernameAdmin" class="col-sm-3 col-form-label">Tên đăng nhập</label>
-                <div class="col-sm-5">
-                    <input name="usernameAdmin" type="text" class="form-control" id="usernameAdmin">
-                </div>
-            </div>
-            <div class="form-group row m-2">
-                <label for="emailAdmin" class="col-sm-3 col-form-label">Email</label>
-                <div class="col-sm-5">
-                    <input name="emailAdmin" type="email" class="form-control" id="emailAdmin">
-                </div>
-            </div>
-            <div class="form-group row m-2">
-                <label for="password" class="col-sm-3 col-form-label">Mật khẩu</label>
-                <div class="col-sm-5">
-                    <input name="passwordAdmin" type="password" class="form-control " id="password">
-                </div>
-            </div>
-            <div class="form-group row m-2">
-                <label for="re-password" class="col-sm-3 col-form-label">Nhập lại mật khẩu</label>
-                <div class="col-sm-5">
-                    <input name="repasswordAdmin" type="password" class="form-control " id="re-password">
-                </div>
-            </div>
-            <div class="form-group row m-2"  style="align-items: center;">
-                <label for="sendNotify" class="col-sm-3 col-form-label">Gửi thông báo đến người dùng</label>
-                <div class="col-sm-8">
-                    <input name="sendNotify" class="form-check-input" type="checkbox" value="" id="sendNotify" style="margin-left: 1px;">
-                    <label style="margin-left: 20px; color: #001858;" for="sendNotify"> Gửi cho thành viên mới đăng ký chứa email chứa
-                        thông tin tài
-                        khoản của họ</label>
-                    </label>
-                </div>
-            </div>
-            <span><%= msg %></span>
-            <div class="form-group row m-2">
-                <div class="col-sm-10">
-                    <button style="background-color: #F582AE;" type="submit" class="btn btn-secondary ">Thêm admin mới
-                    </button>
-                    <button style=" background-color: #001858" ; type="button" class="btn btn-secondary">Hủy bỏ</button>
-                </div>
-            </div>
-        </form>
-       
-        
+            <% }%>
+
+
+                <form method="post">
+                    <div class="form-group row  m-2">
+                        <label for="nameAdmin" form="bold" class="col-sm-3 col-form-label">Tên admin(bắt buộc)</label>
+                        <div class="col-sm-5">
+                            <input name="fullName" type="text" class="form-control" id="nameAdmin" required>
+                        </div>
+                    </div>
+                    <div class="form-group row m-2">
+                        <label for="usernameAdmin" class="col-sm-3 col-form-label">Tên đăng nhập</label>
+                        <div class="col-sm-5">
+                            <input name="userName" type="text" class="form-control" id="usernameAdmin">
+                        </div>
+                    </div>
+                    <div class="form-group row m-2">
+                        <label for="emailAdmin" class="col-sm-3 col-form-label">Email</label>
+                        <div class="col-sm-5">
+                            <input name="email" type="email" class="form-control" id="emailAdmin">
+                        </div>
+                    </div>
+                    <div class="form-group row m-2">
+                        <label for="password" class="col-sm-3 col-form-label">Mật khẩu</label>
+                        <div class="col-sm-5">
+                            <input name="passWord" type="password" class="form-control " id="password">
+                        </div>
+                    </div>
+                    <div class="form-group row m-2">
+                        <label for="re-password" class="col-sm-3 col-form-label">Nhập lại mật khẩu</label>
+                        <div class="col-sm-5">
+                            <input name="re_passWord" type="password" class="form-control " id="re-password">
+                        </div>
+                    </div>
+                    <!-- <div class="form-group row m-2" style="align-items: center;">
+                        <label for="sendNotify" class="col-sm-3 col-form-label">Gửi thông báo đến người dùng</label>
+                        <div class="col-sm-8">
+                            <input name="sendNotify" class="form-check-input" type="checkbox" value="" id="sendNotify"
+                                style="margin-left: 1px;">
+                            <label style="margin-left: 20px; color: #001858;" for="sendNotify"> Gửi cho thành viên mới
+                                đăng ký chứa email chứa
+                                thông tin tài
+                                khoản của họ</label>
+                            </label>
+                        </div>
+                    </div> -->
+
+                    <div class="form-group row m-2 mt-4">
+                        <div class="col-sm-10">
+                            <button style="background-color: #F582AE;margin-right: 20px;" type="submit" class="btn btn-secondary ">Thêm
+                                admin mới
+                            </button>
+                            <a href="http://localhost:3000/admin" style=" background-color: #001858" class="btn btn-secondary">Hủy bỏ</a>
+                        </div>
+                    </div>
+                </form>
+
+
 
     </div>
 
