@@ -1,8 +1,8 @@
 let db = require('./db');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-// require('dotenv').config();
-const chuoi_ki_hieu_bi_mat = process.env.TOKEN_SEC_KEY
+require('dotenv').config();
+const string_word_secret = process.env.TOKEN_SEC_KEY
 let UserSchema = new db.mongoose.Schema(
     {
         usernameUser:{type:String,required:true,index:{unique:true}},
@@ -30,7 +30,7 @@ let UserSchema = new db.mongoose.Schema(
 UserSchema.methods.generateAuthToken = async function () {
     const user = this;
     console.log("user "+user);
-    const token = jwt.sign({ _id: user._id, usernameUser: user.usernameUser }, chuoi_ki_hieu_bi_mat);
+    const token = jwt.sign({ _id: user._id, usernameUser: user.usernameUser }, string_word_secret);
     user.token = token;
     await user.save();
     return token;
