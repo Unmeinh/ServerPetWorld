@@ -30,19 +30,19 @@ let UserSchema = new db.mongoose.Schema(
 UserSchema.methods.generateAuthToken = async function () {
     const user = this;
     console.log("user "+user);
-    const token = jwt.sign({ _id: user._id, usernameUser: user.usernameUser }, string_word_secret);
+    const token = jwt.sign({ _id: user._id, userName: user.userName }, string_word_secret);
     user.token = token;
     await user.save();
     return token;
 }
 
-UserSchema.statics.findByCredentials = async(usernameUser,passwordUser)=>{
-    const user = await UserModel.findOne({usernameUser});
+UserSchema.statics.findByCredentials = async(userName,passWord)=>{
+    const user = await UserModel.findOne({userName});
     if(!user)
     {
         throw new Error({error:'Không tồn tại user này'})
     }
-    const isPasswordMatch = await bcrypt.compare(passwordUser, user.passwordUser)
+    const isPasswordMatch = await bcrypt.compare(passWord, user.passWord)
    if (!isPasswordMatch) {
        throw new Error({error: 'Sai password rồi'})
    }
