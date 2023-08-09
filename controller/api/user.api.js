@@ -32,11 +32,11 @@ exports.registUser = async (req, res, next) => {
 
     try {
       let newUser = new mdUser.UserModel();
-      newUser.usernameUser = req.body.usernameUser;
+      newUser.userName = req.body.userName;
       newUser.phoneNumber = req.body.phoneNumber;
      
       const salt = await bcrypt.genSalt(10);
-      newUser.passwordUser = await bcrypt.hash(req.body.passwordUser, salt);
+      newUser.passWord = await bcrypt.hash(req.body.passWord, salt);
       await newUser.generateAuthToken();
 
       await newUser.save();
@@ -50,7 +50,7 @@ exports.registUser = async (req, res, next) => {
 exports.loginUser = async (req, res, next) => {
   if (req.method == 'POST') {
     try {
-      let objU = await mdUser.UserModel.findByCredentials(req.body.usernameUser, req.body.passwordUser);
+      let objU = await mdUser.UserModel.findByCredentials(req.body.userName, req.body.passWord);
       if (!objU) {
         return res.status(401).json({ success: false, message: 'Sai thông tin đăng nhập' })
       }

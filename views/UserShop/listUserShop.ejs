@@ -53,9 +53,8 @@
           <td style="display: flex;flex-direction: row;"> <img src=" <%= row.avatarUser %>" style="width: 50px;height: 50px;border-radius: 8px;">
              
               <div class="box" style="line-height: 8px;margin: 5px;">
-                <p><%= row.fullname %></p>
-                <a href="http://localhost:3000/user-shop/edit" style="text-decoration: none;color: rgb(171, 169, 169);">Sửa</a>
-                <span> | </span>
+                <p><%= row.fullName %></p>
+                
                 <a href="http://localhost:3000/user-shop/delete" style="text-decoration: none;color: rgb(171, 169, 169);">Xóa</a>
               </div>
              
@@ -64,12 +63,12 @@
           </td>
           <td>
             
-                <%= row.emailShop %>
+                <%= row.email %>
            
           </td>
           <td>
            
-            <%= row.locationUS %>
+            <%= row.location %>
           </td>
           
           <td>

@@ -3,7 +3,7 @@
     <div class="row col m-3">
 
       <form action="" class="row col-3 me-2" method="get">
-        <div style="background-color: #F0F4F8;border-radius: 25px;align-items: center;" class="row">
+        <div style="background-color: #F0F4F8;border-radius: 25px;align-items: center;display: flex;flex-direction: row;">
           <div style="width: 10%;">
             <button type="submit" style="border: none;"><img src="https://cdn-icons-png.flaticon.com/128/622/622669.png"
                 style="width: 20px;height: 20px;"></button>
@@ -11,23 +11,27 @@
           <div style="width: 90%;">
             <input name="filterSearch"
               style="border: none;background-color: #F0F4F8;border-radius: 25px; box-shadow: none;" class="form-control"
-              placeholder="Nhập từ khóa">
+              placeholder="Tìm kiếm">
           </div>
         </div>
+      </form>
+
+      <form action="" method="get" class="row col-4 me-5"
+        style="display: flex; flex-direction: row; justify-content: space-between;">
+        <select name="ChangeUser" class="row col-10 form-select"
+          style="background-color: #F0F4F8;border-radius: 20px;border: none;box-shadow: none; width: 80%;">
+          <option selected disabled>Sắp xếp email</option>
+          <option value="1"><button type="submit">Sắp xếp từ a-z</button></option>
+          <option value="-1"><button type="submit">Sắp xếp từ z-a</button></option>
+
+        </select>
+
+        <button class="btn" type="submit" style="width: 20%;font-weight: bold;color: #F0F4F8;background-color: #8BD3DD;">Lọc</button>
+
 
       </form>
 
-      <div class="row col-3 me-5">
-        <form action="" method="get">
-          <select name="ChangeUser" class="form-select"
-            style="background-color:  #F0F4F8;border-radius: 20px;border: none;box-shadow: none;">
-            <option selected disabled>Sắp xếp theo</option>
-            <option value="1">Sắp xếp từ a-z</option>
-            <option value="2">Sắp xếp từ z-a</option>
-          </select>
-        </form>
-      </div>
-      <div class="row col-4">
+      <div class="row col-3">
 
       </div>
       <div class="row col-2 ms-1" style="align-items: center;">
@@ -50,86 +54,78 @@
 
       <% listAdmin.forEach((row)=>{ %>
         <tr>
-          <td style="display: flex;flex-direction: row;"> <img src=" <%= row.avatarAdmin %>"
-              style="width: 50px;height: 50px;border-radius: 8px;">
+          <td style="display: flex;flex-direction: row;">
+            <% if(typeof(row.avatarAdmin)!='undefined' ) { %>
+              <img src=" <%= row.avatarAdmin %>" style="width: 50px;height: 50px;border-radius: 8px;">
+              <% } else { %>
+                <img src=" http://localhost:3000/upload/avatar_null.png"
+                  style="width: 50px;height: 50px;border-radius: 8px;">
+                <% }%>
 
-            <div class="box" style="line-height: 8px;margin: 5px;">
-              <p>
-                <%= row.nameAdmin %>
-              </p>
-                <a href="" style="text-decoration: none;color: rgb(171, 169, 169);" data-bs-toggle="modal" data-bs-target="#ModalDeleteSP" data-bs-whatever="@mdo" data-id="<%= row._id %>">
-                  <span>Xóa</span>
-                 </a>
-            </div>
+
+                  <div class="box" style="line-height: 8px;margin: 5px;">
+                    <p>
+                      <%= row.fullName %>
+                    </p>
+                    <a href="http://localhost:3000/admin/delete/<%= row._id %>"
+                      style="text-decoration: none;color: rgb(171, 169, 169);"> Xóa</a>
+                  </div>
+
           </td>
           <td>
-            <%= row.emailAdmin %>
+            <%= row.email %>
           </td>
           <td>
-            <%= row.usernameAdmin %>
+            <%= row.userName %>
           </td>
           <td><a href="http://localhost:3000/admin/detail/<%= row._id%>"
               style="background-color: #F582AE;padding: 8px;border-radius: 10px;text-decoration: none;color: white; font-weight: bold;">Chi
               tiết</a></td>
         </tr>
 
-        <div class="modal fade" id="ModalDeleteSP" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Delete Product</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <h2>Bạn có muốn xóa admin này?</h2>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    No
-                  </button>
-                  <button type="button" class="btn btn-primary" id="btnDeleteProduct">Yes</button>
-                </div>
-              </div>
-      
-            </div>
-          </div>
-        </div>
         <% }) %>
-        
-    </table>
 
+    </table>
 
     <div
       style="display: flex; flex-direction: row; align-items: center;justify-content: space-between;position:absolute ; bottom: 0; width: 96%;">
       <p> Số bản ghi: <span style="font-weight: bold;">
-        <%= countNowAdmin %>/<%= countAllAdmin %>
+          <%= countNowAdmin %>/<%= countAllAdmin %>
         </span></p>
 
-      <nav>
-        <ul class="pagination">
-          <li class="page-item">
-            <a class="page-link" href="#" aria-label="Previous">
-              <span aria-hidden="true">&laquo;</span>
-            </a>
-          </li>
-          <li class="page-item"><a class="page-link" href="#">1</a></li>
-          <li class="page-item"><a class="page-link" href="#">2</a></li>
-          <li class="page-item"><a class="page-link" href="#">3</a></li>
-          <li class="page-item">
-            <a class="page-link" href="#" aria-label="Next">
-              <span aria-hidden="true">&raquo;</span>
-            </a>
-          </li>
-        </ul>
-      </nav>
+        <nav>
+          <ul class="pagination">
+            <% if (currentPage > 1) { %>
+            <li class="page-item">
+              <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            <% } %>
+      
+            <% for (let i = 1; i <= totalPage; i++) { %>
+            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+              <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+            </li>
+            <% } %>
+      
+            <% if (currentPage < totalPage) { %>
+            <li class="page-item">
+              <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+            <% } %>
+          </ul>
+        </nav>
 
 
     </div>
 
   </div>
-  
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.min.js"
-  integrity="sha384-Rx+T1VzGupg4BHQYs2gCW9It+akI2MM/mndMCy36UVfodzcJcF0GGLxZIzObiEfa"
-  crossorigin="anonymous"></script>
+    integrity="sha384-Rx+T1VzGupg4BHQYs2gCW9It+akI2MM/mndMCy36UVfodzcJcF0GGLxZIzObiEfa"
+    crossorigin="anonymous"></script>
   <%- include('../inc/bottom') %>
