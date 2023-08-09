@@ -1,1 +1,88 @@
-<h1>màn them admin</h1>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Thêm admin mới</title>
+  <!-- Link tới Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    label {
+      color: #001858; 
+    }
+    input.form-control {
+      border: 1px solid gray; /* Tùy chỉnh độ dày và màu sắc của border */
+      border-radius: 5px; /* Độ cong viền bo tròn */
+    }
+    .custom-container {
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+      <div class="row align-items-center" style="padding: 20px;">
+        <!-- Cột chứa ảnh -->
+        <div >
+          <img src="menu.png" alt="" class="img-fluid">
+        </div>
+        <div class="col-md-9">
+          <p style="color: #001858;font-weight: bold"class="mb-0">Thêm admin mới</p>
+        </div>
+      </div>
+    <div class="form-group row">
+      <label for="username" class="col-sm-5 col-form-label">Tạo một admin mới và thêm vào trang mạng này.</label>
+      <div class="col-sm-5">
+      </div>
+    </div>
+    <form>
+      <div class="form-group row">
+        <label for="username" form="bold" class="col-sm-3 col-form-label">Tên admin(bắt buộc)</label>
+        <div class="col-sm-5">
+          <input type="text" class="form-control" id="username" required>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="phone" class="col-sm-3 col-form-label">Tên đăng nhập</label>
+        <div class="col-sm-5">
+          <input type="tel" class="form-control" id="tendangnhap">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="address" class="col-sm-3 col-form-label">Email</label>
+        <div class="col-sm-5">
+          <input type="text" class="form-control" id="email">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="password" class="col-sm-3 col-form-label">Mật khẩu</label>
+        <div class="col-sm-5">
+          <input type="password" class="form-control " id="password">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="password" class="col-sm-3 col-form-label">Nhập lại mật khẩu</label>
+        <div class="col-sm-5">
+          <input type="confirm_password" class="form-control " id="confirm_password">
+        </div>
+      </div>
+    </form>
+    <div class="form-group row">
+        <label for="username" class="col-sm-3 col-form-label">Gửi thông báo đến người dùng</label>
+        <div class="col-sm-8">
+          <input class="form-check-input" type="checkbox" value="" id="checkbox" style="margin-left: 1px;">
+           <label style="margin-left: 20px; color: #001858;"> Gửi cho thành viên mới đăng ký chứa email chứa thông tin tài khoản của họ</label>
+          </label>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-sm-10">
+          <button style="background-color: #F582AE;"  type="submit"  class="btn btn-secondary ">Thêm admin mới </button>
+          <button  style=" background-color: #001858"; type="button" class="btn btn-secondary">Hủy bỏ</button>
+        </div>
+      </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

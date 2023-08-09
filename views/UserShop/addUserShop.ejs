@@ -1,1 +1,82 @@
-<h1>màn thêm UserShop</h1>
+<%- include('../inc/top',{title:'Thêm người dùng shop mới'}) %>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Thêm người dùng shop mới</title>
+  <!-- Link tới Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">  
+</head>
+<body>
+  <div style="margin-left: 40px;" >
+      <div class="row align-items-center" style="padding: 20px;">
+        <!-- Cột chứa ảnh -->
+        <div >
+          <img src="menu.png" alt="" class="img-fluid">
+        </div>
+      </div>
+    <div class="form-group row">
+      <label for="username" class="col-sm-5 ">Tạo một người dùng shop mới và thêm vào trang mạng này.</label>
+    </div>
+    <form action="" method="post" enctype="multipart/form-data" >
+    
+      <div class="form-group row">
+        <label for="phone" class="col-sm-3 col-form-label">Tên đăng nhập</label>
+        <div class="col-sm-4">
+          <input name="tendangnhap" class="form-control" placeholder="Nhập tên đăng nhập">
+        </div>
+      </div>
+     
+      <div class="form-group row">
+        <label for="password" class="col-sm-3 col-form-label">Mật khẩu</label>
+        <div class="col-sm-4">
+          <input type="password" name="matkhau" class="form-control " id="password"   placeholder="Nhập mật khẩu" >
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="password" class="col-sm-3 col-form-label">Nhập lại mật khẩu</label>
+        <div class="col-sm-4">
+          <input type="password" name="confirmmatkhau" class="form-control " id="confirm_password"   placeholder="Nhập lại mật khẩu" >
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="phone" class="col-sm-3 col-form-label">Tên đầy đủ</label>
+        <div class="col-sm-4">
+          <input type="tel" name="tendaydu" class="form-control" id="tendaydu"  placeholder="Nhập tên đầy đủ" >
+        </div>
+      </div>
+      <div class="form-group row">
+        <label  class="col-sm-3 col-form-label">Email</label>
+        <div class="col-sm-4">
+          <input type="text" name="email" class="form-control" id="email"   placeholder="Nhập email của bạn"  >
+        </div>
+      </div>
+      <div class="form-group row">
+      <label class="col-sm-3 col-form-label">Ảnh</label>
+      <div class="col-sm-4">
+        <input type="file" name="anh_usershop" id="anh_usershop" multiple>
+      </div>
+      </div>
+      <div class="form-group row">
+        <label for="username" class="col-sm-3 col-form-label">Gửi thông báo đến người dùng</label>
+        <div class="col-sm-9">
+          <input  class="form-check-input" type="checkbox" value="" id="checkbox" style="margin-left: 1px;">
+           <label style="margin-left: 20px; color: #001858;"> Gửi cho thành viên mới đăng ký chứa email chứa thông tin tài khoản của họ</label>
+          </label>
+        </div>
+      </div>
+      <span><%= msg %></span>
+      <div class="form-group row">
+        <div class="col-sm-10">
+          <button style="background-color: #F582AE;"  type="submit"  class="btn btn-secondary ">Thêm admin mới </button>
+          <button  style=" background-color: #001858"; type="button" class="btn btn-secondary">Hủy bỏ</button>
+        </div>
+      </div>
+    </form>
+    
+  </div>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
+<%- include('../inc/bottom') %>

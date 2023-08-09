@@ -1,28 +1,29 @@
 <%- include('../inc/top',{title:'Quản lý người dùng shop'}) %>
-  <div class="container-fluid " style="width: 98%;" >
+  <div class="container-fluid " style="width: 98%;display: flex; flex-direction: column" >
     <div class="row col m-3">
 
-      <form class="row col-3 me-2" method="post">
+      <form class="row col-3 me-2" action="" method="GET">
         <div style="background-color: #F0F4F8;border-radius: 25px;align-items: center;" class="row col">
           <div style="width: 10%;">
             <button type="submit" style="border: none;"><img src="https://cdn-icons-png.flaticon.com/128/622/622669.png"
                 style="width: 20px;height: 20px;"></button>
           </div>
           <div style="width: 90%;">
-            <input style="border-radius: 20px;border: #F0F4F8;background-color: #F0F4F8;border-radius: 25px;;"
+            <input name="filterSearch"
+              style="border-radius: 20px;border: #F0F4F8;background-color: #F0F4F8;border-radius: 25px;;"
               class="form-control" placeholder="Nhập từ khóa">
           </div>
         </div>
 
       </form>
-
       <div class="row col-3 me-5">
-        <select class="form-select" style="background-color:  #F0F4F8;border-radius: 20px;">
-          <option selected disabled>Sắp xếp theo</option>
-          <option value="1">Sắp xếp từ a-z</option>
-          <option value="2">Sắp xếp từ z-a</option>
-
-        </select>
+        <form id="sortForm" action="" method="GET">
+          <select id="sortOption" name="sortOption" class="form-select" style="background-color: #F0F4F8; border-radius: 20px;">
+            <option selected disabled>Sắp xếp theo</option>
+            <option value="az">Sắp xếp từ a-z</option>
+            <option value="za">Sắp xếp từ z-a</option>
+          </select>
+        </form>
       </div>
       <div class="row col-4">
 
@@ -38,77 +39,147 @@
     <table class="table" style="border: white; ">
 
       <tr style="background-color: #8BD3DD;">
-        <th scope="col">Tài khoản shop</th>
+        <th scope="col">Tên đăng nhập</th>
         <th scope="col">Email</th>
-        <th scope="col">Địa chỉ</th>
-        
-        <th scope="col">Số điện thoại</th>
-        <th scope="col"></th>
+        <th scope="col">Tên đầy đủ</th>
+
+        <th scope="col">Ngày tạo</th>
       </tr>
 
-      <tr>
-       
-        <% listUserShop.forEach((row)=>{ %>
-          <td style="display: flex;flex-direction: row;"> <img src=" <%= row.avatarUser %>" style="width: 50px;height: 50px;border-radius: 8px;">
-             
-              <div class="box" style="line-height: 8px;margin: 5px;">
-                <p><%= row.fullname %></p>
-                <a href="http://localhost:3000/user-shop/edit" style="text-decoration: none;color: rgb(171, 169, 169);">Sửa</a>
-                <span> | </span>
-                <a href="http://localhost:3000/user-shop/delete" style="text-decoration: none;color: rgb(171, 169, 169);">Xóa</a>
-              </div>
-             
-            
-           
+
+      <% listUserShop.forEach((row)=>{ %>
+        <tr>
+
+          <td style="display: flex;flex-direction: row;"> <img src=" <%= row.avatarUserShop %>"
+              style="width: 50px;height: 50px;border-radius: 8px;">
+
+            <div class="box" style="line-height: 8px;margin: 5px;">
+              <p>
+                <%= row.userName %>
+              </p>
+              <a href="" style="text-decoration: none;color: rgb(171, 169, 169);" data-bs-toggle="modal" data-bs-target="#ModalDeleteSP" data-bs-whatever="@mdo" data-id="<%= row.idUS %>">
+                <span>Xóa</span>
+               </a>
+                
+            </div>
           </td>
           <td>
-            
-                <%= row.emailShop %>
-           
+            <%= row.email %>
+
           </td>
           <td>
-           
-            <%= row.locationUS %>
+            <%= row.fullName%>
           </td>
-          
+
           <td>
-            <%= row.phoneNumber %>
+            <%=row.createdAt %>
           </td>
-          <td><a href="http://localhost:3000/user-shop/detail"
+          <td><a href="http://localhost:3000/user-shop/detail/<%= row._id%>"
               style="background-color: #F582AE;padding: 8px;border-radius: 10px;text-decoration: none;color: white; font-weight: bold;">Chi
               tiết</a></td>
-          <% }) %>
-        
+        </tr>
+        <div class="modal fade" id="ModalDeleteSP" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 
-      </tr>
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Delete Product</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <h2>Bạn có muốn xóa Người dùng shop này?</h2>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    No
+                  </button>
+                  <button type="button" class="btn btn-primary" id="btnDeleteProduct">Yes</button>
+                </div>
+              </div>
+      
+            </div>
+          </div>
+        </div>
+        <% }) %>
 
     </table>
+<!-- ... Your existing table content ... -->
 
-    <div style="display: flex; flex-direction: row; align-items: center;justify-content: space-between;position:absolute ; bottom: 0; width: 96%;">
-      <p> Số bản ghi: <span style="font-weight: bold;">
-          <%= countAllUserShop %>
-        </span></p>
+<div  style="display: flex; flex-direction: row; align-items: center;justify-content: space-between;position:absolute ; bottom: 0; width: 96%;">
+  <p> Số bản ghi: <span style="font-weight: bold;"><%= countNowUserShop %>/<%= countAllUserShop %></span></p>
+  <nav>
+    <ul class="pagination">
+      <% if (currentPage > 1) { %>
+      <li class="page-item">
+        <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+      <% } %>
 
-      <nav>
-        <ul class="pagination">
-          <li class="page-item">
-            <a class="page-link" href="#" aria-label="Previous">
-              <span aria-hidden="true">&laquo;</span>
-            </a>
-          </li>
-          <li class="page-item"><a class="page-link" href="#">1</a></li>
-          <li class="page-item"><a class="page-link" href="#">2</a></li>
-          <li class="page-item"><a class="page-link" href="#">3</a></li>
-          <li class="page-item">
-            <a class="page-link" href="#" aria-label="Next">
-              <span aria-hidden="true">&raquo;</span>
-            </a>
-          </li>
-        </ul>
-      </nav>
+      <% for (let i = 1; i <= totalPages; i++) { %>
+      <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+      </li>
+      <% } %>
 
+      <% if (currentPage < totalPages) { %>
+      <li class="page-item">
+        <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+      <% } %>
+    </ul>
+  </nav>
+</div>
 
-    </div>
 
   </div>
   <%- include('../inc/bottom') %>
+
+<script>
+  const sortOptionDropdown = document.getElementById('sortOption');
+  const sortForm = document.getElementById('sortForm');
+
+  sortOptionDropdown.addEventListener('change', function () {
+    sortForm.submit();
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.min.js"
+integrity="sha384-Rx+T1VzGupg4BHQYs2gCW9It+akI2MM/mndMCy36UVfodzcJcF0GGLxZIzObiEfa"
+crossorigin="anonymous"></script>
+<script>
+  const deleteButtons = document.querySelectorAll('[data-bs-toggle="modal"]');
+  const deleteModal = new bootstrap.Modal(document.getElementById('ModalDeleteSP'));
+  const btnDeleteProduct = document.getElementById('btnDeleteProduct');
+
+  let idToDelete = null;
+
+  // Attach event listeners to delete buttons
+  deleteButtons.forEach(button => {
+    button.addEventListener('click', function () {
+      idToDelete = button.getAttribute('data-id');
+    });
+  });
+
+  // Attach event listener to the "Yes" button in the modal
+  btnDeleteProduct.addEventListener('click', async () => {
+    try {
+      // Make an AJAX request to delete the user shop
+      const response = await fetch(`/user-shop/delete/${idToDelete}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        // Reload the page or update the UI as needed
+        window.location.reload(); // For example, reload the page
+      } else {
+        console.error('Error deleting user shop');
+        // Handle error case
+      }
+    } catch (error) {
+      console.error('Error deleting user shop:', error);
+      // Handle error case
+    }
+  });
+</script>
