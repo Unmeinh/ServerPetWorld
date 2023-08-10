@@ -66,43 +66,15 @@
                     <%= row.fullname %>
                   </p>
 
-                  <a href="" data-bs-toggle="modal" data-bs-target="#ModalDeleteUser" data-bs-whatever="@mdo"
-                    data-id="<%= row._id %>" style="text-decoration: none;color: rgb(171, 169, 169);">Xóa</a>
+                  <a href="http://localhost:3000/user/delete/<%= row._id %>"
+                    style="text-decoration: none;color: rgb(171, 169, 169);">Xóa</a>
 
 
                 </div>
-
-
 
               </td>
               <!-- xóa -->
 
-
-              <div class="modal fade" id="ModalDeleteUser" tabindex="-1" aria-labelledby="exampleModalLabel"
-                aria-hidden="true">
-
-                <div class="modal-dialog">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h1 class="modal-title fs-5" id="exampleModalLabel">Xóa người dùng</h1>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                      <span>Bạn có muốn xóa người dùng <h4>
-                          <%= row.fullname %>
-                        </h4></span>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                          Không
-                        </button>
-                        <button type="button" class="btn btn-primary" id="btnDeleteUser">Có</button>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-              </div>
-              <form method="POST" name="delete-form"></form>
               <td>
 
                 <%= row.emailUser %>

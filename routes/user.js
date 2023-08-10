@@ -12,7 +12,8 @@ router.post('/add', UserCtrl.addUser);
 router.get('/edit', UserCtrl.editUser);//bổ sung /:idUser khi làm 
 router.put('/edit', UserCtrl.editUser);//bổ sung /:idUser khi làm 
 
-// router.get('/delete',UserCtrl.deleteUser);//bổ sung /:idUser khi làm 
-router.post('/:idUser',UserCtrl.deleteUser);//bổ sung /:idUser khi làm 
+router.get('/delete/:idUser',UserCtrl.deleteUser);
+router.delete('/delete/:idUser',UserCtrl.deleteUser);//bổ sung /:idUser khi làm 
+// router.post('/:idUser',UserCtrl.deleteUser);//bổ sung /:idUser khi làm 
 
 module.exports = router;
