@@ -5,10 +5,10 @@ exports.listUser = async (req, res, next) => {
   try {
     let listUser = await mdUser.UserModel.find();
     if (listUser) {
-      return res.status(200).json({ success: true, data: listUser, message: "Lấy danh sách user thành công" });
+      return res.status(200).json({ success: true, data: listUser, message: "Lấy danh sách users thành công" });
     }
     else {
-      return res.status(203).json({ success: false, message: "Không có dữ liệu" });
+      return res.status(203).json({ success: false, message: "Không có dữ liệu người dùng" });
     }
 
   } catch (error) {
@@ -20,10 +20,10 @@ exports.detailUser = async (req, res, next) => {
 
   let idUser = req.params.idUser;
   try {
-    let objU = await mdUser.UserModel.findById({ _id: idUser });
-    return res.status(200).json({ success: true, data: objU, message: "Lấy dữ liệu user thành công" });
+    let objU = await mdUser.UserModel.findById(idUser);
+    return res.status(200).json({ success: true, data: objU, message: "Lấy dữ liệu users thành công" });
   } catch (error) {
-    return res.status(500).json({ success: false, message: "Lỗi: " + error.message });
+    return res.status(500).json({ success: false,data: {}, message: "Lỗi: " + error.message });
   }
 
 }
@@ -42,7 +42,7 @@ exports.registUser = async (req, res, next) => {
       await newUser.save();
       return res.status(201).json({ success: true, data: newUser, message: "Đăng kí tài khoản thành công" });
     } catch (error) {
-      return res.status(500).json({ success: false, message: "Đăng kí thất bại " + error.message });
+      return res.status(500).json({ success: false, data:{},message: "Đăng kí thất bại " + error.message });
 
     }
   }
@@ -62,7 +62,7 @@ exports.loginUser = async (req, res, next) => {
       return res.status(500).json({
         success: false,
         obj:[],
-        message:'Đăng nhập không thanh công',
+        message:'Đăng nhập không thành công',
       });
     }
   }
