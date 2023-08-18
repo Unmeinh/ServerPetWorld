@@ -6,9 +6,9 @@ router.get('/', UserApiCtrl.listUser);
 
 router.get('/detail/:idUser', UserApiCtrl.detailUser);
 
-router.post('/regist', UserApiCtrl.registUser);
+router.post('/register', UserApiCtrl.registUser);
 router.post('/login', UserApiCtrl.loginUser);
-
+router.get('/logout', UserApiCtrl.logoutUser);
 router.put('/edit/:idUser', UserApiCtrl.editUser);
 
 router.delete('/delete/:idUser',UserApiCtrl.deleteUser);
