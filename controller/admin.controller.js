@@ -4,7 +4,7 @@ exports.listAdmin = async (req, res, next) => {
     let msg = '';
     let filterSearch = null;
     let sortAz = null;
-    let listAdmin;
+   
 
     let perPage = 6;
     let currentPage = parseInt(req.query.page) || 1;
@@ -26,7 +26,7 @@ exports.listAdmin = async (req, res, next) => {
             if (currentPage > totalPage) currentPage = totalPage;
             let skipCount = (currentPage - 1) * perPage;
 
-            listAdmin = await mdAdmin.AdminModel.find(filterSearch).sort(sortAz).skip(skipCount).limit(perPage);
+            let listAdmin = await mdAdmin.AdminModel.find(filterSearch).sort(sortAz).skip(skipCount).limit(perPage);
            
             msg = 'Lấy danh sách admin thành công';
             return res.render('Admin/listAdmin', { listAdmin: listAdmin, countAllAdmin: totalCount, countNowAdmin: listAdmin.length, msg: msg, currentPage: currentPage, totalPage: totalPage });
@@ -36,7 +36,6 @@ exports.listAdmin = async (req, res, next) => {
         }
 
     }
-
 }
 exports.detailAdmin = async (req, res, next) => {
 

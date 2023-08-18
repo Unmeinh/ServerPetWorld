@@ -6,7 +6,7 @@ let AdminSchema = new db.mongoose.Schema(
         email:{type:String,required:true,index:{unique:true}},
         passWord:{type:String,required:true},
         avatarAdmin:{type:String,required:false},
-        status:{type:String,require:false},
+        status:{type:Number,require:false}
     },
     {
         collection:'Admin'
