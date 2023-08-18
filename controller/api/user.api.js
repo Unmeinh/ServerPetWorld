@@ -16,14 +16,12 @@ exports.listUser = async (req, res, next) => {
   }
 }
 exports.detailUser = async (req, res, next) => {
-
-
   let idUser = req.params.idUser;
   try {
     let objU = await mdUser.UserModel.findById(idUser);
     return res.status(200).json({ success: true, data: objU, message: "Lấy dữ liệu users thành công" });
   } catch (error) {
-    return res.status(500).json({ success: false,data: {}, message: "Lỗi: " + error.message });
+    return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
   }
 
 }
@@ -34,7 +32,7 @@ exports.registUser = async (req, res, next) => {
       let newUser = new mdUser.UserModel();
       newUser.userName = req.body.userName;
       newUser.phoneNumber = req.body.phoneNumber;
-     
+
       const salt = await bcrypt.genSalt(10);
       newUser.passWord = await bcrypt.hash(req.body.passWord, salt);
       await newUser.generateAuthToken();
@@ -42,7 +40,7 @@ exports.registUser = async (req, res, next) => {
       await newUser.save();
       return res.status(201).json({ success: true, data: newUser, message: "Đăng kí tài khoản thành công" });
     } catch (error) {
-      return res.status(500).json({ success: false, data:{},message: "Đăng kí thất bại " + error.message });
+      return res.status(500).json({ success: false, data: {}, message: "Đăng kí thất bại " + error.message });
 
     }
   }
@@ -55,17 +53,31 @@ exports.loginUser = async (req, res, next) => {
         return res.status(401).json({ success: false, message: 'Sai thông tin đăng nhập' })
       }
       const token = await objU.generateAuthToken();
-      return res.status(200).json({ success: true, data: objU, token: token , message: "Đăng nhập thành công"});
+      return res.status(200).json({ success: true, data: objU, token: token, message: "Đăng nhập thành công" });
 
     } catch (error) {
       // console.log(error.message);
       return res.status(500).json({
         success: false,
-        obj:[],
-        message:'Đăng nhập không thành công',
+        data: {},
+        message: 'Đăng nhập thất bại',
       });
     }
   }
+}
+
+exports.logoutUser = async (req, res, next) => {
+  try {
+    console.log(req.user);
+
+    req.user.token = null; //xóa token
+    await req.user.save()
+    return res.status(200).json({ success: true, data: {}, message: 'Đăng xuất thành công' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error.message)
+  }
+
 }
 exports.editUser = async (req, res, next) => {
   let idUser = req.params.idUser;
@@ -85,9 +97,9 @@ exports.deleteUser = async (req, res, next) => {
   if (req.method == 'DELETE') {
     try {
       await mdUser.UserModel.findByIdAndDelete({ _id: idUser });
-      return res.status(203).json({ success: true, message: "Tài khoản này không còn tồn tại" });
+      return res.status(203).json({ success: true,data:{}, message: "Tài khoản này đã không còn tồn tại" });
     } catch (error) {
-      return res.status(500).json({ success: false, message: "Lỗi: " + error.message });
+      return res.status(500).json({ success: false, message: "Lỗi rồi: " + error.message });
     }
   }
 }
