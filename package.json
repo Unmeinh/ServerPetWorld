@@ -6,8 +6,10 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "body-parser": "^1.20.2",
     "cookie-parser": "~1.4.4",
     "date-fns": "^2.30.0",
+    "dateformat": "^5.0.3",
     "debug": "~2.6.9",
     "ejs": "~2.6.1",
     "express": "~4.16.1",
@@ -15,7 +17,7 @@
     "http-errors": "~1.6.3",
     "moment": "^2.29.4",
     "mongodb": "^5.7.0",
-    "mongoose": "^7.4.0",
+    "mongoose": "^7.4.2",
     "morgan": "~1.9.1",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.4"

@@ -1,18 +1,16 @@
 var express = require('express');
 var ProductCtrl = require('../controller/product.controller');
+var multer = require('multer');
+var uploader = multer({ dest: './tmp' });
 var router = express.Router();
 
 router.get('/', ProductCtrl.listProduct);
 
-router.get('/detail', ProductCtrl.detailProduct);//bổ sung /:idUser khi làm 
+router.get('/detail/:idPR', ProductCtrl.detailProduct);//bổ sung /:idUser khi làm 
 
-router.get('/add',ProductCtrl.addProduct);
-router.post('/add', ProductCtrl.addProduct);
+router.post('/add', uploader.array("arrProduct", 10), ProductCtrl.addProduct);
 
-router.get('/edit', ProductCtrl.editProduct);//bổ sung /:idUser khi làm 
-router.put('/edit', ProductCtrl.editProduct);//bổ sung /:idUser khi làm 
-
-router.get('/delete',ProductCtrl.deleteProduct);//bổ sung /:idUser khi làm 
-router.delete('/delete',ProductCtrl.deleteProduct);//bổ sung /:idUser khi làm 
+router.get('/delete/:idPR',ProductCtrl.deleteProduct);
+router.post('/delete/:idPR',ProductCtrl.deleteProduct);
 
 module.exports = router;

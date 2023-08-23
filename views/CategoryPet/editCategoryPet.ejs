@@ -1,0 +1,39 @@
+<%- include('../inc/top',{title:'Sửa thể loại mới'}) %>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sửa  thể loại mới</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">  
+</head>
+<body>
+  <div style="margin-left: 40px;" >
+      <div class="row align-items-center" style="padding: 20px;">
+        <!-- Cột chứa ảnh -->
+        <div >
+          <img src="menu.png" alt="" class="img-fluid">
+        </div>
+      </div>
+    <div class="form-group row">
+      <label for="username" class="col-sm-5 ">Tạo một thể loại sản phẩm mới và thêm vào trang mạng này.</label>
+    </div>
+    <form action="" method="post">
+        <div class="form-group row">
+          <label for="" class="col-sm-3 col-form-label">Tên thể loại</label>
+          <div class="col-sm-4">
+            <input type="text" name="tentheloai" class="form-control " id="tentheloai"  placeholder="Nhập tên thể loại" value="<%= ObjPet.nameCategoryPet%>" >
+          </div>
+        </div>
+      <div class="form-group row">
+        <div class="col-sm-10">
+          <button style="background-color: #F582AE;"  type="submit"  class="btn btn-secondary ">Sửa thể loại mới </button>
+        </div>
+      </div>
+    </form>
+    
+  </div>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
+<%- include('../inc/bottom') %>

@@ -1,9 +1,6 @@
 let mdUserShop = require('../model/userShop.model');
 const fs = require("fs");
 
-const { format } = require('date-fns');
-const currentDate = new Date();
-
 exports.listUserShop = async (req, res, next) => {
   const perPage = 7;
   let msg = '';
@@ -70,7 +67,7 @@ exports.addUserShop = async (req, res, next) => {
         newObj.userName = req.body.tendangnhap;
         newObj.passWord = req.body.matkhau;
         newObj.email = req.body.email;
-        newObj.createdAt =outputdate ;
+        newObj.createdAt =new Date() ;
         if (req.file) {
             fs.renameSync(req.file.path, './public/upload/' + req.file.originalname);
             console.log("url:http://localhost:3000/upload/" + req.file.originalname);

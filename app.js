@@ -8,8 +8,12 @@ var adminRouter= require('./routes/admin');
 var usersRouter = require('./routes/user');
 var usersShopRouter = require('./routes/userShop');
 var productRouter = require('./routes/product');
+var petRouter = require('./routes/pet');
+var categoryProduct = require('./routes/categoryProduct');
+var categoryPet = require('./routes/categoryPet');
 
 var app = express();
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -25,10 +29,13 @@ app.use('/admin',adminRouter);
 app.use('/user', usersRouter);
 app.use('/user-shop', usersShopRouter);
 app.use('/product', productRouter);
+app.use('/pet', petRouter);
+app.use('/categoryProduct', categoryProduct);
+app.use('/categoryPet', categoryPet);
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
+// app.use(function(req, res, next) {
+//   next(createError(404));
+// });
 
 // error handler
 app.use(function(err, req, res, next) {
