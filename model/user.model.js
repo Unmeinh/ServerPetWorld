@@ -17,8 +17,9 @@ let UserSchema = new db.mongoose.Schema(
         description:{type:String,required:false},
         status:{type:String,required:false},
         nickName:{type:String,required:false},
-        followers:{type:Array,required:false},
-        following:{type:Array,required:false},
+        blog:{type:Number,required:false},
+        followers:{type:Number,required:false},
+        following:{type:Number,required:false},
         createAt:{type:Date,required:false},
         myPet:{type:Array,required:false},
         token:{type:String,required:true}
@@ -39,18 +40,18 @@ UserSchema.methods.generateAuthToken = async function () {
 
 UserSchema.statics.findByCredentials = async(userName,passWord)=>{
     const user = await UserModel.findOne({userName});
+    
     if(!user)
     {
-        throw new Error({error:'Không tồn tại user này'});
+        throw new Error('Tên đăng nhập không tồn tại!');
     }
     const isPasswordMatch = await bcrypt.compare(passWord, user.passWord)
    if (!isPasswordMatch) {
-       throw new Error({error: 'Sai password rồi'});
+       throw new Error('Sai mật khẩu!');
    }
    return user;
 
 }
-
 
 let UserModel = db.mongoose.model('UserModel',UserSchema);
 

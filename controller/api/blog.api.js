@@ -1,4 +1,5 @@
 let mdBlog = require('../../model/blog.model');
+let fs = require('fs');
 exports.listAllBlog = async (req, res, next) => {
 
     try {
@@ -46,10 +47,30 @@ exports.addBlog = async (req, res, next) => {
             let newBlog = new mdBlog.BlogModel();
             newBlog.contentBlog = req.body.contentBlog;
             newBlog.contentFont = req.body.contentFont;
-            newBlog.imageBlogs = req.body.imageBlogs;
+
+            if (req.files != undefined) {
+                console.log("check "+req.files);
+                req.files.map((file, index, arr) => {
+                    console.log("check2 "+file);
+                  if (file != {}) {
+                    fs.renameSync(file.path, './public/upload/' + file.originalname);
+                    let imagePath = 'http://localhost:3000/upload/' + file.originalname;
+                    newBlog.imageBlogs.push(imagePath);
+                  }
+                })
+              }
+           
+            // if (req.files && req.files.length > 0) {
+            //      newBlog.imageBlogs = req.files.map(file => "http://localhost:3000/upload/"  + file.originalname); // Lưu đường link + tên tệp vào mảng
+            // } else {
+            //     newBlog.imageBlogs = []; // Mảng rỗng nếu không có ảnh được tải lên
+            // }
+            // newBlog.imageBlogs = req.body.imageBlogs;
             newBlog.aspectRatio = req.body.aspectRatio;
             newBlog.idUser = req.body.idUser;
             newBlog.createdAt = new Date();
+            newBlog.comments=0;
+            newBlog.shares=0;
 
             await newBlog.save();
             return res.status(201).json({ success: true, data: newBlog, message: "Đã đăng bài viết mới" });
@@ -68,17 +89,35 @@ exports.addBlog = async (req, res, next) => {
     }
 }
 exports.editBlog = async (req, res, next) => {
+   
     let idBlog = req.params.idBlog;
     if (req.method == 'PUT') {
         try {
-            let newBlog = new mdBlog.BlogModel();
+           let newBlog = new mdBlog.BlogModel();
             newBlog.contentBlog = req.body.contentBlog;
             newBlog.contentFont = req.body.contentFont;
+
+            if (req.files != undefined) {
+                req.files.map((file, index, arr) => {
+                  if (file != {}) {
+                    fs.renameSync(file.path, '../../public/upload/' + file.originalname);
+                    let imagePath = 'http://localhost:3000/upload/' + file.originalname;
+                    newBlog.imageBlogs.push(imagePath);
+                  }
+                })
+              }
+
+            // if (req.files && req.files.length > 0) {
+            //      newBlog.imageBlogs = req.files.map(file => "http://localhost:3000/upload/"  + file.originalname); // Lưu đường link + tên tệp vào mảng
+            // } else {
+            //     newBlog.imageBlogs = []; // Mảng rỗng nếu không có ảnh được tải lên
+            // }
             newBlog.imageBlogs = req.body.imageBlogs;
             newBlog.aspectRatio = req.body.aspectRatio;
             newBlog.idUser = req.body.idUser;
             newBlog.createdAt = new Date();
-            newBlog._id = idBlog;
+            newBlog.comments=0;
+            newBlog.shares=0;
 
             await mdBlog.BlogModel.findByIdAndUpdate(idBlog, newBlog);
             return res.status(200).json({ success: true, data: newBlog, message: "Đã sửa bài viết" });
