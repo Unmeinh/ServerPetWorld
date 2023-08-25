@@ -5,6 +5,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var session = require('express-session');
+
 var adminRouter= require('./routes/admin');
 var usersRouter = require('./routes/user');
 var usersShopRouter = require('./routes/userShop');
@@ -13,6 +14,7 @@ var accountRouter= require('./routes/account');
 //api
 var userApiRouter = require('./routes/api/userApi');
 var blogApiRouter = require('./routes/api/blogApi');
+var itemCartApiRouter = require('./routes/api/itemCartApi');
 
 var app = express();
 
@@ -31,7 +33,7 @@ app.use(session({
   resave: false,
   saveUninitialized: true
 }))
-
+app.use('/',blogsRouter);
 app.use('/admin',adminRouter);
 app.use('/user', usersRouter);
 app.use('/user-shop', usersShopRouter);
@@ -40,6 +42,7 @@ app.use('/account',accountRouter );
 //api
 app.use('/api/user', userApiRouter);
 app.use('/api/blog', blogApiRouter);
+app.use('/api/item-carts', itemCartApiRouter);
 // catch 404 and forward to error handler
 
 app.use(function(req, res, next) {

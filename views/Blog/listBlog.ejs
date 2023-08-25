@@ -6,8 +6,7 @@
                 <div
                     style="background-color: #F0F4F8;border-radius: 25px;align-items: center;display: flex;flex-direction: row;">
                     <div style="width: 10%;">
-                        <button type="submit" style="border: none;"><img
-                                src="http://localhost:3000/upload/iconFind.png"
+                        <button type="submit" style="border: none;"><img src="http://localhost:3000/upload/iconFind.png"
                                 style="width: 20px;height: 20px;"></button>
                     </div>
                     <div style="width: 90%;">
@@ -62,7 +61,7 @@
                         <span style="margin-right: 10px;">
                             <%= row.imageBlogs.length %> ảnh
                         </span>
-                       
+
                         <a href="/blog/delete/<%= row._id %>" style="text-decoration: none;color: rgb(171, 169, 169);">
                             Xóa
                         </a>
@@ -71,10 +70,15 @@
                         <%= row.contentBlog %>
                     </td>
                     <td>
-                        <%= moment(row.createdAt).format('DD/MM/YYYY hh:mm:ss a')  %>
+                        <%= moment(row.createdAt).format('DD/MM/YYYY hh:mm:ss a') %>
                     </td>
                     <td>
-                        <%= row.idUser.fullName %>
+                        <% if(typeof(row.idUser.fullName)!='undefined' ){%>
+                            <%= row.idUser.fullName %>
+                                <%} else { %>
+                                    <p>Không có</p>
+                                    <%}%>
+
                     </td>
                     <td>
                         <a href="/blog/detail/<%= row._id%>"

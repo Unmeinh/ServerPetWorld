@@ -4,8 +4,6 @@ exports.listAdmin = async (req, res, next) => {
     let msg = '';
     let filterSearch = null;
     let sortAz = null;
-   
-
     let perPage = 6;
     let currentPage = parseInt(req.query.page) || 1;
 
@@ -27,14 +25,14 @@ exports.listAdmin = async (req, res, next) => {
             let skipCount = (currentPage - 1) * perPage;
 
             let listAdmin = await mdAdmin.AdminModel.find(filterSearch).sort(sortAz).skip(skipCount).limit(perPage);
-           
-            msg = 'Lấy danh sách admin thành công';
+          
+            // msg = 'Lấy danh sách admin thành công';
             return res.render('Admin/listAdmin', { listAdmin: listAdmin, countAllAdmin: totalCount, countNowAdmin: listAdmin.length, msg: msg, currentPage: currentPage, totalPage: totalPage });
         } catch (error) {
             msg = '' + error.message;
             console.log('Không lấy được danh sách  admin: ' + error.message);
+            return res.render('Admin/listAdmin', { listAdmin: listAdmin, countAllAdmin: totalCount, countNowAdmin: listAdmin.length, msg: msg, currentPage: currentPage, totalPage: totalPage });
         }
-
     }
 }
 exports.detailAdmin = async (req, res, next) => {
@@ -101,7 +99,7 @@ exports.deleteAdmin = async (req, res, next) => {
 
         try {
             if (listAdmin == 1) {
-                msg = 'Bạn không thể xóa admin vì admin tối thiểu phải là 1';
+                msg = 'Danh sách admin tối thiểu phải là 1';
                 return res.render('Admin/deleteAdmin', { msg: msg, objAd: objAd });
             }
             await mdAdmin.AdminModel.findByIdAndDelete(idAdmin);

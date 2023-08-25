@@ -27,8 +27,6 @@
         </select>
 
         <button class="btn" type="submit" style="width: 20%;font-weight: bold;color: #F0F4F8;background-color: #8BD3DD;">Lọc</button>
-
-
       </form>
 
       <div class="row col-3">
@@ -42,7 +40,14 @@
       </div>
     </div>
 
-
+    <% if(msg) { %>
+      <div class="row">
+          <span class="p-3"
+              style="background-color: rgb(175, 214, 239); border-radius: 10px;color: red;font-weight: bold;">
+              <%= msg %>
+          </span>
+      </div>
+      <% }%>
     <table class="table table-curved" style="border: white;">
 
       <tr style="background: #8BD3DD;border-radius: 15px;">
@@ -55,14 +60,8 @@
       <% listAdmin.forEach((row)=>{ %>
         <tr>
           <td style="display: flex;flex-direction: row;">
-            <% if(typeof(row.avatarAdmin)!='undefined' ) { %>
               <img src=" <%= row.avatarAdmin %>" style="width: 50px;height: 50px;border-radius: 8px;">
-              <% } else { %>
-                <img src=" http://localhost:3000/upload/avatar_null.png"
-                  style="width: 50px;height: 50px;border-radius: 8px;">
-                <% }%>
-
-
+            
                   <div class="box" style="line-height: 8px;margin: 5px;">
                     <p>
                       <%= row.fullName %>

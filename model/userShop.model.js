@@ -1,7 +1,9 @@
 let db = require('./db');
 let UserShopSchema = new db.mongoose.Schema(
     {
-        userName:{type:String,required:true},
+        userName:{type:String,required:true,index:{
+            unique:true
+        }},
         passWord:{type:String,required:true},
         email:{type:String,required:false,index:{
             unique:true
@@ -18,6 +20,4 @@ let UserShopSchema = new db.mongoose.Schema(
     }
 )
 let UserShopModel = db.mongoose.model('UserShopModel',UserShopSchema);
-
-
 module.exports={UserShopModel};
