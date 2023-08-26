@@ -32,7 +32,7 @@ exports.listpet = async (req, res, next) => {
             if (currentPage > totalPages) currentPage = totalPages;
 
             const skipCount = (currentPage - 1) * perPage;
-            let listpet = await mdpet.PetModel.find(filterSearch).populate('id_categoryP')
+            let listpet = await mdpet.PetModel.find(filterSearch).populate('idCategoryP').populate('idShop')
                 .sort(sortOption)
                 .skip(skipCount)
                 .limit(perPage);
@@ -62,27 +62,27 @@ exports.listpet = async (req, res, next) => {
 exports.detailpet = async (req, res, next) => {
     let msg = '';
     let idP = req.params.idP;
-    let Objpet = await mdpet.PetModel.findById(idP).populate('id_categoryP');
+    let Objpet = await mdpet.PetModel.findById(idP).populate('idCategoryP').populate('idShop');
     res.render('pet/detailpet', { Objpet: Objpet });
     console.log("objjjjj" + Objpet);
 }
 
 exports.addpet = async (req, res, next) => {
     let msg = '';
-    if (
-        !req.body.namePet ||
-        !req.body.speciesPet ||
-        !req.body.detailPet ||
-        !req.body.sizePet ||
-        !req.body.heightPet ||
-        !req.body.id_categoryP ||
-        !req.body.weightPet ||
-        !req.body.pricePet ||
-        !req.body.amountPet
-    ) {
-        msg = 'Vui lòng không để trống!';
-        return res.status(400).json({ message: msg });
-    }
+    // if (
+    //     !req.body.namePet ||
+    //     !req.body.speciesPet ||
+    //     !req.body.detailPet ||
+    //     !req.body.sizePet ||
+    //     !req.body.heightPet ||
+    //     !req.body.idCategoryP ||
+    //     !req.body.weightPet ||
+    //     !req.body.pricePet ||
+    //     !req.body.amountPet
+    // ) {
+    //     msg = 'Vui lòng không để trống!';
+    //     return res.status(400).json({ message: msg });
+    // }
         console.log("reqbody"+req.body.namePet);
         let newObj = new mdpet.PetModel();
         newObj.namePet = req.body.namePet;
@@ -91,7 +91,8 @@ exports.addpet = async (req, res, next) => {
         newObj.sizePet = req.body.sizePet;
         newObj.heightPet = req.body.heightPet;
         newObj.weightPet = req.body.weightPet;
-        newObj.id_categoryP = req.body.id_categoryP;
+        newObj.idCategoryP = req.body.idCategoryP;
+        newObj.idShop = req.body.idShop;
         newObj.pricePet = req.body.pricePet;
         newObj.amountPet = req.body.amountPet;
         newObj.createdAt = new Date();

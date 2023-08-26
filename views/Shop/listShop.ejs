@@ -1,0 +1,121 @@
+<%- include('../inc/top',{title:'Quản lý shop'}) %>
+  <div class="container-fluid " style="width: 98%;display: flex; flex-direction: column" >
+    <div class="row col m-3">
+
+      <form class="row col-3 me-2" action="" method="GET">
+        <div style="background-color: #F0F4F8;border-radius: 25px;align-items: center;" class="row col">
+          <div style="width: 10%;">
+            <button type="submit" style="border: none;"><img src="https://cdn-icons-png.flaticon.com/128/622/622669.png"
+                style="width: 20px;height: 20px;"></button>
+          </div>
+          <div style="width: 90%;">
+            <input name="filterSearch"
+              style="border-radius: 20px;border: #F0F4F8;background-color: #F0F4F8;border-radius: 25px;;"
+              class="form-control" placeholder="Nhập từ khóa">
+          </div>
+        </div>
+
+      </form>
+      <div class="row col-3 me-5">
+        <form id="sortForm" action="" method="GET">
+          <select id="sortOption" name="sortOption" class="form-select" style="background-color: #F0F4F8; border-radius: 20px;">
+            <option selected disabled>Sắp xếp theo</option>
+            <option value="az">Sắp xếp từ a-z</option>
+            <option value="za">Sắp xếp từ z-a</option>
+          </select>
+        </form>
+      </div>
+      <div class="row col-4">
+
+      </div>
+    </div>
+
+    <% if (typeof listShop !== 'undefined' && listShop.length > 0) { %>
+    <table class="table" style="border: white; ">
+
+      <tr style="background-color: #8BD3DD;">
+        <th scope="col">Tên shop</th>
+        <th scope="col">Email</th>
+        <th scope="col">Trạng thái</th>
+        <th scope="col">Ngày tạo</th>
+        <th scope="col"></th>
+        <% listShop.forEach((row) => { %>
+      </tr>
+        <tr>
+
+          <td
+            <div class="box" style="line-height: 8px;margin: 5px;">
+              <p>
+                <%= row.nameShop%>
+              </p>
+              <a href="/shop/delete/<%= row._id %>" style="text-decoration: none;color: rgb(171, 169, 169);" data-bs-toggle="modal" data-bs-target="#ModalDeleteSP" data-bs-whatever="@mdo" >
+                <span>Xóa</span>
+               </a>
+                
+            </div>
+          </td>
+          <td>
+            <%= row.emailShop%>
+
+          </td>
+          <td>
+            <%= row.statusShop%>
+          </td>
+
+          <td>
+            <%= moment(row.createdAt).format('DD-MM-YYYY') %>
+          </td>
+          <td><a href="http://localhost:3000/shop/detail/<%= row._id%>"
+              style="background-color: #F582AE;padding: 8px;border-radius: 10px;text-decoration: none;color: white; font-weight: bold;">Chi
+              tiết</a></td>
+        </tr>
+        <% }) %>
+
+    </table>
+<!-- ... Your existing table content ... -->
+
+<div  style="display: flex; flex-direction: row; align-items: center;justify-content: space-between;position:absolute ; bottom: 0; width: 96%;">
+  <p> Số bản ghi: <span style="font-weight: bold;"><%= countNowShop %>/<%= countAllShop %></span></p>
+  <nav>
+    <ul class="pagination">
+      <% if (currentPage > 1) { %>
+      <li class="page-item">
+        <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+      <% } %>
+
+      <% for (let i = 1; i <= totalPages; i++) { %>
+      <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+      </li>
+      <% } %>
+
+      <% if (currentPage < totalPages) { %>
+      <li class="page-item">
+        <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+      <% } %>
+    </ul>
+  </nav>
+</div>
+<% } else { %>
+    <div class="no-results-message">
+      <p>Không tìm thấy kết quả</p>
+  </div>
+<% } %>
+
+  </div>
+  <%- include('../inc/bottom') %>
+
+<script>
+  const sortOptionDropdown = document.getElementById('sortOption');
+  const sortForm = document.getElementById('sortForm');
+
+  sortOptionDropdown.addEventListener('change', function () {
+    sortForm.submit();
+  });
+</script>

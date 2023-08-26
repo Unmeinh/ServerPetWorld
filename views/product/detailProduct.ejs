@@ -64,9 +64,15 @@
             <div class="form-group row m-3">
                 <label for="username" form="bold" class="col-sm-2 col-form-label">Đánh giá</label>
                 <div class="col-sm-3">
+                     <% if(typeof( ObjProduct.rate)!='undefined' ){%>
+                <label type="text" class="form-control" style="width: 200px;">
+                    <%= ObjProduct.rate %>
+                </label>
+                <%} else {%>
                     <label type="text" class="form-control" style="width: 200px;">
-                        <%= ObjProduct.rate%>
+                      Chưa có đánh giá 
                     </label>
+                    <%}%>
                 </div>
 
                 <label for="username" form="bold" class="col-sm-2 col-form-label">Giảm giá</label>
@@ -85,25 +91,42 @@
                     </label>
                 </div>
 
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Thể loại</label>
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Thể loại sản phẩm</label>
                 <div class="col-sm-3">
-
-                    <% if(typeof( ObjProduct.id_categoryPr)!='undefined' ){%>
-                        <label type="text" class="form-control" style="width: 200px;">
-                            <%= ObjProduct.id_categoryPr.nameCategoryProduct %>
-                        </label>
-                        <%} else {%>
-
-                            <label type="text" class="form-control" style="width: 200px;">
-                                Khong co the loai
-                            </label>
-                            <%}%>
-
-
-
+                     <% if(typeof( ObjProduct.idCategoryPr)!='undefined' ){%>
+                <label type="text" class="form-control" style="width: 200px;">
+                    <%= ObjProduct.idCategoryPr.nameCategoryProduct %>
+                </label>
+                <%} else {%>
+                    <label type="text" class="form-control" style="width: 200px;">
+                      Chưa có thể loại sản phẩm
+                    </label>
+                    <%}%>
                 </div>
 
+
             </div>
+
+
+            <div class="form-group row m-3">
+              
+
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Tên Shop</label>
+                <div class="col-sm-3">
+                     <% if(typeof( ObjProduct.idShop)!='undefined' ){%>
+                <label type="text" class="form-control" style="width: 200px;">
+                    <%= ObjProduct.idShop.nameShop %>
+                </label>
+                <%} else {%>
+                    <label type="text" class="form-control" style="width: 200px;">
+                      Không có tên shop 
+                    </label>
+                    <%}%>
+                </div>
+
+
+            </div>
+
 
     </div>
     <div class="form-group row m-2">

@@ -1,10 +1,12 @@
+const { ObjectId } = require('mongodb');
+let db = require('./db');
 let ShopSchema = new db.mongoose.Schema(
     {
         nameShop:{type:String,required:true},
         emailShop:{type:String,required:true},
         idUserShop:{type:db.mongoose.Schema.Types.ObjectId,ref:'UserShopModel'},
         locationShop:{type:String,required:true},
-        avatarShop:{type:Array,required:true},
+        avatarShop:{type:String,required:false},
         descriptionShop:{type:String,required:true}, 
         statusShop:{type:String,required:true}, 
         followers:{type:Array,required:false},

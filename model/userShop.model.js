@@ -6,7 +6,7 @@ let UserShopSchema = new db.mongoose.Schema(
         email:{type:String,required:false,index:{
             unique:true
         }},
-        avatarUserShop:{type:String,required:false},
+        avatarUserShop:{type:Array,required:false},
         status:{type:String,required:false},
         location:{type:String,required:false},
         createdAt:{type:Date,required:false}, 

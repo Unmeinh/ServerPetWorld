@@ -31,7 +31,7 @@ exports.listProduct = async (req, res, next) => {
             if (currentPage > totalPages) currentPage = totalPages;
 
             const skipCount = (currentPage - 1) * perPage;
-            let listProduct = await mdProduct.ProductModel.find(filterSearch).populate('id_categoryPr')
+            let listProduct = await mdProduct.ProductModel.find(filterSearch).populate('idCategoryPr').populate('idShop')
                 .sort(sortOption)
                 .skip(skipCount)
                 .limit(perPage);
@@ -61,7 +61,7 @@ exports.listProduct = async (req, res, next) => {
 exports.detailProduct = async (req, res, next) => {
     let msg = '';
     let idPR = req.params.idPR;
-    let ObjProduct = await mdProduct.ProductModel.findById(idPR).populate('id_categoryPr');
+    let ObjProduct = await mdProduct.ProductModel.findById(idPR).populate('idCategoryPr').populate('idShop');
     res.render('Product/detailProduct', { ObjProduct: ObjProduct });
     console.log("objjjjj" + ObjProduct);
 }
@@ -69,25 +69,15 @@ exports.detailProduct = async (req, res, next) => {
 exports.addProduct = async (req, res, next) => {
     let msg = '';
 
-    if (
-        !req.body.nameProduct ||
-        !req.body.priceProduct ||
-        !req.body.detailProduct ||
-        !req.body.amountProduct ||
-        !req.body.quantitySold ||
-        !req.body.rate ||
-        !req.body.id_categoryPr ||
-        !req.body.discount
-    ) {
-        return res.status(400).json({ message: 'Vui lòng không để trống!' });
-    }
         console.log("reqbody"+req.body.nameProduct);
         let newObj = new mdProduct.ProductModel();
         newObj.nameProduct = req.body.nameProduct;
         newObj.priceProduct = req.body.priceProduct;
+    
         newObj.detailProduct = req.body.detailProduct;
         newObj.amountProduct = req.body.amountProduct;
-        newObj.id_categoryPr = req.body.id_categoryPr;
+        newObj.idCategoryPr = req.body.idCategoryPr;
+        newObj.idShop = req.body.idShop;
         newObj.quantitySold = req.body.quantitySold;
         newObj.rate = req.body.rate;
         newObj.discount = req.body.discount;
@@ -112,17 +102,25 @@ exports.addProduct = async (req, res, next) => {
                 msg = 'Giá sản phẩm phải nhập số!';
                 return res.status(400).json({ success: false, data: {}, message: msg });
             }
-           
+            else if (error.message.match(new RegExp('.+`quantitySold` is require+.'))) {
+                msg = 'Số lượng bán đang trống!';
+            }
             else if (isNaN(newObj.quantitySold) || newObj.quantitySold <= 0) {
                 msg = 'Số lượng bán phải nhập số!';
                 return res.status(400).json({ success: false, data: {}, message: msg });
             }
+            else if (error.message.match(new RegExp('.+`discount` is require+.'))) {
+                msg = 'Số lượng bán đang trống!';
+            }
+            else if (isNaN(newObj.discount) || newObj.discount <= 0) {
+                msg = 'Giảm giá phải nhập số!';
+                return res.status(400).json({ success: false, data: {}, message: msg });
+            }
+           
             else if (error.message.match(new RegExp('.+`detailProduct` is require+.'))) {
                 msg = 'Chi tiết sản phẩm đang trống!';
             }
-            else if (error.message.match(new RegExp('.+`quantitySold` is require+.'))) {
-                msg = 'Số lượng bán đang trống!';
-            }
+            
             else if (error.message.match(new RegExp('.+`amountProduct` is require+.'))) {
                 msg = 'Số lượng bán đang trống!';
             }

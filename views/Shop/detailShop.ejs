@@ -1,19 +1,19 @@
-<%- include('../inc/top',{title:'Chi tiết Pet'}) %>
+<%- include('../inc/top',{title:'Chi tiết Shop'}) %>
 
     <div class="container mt-2">
 
         <div class="form-group row m-2">
-            <label for="nameAdmin" class="col-sm-5 col-form-label" style="color: #848485;">Trang này để xem chi tiết Pet </label>
+            <label for="nameAdmin" class="col-sm-5 col-form-label" style="color: #848485;">Trang này để xem chi tiết Shop </label>
                 <div class="col-sm-5">
         </div>
     </div>
-    <form action="http://localhost:3000/pet" method="get">
+    <form action="http://localhost:3000/Shop" method="get">
         
         <div class="form-group row m-3" style="align-items: center;">
-            <label for="username" form="bold" class="col-sm-2 col-form-label">Images</label>
+            <label for="username" form="bold" class="col-sm-2 col-form-label">Avatar</label>
             <div class="col-sm-5">
-                <% if (typeof(Objpet.imagesPet) !== 'undefined' && Objpet.imagesPet.length > 0) { %>
-                    <% Objpet.imagesPet.forEach((image) => { %>
+                <% if (typeof(ObjShop.avatarShop) !== 'undefined' && ObjShop.avatarShop.length > 0) { %>
+                    <% ObjShop.avatarShop.forEach((image) => { %>
                         <img src="<%= image %>" style="width: 100px; height: 100px;" class="img-fluid">
                     <% }); %>
                 <% } else { %>
@@ -23,102 +23,86 @@
         </div>
 
         <div class="form-group row m-3">
-            <label for="username" form="bold" class="col-sm-2 col-form-label">Tên Pet</label>
+            <label for="username" form="bold" class="col-sm-2 col-form-label">Tên Shop</label>
             <div class="col-sm-3">
                 <label type="text" class="form-control"  style="width: 200px;"  >
-                    <%= Objpet.namePet%>
+                    <%= ObjShop.nameShop%>
                 </label>
             </div>
 
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Giá tiền</label>
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Email Shop</label>
                 <div class="col-sm-3">
                     <label type="text" style="width: 200px;" class="form-control">
-                        <%= Objpet.pricePet%>
+                        <%= ObjShop.emailShop%>
                     </label>
                 </div>
 
         </div>
 
         <div class="form-group row m-3">
-            <label for="username" form="bold" class="col-sm-2 col-form-label">Số lượng Pet</label>
+            <label for="username" form="bold" class="col-sm-2 col-form-label">Địa chỉ Shop</label>
             <div class="col-sm-3">
                 <label type="text" class="form-control"  style="width: 200px;"  >
-                    <%= Objpet.amountPet%>
+                    <%= ObjShop.locationShop%>
                 </label>
             </div>
 
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Loài</label>
+                <label for="username" form="bold" class="col-sm-2 col-form-label">followers</label>
                 <div class="col-sm-3">
                     <label type="text" style="width: 200px;" class="form-control">
-                        <%= Objpet.speciesPet%>
+                        <%= ObjShop.followers%>
                     </label>
                 </div>
 
         </div>
         <div class="form-group row m-3">
-            <label for="username" form="bold" class="col-sm-2 col-form-label">Chiều cao</label>
+            <label for="username" form="bold" class="col-sm-2 col-form-label">Số điện thoại</label>
             <div class="col-sm-3">
                 <label type="text" class="form-control"  style="width: 200px;"  >
-                    <%= Objpet.heightPet%>
+                    <%= ObjShop.hotlineShop%>
                 </label>
             </div>
 
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Cân nặng</label>
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Doanh thu</label>
                 <div class="col-sm-3">
                     <label type="text" style="width: 200px;" class="form-control">
-                        <%= Objpet.weightPet%>
+                        <%= ObjShop.revenue%>
                     </label>
                 </div>
 
         </div>
         <div class="form-group row m-3">
-            <label for="username" form="bold" class="col-sm-2 col-form-label">Kích Thước</label>
+            <label for="username" form="bold" class="col-sm-2 col-form-label">Trạng thái Shop</label>
             <div class="col-sm-3">
                 <label type="text" class="form-control"  style="width: 200px;"  >
-                    <%= Objpet.sizePet%>
+                    <%= ObjShop.statusShop%>
                 </label>
             </div>
 
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Chi tiết Pet</label>
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Chi tiết Shop</label>
                 <div class="col-sm-3">
                     <label type="text" style="width: 200px;" class="form-control">
-                        <%= Objpet.detailPet %>
+                        <%= ObjShop.descriptionShop %>
                     </label>
                 </div>
 
         </div>
 
         <div class="form-group row m-3">
-            <label for="username" form="bold" class="col-sm-2 col-form-label">Thể loại</label>
+            <label for="username" form="bold" class="col-sm-2 col-form-label">Tên người dùng Shop</label>
         <div class="col-sm-3">
 
-            <% if(typeof( Objpet.idCategoryP)!='undefined' ){%>
+            <% if(typeof( ObjShop.idUserShop)!='undefined' ){%>
                 <label type="text" class="form-control" style="width: 200px;">
-                    <%= Objpet.idCategoryP.nameCategoryPet %>
+                    <%= ObjShop.idUserShop.userName %>
                 </label>
                 <%} else {%>
 
                     <label type="text" class="form-control" style="width: 200px;">
-                        Khong co the loai
+                        Không có người dùng shop 
                     </label>
                     <%}%>
         </div>
-
-        <label for="username" form="bold" class="col-sm-2 col-form-label">Thể loại</label>
-        <div class="col-sm-3">
-
-            <% if(typeof( Objpet.idShop)!='undefined' ){%>
-                <label type="text" class="form-control" style="width: 200px;">
-                    <%= Objpet.idShop.nameShop %>
-                </label>
-                <%} else {%>
-
-                    <label type="text" class="form-control" style="width: 200px;">
-                      Không có tên shop
-                    </label>
-                    <%}%>
-        </div>
-        
 
         </div>
 
