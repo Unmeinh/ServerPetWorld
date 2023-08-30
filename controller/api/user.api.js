@@ -54,8 +54,8 @@ exports.loginUser = async (req, res, next) => {
       if (!objU) {
         return res.status(401).json({ success: false, message: 'Sai thông tin đăng nhập' })
       }
-      const token = await objU.generateAuthToken();
-      return res.status(200).json({ success: true, data: objU, token: token, message: "Đăng nhập thành công" });
+      // const token = await objU.generateAuthToken();
+      return res.status(200).json({ success: true, data: {}, token: objU.token, message: "Đăng nhập thành công" });
 
     } catch (error) {
       console.error('err: ' + error.message);

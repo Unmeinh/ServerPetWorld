@@ -1,16 +1,17 @@
+let db = require('./db');
 let ShopSchema = new db.mongoose.Schema(
     {
-        fullName:{type:String,required:true},
+        nameShop:{type:String,required:true},
         email:{type:String,required:true},
         idUserShop:{type:db.mongoose.Schema.Types.ObjectId,ref:'UserShopModel'},
-        location:{type:String,required:true},
+        locationShop:{type:String,required:true},
         avatarShop:{type:String,required:true},
         description:{type:String,required:true}, 
         status:{type:String,required:true}, 
-        followers:{type:Array,required:false},
-        hotlineShop:{type:Number,required:true},
+        followers:{type:Number,required:true},
+        hotline:{type:Number,required:true},
         createdAt:{type:Date,required:true},
-        revenue:{type:Number,required:false}
+        revenue:{type:Number,required:true}
     },
     {
         collection:'Shop'
