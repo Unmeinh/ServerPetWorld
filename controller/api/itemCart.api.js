@@ -16,7 +16,7 @@ exports.listItemCart  = async(req,res,next)=>{
 exports.listItemCartFromIdUser  = async(req,res,next)=>{
     let idUser = req.params.idUser;
     try {
-        let listItemCartUser = await mdItemCart.ItemCartModel.find({ idUser: idUser }).populate('idProduct').populate('idUser');//.populate('idProduct')
+        let listItemCartUser = await mdItemCart.ItemCartModel.find({ idUser: idUser }).populate('idProduct').populate('idUser');
         if (listItemCartUser) {
             return res.status(200).json({ success: true, data: listItemCartUser, message: "Lấy danh sách giỏ hàng của người dùng thành công" });
         }
@@ -32,7 +32,7 @@ exports.listItemCartFromIdUser  = async(req,res,next)=>{
 exports.detailItemCart  = async(req,res,next)=>{
     let idItemCart = req.params.idItemCart;
     try {
-        let objItemCart = await mdItemCart.ItemCartModel.findById(idItemCart);
+        let objItemCart = await mdItemCart.ItemCartModel.findById(idItemCart).populate('idProduct').populate('idUser');
         return res.status(200).json({ success: true, data: objItemCart, message: "Lấy chi tiết giỏ hàng thành công" });
     } catch (error) {
         return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
@@ -60,7 +60,6 @@ exports.addItemCart  = async(req,res,next)=>{
                 message = error.message;
             }
             return res.status(500).json({ success: false, data: {}, message: message });
-
         }
     }
 }

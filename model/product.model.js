@@ -11,7 +11,7 @@ let ProductSchema = new db.mongoose.Schema(
         rate:{type:Number,required:false},
         discount:{type:Number,required:true},
         idShop:{type:db.mongoose.Schema.Types.ObjectId,required:false,ref:'ShopModel'},
-        id_categoryPr:{type: db.mongoose.Schema.Types.ObjectId, ref:'CategoryProductModel'},
+        idCategoryPr:{type: db.mongoose.Schema.Types.ObjectId, ref:'CategoryProductModel'},
     },
     {
         collection:'Products'
