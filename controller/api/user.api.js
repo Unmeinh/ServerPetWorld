@@ -15,11 +15,34 @@ exports.listUser = async (req, res, next) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 }
+exports.myDetail = async (req, res, next) => {
+ let token= req.header('authorization').replace('Bearer ', '');
+ console.log("dtaat: "+token);
+  try {
+    let objU = await mdUser.UserModel.findOne({token:token});
+    console.log('objU: '+objU);
+    return res.status(200).json({ success: true, data: objU, message: "Lấy dữ liệu của bạn thành công" });
+  } catch (error) {
+    return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+  }
+
+}
+
+exports.getFromToken = async (req, res, next) => {
+  let token = req.params.token;
+  try {
+    let objU = await mdUser.UserModel.findById(token);
+    return res.status(200).json({ success: true, data: objU, message: "Lấy dữ liệu của người dùng khác thành công" });
+  } catch (error) {
+    return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+  }
+
+}
 exports.detailUser = async (req, res, next) => {
   let idUser = req.params.idUser;
   try {
     let objU = await mdUser.UserModel.findById(idUser);
-    return res.status(200).json({ success: true, data: objU, message: "Lấy dữ liệu users thành công" });
+    return res.status(200).json({ success: true, data: objU, message: "Lấy dữ liệu của người dùng khác thành công" });
   } catch (error) {
     return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
   }

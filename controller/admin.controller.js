@@ -3,19 +3,19 @@ let bcrypt = require('bcrypt');
 exports.listAdmin = async (req, res, next) => {
     let msg = '';
     let filterSearch = null;
-    let sortAz = null;
+    let sortOption = null;
     let perPage = 6;
     let currentPage = parseInt(req.query.page) || 1;
 
     if (req.method == 'GET') {
         try {
-            if (typeof (req.query.filterSearch) != 'undefined' && req.query.filterSearch.trim() != '') {
-                filterSearch = { fullName: req.query.filterSearch };
-
+            if (typeof req.query.filterSearch !== 'undefined' && req.query.filterSearch.trim() !== '') {
+                const searchTerm = req.query.filterSearch.trim();
+                filterSearch = { fullName: new RegExp(searchTerm, 'i') };
             }
 
-            if (typeof (req.query.ChangeUser) != 'undefined') {
-                sortAz = { email: req.query.ChangeUser };
+            if (typeof (req.query.sortOption) != 'undefined') {
+                sortOption = { email: req.query.sortOption };
             }
 
             let totalCount = await mdAdmin.AdminModel.countDocuments(filterSearch);
@@ -24,7 +24,7 @@ exports.listAdmin = async (req, res, next) => {
             if (currentPage > totalPage) currentPage = totalPage;
             let skipCount = (currentPage - 1) * perPage;
 
-            let listAdmin = await mdAdmin.AdminModel.find(filterSearch).sort(sortAz).skip(skipCount).limit(perPage);
+            let listAdmin = await mdAdmin.AdminModel.find(filterSearch).sort(sortOption).skip(skipCount).limit(perPage);
           
             // msg = 'Lấy danh sách admin thành công';
             return res.render('Admin/listAdmin', { listAdmin: listAdmin, countAllAdmin: totalCount, countNowAdmin: listAdmin.length, msg: msg, currentPage: currentPage, totalPage: totalPage });
