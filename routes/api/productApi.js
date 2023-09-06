@@ -4,15 +4,15 @@ var multer = require('multer');
 var uploader = multer({dest:'/tmp'});
 var router = express.Router();
 
-router.get('/', ProducttApiCtrl.listProduct);
+router.get('/list/all', ProducttApiCtrl.listProduct);
 
-router.get('/shop/:idShop', ProducttApiCtrl.listProductFromIdShop);
+router.get('/list/shop/:idShop', ProducttApiCtrl.listProductFromIdShop);
 
 router.get('/detail/:idPR', ProducttApiCtrl.detailProduct);
 
-router.post('/add', uploader.any(), ProducttApiCtrl.addProduct);
+router.post('/insert', uploader.any(), ProducttApiCtrl.addProduct);
 
-// router.put('/edit/:idItemCart', ItemCartApiCtrl.editItemCart);
+router.put('/update/:idPR', uploader.any(), ProducttApiCtrl.editProduct);
 
 router.delete('/delete/:idPR',ProducttApiCtrl.deleteProduct);
 

@@ -13,6 +13,7 @@ var blogsRouter = require('./routes/blog');
 var accountRouter= require('./routes/account');
 var productRouter = require('./routes/product');
 var categoryProduct = require('./routes/categoryProduct');
+var petRouter = require('./routes/pet');
 var shopRouter = require('./routes/shop');
 //api
 var userApiRouter = require('./routes/api/userApi');
@@ -21,6 +22,7 @@ var itemCartApiRouter = require('./routes/api/itemCartApi');
 var productApiRouter = require('./routes/api/productApi');
 var shopApiRouter = require('./routes/api/shopApi');
 var CatAllApiRouter = require('./routes/api/categoryAll');
+var petApiRouter = require('./routes/api/petApi');
 
 var app = express();
 
@@ -47,6 +49,7 @@ app.use('/blog', blogsRouter);
 app.use('/account',accountRouter );
 app.use('/product', productRouter);
 app.use('/category-product', categoryProduct);
+app.use('/pet', petRouter);
 app.use('/shop', shopRouter);
 //api
 app.use('/api/user', userApiRouter);
@@ -55,6 +58,8 @@ app.use('/api/item-carts', itemCartApiRouter);
 app.use('/api/product', productApiRouter);
 app.use('/api/shop', shopApiRouter);
 app.use('/api/category', CatAllApiRouter);
+app.use('/api/pet', petApiRouter);
+
 // catch 404 and forward to error handler
 
 app.use(function(req, res, next) {

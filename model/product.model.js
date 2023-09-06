@@ -9,9 +9,9 @@ let ProductSchema = new db.mongoose.Schema(
         amountProduct:{type:Number,required:true},
         quantitySold:{type:Number,required:true},
         rate:{type:Number,required:false},
-        discount:{type:Number,required:true},
+        discount:{type:Number,required:false},
         idShop:{type:db.mongoose.Schema.Types.ObjectId,required:false,ref:'ShopModel'},
-        idCategoryPr:{type: db.mongoose.Schema.Types.ObjectId, ref:'CategoryProductModel'},
+        idCategoryPr:{type: db.mongoose.Schema.Types.ObjectId,required:true, ref:'CategoryProductModel'},
     },
     {
         collection:'Products'
