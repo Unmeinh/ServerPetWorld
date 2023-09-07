@@ -8,8 +8,6 @@ router.get('/', ProductCtrl.listProduct);
 
 router.get('/detail/:idPR', ProductCtrl.detailProduct);
 
-router.post('/add', uploader.array("arrProduct", 10), ProductCtrl.addProduct);
-
 router.get('/delete/:idPR',ProductCtrl.deleteProduct);
 router.post('/delete/:idPR',ProductCtrl.deleteProduct);
 

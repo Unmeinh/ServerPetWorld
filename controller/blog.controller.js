@@ -4,28 +4,29 @@ let fs = require('fs');
 exports.listAllBlog = async (req, res, next) => {
     let msg = '';
     let filterSearch = null;
-    let sortAz=null;
+    let sortOption=null;
     let perPage = 10;
     let currentPage = parseInt(req.query.page) || 1;
 
     if(req.method=='GET')
     {
         try {
-            if(typeof(req.query.filterSearch)!='undefined' && req.query.filterSearch.trim()!='')
-            {
-                filterSearch={contentBlog:req.query.filterSearch};
+            if (typeof req.query.filterSearch !== 'undefined' && req.query.filterSearch.trim() !== '') {
+                const searchTerm = req.query.filterSearch.trim();
+                filterSearch = { contentBlog: new RegExp(searchTerm, 'i') };
             }
-            if (typeof (req.query.ChangeBlog) != 'undefined') {
-                sortAz = { contentBlog: req.query.ChangeBlog };
+            if (typeof (req.query.sortOption) != 'undefined') {
+                sortOption = { contentBlog: req.query.sortOption };
             }
 
             let totalCount = await mdBlog.BlogModel.countDocuments(filterSearch);
             const totalPage = Math.ceil(totalCount / perPage);
+
             if (currentPage < 1) currentPage = 1;
             if (currentPage > totalPage) currentPage = totalPage;
             let skipCount = (currentPage - 1) * perPage;
 
-            let listAllBlog = await mdBlog.BlogModel.find(filterSearch).sort(sortAz).populate('idUser').skip(skipCount).limit(perPage);
+            let listAllBlog = await mdBlog.BlogModel.find(filterSearch).populate('idUser').sort(sortOption).skip(skipCount).limit(perPage);
             msg='Lấy danh sách tất cả blog thành công';
             // console.log(listAllBlog);
             return res.render('Blog/listBlog',{listAllBlog:listAllBlog,countAllBlog:totalCount,countNowBlog:listAllBlog.length,msg:msg,moment:moment,currentPage: currentPage, totalPage: totalPage});

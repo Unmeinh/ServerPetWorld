@@ -1,43 +1,41 @@
-let mdProduct = require('../model/product.model');
+let mdpet = require('../model/pet.model');
 var moment = require('moment')
 
-exports.listProduct = async (req, res, next) => {
+exports.listpet = async (req, res, next) => {
     const perPage = 7;
     let msg = '';
-    let sortOption=null;
     let filterSearch = null;
+    let sortOption = null;
     let currentPage = parseInt(req.query.page) || 1;
 
     if (req.method == 'GET') {
         try {
             if (typeof req.query.filterSearch !== 'undefined' && req.query.filterSearch.trim() !== '') {
-                // Use a regex to match any username containing the search input character(s)
                 const searchTerm = req.query.filterSearch.trim();
-                filterSearch = { nameProduct: new RegExp(searchTerm, 'i') };
+                filterSearch = { namePet: new RegExp(searchTerm, 'i') };
             }
 
             if (typeof (req.query.sortOption) != 'undefined') {
-                sortOption = { nameProduct: req.query.sortOption };
+                sortOption = { namePet: req.query.sortOption };
             }
-     
-            const totalCount = await mdProduct.ProductModel.countDocuments(filterSearch);
+
+            const totalCount = await mdpet.PetModel.countDocuments(filterSearch);
             const totalPages = Math.ceil(totalCount / perPage);
 
             // Validate the current page number to stay within the correct range
             if (currentPage < 1) currentPage = 1;
             if (currentPage > totalPages) currentPage = totalPages;
-
             const skipCount = (currentPage - 1) * perPage;
-            let listProduct = await mdProduct.ProductModel.find(filterSearch).populate('idCategoryPr')
+            let listpet = await mdpet.PetModel.find(filterSearch).populate('idCategoryP').populate('idShop')
                 .sort(sortOption)
                 .skip(skipCount)
                 .limit(perPage);
 
             msg = 'Lấy danh sách  sản phẩm thành công';
-            return res.render('Product/listProduct', {
-                listProduct: listProduct,
-                countNowProduct: listProduct.length,
-                countAllProduct: totalCount,
+            return res.render('pet/listpet', {
+                listpet: listpet,
+                countNowpet: listpet.length,
+                countAllpet: totalCount,
                 msg: msg,
                 currentPage: currentPage,
                 totalPages: totalPages,
@@ -50,34 +48,34 @@ exports.listProduct = async (req, res, next) => {
     }
 
     // If no search results are found, render a message
-    res.render('Product/listProduct', {
+    res.render('pet/listpet', {
         msg: 'Không tìm thấy kết quả phù hợp',
         moment: moment
     });
 }
-exports.detailProduct = async (req, res, next) => {
+exports.detailpet = async (req, res, next) => {
     let msg = '';
-    let idPR = req.params.idPR;
-    let ObjProduct = await mdProduct.ProductModel.findById(idPR).populate('idCategoryPr');
-    res.render('Product/detailProduct', { ObjProduct: ObjProduct });
-    console.log("objjjjj" + ObjProduct);
+    let idP = req.params.idP;
+    let Objpet = await mdpet.PetModel.findById(idP).populate('idCategoryP').populate('idShop');
+    res.render('pet/detailpet', { Objpet: Objpet });
+    console.log("objjjjj" + Objpet);
 }
 
-exports.deleteProduct = async (req, res, next) => {
+exports.deletepet = async (req, res, next) => {
     let message = ""
-    let idPR = req.params.idPR;
-    let ObjProduct = await mdProduct.ProductModel.findById(idPR);
-    console.log("idPR  " + idPR);
+    let idP = req.params.idP;
+    let Objpet = await mdpet.PetModel.findById(idP);
+    console.log("idP  " + idP);
     if (req.method == 'POST') {
         try {
-            await mdProduct.ProductModel.findByIdAndDelete(idPR);
+            await mdpet.PetModel.findByIdAndDelete(idP);
             console.log("xoa thành công");
-            return res.redirect('/product');
+            return res.redirect('/pet');
         } catch (error) {
             console.log(error.message);
             console.log("falll");
         }
     }
 
-    res.render('Product/deleteProduct', { message: message, ObjProduct: ObjProduct });
+    res.render('pet/deletepet', { message: message, Objpet: Objpet });
 }
