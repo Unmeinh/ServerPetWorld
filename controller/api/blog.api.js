@@ -20,14 +20,14 @@ exports.listBlogFromIdUser = async (req, res, next) => {
     try {
         let listBlogUser = await mdBlog.BlogModel.find({ idUser: idUser }).populate('idUser');
         if (listBlogUser) {
-            return res.status(200).json({ success: true, data: listBlogUser, message: "Lấy danh sách blog thành công" });
+            return res.status(200).json({ success: true, data: listBlogUser, message: "Lấy danh sách bài viết thành công" });
         }
         else {
             return res.status(203).json({ success: false, data: [], message: "Không có dữ liệu blog" });
         }
 
     } catch (error) {
-        return res.status(500).json({ success: false, message: error.message });
+        return res.status(500).json({ success: false, message:'Lỗi: ' +error.message });
     }
 }
 exports.detailBlog = async (req, res, next) => {
@@ -41,8 +41,9 @@ exports.detailBlog = async (req, res, next) => {
 }
 
 exports.addBlog = async (req, res, next) => {
+    console.log('req... '+req.method);
     if (req.method == 'POST') {
-
+        console.log('==========');
         try {
             let newBlog = new mdBlog.BlogModel();
             newBlog.contentBlog = req.body.contentBlog;
@@ -60,12 +61,6 @@ exports.addBlog = async (req, res, next) => {
                 })
               }
            
-            // if (req.files && req.files.length > 0) {
-            //      newBlog.imageBlogs = req.files.map(file => "http://localhost:3000/upload/"  + file.originalname); // Lưu đường link + tên tệp vào mảng
-            // } else {
-            //     newBlog.imageBlogs = []; // Mảng rỗng nếu không có ảnh được tải lên
-            // }
-            // newBlog.imageBlogs = req.body.imageBlogs;
             newBlog.aspectRatio = req.body.aspectRatio;
             newBlog.idUser = req.body.idUser;
             newBlog.createdAt = new Date();
