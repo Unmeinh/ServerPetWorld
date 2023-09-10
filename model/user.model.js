@@ -15,14 +15,15 @@ let UserSchema = new db.mongoose.Schema(
         locationDelivery:{type:Array,required:false},
         avatarUser:{type:String,required:false},
         description:{type:String,required:false},
-        status:{type:String,required:false},
+        status:{type:Number,required:true},
         nickName:{type:String,required:false},
         blog:{type:Number,required:false},
         followers:{type:Number,required:false},
         following:{type:Number,required:false},
         createAt:{type:Date,required:false},
         myPet:{type:Array,required:false},
-        token:{type:String,required:true}
+        token:{type:String,required:true},
+        online:{type:Number,required:true}
     },
     {
         collection:'User'

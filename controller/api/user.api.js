@@ -28,11 +28,11 @@ exports.myDetail = async (req, res, next) => {
 
 }
 
-exports.getFromToken = async (req, res, next) => {
-  let token = req.params.token;
+exports.autoLogin = async (req, res, next) => {
+  let token= req.header('authorization').replace('Bearer ', '');
   try {
     let objU = await mdUser.UserModel.findById(token);
-    return res.status(200).json({ success: true, data: objU, message: "Lấy dữ liệu của người dùng khác thành công" });
+    return res.status(200).json({ success: true, data: objU, message: "Lấy dữ liệu của người dùng theo token thành công" });
   } catch (error) {
     return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
   }
@@ -56,6 +56,8 @@ exports.registUser = async (req, res, next) => {
       newUser.userName = req.body.userName;
       newUser.phoneNumber = req.body.phoneNumber;
       newUser.createAt = new Date();
+      newUser.followers=0;
+      newUser.following=0;
       newUser.avatarUser='https://i.pinimg.com/564x/0c/a6/ec/0ca6ecf671331f3ca3bbee9966359e32.jpg';
       const salt = await bcrypt.genSalt(10);
       newUser.passWord = await bcrypt.hash(req.body.passWord, salt);
