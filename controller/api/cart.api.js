@@ -1,7 +1,7 @@
 let mdCart = require('../../model/cart.model');
 exports.listCart  = async(req,res,next)=>{
     try {
-       
+        // console.log("req: "+req.user);
         let listCart = await mdCart.CartModel.find();
         if (listCart) {
             return res.status(200).json({ success: true, data: listCart, message: "Lấy danh sách giỏ hàng thành công" });
@@ -26,5 +26,22 @@ exports.listCartByIdUser  = async(req,res,next)=>{
         }
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+exports.addCart = async(req,res,next)=>{
+    if (req.method == 'POST') {
+
+        try {
+            let newCart = new mdCart.CartModel();
+            newCart.idUser = req.body.idUser;
+           
+            await newCart.save();
+            return res.status(201).json({ success: true, data: newCart, message: "Tạo giỏ hàng thành công" });
+        } catch (error) {
+            console.log(error.message);
+            let message = error.message;
+            return res.status(500).json({ success: false, data: {}, message: message });
+        }
     }
 }
