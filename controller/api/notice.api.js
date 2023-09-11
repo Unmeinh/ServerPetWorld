@@ -1,6 +1,20 @@
 let mdNoti = require('../../model/notice.model');
-let mdUser = require('../../model/user.model');
 
+exports.listAllNotice = async (req, res, next) => {
+
+  try {
+      let listAllNotice = await mdNoti.NoticeModel.find().populate('idUser');
+      if (listAllNotice) {
+          return res.status(200).json({ success: true, data: listAllNotice, message: "Lấy danh sách tất cả Notice thành công" });
+      }
+      else {
+          return res.status(203).json({ success: false, message: "Không có dữ liệu blog" });
+      }
+
+  } catch (error) {
+      return res.status(500).json({ success: false, message: error.message });
+  }
+}
 
 function validateNotificationData(notificationData) {
   const message = [];
