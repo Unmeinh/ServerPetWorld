@@ -19,6 +19,7 @@ const api_auth = async (req, res, next) => {
             //    throw new Error("Không xác định được người dùng")
             return res.status(401).json({ success: false, data: {}, message: 'Không xác định được người dùng!' });
         }
+        user.online==0;
         req.user = user
         req.token = token
         next();

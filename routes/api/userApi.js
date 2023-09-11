@@ -5,13 +5,14 @@ var mdJWT= require('../../middlewares/api.auth');
 
 router.get('/list/all',mdJWT.api_auth, UserApiCtrl.listUser);
 router.get('/myDetail',mdJWT.api_auth, UserApiCtrl.myDetail);
-router.get('/token/:token', UserApiCtrl.getFromToken);
+router.get('/autoLogin', UserApiCtrl.autoLogin);
 router.get('/userDetail/:idUser',mdJWT.api_auth, UserApiCtrl.detailUser);
 router.post('/register', UserApiCtrl.registUser);
-router.post('/login',mdJWT.api_auth, UserApiCtrl.loginUser);
+router.post('/login', UserApiCtrl.loginUser);
+/** bổ sung phần quên mạt khẩu sau */ 
 router.get('/logout', UserApiCtrl.logoutUser);
 router.put('/update/:idUser',mdJWT.api_auth, UserApiCtrl.editUser);
-router.delete('/delete/:idUser',UserApiCtrl.deleteUser);
+router.delete('/delete/:idUser',mdJWT.api_auth,UserApiCtrl.deleteUser);
 
 // router.post('/list/following/:idUser');
 // router.post('/list/follower/:idUser');
