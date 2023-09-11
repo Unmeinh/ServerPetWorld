@@ -6,7 +6,7 @@
         <div
           style="background-color: #F0F4F8;border-radius: 25px;align-items: center;display: flex;flex-direction: row;">
           <div style="width: 10%;">
-            <button type="submit" style="border: none;"><img src="http://localhost:3000/upload/iconFind.png"
+            <button type="submit" style="border: none;"><img src="/upload/iconFind.png"
                 style="width: 20px;height: 20px;"></button>
           </div>
           <div style="width: 90%;">
@@ -33,7 +33,7 @@
 
       </div>
       <div class="row col-2 ms-1" style="align-items: center;">
-        <a href="http://localhost:3000/user/add"
+        <a href="/user/add"
           style="text-decoration: none; background-color: #F582AE; border-radius: 6px;text-align: center;padding: 7px;">
           <span style="color: white;font-weight: bold;">Thêm người dùng</span>
         </a>
@@ -69,7 +69,7 @@
                       <p>Không có</p>
                       <% }%>
 
-                        <a href="http://localhost:3000/user/delete/<%= row._id %>"
+                        <a href="/user/delete/<%= row._id %>"
                           style="text-decoration: none;color: rgb(171, 169, 169);">Xóa</a>
                 </div>
 
@@ -88,7 +88,7 @@
           <td>
             <%= row.phoneNumber %>
           </td>
-          <td><a href="http://localhost:3000/user/detail/<%= row._id%>"
+          <td><a href="/user/detail/<%= row._id%>"
               style="background-color: #F582AE;padding: 8px;border-radius: 10px;text-decoration: none;color: white; font-weight: bold;">Chi
               tiết</a></td>
         </tr>
