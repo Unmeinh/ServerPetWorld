@@ -3,7 +3,7 @@ let bcrypt = require('bcrypt');
 exports.listUser = async (req, res, next) => {
 
   try {
-    let listUser = await mdUser.UserModel.find();
+    let listUser = await mdUser.UserModel.find().sort({createAt:-1});
     if (listUser) {
       return res.status(200).json({ success: true, data: listUser, message: "Lấy danh sách người dùng thành công" });
     }
@@ -28,16 +28,16 @@ exports.myDetail = async (req, res, next) => {
 
 }
 
-exports.autoLogin = async (req, res, next) => {
-  let token= req.header('authorization').replace('Bearer ', '');
-  try {
-    let objU = await mdUser.UserModel.findById(token);
-    return res.status(200).json({ success: true, data: objU, message: "Lấy dữ liệu của người dùng theo token thành công" });
-  } catch (error) {
-    return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
-  }
+// exports.autoLogin = async (req, res, next) => {
+  
+//   try {
+//     let objU = await mdUser.UserModel.findOne(token);
+//     return res.status(200).json({ success: true, data: objU, message: "Lấy dữ liệu của người dùng theo token thành công" });
+//   } catch (error) {
+//     return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+//   }
 
-}
+// }
 exports.detailUser = async (req, res, next) => {
   let idUser = req.params.idUser;
   try {
@@ -107,6 +107,7 @@ exports.logoutUser = async (req, res, next) => {
   }
 
 }
+
 exports.editUser = async (req, res, next) => {
   let idUser = req.params.idUser;
   if (req.method == 'PUT') {
@@ -120,11 +121,12 @@ exports.editUser = async (req, res, next) => {
     // }
   }
 }
+
 exports.deleteUser = async (req, res, next) => {
-  let idUser = req.params.idUser;
+  let idUser = req.user._id
   if (req.method == 'DELETE') {
     try {
-      await mdUser.UserModel.findByIdAndDelete({ _id: idUser });
+      await mdUser.UserModel.findByIdAndDelete(idUser);
       return res.status(203).json({ success: true,data:{}, message: "Tài khoản này đã không còn tồn tại" });
     } catch (error) {
       return res.status(500).json({ success: false, message: "Lỗi rồi: " + error.message });
