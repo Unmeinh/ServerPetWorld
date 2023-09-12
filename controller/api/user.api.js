@@ -3,7 +3,7 @@ let bcrypt = require('bcrypt');
 exports.listUser = async (req, res, next) => {
 
   try {
-    let listUser = await mdUser.UserModel.find().sort({createAt:-1});
+    let listUser = await mdUser.find().populate('idAccount');
     if (listUser) {
       return res.status(200).json({ success: true, data: listUser, message: "Lấy danh sách người dùng thành công" });
     }
@@ -28,16 +28,15 @@ exports.myDetail = async (req, res, next) => {
 
 }
 
-// exports.autoLogin = async (req, res, next) => {
-  
-//   try {
-//     let objU = await mdUser.UserModel.findOne(token);
-//     return res.status(200).json({ success: true, data: objU, message: "Lấy dữ liệu của người dùng theo token thành công" });
-//   } catch (error) {
-//     return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
-//   }
-
-// }
+exports.autoLogin = async (req, res, next) => {
+  try {
+    req.account.online = 0;
+    let objU = await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
+    return res.status(200).json({ success: true, data: objU, message: "Lấy dữ liệu của người dùng theo token thành công" });
+  } catch (error) {
+    return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+  }
+};
 exports.detailUser = async (req, res, next) => {
   let idUser = req.params.idUser;
   try {
@@ -105,8 +104,7 @@ exports.logoutUser = async (req, res, next) => {
     console.log(error);
     res.status(500).send(error.message)
   }
-
-}
+};
 
 exports.editUser = async (req, res, next) => {
   let idUser = req.params.idUser;
@@ -123,11 +121,15 @@ exports.editUser = async (req, res, next) => {
 }
 
 exports.deleteUser = async (req, res, next) => {
-  let idUser = req.user._id
-  if (req.method == 'DELETE') {
+  let idUser = req.params.idUser;
+  if (req.method == "DELETE") {
     try {
-      await mdUser.UserModel.findByIdAndDelete(idUser);
-      return res.status(203).json({ success: true,data:{}, message: "Tài khoản này đã không còn tồn tại" });
+      await mdUser.findByIdAndDelete({ _id: idUser });
+      return res.status(203).json({
+        success: true,
+        data: {},
+        message: "Tài khoản này đã không còn tồn tại",
+      });
     } catch (error) {
       return res.status(500).json({ success: false, message: "Lỗi rồi: " + error.message });
     }
