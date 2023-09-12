@@ -1,8 +1,6 @@
 let db = require('./db');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 require('dotenv').config();
-const string_word_secret = process.env.TOKEN_SEC_KEY
+
 let UserSchema = new db.mongoose.Schema(
     {
         idAccount: { type: db.mongoose.Schema.Types.ObjectId, required: false, ref: 'UserAccountModel' },
@@ -19,10 +17,10 @@ let UserSchema = new db.mongoose.Schema(
         myPet: { type: Array, required: false },
     },
     {
-        collection:'User'
+        collection: 'User'
     }
 )
 
-let UserModel = db.mongoose.model('UserModel',UserSchema);
+let UserModel = db.mongoose.model('UserModel', UserSchema);
 
-module.exports={UserModel};
+module.exports = { UserModel };
