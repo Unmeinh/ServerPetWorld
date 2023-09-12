@@ -1,32 +1,46 @@
-let mdUser = require('../../model/user.model');
-let bcrypt = require('bcrypt');
-exports.listUser = async (req, res, next) => {
+let mdUser = require("../../model/user.model").UserModel;
+let mdUserAccount = require("../../model/userAccount.model").UserAccountModel;
+let bcrypt = require("bcrypt");
+const nodemailer = require("nodemailer");
+const OTPEmailModel = require("../../model/otpemail.model").OTPEmailModel;
+const otpGenerator = require("otp-generator");
+let hashFunction = require("../../function/hashEmail");
 
+exports.listUser = async (req, res, next) => {
   try {
     let listUser = await mdUser.find().populate('idAccount');
     if (listUser) {
-      return res.status(200).json({ success: true, data: listUser, message: "Lấy danh sách người dùng thành công" });
+      return res.status(200).json({
+        success: true,
+        data: listUser,
+        message: "Lấy danh sách người dùng thành công",
+      });
+    } else {
+      return res
+        .status(203)
+        .json({ success: false, message: "Không có dữ liệu người dùng" });
     }
-    else {
-      return res.status(203).json({ success: false, message: "Không có dữ liệu người dùng" });
-    }
-
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
-}
-exports.myDetail = async (req, res, next) => {
- let token= req.header('authorization').replace('Bearer ', '');
- console.log("dtaat: "+token);
-  try {
-    let objU = await mdUser.UserModel.findOne({token:token});
-    console.log('objU: '+objU);
-    return res.status(200).json({ success: true, data: objU, message: "Lấy dữ liệu của bạn thành công" });
-  } catch (error) {
-    return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
-  }
+};
 
-}
+exports.myDetail = async (req, res, next) => {
+  let token = req.header("authorization").replace("Bearer ", "");
+  try {
+    let objA = await mdUserAccount.findOne({ token: token });
+    let objU = await mdUser.findOne({ _id: objA.idUser }).populate('idAccount');
+    return res.status(200).json({
+      success: true,
+      data: objU,
+      message: "Lấy dữ liệu của bạn thành công",
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, data: {}, message: "Lỗi: " + error.message });
+  }
+};
 
 exports.autoLogin = async (req, res, next) => {
   try {
@@ -41,79 +55,116 @@ exports.autoLogin = async (req, res, next) => {
 exports.detailUser = async (req, res, next) => {
   let idUser = req.params.idUser;
   try {
-    let objU = await mdUser.UserModel.findById(idUser);
-    return res.status(200).json({ success: true, data: objU, message: "Lấy dữ liệu của người dùng khác thành công" });
+    let objU = await mdUser.findById(idUser).populate('idAccount');
+    return res.status(200).json({
+      success: true,
+      data: objU,
+      message: "Lấy dữ liệu của người dùng khác thành công",
+    });
   } catch (error) {
-    return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    return res
+      .status(500)
+      .json({ success: false, data: {}, message: "Lỗi: " + error.message });
   }
+};
 
-}
-exports.registUser = async (req, res, next) => {
-  if (req.method == 'POST') {
-
+exports.registerUser = async (req, res, next) => {
+  if (req.method == "POST") {
     try {
-      let newUser = new mdUser.UserModel();
-      newUser.userName = req.body.userName;
-      newUser.phoneNumber = req.body.phoneNumber;
-      newUser.createAt = new Date();
-      newUser.followers=0;
-      newUser.following=0;
-      newUser.avatarUser='https://i.pinimg.com/564x/0c/a6/ec/0ca6ecf671331f3ca3bbee9966359e32.jpg';
+      let newUser = new mdUser();
+      let newAccount = new mdUserAccount();
+      newUser.idAccount = newAccount._id;
+      newAccount.idUser = newUser._id;
+      newAccount.userName = req.body.userName;
+      newAccount.phoneNumber = req.body.phoneNumber;
+      newAccount.isVerifyPhoneNumber = 0;
+      newAccount.createAt = new Date();
+      newAccount.online = 1;
+      newAccount.status = 0;
+      newAccount.emailAddress = "Chưa thiết lập";
       const salt = await bcrypt.genSalt(10);
-      newUser.passWord = await bcrypt.hash(req.body.passWord, salt);
-      await newUser.generateAuthToken();
-      
+      newAccount.passWord = await bcrypt.hash(req.body.passWord, salt);
+      await newAccount.generateAuthToken(newAccount);
+      newUser.fullName = req.body.fullName;
+      newUser.avatarUser =
+        "https://i.pinimg.com/564x/0c/a6/ec/0ca6ecf671331f3ca3bbee9966359e32.jpg";
+      newUser.nickName = "Chưa thiết lập";
+      newUser.description = "Chưa thiết lập";
+      newUser.birthday = new Date();
+      newUser.locationUser = "Chưa thiết lập";
+      newUser.locationDelivery = [];
+      newUser.blogs = 0;
+      newUser.followers = 0;
+      newUser.followings = 0;
+      newUser.myPet = [];
       await newUser.save();
-      return res.status(201).json({ success: true, data: newUser, message: "Đăng kí tài khoản thành công" });
+      await newAccount.save();
+      return res.status(201).json({
+        success: true,
+        data: newUser,
+        message: "Đăng kí tài khoản thành công",
+      });
     } catch (error) {
-      return res.status(500).json({ success: false, data: {}, message:  error.message });
-
+      return res
+        .status(500)
+        .json({ success: false, data: {}, message: error.message });
     }
   }
-}
-exports.loginUser = async (req, res, next) => {
-  if (req.method == 'POST') {
-    try {
-      let objU = await mdUser.UserModel.findByCredentials(req.body.userName, req.body.passWord);
-      console.log('objU login '+objU);
-      if (!objU) {
-        return res.status(401).json({ success: false, message: 'Sai thông tin đăng nhập' })
-      }
-      // const token = await objU.generateAuthToken();
-      return res.status(200).json({ success: true, data: {}, token: objU.token, message: "Đăng nhập thành công" });
+};
 
+exports.loginUser = async (req, res, next) => {
+  if (req.method == "POST") {
+    try {
+      let objU = await mdUserAccount.findByCredentials(
+        req.body.userName,
+        req.body.passWord
+      );
+      if (!objU) {
+        return res
+          .status(401)
+          .json({ success: false, message: "Sai thông tin đăng nhập!" });
+      }
+      objU.online = 0;
+      await mdUserAccount.findByIdAndUpdate(objU._id, objU)
+      return res.status(200).json({
+        success: true,
+        data: {},
+        token: objU.token,
+        message: "Đăng nhập thành công.",
+      });
     } catch (error) {
-      console.error('err: ' + error.message);
- 
+      console.error("err: " + error.message);
+
       return res.status(500).json({
         success: false,
         data: {},
-        message:  error.message,
+        message: error.message,
       });
     }
   }
-}
+};
 
 exports.logoutUser = async (req, res, next) => {
   try {
     console.log(req.user);
 
     req.user.token = null; //xóa token
-    await req.user.save()
-    return res.status(200).json({ success: true, data: {}, message: 'Đăng xuất thành công' });
+    await req.user.save();
+    return res
+      .status(200)
+      .json({ success: true, data: {}, message: "Đăng xuất thành công" });
   } catch (error) {
     console.log(error);
-    res.status(500).send(error.message)
+    res.status(500).send(error.message);
   }
 };
 
 exports.editUser = async (req, res, next) => {
   let idUser = req.params.idUser;
-  if (req.method == 'PUT') {
+  if (req.method == "PUT") {
     // try {
-    //   let newUser = new mdUser.UserModel(req.body);
-
-    //   await mdUser.UserModel.findByIdAndUpdate(idUser, newUser);
+    //   let newUser = new mdUser(req.body);
+    //   await mdUser.findByIdAndUpdate(idUser, newUser);
     //   return res.status(200).json({ success: true, msg: "Cập nhật thành công" });
     // } catch (error) {
     //   return res.status(500).json({ success: false, msg: "Lỗi: " + error.message });
@@ -132,7 +183,9 @@ exports.deleteUser = async (req, res, next) => {
         message: "Tài khoản này đã không còn tồn tại",
       });
     } catch (error) {
-      return res.status(500).json({ success: false, message: "Lỗi rồi: " + error.message });
+      return res
+        .status(500)
+        .json({ success: false, message: "Lỗi rồi: " + error.message });
     }
   }
 };
