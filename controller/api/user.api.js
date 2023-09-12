@@ -37,6 +37,7 @@ exports.autoLogin = async (req, res, next) => {
     return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
   }
 };
+
 exports.detailUser = async (req, res, next) => {
   let idUser = req.params.idUser;
   try {
@@ -118,7 +119,7 @@ exports.editUser = async (req, res, next) => {
     //   return res.status(500).json({ success: false, msg: "Lỗi: " + error.message });
     // }
   }
-}
+};
 
 exports.deleteUser = async (req, res, next) => {
   let idUser = req.params.idUser;
@@ -134,4 +135,291 @@ exports.deleteUser = async (req, res, next) => {
       return res.status(500).json({ success: false, message: "Lỗi rồi: " + error.message });
     }
   }
+};
+
+exports.updatePassword = async (req, res, next) => {
+  if (req.method == "PUT") {
+    var body = req.body;
+    if (body.newPassword) {
+      req.account.passWord = body.newPassword;
+      try {
+        await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
+        return res.status(500).json({ success: true, data: {}, message: "Đổi mật khẩu thành công. " });
+      } catch (error) {
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+      }
+    } else {
+      return res.status(500).json({ success: false, data: {}, message: "Đổi mật khẩu thất bại, không nhận được dữ liệu mật khẩu mới! " });
+    }
+  }
+};
+
+exports.changePassword = async (req, res, next) => {
+  if (req.method == "PUT") {
+    var body = req.body;
+    if (body.typeUpdate && body.valueUpdate && body.newPassword) {
+      try {
+        let account = {};
+        if (body.typeUpdate == 'email') {
+          account = await mdUserAccount.findOne({ emailAddress: body.valueUpdate });
+        } else {
+          account = await mdUserAccount.findOne({ phoneNumber: body.valueUpdate });
+        }
+        const salt = await bcrypt.genSalt(10);
+        account.passWord = await bcrypt.hash(body.newPassword, salt);
+        await mdUserAccount.findByIdAndUpdate(account._id, account);
+        return res.status(200).json({ success: true, data: {}, message: "Đổi mật khẩu thành công." });
+      } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+      }
+    } else {
+      return res.status(500).json({ success: false, data: {}, message: "Đổi mật khẩu thất bại, không nhận được dữ liệu mật khẩu mới! " });
+    }
+  }
+};
+
+exports.sendVerifyEmail = async (req, res, next) => {
+  if (req.method == "POST") {
+    if (req.body.email != undefined) {
+      var data = await mdUserAccount.find({ emailAddress: req.body.email });
+      if (data.length > 0) {
+        if (data[0].isVerifyEmail == 1) {
+          let encode = hashFunction.encodeEmail(req.body.email);
+          let linkVerify = "https://73a8-2402-800-61c4-c98-5b7-54b0-1d1b-346e.ngrok-free.app/account/verifyEmail/" + encode;
+          await sendEmailLink(req.body.email, linkVerify, res);
+        } else {
+          return res
+            .status(200)
+            .json({ success: false, data: {}, message: "Email của bạn đã được xác minh!" });
+        }
+      } else {
+        return res
+          .status(500)
+          .json({ success: false, data: {}, message: "Không tìm thấy tài khoản có email trên!" });
+      }
+    }
+  }
+};
+
+exports.sendResetPassword = async (req, res, next) => {
+  if (req.method == "POST") {
+    if (req.body.email != undefined) {
+      var data = await mdUserAccount.find({ emailAddress: req.body.email });
+      if (data.length > 0) {
+        if (data[0].isVerifyEmail == 0) {
+          var data = await OTPEmailModel.find({ email: req.body.email });
+          var newOTP = otpGenerator.generate(6, {
+            upperCaseAlphabets: false,
+            lowerCaseAlphabets: false,
+            specialChars: false,
+          });
+          await sendEmailOTP(req.body.email, newOTP, data, res);
+        } else {
+          return res
+            .status(500)
+            .json({ success: false, data: {}, message: "Email của bạn chưa được xác minh!" });
+        }
+      } else {
+        return res
+          .status(500)
+          .json({ success: false, data: {}, message: "Không tìm thấy tài khoản có email trên!" });
+      }
+    }
+  }
+};
+
+exports.verifyResetCode = async (req, res, next) => {
+  if (req.method == "POST") {
+    if (req.body.email != undefined && req.body.otp != undefined) {
+      var data = await OTPEmailModel.find({ email: req.body.email });
+      if (data.length > 0) {
+        if (data[0].code == Number(req.body.otp)) {
+          var timeBetween =
+            (new Date().getTime() - new Date(data[0].createAt).getTime()) /
+            1000;
+          // console.log(date + "s");
+          // console.log((date / 60) + "min");
+          // console.log(new Date() - new Date(data[0].createAt));
+          if (timeBetween / 60 >= 5) {
+            return res.status(500).json({
+              success: false,
+              data: {},
+              message: "Mã xác minh quá hạn!",
+            });
+          } else {
+            await OTPEmailModel.findByIdAndDelete(data[0]._id);
+            return res.status(200).json({
+              success: true,
+              data: {},
+              message: "Xác minh thành công!",
+            });
+          }
+        } else {
+          return res
+            .status(500)
+            .json({ success: false, data: {}, message: "Mã xác minh sai!" });
+        }
+      } else {
+        return res.status(500).json({
+          success: false,
+          data: {},
+          message: "Mã xác minh sai hoặc không tồn tại trong cơ sở dữ liệu",
+        });
+      }
+    } else {
+      return res.status(500).json({
+        success: false,
+        data: {},
+        message: "OTP sai hoặc không tồn tại trong cơ sở dữ liệu",
+      });
+    }
+  }
+};
+
+async function sendEmailLink(email, link, res) {
+  var transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: "petworld.server.email@gmail.com",
+      pass: "rrcn tlju vwab vgts",
+      // pass: 'Lorem1000.-.. --- .-. . -- .---- ----- ----- -----'
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
+  var content = "";
+  content += `
+      <div style="padding: 7px; background-color: #003375; border-radius: 7px;">
+          <div style="padding: 10px; background-color: white; border-radius: 7px;">
+              <p>Xin chào!</p>
+              <p>Bấm vào link dưới đây để xác minh email của bạn.</p>
+              <p>${link}</p>
+              <p>Nếu bạn không yêu cầu xác minh email nữa, bạn có thể bỏ qua email này.</p>
+              <p>Cảm ơn bạn!</p>
+              <img src="cid:logo1" alt="logo-petworld.png"
+                  width="200" height="auto" />
+          </div>
+      </div>
+  `;
+  var mainOptions = {
+    from: {
+      name: "noreply@petworld-server.serverapp.com",
+      address: "petworld.server.email@gmail.com",
+    },
+    to: email,
+    subject: "Xác minh email của bạn cho Petworld",
+    text:
+      "Xin chào! Bấm vào link dưới đây để xác minh email của bạn. " +
+      link,
+    html: content,
+    attachments: [
+      {
+        filename: "logo.jpg",
+        path: `public/upload/logo-darktheme.png`,
+        cid: "logo1",
+      },
+    ],
+  };
+  transporter.sendMail(mainOptions, async function (err, info) {
+    if (err) {
+      console.log(err);
+      return res
+        .status(500)
+        .json({ success: false, data: {}, message: "Gửi link xác minh thất bại!" });
+    } else {
+      console.log("Message sent: " + info.response);
+      return res
+        .status(200)
+        .json({ success: true, data: {}, message: "Gửi link xác minh thành công." });
+    }
+  });
 }
+
+async function sendEmailOTP(email, otp, data, res) {
+  var transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: "petworld.server.email@gmail.com",
+      pass: "rrcn tlju vwab vgts",
+      // pass: 'Lorem1000.-.. --- .-. . -- .---- ----- ----- -----'
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
+  var content = "";
+  content += `
+      <div style="padding: 7px; background-color: #003375; border-radius: 7px;">
+          <div style="padding: 10px; background-color: white; border-radius: 7px;">
+              <p>Xin chào!</p>
+              <p>Mã xác thực đặt lại mật khẩu của bạn là ${otp}.</p>
+              <p>Để bảo mật an toàn, Bạn tuyệt đối không cung cấp mã xác thực này cho bất kỳ ai.</p>
+              <p>Mã xác thực có hiệu lực trong vòng 5 phút. Nếu hết thời gian cho yêu cầu này, Xin vui lòng thực hiện lại yêu cầu để nhận được mã xác thực mới.</p>
+              <p>Nếu bạn không yêu cầu đặt lại mật khẩu nữa, bạn có thể bỏ qua email này.</p>
+              <p>Cảm ơn bạn!</p>
+              <img src="cid:logo1" alt="logo-petworld.png"
+                  width="200" height="auto" />
+          </div>
+      </div>
+  `;
+  var mainOptions = {
+    from: {
+      name: "noreply@petworld-server.serverapp.com",
+      address: "petworld.server.email@gmail.com",
+    },
+    to: email,
+    subject: "Đặt lại mật khẩu của bạn cho Petworld",
+    text:
+      "Xin chào! Mã xác thực đặt lại mật khẩu của bạn là " +
+      otp +
+      ". Để bảo mật an toàn, Bạn tuyệt đối không cung cấp mã xác thực này cho bất kỳ ai.",
+    html: content,
+    attachments: [
+      {
+        filename: "logo.jpg",
+        path: `public/upload/logo-darktheme.png`,
+        cid: "logo1",
+      },
+    ],
+  };
+  transporter.sendMail(mainOptions, async function (err, info) {
+    if (err) {
+      console.log(err);
+      return res
+        .status(500)
+        .json({ success: false, data: {}, message: "Gửi mã xác minh thất bại!" });
+    } else {
+      console.log("Message sent: " + info.response);
+      if (data.length > 0) {
+        await OTPEmailModel.findByIdAndUpdate(data[0]._id, {
+          _id: data[0]._id,
+          email: data[0].email,
+          code: otp,
+          createAt: new Date(),
+        });
+        return res.status(200).json({
+          success: true,
+          data: {},
+          message: "Gửi mã xác minh thành công.",
+        });
+      } else {
+        let newOTPEmail = new OTPEmailModel();
+        newOTPEmail.email = email;
+        newOTPEmail.code = otp;
+        newOTPEmail.createAt = new Date();
+
+        await newOTPEmail.save();
+        return res.status(200).json({
+          success: true,
+          data: {},
+          message: "Gửi mã xác minh thành công.",
+        });
+      }
+    }
+  });
