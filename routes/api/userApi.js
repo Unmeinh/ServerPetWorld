@@ -20,5 +20,4 @@ router.post('/verifyResetPasswordCode', UserApiCtrl.verifyResetCode);
 
 // router.post('/list/following/:idUser');
 // router.post('/list/follower/:idUser');
-
 module.exports = router;

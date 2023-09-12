@@ -19,10 +19,12 @@ var shopRouter = require('./routes/shop');
 var userApiRouter = require('./routes/api/userApi');
 var blogApiRouter = require('./routes/api/blogApi');
 var itemCartApiRouter = require('./routes/api/itemCartApi');
+var cartApiRouter = require('./routes/api/cartApi');
 var productApiRouter = require('./routes/api/productApi');
 var shopApiRouter = require('./routes/api/shopApi');
 var CatAllApiRouter = require('./routes/api/categoryAll');
 var petApiRouter = require('./routes/api/petApi');
+var followRouter = require('./routes/api/followApi');
 
 var app = express();
 
@@ -56,10 +58,12 @@ app.use('/shop', shopRouter);
 app.use('/api/user', userApiRouter);
 app.use('/api/blog', blogApiRouter);
 app.use('/api/item-carts', itemCartApiRouter);
+app.use('/api/cart', cartApiRouter);
 app.use('/api/product', productApiRouter);
 app.use('/api/shop', shopApiRouter);
 app.use('/api/category', CatAllApiRouter);
 app.use('/api/pet', petApiRouter);
+app.use('/api/follow', followRouter);
 
 // catch 404 and forward to error handler
 

@@ -1,17 +1,12 @@
 var express = require('express');
 var ItemCartApiCtrl = require('../../controller/api/itemCart.api');
+var mdJWT= require('../../middlewares/api.auth');
 var router = express.Router();
 
-router.get('/', ItemCartApiCtrl.listItemCart);
+router.post('/insert',mdJWT.api_auth, ItemCartApiCtrl.addItemCart);
 
-router.get('/user/:idUser', ItemCartApiCtrl.listItemCartFromIdUser);
+router.put('/update/:idItemCart',mdJWT.api_auth, ItemCartApiCtrl.editItemCart);
 
-router.get('/detail/:idItemCart', ItemCartApiCtrl.detailItemCart);
-
-router.post('/add', ItemCartApiCtrl.addItemCart);
-
-router.put('/edit/:idItemCart', ItemCartApiCtrl.editItemCart);
-
-router.delete('/delete/:idItemCart',ItemCartApiCtrl.deleteItemCart);
+router.delete('/delete/:idItemCart',mdJWT.api_auth,ItemCartApiCtrl.deleteItemCart);
 
 module.exports = router;
