@@ -18,13 +18,14 @@ exports.listProductFromIdShop = async (req, res, next) => {
 
         let listProduct = await mdProduct.ProductModel.find({ idShop: idShop }).populate('idCategoryPr').populate('idShop');
         if (listProduct) {
-            return res.status(200).json({ success: true, data: listProduct, message: 'Lấy danh sách sản phẩm theo thành công' });
+            return res.status(200).json({ success: true, data: listProduct, message: 'Lấy danh sách sản phẩm theo shop thành công' });
         }
         else {
             return res.status(500).json({ success: false, data: [], message: 'Không lấy được danh sách sản phẩm' });
         }
     }
 }
+
 exports.detailProduct = async (req, res, next) => {
     let idPR = req.params.idPR;
     try {
@@ -48,7 +49,7 @@ exports.addProduct = async (req, res, next) => {
         ) {
             return res.status(400).json({ success: false, data: [], message: 'Vui lòng không để trống ô nhập' });
         }
-
+        
         let newObj = new mdProduct.ProductModel();
         newObj.nameProduct = req.body.nameProduct;
         newObj.priceProduct = req.body.priceProduct;
