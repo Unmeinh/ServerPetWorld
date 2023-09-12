@@ -423,3 +423,4 @@ async function sendEmailOTP(email, otp, data, res) {
       }
     }
   });
+}
