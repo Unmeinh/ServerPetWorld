@@ -14,8 +14,8 @@ router.get('/detail/:idBlog',mdJWT.api_auth, BlogApiCtrl.detailBlog);
 
 router.post('/insert',mdJWT.api_auth,uploader.any(),BlogApiCtrl.addBlog);
 
-router.put('/update/:idBlog', BlogApiCtrl.editBlog);
+router.put('/update/:idBlog',mdJWT.api_auth, BlogApiCtrl.editBlog);
 
-router.delete('/delete/:idBlog',BlogApiCtrl.deleteBlog);
+router.delete('/delete/:idBlog',mdJWT.api_auth,BlogApiCtrl.deleteBlog);
 
 module.exports = router;
