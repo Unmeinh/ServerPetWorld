@@ -50,8 +50,6 @@
         <th style="border-radius: 0 6px 6px 0;"></th>
       </tr>
 
-
-
       <% listUser.forEach((row)=>{ %>
         <tr>
           <td style="display: flex;flex-direction: row;">
@@ -72,14 +70,13 @@
                         <a href="/user/delete/<%= row._id %>"
                           style="text-decoration: none;color: rgb(171, 169, 169);">Xóa</a>
                 </div>
-
-
-
           </td>
           <td>
-
-            <%= row.email %>
-
+            <% if(typeof(row.email)!='undefined' ) { %>
+              <%= row.email %>
+                <%} else {%>
+                  <p>Không có</p>
+                  <%}%>
           </td>
           <td>
 

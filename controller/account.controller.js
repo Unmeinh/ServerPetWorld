@@ -1,5 +1,8 @@
 let mdAdmin = require('../model/admin.model');
+let mdUserAccount = require('../model/userAccount.model').UserAccountModel;
 var bcrypt = require('bcrypt');
+let hashFunction = require('../function/hashEmail');
+
 exports.login = async (req, res, next) => {
     let msg = '';
     if (req.method == 'POST') {
@@ -19,12 +22,40 @@ exports.login = async (req, res, next) => {
                 msg = 'Không tồn tại tài khoản này';
             }
         } catch (error) {
-            msg=error.message
+            msg = error.message
         }
 
     }
     res.render('Account/loginAdmin', { msg: msg })
 }
-// exports.detail=async()=>{
-//     res.render('')
-// }
+
+exports.verifyEmail = async (req, res, next) => {
+    if (req.method == 'POST') {
+        let decode = hashFunction.decodeEmail(req.params.encodeEmail);
+        try {
+            var data = await mdUserAccount.findOne({ emailAddress: decode });
+            if (data != null) {
+                data.isVerifyEmail = 0;
+                await mdUserAccount.findByIdAndUpdate(data._id, data);
+                return res
+                    .status(200)
+                    .json({ success: true, data: {}, message: "Xác minh email thành công" });
+            } else {
+                return res
+                    .status(500)
+                    .json({ success: false, data: {}, message: "Xác minh email thất bại" });
+            }
+        } catch (error) {
+            console.log(error);
+            return res
+                .status(500)
+                .json({ success: false, data: {}, message: "Xác minh email thất bại" });
+        }
+    }
+    res.render('account/verifyEmail')
+}
+
+exports.verifyResult = async (req, res, next) => {
+    let isVerify = req.query.isVerify;
+    res.render('account/verifyResult', { isVerify: isVerify })
+}

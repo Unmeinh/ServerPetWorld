@@ -3,9 +3,9 @@ let fs = require('fs');
 exports.listAllBlog = async (req, res, next) => {
 
     try {
-        let listAllBlog = await mdBlog.BlogModel.find().populate('idUser');
+        let listAllBlog = await mdBlog.BlogModel.find().populate('idUser').sort({createdAt:-1});
         if (listAllBlog) {
-            return res.status(200).json({ success: true, data: listAllBlog, message: "Lấy danh sách tất cả blog thành công" });
+            return res.status(200).json({ success: true, data: listAllBlog, message: "Lấy danh sách tất cả bài viết thành công" });
         }
         else {
             return res.status(203).json({ success: false, message: "Không có dữ liệu blog" });
