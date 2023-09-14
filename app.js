@@ -25,7 +25,7 @@ var shopApiRouter = require('./routes/api/shopApi');
 var CatAllApiRouter = require('./routes/api/categoryAll');
 var petApiRouter = require('./routes/api/petApi');
 var savenoticeRouter= require('./routes/api/noticeApi');
-var followRouter = require('./routes/api/followApi');
+
 var app = express();
 
 // view engine setup
@@ -64,7 +64,7 @@ app.use('/api/shop', shopApiRouter);
 app.use('/api/category', CatAllApiRouter);
 app.use('/api/pet', petApiRouter);
 app.use('/api/notice',savenoticeRouter)
-app.use('/api/follow', followRouter);
+
 
 // catch 404 and forward to error handler
 
