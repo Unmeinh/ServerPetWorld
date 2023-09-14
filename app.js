@@ -24,6 +24,7 @@ var productApiRouter = require('./routes/api/productApi');
 var shopApiRouter = require('./routes/api/shopApi');
 var CatAllApiRouter = require('./routes/api/categoryAll');
 var petApiRouter = require('./routes/api/petApi');
+var followRouter = require('./routes/api/followApi');
 
 var followRouter = require('./routes/api/followApi');
 
@@ -40,6 +41,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/function', express.static('function'))
 
 app.use(session({
   secret: process.env.KEY_LOGIN_ADMIN,
@@ -66,6 +68,7 @@ app.use('/api/product', productApiRouter);
 app.use('/api/shop', shopApiRouter);
 app.use('/api/category', CatAllApiRouter);
 app.use('/api/pet', petApiRouter);
+app.use('/api/follow', followRouter);
 
 app.use('/api/follow', followRouter);
 
