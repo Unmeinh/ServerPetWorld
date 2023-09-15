@@ -17,7 +17,7 @@ const api_auth = async (req, res, next) => {
         console.log(data);
         let account = await mdUserAccount.findOne({ idUser: data._id, token: token })
         if (!account) {
-            return res.status(401).json({ success: false, data: {}, message: 'Không xác định được người dùng!' });
+            return res.status(401).json({ success: false, data: {}, message: 'Không xác định được tài khoản!' });
         }
         let user = await mdUser.findById(account.idUser);
         if (!user) {
