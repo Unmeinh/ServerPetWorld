@@ -6,10 +6,12 @@ var router = express.Router();
 
 router.get('/list/blog/:idBlog', CommentApiCtrl.listCommentFromIdBlog);
 
-router.post('/insert', CommentApiCtrl.addComment);
+router.post('/insert',mdJWT.api_auth, CommentApiCtrl.addComment);
 
 router.put('/update/:idComment', CommentApiCtrl.editComment);
 
 router.delete('/delete/:idComment', CommentApiCtrl.deleteComment);
+//comment in comment
+router.post('/insert/blog/comment/:idBlog',mdJWT.api_auth, CommentApiCtrl.addCommentInComment);
 
 module.exports = router;
