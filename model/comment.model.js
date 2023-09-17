@@ -5,7 +5,14 @@ let CommentSchema = new db.mongoose.Schema(
         idUser: { type: db.mongoose.Schema.Types.ObjectId, ref: 'UserModel' },
         content: { type: String, required: true },
         createdAt: { type: Date, required: true },
-        interacts: { type: Array, required:false}
+        interacts: [
+            {
+                idBlog:{type: db.mongoose.Schema.Types.ObjectId, ref: 'BlogModel'},
+                idUser: { type: db.mongoose.Schema.Types.ObjectId, ref: 'UserModel'},
+                interact:{type:String,required:true}
+            }
+           
+        ]
     },
     {
         collection: 'Comment'
