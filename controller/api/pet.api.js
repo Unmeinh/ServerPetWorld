@@ -2,17 +2,43 @@ let mdPet = require('../../model/pet.model');
 const fs = require("fs");
 
 exports.listpet = async (req, res, next) => {
-    if (req.method == 'GET') {
-        let listpet = await mdPet.PetModel.find().populate('idCategoryP').populate('idShop');
-        if (listpet) {
-            return res.status(200).json({ success: true, data: listpet, message: 'Lấy danh sách thú cưng thành công' });
-        }
-        else {
-            return res.status(500).json({ success: false, data: [], message: 'Không lấy được danh sách thú cưng' });
-        }
+    if (req.method !== 'GET') {
+        return res.status(400).json({ success: false, message: 'Method not allowed' });
     }
 
-}
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const totalCount = await mdPet.PetModel.countDocuments();
+        const totalPage = Math.ceil(totalCount / limit);
+        const startIndex = (page - 1) * limit;
+        const pageRegex = /^[1-9]+$/;
+        if (page <= 0) {
+            return res.status(400).json({ success: false, message: 'Số trang phải lớn hơn 0' });
+        }
+        if (page > totalPage) {
+            return res.status(404).json({ success: false, message: 'Số trang không tồn tại!' });
+        }
+        if (!pageRegex.test(page)) {
+            return res.status(500).json({ success: false, message: "Số trang phải là số nguyên!" });
+        }
+        const listpet = await mdPet.PetModel
+            .find()
+            .populate('idCategoryP')
+            .populate('idShop')
+            .limit(limit)
+            .skip(startIndex)
+            .exec();
+
+        if (listpet.length > 0) {
+            return res.status(200).json({ success: true, data: listpet, message: 'Lấy danh sách sản phẩm thành công' });
+        } else {
+            return res.status(404).json({ success: false, message: 'Không có sản phẩm nào' });
+        }
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
 
 exports.listPetFromIdShop = async (req, res, next) => {
     let idShop = req.params.idShop;
@@ -106,9 +132,6 @@ exports.addpet = async (req, res, next) => {
                 msg = 'Số lượng Pet phải nhập số!';
                 return res.status(500).json({ success: false, data: {}, message: msg });
             }
-            
-
-            
             else if (error.message.match(new RegExp('.+`detailPet` is require+.'))) {
                 msg = 'Chi tiết Pet đang trống!';
             }
