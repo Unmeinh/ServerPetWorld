@@ -29,6 +29,7 @@ var followRouter = require('./routes/api/followApi');
 var followRouter = require('./routes/api/followApi');
 var savenoticeRouter= require('./routes/api/noticeApi');
 var commentRouter= require('./routes/api/commentApi');
+var favoriteRouter = require('./routes/api/myFavoriteProductApi');
 
 var app = express();
 
@@ -71,9 +72,9 @@ app.use('/api/pet', petApiRouter);
 app.use('/api/follow', followRouter);
 
 app.use('/api/follow', followRouter);
-
 app.use('/api/notice',savenoticeRouter)
 app.use('/api/comment',commentRouter)
+app.use('/api/favorite',favoriteRouter)
 
 // catch 404 and forward to error handler
 
