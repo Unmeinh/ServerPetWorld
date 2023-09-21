@@ -10,6 +10,8 @@ router.get('/list/all',mdJWT.api_auth, BlogApiCtrl.listAllBlog);
 
 router.get('/list/user/:idUser',mdJWT.api_auth, BlogApiCtrl.listBlogFromIdUser);
 
+router.get('/list/profile',mdJWT.api_auth, BlogApiCtrl.listMyBlog);
+
 router.get('/detail/:idBlog',mdJWT.api_auth, BlogApiCtrl.detailBlog);
 
 router.post('/insert',mdJWT.api_auth,uploader.any(),BlogApiCtrl.addBlog);
@@ -18,4 +20,5 @@ router.put('/update/:idBlog',mdJWT.api_auth, BlogApiCtrl.editBlog);
 
 router.delete('/delete/:idBlog',mdJWT.api_auth,BlogApiCtrl.deleteBlog);
 
+router.patch('/interact/:idBlog',mdJWT.api_auth, BlogApiCtrl.interactPost);
 module.exports = router;

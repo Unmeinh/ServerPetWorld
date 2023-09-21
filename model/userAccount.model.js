@@ -13,7 +13,7 @@ let UserAccountSchema = new db.mongoose.Schema(
         isVerifyEmail: { type: Number, required: false },
         phoneNumber: { type: Number, required: true, index: { unique: true } },
         isVerifyPhoneNumber: { type: Number, required: false },
-        status: { type: String, required: false },
+        status: { type: Number, required: false },
         createAt: { type: Date, required: false },
         token: { type: String, required: true },
         online: { type: Number, required: false },
@@ -25,7 +25,7 @@ let UserAccountSchema = new db.mongoose.Schema(
 
 UserAccountSchema.methods.generateAuthToken = async function (account) {
     // console.log("account " + account);
-    const token = jwt.sign({ _id: account._id, userName: account.userName }, string_word_secret);
+    const token = jwt.sign({ _id: account.idUser, userName: account.userName }, string_word_secret);
     account.token = token;
     return token;
 }

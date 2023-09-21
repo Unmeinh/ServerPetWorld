@@ -26,6 +26,10 @@ var CatAllApiRouter = require('./routes/api/categoryAll');
 var petApiRouter = require('./routes/api/petApi');
 var followRouter = require('./routes/api/followApi');
 
+var followRouter = require('./routes/api/followApi');
+var savenoticeRouter= require('./routes/api/noticeApi');
+var commentRouter= require('./routes/api/commentApi');
+
 var app = express();
 
 // view engine setup
@@ -54,6 +58,7 @@ app.use('/product', productRouter);
 app.use('/category-product', categoryProduct);
 app.use('/pet', petRouter);
 app.use('/shop', shopRouter);
+
 //api
 app.use('/api/user', userApiRouter);
 app.use('/api/blog', blogApiRouter);
@@ -64,6 +69,11 @@ app.use('/api/shop', shopApiRouter);
 app.use('/api/category', CatAllApiRouter);
 app.use('/api/pet', petApiRouter);
 app.use('/api/follow', followRouter);
+
+app.use('/api/follow', followRouter);
+
+app.use('/api/notice',savenoticeRouter)
+app.use('/api/comment',commentRouter)
 
 // catch 404 and forward to error handler
 
