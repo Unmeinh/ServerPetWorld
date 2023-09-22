@@ -27,8 +27,6 @@ var petApiRouter = require('./routes/api/petApi');
 var followRouter = require('./routes/api/followApi');
 var billProductRouter = require('./routes/api/billProductApi');
 
-
-
 var app = express();
 
 // view engine setup
@@ -68,7 +66,6 @@ app.use('/api/category', CatAllApiRouter);
 app.use('/api/pet', petApiRouter);
 app.use('/api/follow', followRouter);
 app.use('/api/billProduct', billProductRouter);
-
 
 // catch 404 and forward to error handler
 
