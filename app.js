@@ -69,7 +69,7 @@ app.use('/api/pet', petApiRouter);
 app.use('/api/follow', followRouter);
 app.use('/api/notice',savenoticeRouter)
 app.use('/api/comment',commentRouter)
-app.use('/api/billProduct', billProductRouter);
+app.use('/api/bill-product', billProductRouter);
 
 // catch 404 and forward to error handler
 
