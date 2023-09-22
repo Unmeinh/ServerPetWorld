@@ -28,4 +28,4 @@ let billProductSchema = new db.mongoose.Schema(
 );
 
 let billProductModel = db.mongoose.model("billProductModel", billProductSchema);
-
+module.exports = { billProductModel };
