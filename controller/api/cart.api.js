@@ -79,11 +79,11 @@ exports.editCart = async (req, res, next) => {
             case "Increment":
               return (item.amount += 1);
             case "Decrement":
-                if(item.amount > 1){
-                    return (item.amount -= 1);
-                }else{
-                    listCartUser.carts.splice(index, 1);
-                }
+              if (item.amount > 1) {
+                return (item.amount -= 1);
+              } else {
+                listCartUser.carts.splice(index, 1);
+              }
             default:
               return item;
           }

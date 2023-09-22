@@ -25,8 +25,6 @@ var shopApiRouter = require('./routes/api/shopApi');
 var CatAllApiRouter = require('./routes/api/categoryAll');
 var petApiRouter = require('./routes/api/petApi');
 var followRouter = require('./routes/api/followApi');
-
-var followRouter = require('./routes/api/followApi');
 var savenoticeRouter= require('./routes/api/noticeApi');
 var commentRouter= require('./routes/api/commentApi');
 
@@ -69,9 +67,6 @@ app.use('/api/shop', shopApiRouter);
 app.use('/api/category', CatAllApiRouter);
 app.use('/api/pet', petApiRouter);
 app.use('/api/follow', followRouter);
-
-app.use('/api/follow', followRouter);
-
 app.use('/api/notice',savenoticeRouter)
 app.use('/api/comment',commentRouter)
 
