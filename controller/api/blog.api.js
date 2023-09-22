@@ -3,39 +3,50 @@ let fs = require('fs');
 exports.listAllBlog = async (req, res, next) => {
 
     let list = await mdBlog.BlogModel.find();
-    let page = parseInt(req.query.page);
+    let page = req.query.page;
     let limit = 10;
     let startIndex = (page - 1) * limit;
     let endIndex = page * limit;
     let totalCount = await mdBlog.BlogModel.countDocuments();
     let totalPage = Math.ceil(totalCount / limit);
+    let listAllBlog = [];
 
     if (endIndex < list.length) {
         page = page + 1;
     }
-   
+
     if (startIndex > 0) {
         page = page - 1;
     }
-    
+
     try {
         /**Validate */
-        if(isNaN(page)){
-            return res.status(500).json({ success: false, message: "Số trang Page phải là số nguyên!" });
-        }
+        if (req.query.page == 'undefined' || req.query.page == '') {
+            listAllBlog = await mdBlog.BlogModel.find().populate('idUser').sort({ createdAt: -1 });
+        } else {
+            if (page <= 0) {
+                return res.status(500).json({ success: false, message: "Số trang phải lớn hơn 0" });
+            }
+            if (isNaN(page)) {
+                return res.status(500).json({ success: false, message: "Số trang Page phải là số nguyên!" });
+            }
 
-        if (page > totalPage) {
-            return res.status(500).json({ success: false, message: "Số page không tồn tại!" });
-        }
+            listAllBlog = await mdBlog.BlogModel.find().populate('idUser').sort({ createdAt: -1 }).limit(limit).skip(startIndex).exec();
 
-        let listAllBlog = await mdBlog.BlogModel.find().populate('idUser').sort({ createdAt: -1 }).limit(limit).skip(startIndex).exec();
-        
+        }
+        /** check chung 2 trường hợp */
         if (listAllBlog.length > 0) {
-            return res.status(200).json({ success: true, data: listAllBlog, message: "Lấy danh sách bài viết" + page + "thành công" });
+    
+            const maxInteract = listAllBlog.reduce(function(prev, current) {
+                return (prev && prev.interacts.length > current.interacts.length) ? prev : current
+            })
+
+            return res.status(200).json({ success: true, data: [maxInteract,listAllBlog], message: "Lấy danh sách bài viết" + page + "thành công" });
         }
         else {
             return res.status(203).json({ success: false, message: "Bạn đã xem hết bài viết rồi" });
-        } 
+        }
+
 
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
@@ -44,7 +55,7 @@ exports.listAllBlog = async (req, res, next) => {
 
 exports.listBlogFromIdUser = async (req, res, next) => {
     let list = await mdBlog.BlogModel.find();
-    let page = parseInt(req.query.page);
+    let page = req.query.page;
     let limit = 10;
     let startIndex = (page - 1) * limit;
     let endIndex = page * limit;
@@ -54,16 +65,16 @@ exports.listBlogFromIdUser = async (req, res, next) => {
     if (endIndex < list.length) {
         page = page + 1;
     }
-   
+
     if (startIndex > 0) {
         page = page - 1;
     }
-    
+
     let idUser = req.params.idUser;
 
     try {
-         /**Validate */
-         if(isNaN(page)){
+        /**Validate */
+        if (isNaN(page)) {
             return res.status(500).json({ success: false, message: "Số trang Page phải là số nguyên!" });
         }
 
@@ -85,7 +96,7 @@ exports.listBlogFromIdUser = async (req, res, next) => {
 }
 exports.listMyBlog = async (req, res, next) => {
     let list = await mdBlog.BlogModel.find();
-    let page = parseInt(req.query.page);
+    let page = req.query.page;
     let limit = 10;
     let startIndex = (page - 1) * limit;
     let endIndex = page * limit;
@@ -95,16 +106,16 @@ exports.listMyBlog = async (req, res, next) => {
     if (endIndex < list.length) {
         page = page + 1;
     }
-   
+
     if (startIndex > 0) {
         page = page - 1;
     }
-    
+
     let idMyUser = req.user._id;
     console.log("idMyUser: " + idMyUser);
     try {
-         /**Validate */
-         if(isNaN(page)){
+        /**Validate */
+        if (isNaN(page)) {
             return res.status(500).json({ success: false, message: "Số trang Page phải là số nguyên!" });
         }
 
