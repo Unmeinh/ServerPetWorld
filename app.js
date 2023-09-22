@@ -56,8 +56,6 @@ app.use('/account',accountRouter );
 app.use('/product', productRouter);
 app.use('/category-product', categoryProduct);
 app.use('/pet', petRouter);
-app.use('/api/notice',savenoticeRouter)
-app.use('/api/comment',commentRouter)
 app.use('/shop', shopRouter);
 
 //api
@@ -70,6 +68,8 @@ app.use('/api/shop', shopApiRouter);
 app.use('/api/category', CatAllApiRouter);
 app.use('/api/pet', petApiRouter);
 app.use('/api/follow', followRouter);
+app.use('/api/notice',savenoticeRouter)
+app.use('/api/comment',commentRouter)
 app.use('/api/billProduct', billProductRouter);
 
 // catch 404 and forward to error handler
