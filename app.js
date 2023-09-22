@@ -57,7 +57,6 @@ app.use('/product', productRouter);
 app.use('/category-product', categoryProduct);
 app.use('/pet', petRouter);
 app.use('/shop', shopRouter);
-
 //api
 app.use('/api/user', userApiRouter);
 app.use('/api/blog', blogApiRouter);
