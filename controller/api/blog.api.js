@@ -1,5 +1,8 @@
 let mdBlog = require('../../model/blog.model');
 let fs = require('fs');
+let { decodeFromAscii } = require("../../function/hashFunction");
+const { onUploadImages } = require('../../function/uploadImage');
+
 exports.listAllBlog = async (req, res, next) => {
     let list = await mdBlog.BlogModel.find();
     let page = req.query.page;
