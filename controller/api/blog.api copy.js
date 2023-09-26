@@ -199,12 +199,17 @@ exports.editBlog = async (req, res, next) => {
                 })
             }
 
+            // if (req.files && req.files.length > 0) {
+            //      newBlog.imageBlogs = req.files.map(file => "http://localhost:3000/upload/"  + file.originalname); // Lưu đường link + tên tệp vào mảng
+            // } else {
+            //     newBlog.imageBlogs = []; // Mảng rỗng nếu không có ảnh được tải lên
+            // }
             newBlog.imageBlogs = req.body.imageBlogs;
-            // newBlog.aspectRatio = req.body.aspectRatio;
-            newBlog.idUser = req.user._id;
+            newBlog.aspectRatio = req.body.aspectRatio;
+            newBlog.idUser = req.body.idUser;
             newBlog.createdAt = new Date();
-            // newBlog.comments = 0;
-            // newBlog.shares = 0;
+            newBlog.comments = 0;
+            newBlog.shares = 0;
 
             await mdBlog.BlogModel.findByIdAndUpdate(idBlog, newBlog);
             return res.status(200).json({ success: true, data: newBlog, message: "Đã sửa bài viết" });
@@ -231,33 +236,6 @@ exports.deleteBlog = async (req, res, next) => {
             return res.status(203).json({ success: true, data: {}, message: "Tài khoản này không còn tồn tại" });
         } catch (error) {
             return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
-        }
-    }
-}
-exports.interactPost = async (req, res, next) => {
-    let idBlog = req.params.idBlog;
-
-    if (req.method == 'PATCH') {
-
-        try {
-            let listBlog = await mdBlog.BlogModel.find({ _id: idBlog }).populate('idUser');
-            if (listBlog.length > 0) {
-                var objBlog = listBlog[0]
-                var objInteract = objBlog.interacts
-                if (objInteract.includes(req.user._id)) {
-                    objInteract.splice(objInteract.indexOf(req.user._id), 1)
-
-                } else {
-                    objInteract.push(req.user._id)
-                }
-
-                await mdBlog.BlogModel.findByIdAndUpdate({ _id: idBlog }, objBlog);
-            }
-
-            return res.status(200).json({ success: true, data: objBlog, message: "Đã tương tác với bài viết" });
-        } catch (error) {
-            return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
-
         }
     }
 }
