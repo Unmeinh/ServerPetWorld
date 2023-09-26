@@ -1,9 +1,12 @@
 let mdBlog = require('../../model/blog.model');
 let fs = require('fs');
+let { decodeFromAscii } = require("../../function/hashFunction");
+const { onUploadImages } = require('../../function/uploadImage');
+
 exports.listAllBlog = async (req, res, next) => {
 
     try {
-        let listAllBlog = await mdBlog.BlogModel.find().populate('idUser').sort({createdAt:-1});
+        let listAllBlog = await mdBlog.BlogModel.find().populate('idUser').sort({ createdAt: -1 });
         if (listAllBlog) {
             return res.status(200).json({ success: true, data: listAllBlog, message: "Lấy danh sách tất cả bài viết thành công" });
         }
@@ -16,18 +19,21 @@ exports.listAllBlog = async (req, res, next) => {
     }
 }
 exports.listBlogFromIdUser = async (req, res, next) => {
-    let idUser = req.params.idUser;
+    if (!req.params.idUser) {
+        return res.status(500).json({ success: false, message: 'Lỗi dữ liệu tải lên! ' });
+    }
+    let idUser = decodeFromAscii(req.params.idUser);
     try {
         let listBlogUser = await mdBlog.BlogModel.find({ idUser: idUser }).populate('idUser');
         if (listBlogUser) {
-            return res.status(200).json({ success: true, data: listBlogUser, message: "Lấy danh sách bài viết thành công" });
+            return res.status(200).json({ success: true, data: listBlogUser, message: "" });
         }
         else {
             return res.status(203).json({ success: false, data: [], message: "Không có dữ liệu blog" });
         }
 
     } catch (error) {
-        return res.status(500).json({ success: false, message:'Lỗi: ' +error.message });
+        return res.status(500).json({ success: false, message: 'Lỗi: ' + error.message });
     }
 }
 exports.detailBlog = async (req, res, next) => {
@@ -41,31 +47,18 @@ exports.detailBlog = async (req, res, next) => {
 }
 
 exports.addBlog = async (req, res, next) => {
-    console.log('req... '+req.method);
     if (req.method == 'POST') {
-        console.log('==========');
         try {
             let newBlog = new mdBlog.BlogModel();
             newBlog.contentBlog = req.body.contentBlog;
             newBlog.contentFont = req.body.contentFont;
-
-            if (req.files != undefined) {
-                console.log("check "+req.files);
-                req.files.map((file, index, arr) => {
-                    console.log("check2 "+file);
-                  if (file != {}) {
-                    fs.renameSync(file.path, './public/upload/' + file.originalname);
-                    let imagePath = 'http://localhost:3000/upload/' + file.originalname;
-                    newBlog.imageBlogs.push(imagePath);
-                  }
-                })
-              }
-           
+            newBlog.imageBlogs = await onUploadImages(req.files, 'blog')
             newBlog.aspectRatio = req.body.aspectRatio;
             newBlog.idUser = req.body.idUser;
             newBlog.createdAt = new Date();
-            newBlog.comments=0;
-            newBlog.shares=0;
+            newBlog.comments = 0;
+            newBlog.shares = 0;
+            newBlog.interacts = [];
 
             await newBlog.save();
             return res.status(201).json({ success: true, data: newBlog, message: "Đã đăng bài viết mới" });
@@ -84,23 +77,23 @@ exports.addBlog = async (req, res, next) => {
     }
 }
 exports.editBlog = async (req, res, next) => {
-   
+
     let idBlog = req.params.idBlog;
     if (req.method == 'PUT') {
         try {
-           let newBlog = new mdBlog.BlogModel();
+            let newBlog = new mdBlog.BlogModel();
             newBlog.contentBlog = req.body.contentBlog;
             newBlog.contentFont = req.body.contentFont;
 
             if (req.files != undefined) {
                 req.files.map((file, index, arr) => {
-                  if (file != {}) {
-                    fs.renameSync(file.path, '../../public/upload/' + file.originalname);
-                    let imagePath = 'http://localhost:3000/upload/' + file.originalname;
-                    newBlog.imageBlogs.push(imagePath);
-                  }
+                    if (file != {}) {
+                        fs.renameSync(file.path, '../../public/upload/' + file.originalname);
+                        let imagePath = 'http://localhost:3000/upload/' + file.originalname;
+                        newBlog.imageBlogs.push(imagePath);
+                    }
                 })
-              }
+            }
 
             // if (req.files && req.files.length > 0) {
             //      newBlog.imageBlogs = req.files.map(file => "http://localhost:3000/upload/"  + file.originalname); // Lưu đường link + tên tệp vào mảng
@@ -111,8 +104,8 @@ exports.editBlog = async (req, res, next) => {
             newBlog.aspectRatio = req.body.aspectRatio;
             newBlog.idUser = req.body.idUser;
             newBlog.createdAt = new Date();
-            newBlog.comments=0;
-            newBlog.shares=0;
+            newBlog.comments = 0;
+            newBlog.shares = 0;
 
             await mdBlog.BlogModel.findByIdAndUpdate(idBlog, newBlog);
             return res.status(200).json({ success: true, data: newBlog, message: "Đã sửa bài viết" });
