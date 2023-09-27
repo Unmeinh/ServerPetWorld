@@ -29,7 +29,10 @@ var followRouter = require('./routes/api/followApi');
 var followRouter = require('./routes/api/followApi');
 var savenoticeRouter= require('./routes/api/noticeApi');
 var commentRouter= require('./routes/api/commentApi');
+var billProductRouter = require('./routes/api/billProductApi');
 var favoriteRouter = require('./routes/api/myFavoriteProductApi');
+var voucherShopRouter = require('./routes/api/voucherShopApi');
+var voucherServerRouter = require('./routes/api/voucherServerApi');
 
 var app = express();
 
@@ -71,10 +74,16 @@ app.use('/api/category', CatAllApiRouter);
 app.use('/api/pet', petApiRouter);
 app.use('/api/follow', followRouter);
 
-app.use('/api/follow', followRouter);
 app.use('/api/notice',savenoticeRouter)
 app.use('/api/comment',commentRouter)
-app.use('/api/favorite',favoriteRouter)
+app.use('/api/bill-product', billProductRouter);
+
+app.use('/api/follow', followRouter);
+app.use('/api/notice',savenoticeRouter);
+app.use('/api/comment',commentRouter);
+app.use('/api/favorite',favoriteRouter);
+app.use('/api/voucherShop',voucherShopRouter);
+app.use('/api/voucherServer',voucherServerRouter);
 
 // catch 404 and forward to error handler
 
