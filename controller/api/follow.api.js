@@ -1,10 +1,11 @@
 let mdFollow = require('../../model/follows.model').FollowsModel;
+let mdUser = require('../../model/user.model').UserModel;
 
 exports.myFollowing = async (req, res, next) => {
     try {
-        let listFollow = await mdFollow.find({ idUser: req.user._id }).populate('arr_following.idFollowing');
+        let listFollow = await mdUser.find({ _id: req.user._id }).populate('followings.idFollow');
         if (listFollow) {
-            return res.status(200).json({ success: true, data: listFollow[0].arr_following, type: "following", message: "Lấy danh sách đang theo dõi thành công." });
+            return res.status(200).json({ success: true, data: listFollow[0].followings, type: "following", message: "Lấy danh sách đang theo dõi thành công." });
         } else {
             return res.status(500).json({ success: false, data: [], message: "Không có người đang theo dõi!" });
         }
@@ -17,13 +18,15 @@ exports.myFollowing = async (req, res, next) => {
 
 exports.myFollower = async (req, res, next) => {
     try {
-        let listFollow = await mdFollow.find({ idUser: req.user._id }).populate('arr_follower.idFollower');
+        let listFollow = await mdUser.find({ _id: req.user._id }).populate('followers.idFollow');
         if (listFollow) {
-            return res.status(200).json({ success: true, data: listFollow[0].arr_follower, type: "follower", message: "Lấy danh sách người theo dõi thành công." });
+            let listWithCheck = await getListFollowWithCheck(listFollow[0].followers, req.user._id, "follower")
+            if (listWithCheck) {
+                return res.status(200).json({ success: true, data: listWithCheck, type: "follower", message: "Lấy danh sách người theo dõi thành công." });
+            }
         } else {
             return res.status(500).json({ success: false, data: [], message: "Không có người theo dõi!" });
         }
-
     } catch (error) {
         console.log(error);
         return res.status(500).json({ success: false, message: error.message });
@@ -34,14 +37,14 @@ exports.userFollowing = async (req, res, next) => {
     try {
         let listFollow = [];
         if (req.params.idUser) {
-            listFollow = await mdFollow.find({ idUser: req.params.idUser }).populate('arr_following.idFollowing');
+            listFollow = await mdUser.find({ _id: req.params.idUser }).populate('followings.idFollow');
         } else {
             return res.status(500).json({ success: false, data: [], message: "Lấy dữ liệu thất bại!" });
         }
         if (listFollow) {
-            let listWithCheck = await getListFollowWithCheck(listFollow[0].arr_following, req.user._id, "following")
+            let listWithCheck = await getListFollowWithCheck(listFollow[0].followings, req.user._id, "following")
             if (listWithCheck) {
-                return res.status(200).json({ success: true, data: listWithCheck, type: "follower", message: "Lấy danh sách người theo dõi thành công." });
+                return res.status(200).json({ success: true, data: listWithCheck, type: "following", message: "Lấy danh sách người theo dõi thành công." });
             }
         } else {
             return res.status(500).json({ success: false, data: [], message: "Không có người đang theo dõi!" });
@@ -57,12 +60,12 @@ exports.userFollower = async (req, res, next) => {
     try {
         let listFollow = [];
         if (req.params.idUser) {
-            listFollow = await mdFollow.find({ idUser: req.params.idUser }).populate('arr_follower.idFollower');
+            listFollow = await mdUser.find({ _id: req.params.idUser }).populate('followers.idFollow');
         } else {
             return res.status(500).json({ success: false, data: [], message: "Lấy dữ liệu thất bại!" });
         }
         if (listFollow) {
-            let listWithCheck = await getListFollowWithCheck(listFollow[0].arr_follower, req.user._id, "follower")
+            let listWithCheck = await getListFollowWithCheck(listFollow[0].followers, req.user._id, "follower")
             if (listWithCheck) {
                 return res.status(200).json({ success: true, data: listWithCheck, type: "follower", message: "Lấy danh sách người theo dõi thành công." });
             }
@@ -77,45 +80,35 @@ exports.userFollower = async (req, res, next) => {
 
 exports.insertFollow = async (req, res, next) => {
     try {
-        if (req.body.idFollow) {
-            let listFollowing = await mdFollow.find({ idUser: req.user._id });
-            let listFollower = await mdFollow.find({ idUser: req.body.idFollow });
-            if (listFollowing && listFollower) {
-                if (listFollowing.length == 0) {
-                    let newFler = new mdFollow();
-                    newFler.idUser = req.user._id;
-                    newFler.arr_following = [{ idFollowing: req.body.idFollow }];
-                    await newFler.save();
+        let { idFollow } = req.body;
+        if (idFollow) {
+            if (String(idFollow) == String(req.user._id)) {
+                return res.status(201).json({ success: false, data: {}, message: "Bạn không thể theo dõi chính mình!" });
+            }
+            let listUser = await mdUser.find({ _id: idFollow });
+            if (listUser) {
+                let isFlwing = req.user.followings.find((follow) => String(follow.idFollow) == String(idFollow));
+                if (isFlwing) {
+                    req.user.followings.splice(req.user.followings.indexOf(isFlwing), 1);
+                    await mdUser.findByIdAndUpdate(req.user._id, req.user);
                 } else {
-                    let fl = listFollowing[0];
-                    let isFl = fl.arr_following.find((element) => String(element.idFollowing) == String(req.body.idFollow));
-                    if (isFl) {
-                        fl.arr_following.splice(fl.arr_following.indexOf(isFl), 1);
-                        await mdFollow.findByIdAndUpdate(fl._id, fl);
-                    } else {
-                        fl.arr_following.push({ idFollowing: req.body.idFollow });
-                        await mdFollow.findByIdAndUpdate(fl._id, fl);
-                    }
+                    req.user.followings.push({ idFollow: idFollow });
+                    await mdUser.findByIdAndUpdate(req.user._id, req.user);
                 }
-                if (listFollower.length == 0) {
-                    let newFling = new mdFollow();
-                    newFling.idUser = req.body.idFollow;
-                    newFling.arr_follower = [{ idFollower: req.user._id }];
-                    await newFling.save();
+
+                let userFollow = listUser[0];
+                let isFlwer = userFollow.followers.find((follow) => String(follow.idFollow) == String(req.user._id));
+                if (isFlwer) {
+                    userFollow.followers.splice(userFollow.followers.indexOf(isFlwer), 1);
+                    await mdUser.findByIdAndUpdate(userFollow._id, userFollow);
                 } else {
-                    let fl = listFollower[0];
-                    let isFl = fl.arr_follower.find((element) => String(element.idFollower) == String(req.user._id));
-                    if (isFl) {
-                        fl.arr_follower.splice(fl.arr_follower.indexOf(isFl), 1);
-                        await mdFollow.findByIdAndUpdate(fl._id, fl);
-                    } else {
-                        fl.arr_follower.push({ idFollower: req.user._id });
-                        await mdFollow.findByIdAndUpdate(fl._id, fl);
-                    }
+                    userFollow.followers.push({ idFollow: req.user._id });
+                    await mdUser.findByIdAndUpdate(userFollow._id, userFollow);
                 }
-                return res.status(200).json({ success: true, data: [listFollowing, listFollower], message: "Lấy danh sách người theo dõi thành công." });
+
+                return res.status(201).json({ success: true, data: [req.user, userFollow], message: "Lấy danh sách người theo dõi thành công." });
             } else {
-                return res.status(500).json({ success: false, data: [], message: "Lỗi truy vấn cơ sở dữ liệu!" });
+                return res.status(500).json({ success: false, data: {}, message: "Lỗi truy vấn cơ sở dữ liệu!" });
             }
         } else {
             return res.status(500).json({ success: false, message: "Không đọc được dữ liệu tải lên!" });
@@ -132,28 +125,14 @@ async function getListFollowWithCheck(follows, myId, caseFl) {
     // console.time("test_timer");
     let followsWithCheck = []; // Danh sách theo dõi của người khác
     for (let i = 0; i < follows.length; i++) {
-        const follow = follows[i];
-        let check, idFollow;
-        if (caseFl == "follower") {
-            idFollow = follow.idFollower;
-            check = await checkIsFollowedUser(idFollow, myId)
-        } else {
-            idFollow = follow.idFollowing;
-            check = await checkIsFollowedUser(idFollow, myId)
-        }
+        let follow = follows[i].idFollow;
+        let check = await checkIsFollowedUser(follow, myId)
 
-        if (check != undefined && idFollow != undefined) {
-            if (caseFl == "follower") {
-                followsWithCheck.push({
-                    idFollower: idFollow,
-                    isFollowed: check
-                })
-            } else {
-                followsWithCheck.push({
-                    idFollowing: idFollow,
-                    isFollowed: check
-                })
-            }
+        if (check != undefined) {
+            followsWithCheck.push({
+                idFollow: follow,
+                isFollowed: check
+            })
         }
     }
     // console.timeEnd("test_timer");
@@ -164,20 +143,17 @@ async function getListFollowWithCheck(follows, myId, caseFl) {
     // console.log("Total time check taken : " + timeTaken + " milliseconds");
 }
 
-async function checkIsFollowedUser(idFollow, myId) {
-    if (idFollow == myId) {
-        return false; // Người theo dõi là mình
+async function checkIsFollowedUser(follow, myId) {
+    if (String(follow._id) == String(myId)) {
+        return -1; // Người theo dõi là mình
     }
-    //Lấy danh sách theo dõi của từng người
-    let listFollow = await mdFollow.find({ idUser: idFollow });
-    if (listFollow) {
-        let userFollow = listFollow[0];
+    if (follow.followers.length > 0) {
         //Kiểm tra xem có trùng id vs mình không
-        let isFollow = userFollow.arr_follower.find(follower => String(follower.idFollower) == String(myId));
+        let isFollow = follow.followers.find(follower => String(follower.idFollow) == String(myId));
         if (isFollow) {
-            return true;
+            return 0;
         } else {
-            return false;
+            return 1;
         }
     }
 }
