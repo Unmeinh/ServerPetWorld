@@ -1,5 +1,8 @@
 let mdBlog = require('../../model/blog.model');
 let fs = require('fs');
+let { decodeFromAscii } = require("../../function/hashFunction");
+const { onUploadImages } = require('../../function/uploadImage');
+
 exports.listAllBlog = async (req, res, next) => {
     let list = await mdBlog.BlogModel.find();
     let page = req.query.page;
@@ -148,31 +151,18 @@ exports.detailBlog = async (req, res, next) => {
 }
 
 exports.addBlog = async (req, res, next) => {
-    console.log('req... ' + req.method);
     if (req.method == 'POST') {
-        console.log('==========');
         try {
             let newBlog = new mdBlog.BlogModel();
             newBlog.contentBlog = req.body.contentBlog;
             newBlog.contentFont = req.body.contentFont;
-
-            if (req.files != undefined) {
-                console.log("check " + req.files);
-                req.files.map((file, index, arr) => {
-                    console.log("check2 " + file);
-                    if (file != {}) {
-                        fs.renameSync(file.path, './public/upload/' + file.originalname);
-                        let imagePath = 'http://localhost:3000/upload/' + file.originalname;
-                        newBlog.imageBlogs.push(imagePath);
-                    }
-                })
-            }
-
+            newBlog.imageBlogs = await onUploadImages(req.files, 'blog')
             newBlog.aspectRatio = req.body.aspectRatio;
-            newBlog.idUser = req.user._id;
+            newBlog.idUser = req.body.idUser;
             newBlog.createdAt = new Date();
             newBlog.comments = 0;
             newBlog.shares = 0;
+            newBlog.interacts = [];
 
             await newBlog.save();
             return res.status(201).json({ success: true, data: newBlog, message: "Đã đăng bài viết mới" });
