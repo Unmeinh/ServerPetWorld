@@ -78,6 +78,10 @@ app.use('/api/notice',savenoticeRouter)
 app.use('/api/comment',commentRouter)
 app.use('/api/bill-product', billProductRouter);
 
+app.use('/api/notice',savenoticeRouter)
+app.use('/api/comment',commentRouter)
+app.use('/api/bill-product', billProductRouter);
+
 app.use('/api/follow', followRouter);
 app.use('/api/notice',savenoticeRouter);
 app.use('/api/comment',commentRouter);
