@@ -12,8 +12,16 @@ let UserSchema = new db.mongoose.Schema(
         description: { type: String, required: false },
         nickName: { type: String, required: false },
         blogs: { type: Number, required: false },
-        followers: { type: Number, required: false },
-        followings: { type: Number, required: false },
+        followers: [
+            {
+                idFollow: { type: db.mongoose.Schema.Types.ObjectId, required: true, ref: 'UserModel' }
+            },
+        ],
+        followings: [
+            {
+                idFollow: { type: db.mongoose.Schema.Types.ObjectId, required: true, ref: 'UserModel' }
+            },
+        ],
         myPet: { type: Array, required: false },
     },
     {
