@@ -72,22 +72,14 @@ exports.editCart = async (req, res, next) => {
   const { idProduct, action } = req.body;
   if (req.method == "POST") {
     try {
-      let listCartUser = await mdCart.CartModel.findOne({ idUser: _id }).populate('carts.idProduct');
-      listCartUser.carts.map((item, index) => {
-        if (item.idProduct == idProduct) {
-          switch (action) {
-            case "Increment":
-              return (item.amount += 1);
-            case "Decrement":
-              if (item.amount > 1) {
-                return (item.amount -= 1);
-              } else {
-                listCartUser.carts.splice(index, 1);
-              }
-            default:
-              return item;
-          }
-        }
+      let listCartUser = await mdCart.CartModel.findOne({ idUser: _id });
+      listCartUser.carts.map(itemOld => {
+        data.map(itemNew =>{
+            if(itemNew.idProduct._id === itemOld.idProduct.toString()){
+              itemOld.isSelected = itemNew.isSelected
+              itemOld.amount = itemNew.amount
+            }
+        })
       });
       await mdCart.CartModel.findByIdAndUpdate(
         { _id: listCartUser._id },
