@@ -1,7 +1,7 @@
 let mdAdmin = require('../model/admin.model');
 let mdUserAccount = require('../model/userAccount.model').UserAccountModel;
 var bcrypt = require('bcrypt');
-let hashFunction = require('../function/hashEmail');
+let { decodeFromSha256 } = require('../function/hashFunction');
 
 exports.login = async (req, res, next) => {
     let msg = '';
@@ -31,7 +31,7 @@ exports.login = async (req, res, next) => {
 
 exports.verifyEmail = async (req, res, next) => {
     if (req.method == 'POST') {
-        let decode = hashFunction.decodeEmail(req.params.encodeEmail);
+        let decode = decodeFromSha256(req.params.encodeToSha256);
         try {
             var data = await mdUserAccount.findOne({ emailAddress: decode });
             if (data != null) {

@@ -22,9 +22,9 @@ exports.listAdmin = async (req, res, next) => {
             const totalPage = Math.ceil(totalCount / perPage);
             if (currentPage < 1) currentPage = 1;
             if (currentPage > totalPage) currentPage = totalPage;
-            let skipCount = (currentPage - 1) * perPage;
+            let skipCount = (perPage * currentPage) -perPage;
 
-            let listAdmin = await mdAdmin.AdminModel.find(filterSearch).sort(sortOption).skip(skipCount).limit(perPage);
+            let listAdmin = await mdAdmin.AdminModel.find(filterSearch).sort(sortOption).skip(skipCount).limit(perPage).exec();
           
             // msg = 'Lấy danh sách admin thành công';
             return res.render('Admin/listAdmin', { listAdmin: listAdmin, countAllAdmin: totalCount, countNowAdmin: listAdmin.length, msg: msg, currentPage: currentPage, totalPage: totalPage });
@@ -49,10 +49,16 @@ exports.addAdmin = async (req, res, next) => {
             msg = "Mật khẩu không trùng khớp";
             return res.render('Admin/addAdmin', { msg: msg });
         }
+        if(req.body.passWord=='')
+        {
+            msg="Mật khẩu đang trống";
+            return res.render('Admin/addAdmin',{msg:msg})
+        }
         let newObj = new mdAdmin.AdminModel();
         newObj.fullName = req.body.fullName;
         newObj.userName = req.body.userName;
         newObj.email = req.body.email;
+        newObj.avatarAdmin = 'https://i.pinimg.com/564x/2e/60/80/2e60808c2b288e393128ebed7ee988b6.jpg';
 
         let salt = await bcrypt.genSalt(10);
         newObj.passWord = await bcrypt.hash(req.body.passWord, salt);

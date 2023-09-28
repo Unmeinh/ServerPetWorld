@@ -4,7 +4,8 @@ let bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const OTPEmailModel = require("../../model/otpemail.model").OTPEmailModel;
 const otpGenerator = require("otp-generator");
-let hashFunction = require("../../function/hashEmail");
+let { encodeToSha256 } = require("../../function/hashFunction");
+const { onUploadImages } = require("../../function/uploadImage");
 
 exports.listUser = async (req, res, next) => {
   try {
@@ -26,13 +27,10 @@ exports.listUser = async (req, res, next) => {
 };
 
 exports.myDetail = async (req, res, next) => {
-  let token = req.header("authorization").replace("Bearer ", "");
   try {
-    let objA = await mdUserAccount.findOne({ token: token });
-    let objU = await mdUser.findOne({ _id: objA.idUser }).populate('idAccount');
     return res.status(200).json({
       success: true,
-      data: objU,
+      data: req.user,
       message: "Lấy dữ liệu của bạn thành công",
     });
   } catch (error) {
@@ -46,7 +44,20 @@ exports.autoLogin = async (req, res, next) => {
   try {
     req.account.online = 0;
     let objU = await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
-    return res.status(200).json({ success: true, data: objU, message: "Lấy dữ liệu của người dùng theo token thành công" });
+    return res.status(200).json({ success: true, data: objU, message: "Đăng nhập thành công." });
+  } catch (error) {
+    return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+  }
+};
+
+exports.checkPhoneNumber = async (req, res, next) => {
+  try {
+    let objU = await mdUserAccount.findOne({ phoneNumber: req.body.phoneNumber });
+    if (!objU) {
+      return res.status(201).json({ success: true, data: objU, message: "Số điện thoại chưa được đăng ký." });
+    } else {
+      return res.status(201).json({ success: false, data: objU, message: "Số điện thoại đã được đăng ký." });
+    }
   } catch (error) {
     return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
   }
@@ -121,12 +132,13 @@ exports.loginUser = async (req, res, next) => {
       );
       if (!objU) {
         return res
-          .status(401)
+          .status(201)
           .json({ success: false, message: "Sai thông tin đăng nhập!" });
       }
       objU.online = 0;
-      await mdUserAccount.findByIdAndUpdate(objU._id, objU)
-      return res.status(200).json({
+      await mdUserAccount.findByIdAndUpdate(objU._id, objU);
+      console.log("token: " + objU.token,);
+      return res.status(201).json({
         success: true,
         data: {},
         token: objU.token,
@@ -159,16 +171,109 @@ exports.logoutUser = async (req, res, next) => {
   }
 };
 
-exports.editUser = async (req, res, next) => {
-  let idUser = req.params.idUser;
+exports.updateUser = async (req, res, next) => {
   if (req.method == "PUT") {
-    // try {
-    //   let newUser = new mdUser(req.body);
-    //   await mdUser.findByIdAndUpdate(idUser, newUser);
-    //   return res.status(200).json({ success: true, msg: "Cập nhật thành công" });
-    // } catch (error) {
-    //   return res.status(500).json({ success: false, msg: "Lỗi: " + error.message });
-    // }
+    if (req.body.typeInfo) {
+      try {
+        switch (req.body.typeInfo) {
+          case "fullName":
+            req.user.fullName = req.body.valueUpdate;
+            await mdUser.findByIdAndUpdate(req.user._id, req.user);
+            break;
+          case "nickName":
+            req.user.nickName = req.body.valueUpdate;
+            await mdUser.findByIdAndUpdate(req.user._id, req.user);
+            break;
+          case "birthday":
+            req.user.birthday = req.body.valueUpdate;
+            await mdUser.findByIdAndUpdate(req.user._id, req.user);
+            break;
+          case "locationUser":
+            req.user.locationUser = req.body.valueUpdate;
+            await mdUser.findByIdAndUpdate(req.user._id, req.user);
+            break;
+          case "description":
+            req.user.description = req.body.valueUpdate;
+            await mdUser.findByIdAndUpdate(req.user._id, req.user);
+            break;
+
+          default:
+            break;
+        }
+        return res.status(201).json({ success: true, data: {}, message: "Cập nhật dữ liệu thành công " });
+      } catch (error) {
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+      }
+    } else {
+      return res.status(500).json({ success: false, data: {}, message: "Không đọc được dữ liệu tải lên! " });
+    }
+  }
+};
+
+exports.updateAvatar = async (req, res, next) => {
+  if (req.method == "PUT") {
+    try {
+      let result = await onUploadImages(req.files, "user");
+      if (result != []) {
+        req.user.avatarUser = result[0];
+        await mdUser.findByIdAndUpdate(req.user._id, req.user)
+        return res.status(201).json({ success: true, data: {}, message: "Cập nhật ảnh đại diện thành công." });
+      } else {
+        return res.status(201).json({ success: false, data: {}, message: "Không có ảnh tải lên!" });
+      }
+    } catch (error) {
+      return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+  }
+};
+
+exports.updateAccount = async (req, res, next) => {
+  if (req.method == "PUT") {
+    if (req.body.typeInfo) {
+      try {
+        switch (req.body.typeInfo) {
+          case "phoneNumber":
+            req.account.phoneNumber = req.body.valueUpdate;
+            req.account.isVerifyPhoneNumber = 0;
+            await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
+            return res.status(201).json({ success: true, data: {}, message: "Cập nhật dữ liệu thành công!" });
+          case "emailAddress":
+            req.account.emailAddress = req.body.valueUpdate;
+            req.account.isVerifyEmail = 1;
+            await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
+            let encode = encodeToSha256(req.body.valueUpdate);
+            let linkVerify = "https://0732-2402-800-61c4-c98-dcce-9914-21bc-1dd3.ngrok-free.app/account/verifyEmail/" + encode;
+            await sendEmailLink(req.body.valueUpdate, linkVerify, res);
+            break;
+
+          default:
+            break;
+        }
+      } catch (error) {
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+      }
+    } else {
+      return res.status(500).json({ success: false, data: {}, message: "Không đọc được dữ liệu tải lên! " });
+    }
+  }
+};
+
+exports.deleteEmail = async (req, res, next) => {
+  if (req.method == "DELETE") {
+    try {
+      req.account.emailAddress = "Chưa thiết lập";
+      req.account.isVerifyEmail = 1;
+      await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
+      return res.status(203).json({
+        success: true,
+        data: {},
+        message: "Hủy liên kết email thành công.",
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ success: false, message: "Lỗi: " + error.message });
+    }
   }
 };
 
@@ -176,7 +281,8 @@ exports.deleteUser = async (req, res, next) => {
   let idUser = req.params.idUser;
   if (req.method == "DELETE") {
     try {
-      await mdUser.findByIdAndDelete({ _id: idUser });
+      await mdUser.findByIdAndDelete({ _id: req.user._id });
+      await mdUserAccount.findByIdAndDelete({ _id: req.account._id });
       return res.status(203).json({
         success: true,
         data: {},
@@ -197,9 +303,9 @@ exports.updatePassword = async (req, res, next) => {
       req.account.passWord = body.newPassword;
       try {
         await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
-        return res.status(500).json({ success: true, data: {}, message: "Đổi mật khẩu thành công. " });
+        return res.status(201).json({ success: true, data: {}, message: "Đổi mật khẩu thành công. " });
       } catch (error) {
-        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+        return res.status(201).json({ success: false, data: {}, message: "Lỗi: " + error.message });
       }
     } else {
       return res.status(500).json({ success: false, data: {}, message: "Đổi mật khẩu thất bại, không nhận được dữ liệu mật khẩu mới! " });
@@ -221,10 +327,10 @@ exports.changePassword = async (req, res, next) => {
         const salt = await bcrypt.genSalt(10);
         account.passWord = await bcrypt.hash(body.newPassword, salt);
         await mdUserAccount.findByIdAndUpdate(account._id, account);
-        return res.status(200).json({ success: true, data: {}, message: "Đổi mật khẩu thành công." });
+        return res.status(201).json({ success: true, data: {}, message: "Đổi mật khẩu thành công." });
       } catch (error) {
         console.log(error);
-        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+        return res.status(201).json({ success: false, data: {}, message: "Lỗi: " + error.message });
       }
     } else {
       return res.status(500).json({ success: false, data: {}, message: "Đổi mật khẩu thất bại, không nhận được dữ liệu mật khẩu mới! " });
@@ -238,17 +344,17 @@ exports.sendVerifyEmail = async (req, res, next) => {
       var data = await mdUserAccount.find({ emailAddress: req.body.email });
       if (data.length > 0) {
         if (data[0].isVerifyEmail == 1) {
-          let encode = hashFunction.encodeEmail(req.body.email);
-          let linkVerify = "https://73a8-2402-800-61c4-c98-5b7-54b0-1d1b-346e.ngrok-free.app/account/verifyEmail/" + encode;
+          let encode = encodeToSha256(req.body.email);
+          let linkVerify = "https://0732-2402-800-61c4-c98-dcce-9914-21bc-1dd3.ngrok-free.app/account/verifyEmail/" + encode;
           await sendEmailLink(req.body.email, linkVerify, res);
         } else {
           return res
-            .status(200)
+            .status(201)
             .json({ success: false, data: {}, message: "Email của bạn đã được xác minh!" });
         }
       } else {
         return res
-          .status(500)
+          .status(201)
           .json({ success: false, data: {}, message: "Không tìm thấy tài khoản có email trên!" });
       }
     }
@@ -270,7 +376,7 @@ exports.sendResetPassword = async (req, res, next) => {
           await sendEmailOTP(req.body.email, newOTP, data, res);
         } else {
           return res
-            .status(500)
+            .status(201)
             .json({ success: false, data: {}, message: "Email của bạn chưa được xác minh!" });
         }
       } else {
@@ -295,14 +401,14 @@ exports.verifyResetCode = async (req, res, next) => {
           // console.log((date / 60) + "min");
           // console.log(new Date() - new Date(data[0].createAt));
           if (timeBetween / 60 >= 5) {
-            return res.status(500).json({
+            return res.status(201).json({
               success: false,
               data: {},
               message: "Mã xác minh quá hạn!",
             });
           } else {
             await OTPEmailModel.findByIdAndDelete(data[0]._id);
-            return res.status(200).json({
+            return res.status(201).json({
               success: true,
               data: {},
               message: "Xác minh thành công!",
@@ -382,12 +488,12 @@ async function sendEmailLink(email, link, res) {
       console.log(err);
       return res
         .status(500)
-        .json({ success: false, data: {}, message: "Gửi link xác minh thất bại!" });
+        .json({ success: false, data: {}, message: "Link xác minh email gửi thất bại!" });
     } else {
       console.log("Message sent: " + info.response);
       return res
-        .status(200)
-        .json({ success: true, data: {}, message: "Gửi link xác minh thành công." });
+        .status(201)
+        .json({ success: true, data: {}, message: "Link xác minh email đã được gửi." });
     }
   });
 }
