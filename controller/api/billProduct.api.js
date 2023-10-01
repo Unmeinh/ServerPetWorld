@@ -107,7 +107,6 @@ exports.billProductUser = async (req, res, next) => {
     }
   }
   };
-
   exports.editbillProduct = async (req, res, next) => {
     // const { _id } = req.user;
     // const { idProduct, action } = req.body;
