@@ -7,7 +7,14 @@ let UserSchema = new db.mongoose.Schema(
         fullName: { type: String, required: false },
         birthday: { type: Date, required: false },
         locationUser: { type: String, required: false },
-        locationDelivery: { type: Array, required: false },
+        locationDelivery: [
+            {
+                fullName: { type: String, required: false},
+                location: { type: String, required: false},
+                phoneNumber: { type: Number, required: false},
+                isSelected: { type: Boolean, required: false}
+            }
+        ],
         avatarUser: { type: String, required: false },
         description: { type: String, required: false },
         nickName: { type: String, required: false },
