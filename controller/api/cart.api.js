@@ -119,7 +119,7 @@ exports.addLocations = async (req, res) =>{
   const {_id} = req.user
   const {fullName,phoneNumber,location,isSelected} = req.body
   try {
-    if(fullName && phoneNumber && location && isSelected && req.method === 'POST'){
+    if(fullName && phoneNumber && location && req.method === 'POST'){
       const user = await mdUser.UserModel.findById(_id) 
       if(user){
         user.locationDelivery = [...user.locationDelivery,req.body]
