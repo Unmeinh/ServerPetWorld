@@ -182,7 +182,6 @@ exports.listProduct = async (req, res, next) => {
     }
 };
 
-
 exports.listProductFromIdShop = async (req, res, next) => {
     let idShop = req.params.idShop;
     if (req.method == 'GET') {

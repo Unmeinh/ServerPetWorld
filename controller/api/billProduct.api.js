@@ -107,6 +107,19 @@ exports.billProductUser = async (req, res, next) => {
     }
   }
   };
+
+
+  exports.detailBillProduct = async (req, res, next) => {
+
+    let idBillPr = req.params.idBillPr;
+    try {
+        let ObjBillPr = await mdbillProduct.billProductModel.findById(idBillPr);
+        return res.status(200).json({ success: true, data: ObjBillPr, message: "Lấy dữ liệu chi tiết hóa đơn thành công" });
+
+    } catch (error) {
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+}
   exports.editbillProduct = async (req, res, next) => {
     // const { _id } = req.user;
     // const { idProduct, action } = req.body;
