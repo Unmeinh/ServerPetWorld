@@ -40,28 +40,25 @@ exports.listAllBlog = async (req, res, next) => {
         }
         /** check chung 2 trường hợp */
         if (listAllBlog.length > 0) {
-
+            /**check bài viết đã like hay chưa để thêm vào listTop10Blog*/
+            listAllBlog.map((item, index, arr) => {
+                if (item.interacts.includes(req.user._id)) {
+                    listAllBlog = listAllBlog.filter(x => { return x != item })
+                }
+            })
             /**lấy 10 bài viết có lượt tương tác cao nhất*/
             listTop10Blog = listAllBlog.sort((a, b) => b.interacts.length - a.interacts.length).slice(0, 10);
-            //check bài viết đã like hay chưa để thêm bài viết khác
-            // listTop10Blog.map((item, index, arr)=>{
-                var dem = 0;
-                for (let i = 0; i < listTop10Blog.length; i++) {
-                    if (listTop10Blog[i].interacts.includes(req.user._id)) {
-                        listTop10Blog.splice(listTop10Blog.indexOf(listTop10Blog[i]),1);
-                        dem++;
-                    }
-                }
-            // })
             /**lấy tất cả các bài viết còn lại theo thời gian gần đây*/
-
             var ids = new Set(listTop10Blog.map(({ id }) => id));
-
             listNotTop10Blog = listAllBlog.filter(({ id }) => !ids.has(id));
-
+            /**Setup ngày hiển thị các bài viết chỉ 7 ngày */
+            
+            /**Hiển thị lại blog nếu có thêm comment của follow */
+            
+            /**Lấy  dữ liệu cuối cùng */
             listAllBlogRequested = [...listTop10Blog, ...listNotTop10Blog];
 
-            return res.status(200).json({ success: true, data: listAllBlogRequested , message: "Lấy danh sách bài viết thành công" });
+            return res.status(200).json({ success: true, data: listAllBlogRequested, message: "Lấy danh sách bài viết thành công" });
         }
         else {
             return res.status(203).json({ success: false, message: "Không có bài viết nào!" });
