@@ -9,7 +9,7 @@ let CartSchema = new db.mongoose.Schema(
           type: db.mongoose.Schema.Types.ObjectId,
           ref: "ProductModel",
         },
-        amount: { type: String },
+        amount: { type: Number },
         createAt: { type: Date },
         isSelected: { type: Boolean },
       },

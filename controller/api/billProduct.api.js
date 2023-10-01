@@ -1,4 +1,3 @@
-const { post } = require("../../app");
 let mdbillProduct = require("../../model/billProduct.model");
 let mdCart = require("../../model/cart.model");
 exports.listbillProduct = async (req, res, next) => {

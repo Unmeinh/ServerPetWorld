@@ -11,9 +11,9 @@
                 <!-- Cột 1 -->
                 <form>
                     <div class="form-group row p-3 ">
-                        <label for="username" form="bold" class="col-sm-3 me-auto col-form-label">Tên người dùng</label>
+                        <label for="username" form="bold" class="col-sm-3 me-auto col-form-label">Tên đăng nhập </label>
                         <div class="col-sm-7">
-                            <input type="text" class="form-control" id="username" value="<%= objU.userName %>" readonly>
+                            <input type="text" class="form-control" id="username" value="<%= objU.idAccount.userName %>">
 
                         </div>
                     </div>
@@ -26,27 +26,26 @@
                     <div class="form-group row p-3 ">
                         <label for="birthday" class="col-sm-3 me-auto col-form-label">Ngày sinh</label>
                         <div class="col-sm-7">
-                            <input type="text" class="form-control" id="birthday" value="<%= moment(objU.birthday).format('DD/MM/YYYY hh:mm:ss a')  %>" readonly>
+                            <input type="text" class="form-control" id="birthday" value="<%= moment(objU.birthday).format('DD/MM/YYYY')  %>" readonly>
                         </div>
                     </div>
                     <div class="form-group row p-3 ">
                         <label for="address" class="col-sm-3 me-auto col-form-label">Địa chỉ</label>
                         <div class="col-sm-7">
-                            <input type="text" class="form-control" id="address" value="<%= objU.locationUser%>"
-                                readonly>
+                            <input type="text" class="form-control" id="address" value="<%= objU.locationUser %>">
                         </div>
                     </div>
                     
                     <div class="form-group row p-3">
                         <label for="email" class="col-sm-3 me-auto col-form-label">Email</label>
                         <div class="col-sm-7">
-                            <input type="email" class="form-control" id="email" value="<%= objU.email %>" readonly>
+                            <input type="email" class="form-control" id="email" value="<%= objU.idAccount.emailAddress %>" readonly>
                         </div>
                     </div>
                     <div class="form-group row p-3">
                         <label for="phone" class="col-sm-3 me-auto col-form-label">Số điện thoại</label>
                         <div class="col-sm-7">
-                            <input type="tel" class="form-control" id="phone" value="<%= objU.phoneNumber %>" readonly>
+                            <input type="tel" class="form-control" id="phone" value="<%= objU.idAccount.phoneNumber %>" readonly>
                         </div>
                     </div>
 
@@ -58,19 +57,19 @@
                     <div class="form-group row p-3">
                         <label for="followe" form="bold" class="col-sm-3 col-form-label">Người theo dõi</label>
                         <div class="col-sm-3">
-                            <input type="text" class="form-control" id="follower" value="<%= objU.followers %>"
+                            <input type="text" class="form-control" id="follower" value="<%= objU.followers.length %>"
                                 readonly>
                         </div>
                     </div>
                     <div class="form-group row p-3">
                         <label for="following" form="bold" class="col-sm-3 col-form-label">Đang theo dõi</label>
                         <div class="col-sm-3">
-                            <input type="text" class="form-control" id="following" value="<%= objU.following %>"
+                            <input type="text" class="form-control" id="following" value="<%= objU.followings.length %>"
                                 readonly>
                         </div>
                     </div>
                     <div class="form-group row p-3">
-                        <label for="mypet" form="bold" class="col-sm-3 col-form-label">Mypet</label>
+                        <label for="mypet" form="bold" class="col-sm-3 col-form-label">MyPet</label>
                         <div class="col-sm-3">
                             <input type="text" class="form-control" id="following" value="<%= objU.myPet.length %>" readonly>
                         </div>
@@ -79,8 +78,7 @@
                         <label for="nickname" form="bold" class="col-sm-3  col-form-label">Nickname</label>
                         <div class="col-sm-3">
                             <% if(typeof(objU.nickName)!='undefined'){ %>
-                                <input type="text" class="form-control" id="nickname" value="<%= objU.nickName %>"
-                                readonly>
+                                <input type="text" class="form-control" id="nickname" value="<%= objU.nickName %>">
                                 <% } else{%>
                                     <input type="text" class="form-control" id="nickname" value="Chưa đặt"
                                     readonly>
