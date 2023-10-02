@@ -1,4 +1,5 @@
 let mdBlog = require('../../model/blog.model');
+let mdUser = require('../../model/user.model');
 let fs = require('fs');
 let { decodeFromAscii } = require("../../function/hashFunction");
 const { onUploadImages } = require('../../function/uploadImage');
@@ -13,6 +14,7 @@ exports.listAllBlog = async (req, res, next) => {
     let totalPage = Math.ceil(totalCount / limit);
     let listAllBlog = [];
     let listTop10Blog = [];
+    let listBlogFollowings = [];
     let listNotTop10Blog = [];
     let listAllBlogRequested = [];
 
@@ -52,10 +54,28 @@ exports.listAllBlog = async (req, res, next) => {
             var ids = new Set(listTop10Blog.map(({ id }) => id));
             listNotTop10Blog = listAllBlog.filter(({ id }) => !ids.has(id));
             /**Setup ngày hiển thị các bài viết chỉ 7 ngày */
-            
-            /**Hiển thị lại blog nếu có thêm comment của follow */
-            
-            /**Lấy  dữ liệu cuối cùng */
+
+            /**Hiển thị Blog - Follow*/
+            //Blog của người mình đã follow
+            let myUser = await mdUser.UserModel.find({ _id: req.user._id }).populate('followings.idFollow');
+            if (myUser.length > 0) {
+                let objMyUser = myUser[0];
+                if (objMyUser.followings.length > 0) {
+                    console.log("Số following của bạn: " + objMyUser.followings.length)
+                    let listFollowing = objMyUser.followers;
+                    listFollowing.map(async(item,index)=>{ //cần time
+                        let listOneBlogFollingNow = await (await mdBlog.BlogModel.find({idUser: String(item.idFollow)}).sort({createdAt:-1})).splice(0,1)
+                        if(listOneBlogFollingNow.length > 0 )
+                        {
+                            // listBlogFollowings.push(listOneBlogFollingNow)
+                            // console.log("day"+listBlogFollowings);
+                        }
+                    })                    
+                } else {
+                    console.log("Bạn không follow ai cả");
+                }   
+            }
+            // console.log("caafn: "+listBlogFollowings);
             listAllBlogRequested = [...listTop10Blog, ...listNotTop10Blog];
 
             return res.status(200).json({ success: true, data: listAllBlogRequested, message: "Lấy danh sách bài viết thành công" });
