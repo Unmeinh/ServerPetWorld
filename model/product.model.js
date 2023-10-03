@@ -10,6 +10,7 @@ let ProductSchema = new db.mongoose.Schema(
         quantitySold:{type:Number,required:true},
         rate:{type:Number,required:false},
         discount:{type:Number,required:false},
+        type:{type:Number, require:false},
         idShop:{type:db.mongoose.Schema.Types.ObjectId,required:false,ref:'ShopModel'},
         idCategoryPr:{type: db.mongoose.Schema.Types.ObjectId,required:true, ref:'CategoryProductModel'},
     },
