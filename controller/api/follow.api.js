@@ -1,5 +1,6 @@
 let mdFollow = require('../../model/follows.model').FollowsModel;
 let mdUser = require('../../model/user.model').UserModel;
+const unidecode = require('unidecode');
 
 exports.myFollowing = async (req, res, next) => {
     try {
@@ -15,8 +16,6 @@ exports.myFollowing = async (req, res, next) => {
         return res.status(500).json({ success: false, message: error.message });
     }
 }
-
-const unidecode = require('unidecode');
 
 exports.searchMyFollowing = async (req, res, next) => {
     try {
