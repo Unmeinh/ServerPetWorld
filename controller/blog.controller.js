@@ -49,42 +49,42 @@ exports.detailBlog = async (req, res, next) => {
     res.render('Blog/detailBlog', { objB: objB, moment: moment });
 }
 
-// exports.addBlog = async (req, res, next) => {
-//     let msg='';
-//     if (req.method == 'POST') {
-//         let newBlog = new mdBlog.BlogModel();
-//         newBlog.contentBlog = req.body.contentBlog;
-//         newBlog.contentFont = req.body.contentFont;
+exports.addBlog = async (req, res, next) => {
+    let msg='';
+    if (req.method == 'POST') {
+        let newBlog = new mdBlog.BlogModel();
+        newBlog.contentBlog = req.body.contentBlog;
+        newBlog.contentFont = req.body.contentFont;
 
-//         fs.renameSync(req.file.path,'./public/upload/'+req.file.originalname);
-//         newBlog.imageBlogs = 'http://localhost:3000/upload/'+req.file.originalname;
-//         // console.log(req.file);
-//         newBlog.aspectRatio = req.body.aspectRatio;
-//         newBlog.idUser='64d4e1c79c5e5fb63b6211d3';
-//         // newBlog.idUser=req.body.idUser;
-//         newBlog.comments=0;
-//         newBlog.shares=0;
-//         newBlog.createdAt = new Date();
+        fs.renameSync(req.file.path,'./public/upload/'+req.file.originalname);
+        newBlog.imageBlogs = 'http://localhost:3000/upload/'+req.file.originalname;
+        // console.log(req.file);
+        newBlog.aspectRatio = req.body.aspectRatio;
+        newBlog.idUser='64d4e1c79c5e5fb63b6211d3';
+        // newBlog.idUser=req.body.idUser;
+        newBlog.comments=0;
+        newBlog.shares=0;
+        newBlog.createdAt = new Date();
 
-//         try {
+        try {
 
-//             await newBlog.save();
-//             msg='Thêm bài viết thành công';
-//             return res.redirect('/blog');
-//         } catch (error) {
-//             console.log(error.message);
+            await newBlog.save();
+            msg='Thêm bài viết thành công';
+            return res.redirect('/blog');
+        } catch (error) {
+            console.log(error.message);
 
-//             if (error.message.match(new RegExp('.+`contentBlog` is require+.'))) {
-//                 msg = 'Bạn chưa nhập nội dung!';
-//             }
-//             else {
-//                 msg = "Đăng bài viết thất bại " + error.message;
-//             }
+            if (error.message.match(new RegExp('.+`contentBlog` is require+.'))) {
+                msg = 'Bạn chưa nhập nội dung!';
+            }
+            else {
+                msg = "Đăng bài viết thất bại " + error.message;
+            }
 
-//         }
-//     }
-//     res.render('Blog/addBlog',{msg:msg});
-// }
+        }
+    }
+    res.render('Blog/addBlog',{msg:msg});
+}
 
 exports.deleteBlog = async (req, res, next) => {
     let msg = '';
@@ -109,12 +109,16 @@ exports.shareBlog = async (req, res, next) => {
     if (req.params.idBlog) {
         let idBlog = hashFunction.decodeFromAscii(req.params.idBlog);
         let blog = await mdBlog.BlogModel.findById(idBlog);
-        let image = (blog.imageBlogs.length > 0) ? blog.imageBlogs[0] : "https://res.cloudinary.com/dcf7f43rh/image/upload/v1695556234/images/logo/s2vq9g9kmy10wxvmeekc.jpg";
-        let urlWithoutType = image.substring(0, image.lastIndexOf('.'));
-        urlWithoutType = urlWithoutType.substring(0, urlWithoutType.lastIndexOf('blog'))
-            + "blogHDScale" + urlWithoutType.substring(urlWithoutType.lastIndexOf('/'));
-        // let urlWithoutImage = image.substring(0, image.lastIndexOf('/'));
-        let imageUrl = urlWithoutType + "_HDScale.png";
+        let imageUrl = "";
+        if (blog.imageBlogs.length > 0) {
+            let image = blog.imageBlogs[0];
+            let urlWithoutType = image.substring(0, image.lastIndexOf('.'));
+            urlWithoutType = urlWithoutType.substring(0, urlWithoutType.lastIndexOf('blog'))
+                + "blogHDScale" + urlWithoutType.substring(urlWithoutType.lastIndexOf('/'));
+            imageUrl = urlWithoutType + "_HDScale.png";
+        } else {
+            imageUrl = "https://res.cloudinary.com/dcf7f43rh/image/upload/v1695556234/images/logo/s2vq9g9kmy10wxvmeekc.jpg";
+        }
         return res.render('Blog/shareBlog', { blog: blog, contentBlog: blog.contentBlog, imageBlog: imageUrl });
     }
     res.render('Blog/shareBlog');

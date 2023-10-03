@@ -24,7 +24,14 @@ exports.listAllBlog = async (req, res, next) => {
     try {
         /**Validate */
         if (!req.query.hasOwnProperty('page') || req.query.page == 'undefined' || req.query.page == '') {
-            listAllBlog = await mdBlog.BlogModel.find().populate('idUser').sort({ createdAt: -1 });
+            console.log("no querry");
+            listAllBlog = await mdBlog.BlogModel.find().populate(['idUser', {
+                path: 'idUser',
+                populate: {
+                    path: 'idAccount',
+                    select: 'online'
+                },
+            }]).sort({ createdAt: -1 });
         } else {
             if (page <= 0) {
                 return res.status(500).json({ success: false, message: "Số trang phải lớn hơn 0" });
@@ -37,19 +44,19 @@ exports.listAllBlog = async (req, res, next) => {
 
         }
         /** check chung 2 trường hợp */
-        if (listAllBlog.length > 0) {
+        // if (listAllBlog.length > 0) {
+        //     console.log(listAllBlog);
+        //     const maxInteract = listAllBlog.reduce(function (prev, current) {
+        //         return (prev && prev.interacts.length > current.interacts.length) ? prev : current
+        //     })
 
-            const maxInteract = listAllBlog.reduce(function (prev, current) {
-                return (prev && prev.interacts.length > current.interacts.length) ? prev : current
-            })
-
-            return res.status(200).json({ success: true, data: [maxInteract, listAllBlog], message: "Lấy danh sách bài viết thành công" });
-        }
-        else {
-            return res.status(203).json({ success: false, message: "Bạn đã xem hết bài viết rồi" });
-        }
-
-
+        //     return res.status(200).json({ success: true, data: [maxInteract, listAllBlog], message: "Lấy danh sách bài viết thành công" });
+        // }
+        // else {
+        //     return res.status(203).json({ success: false, message: "Bạn đã xem hết bài viết rồi" });
+        // }
+        let blogs = getListWithFollow(listAllBlog, req.user._id);
+        return res.status(200).json({ success: true, data: blogs, message: "Lấy danh sách bài viết thành công" });
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
     }
@@ -73,7 +80,7 @@ exports.listBlogFromIdUser = async (req, res, next) => {
     }
 
     let idUser = req.params.idUser;
-    let listBlogUser=[];
+    let listBlogUser = [];
 
     try {
         /**Validate */
@@ -83,21 +90,22 @@ exports.listBlogFromIdUser = async (req, res, next) => {
             if (isNaN(page)) {
                 return res.status(500).json({ success: false, message: "Số trang Page phải là số nguyên!" });
             }
-    
-           listBlogUser = await mdBlog.BlogModel.find({ idUser: idUser }).sort({ createdAt: -1 }).populate('idUser').limit(limit).skip(startIndex).exec();
+
+            listBlogUser = await mdBlog.BlogModel.find({ idUser: idUser }).sort({ createdAt: -1 }).populate('idUser').limit(limit).skip(startIndex).exec();
         }
-        
-        if (listBlogUser.length > 0) {
+
+        if (listBlogUser) {
             return res.status(200).json({ success: true, data: listBlogUser, message: "Lấy danh sách bài viết thành công" });
         }
         else {
-            return res.status(203).json({ success: false, message: "Bạn đã xem hết bài viết rồi" });
+            return res.status(500).json({ success: false, message: "Bạn đã xem hết bài viết rồi" });
         }
 
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Lỗi: ' + error.message });
     }
 }
+
 exports.listMyBlog = async (req, res, next) => {
     let list = await mdBlog.BlogModel.find();
     let page = req.query.page;
@@ -116,7 +124,7 @@ exports.listMyBlog = async (req, res, next) => {
     }
 
     let idMyUser = req.user._id;
-    let listMyBlog=[]
+    let listMyBlog = []
     console.log("idMyUser: " + idMyUser);
     try {
         /**Validate */
@@ -128,18 +136,19 @@ exports.listMyBlog = async (req, res, next) => {
             }
             listMyBlog = await mdBlog.BlogModel.find({ idUser: idMyUser }).sort({ createdAt: -1 }).populate('idUser').limit(limit).skip(startIndex).exec();
         }
-        
-        if (listMyBlog.length > 0) {
+
+        if (listMyBlog) {
             return res.status(200).json({ success: true, data: listMyBlog, message: "Lấy danh sách bài viết của bạn thành công" });
         }
         else {
-            return res.status(203).json({ success: false, data: [], message: "Bạn đã xem hết bài viết rồi!" });
+            return res.status(500).json({ success: false, data: [], message: "Bạn đã xem hết bài viết rồi!" });
         }
 
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Lỗi: ' + error.message });
     }
 }
+
 exports.detailBlog = async (req, res, next) => {
     let idBlog = req.params.idBlog;
     try {
@@ -180,6 +189,7 @@ exports.addBlog = async (req, res, next) => {
         }
     }
 }
+
 exports.editBlog = async (req, res, next) => {
 
     let idBlog = req.params.idBlog;
@@ -223,6 +233,7 @@ exports.editBlog = async (req, res, next) => {
         }
     }
 }
+
 exports.deleteBlog = async (req, res, next) => {
     let idBlog = req.params.idBlog;
     if (req.method == 'DELETE') {
@@ -234,30 +245,60 @@ exports.deleteBlog = async (req, res, next) => {
         }
     }
 }
+
 exports.interactPost = async (req, res, next) => {
-    let idBlog = req.params.idBlog;
-
-    if (req.method == 'PATCH') {
-
+    if (req.method == 'POST') {
+        let idBlog = req.params.idBlog;
         try {
-            let listBlog = await mdBlog.BlogModel.find({ _id: idBlog }).populate('idUser');
-            if (listBlog.length > 0) {
-                var objBlog = listBlog[0]
-                var objInteract = objBlog.interacts
-                if (objInteract.includes(req.user._id)) {
-                    objInteract.splice(objInteract.indexOf(req.user._id), 1)
-
-                } else {
-                    objInteract.push(req.user._id)
+            if (idBlog) {
+                let objBlog = await mdBlog.BlogModel.findById({ _id: idBlog }).populate(['idUser', {
+                    path: 'idUser',
+                    populate: {
+                        path: 'idAccount',
+                        select: 'online'
+                    },
+                }]);
+                if (objBlog) {
+                    let arr_Interact = objBlog.interacts
+                    if (arr_Interact.includes(req.user._id)) {
+                        arr_Interact.splice(arr_Interact.indexOf(req.user._id), 1)
+                    } else {
+                        arr_Interact.push(req.user._id)
+                    }
+                    await mdBlog.BlogModel.findByIdAndUpdate(idBlog, objBlog);
                 }
 
-                await mdBlog.BlogModel.findByIdAndUpdate({ _id: idBlog }, objBlog);
+                return res.status(201).json({ success: true, data: objBlog, message: "Đã tương tác với bài viết" });
+            } else {
+                return res.status(500).json({ success: false, message: "Không đọc được dữ liệu tải lên!" });
             }
-
-            return res.status(200).json({ success: true, data: objBlog, message: "Đã tương tác với bài viết" });
         } catch (error) {
             return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
 
         }
     }
+}
+
+function getListWithFollow(blogs, loginId) {
+    let blogsWithFollow = [];
+    blogs.map((blog) => {
+        let user = blog.idUser;
+        let isFL = user.followers.find(follower => String(follower.idFollow) == String(loginId));
+        if (isFL) {
+            blogsWithFollow.push(
+                {
+                    ...blog.toObject(),
+                    isFollowed: true
+                }
+            );
+        } else {
+            blogsWithFollow.push(
+                {
+                    ...blog.toObject(),
+                    isFollowed: false
+                }
+            );
+        }
+    })
+    return blogsWithFollow;
 }
