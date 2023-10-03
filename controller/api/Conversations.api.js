@@ -23,7 +23,7 @@ exports.convertS = async (req, res, next) => {
           return res.status(200).json({
             success: true,
             data: listConVertS,
-            message: "Thêm  thành công",
+            message: "Thêm thành công",
           });
         } catch (error) {
           return res.status(500).json({ success: false, message: error.message });
@@ -38,13 +38,13 @@ exports.convertS = async (req, res, next) => {
         return res.status(200).json({
           success: true,
           data: arrReceiversData,
-          message: "Lấy danh sách giỏ hàng của người dùng thành công",
+          message: "Lấy danh sách những người nhắn tin thành công",
         });
       } else {
         return res.status(203).json({
           success: false,
           data: [],
-          message: "Không có dữ liệu giỏ hàng",
+          message: "Không có dữ liệu",
         });
       } 
     } catch (error) {
