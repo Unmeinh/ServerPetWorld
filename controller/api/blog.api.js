@@ -15,6 +15,7 @@ exports.listAllBlog = async (req, res, next) => {
     let listAllBlog = [];
     let listTop10Blog = [];
     let listBlogFollowings = [];
+    let listBlogLikeButFollowings = [];
     let listNotTop10Blog = [];
     let listAllBlogRequested = [];
 
@@ -40,7 +41,7 @@ exports.listAllBlog = async (req, res, next) => {
 
             listAllBlog = await mdBlog.BlogModel.find().populate('idUser').sort({ createdAt: -1 }).limit(limit).skip(startIndex).exec();
         }
-        /** check chung 2 trường hợp */
+        /** check chung 2 trường hợp có QUERY*/
         if (listAllBlog.length > 0) {
             /**check bài viết đã like hay chưa để thêm vào listTop10Blog*/
             listAllBlog.map((item, index, arr) => {
@@ -55,28 +56,30 @@ exports.listAllBlog = async (req, res, next) => {
             listNotTop10Blog = listAllBlog.filter(({ id }) => !ids.has(id));
             /**Setup ngày hiển thị các bài viết chỉ 7 ngày */
 
-            /**Hiển thị Blog - Follow*/
-            //Blog của người mình đã follow
+            /**HIỂN THỊ BLOG <-> FOLLOW*/
             let myUser = await mdUser.UserModel.find({ _id: req.user._id }).populate('followings.idFollow');
             if (myUser.length > 0) {
-                let objMyUser = myUser[0];
+                var objMyUser = myUser[0];
+
+                 /** Blog của người mình đã follow: lấy 1 blog*/
                 if (objMyUser.followings.length > 0) {
-                    console.log("Số following của bạn: " + objMyUser.followings.length)
-                    let listFollowing = objMyUser.followers;
-                    listFollowing.map(async(item,index)=>{ //cần time
-                        let listOneBlogFollingNow = await (await mdBlog.BlogModel.find({idUser: String(item.idFollow)}).sort({createdAt:-1})).splice(0,1)
-                        if(listOneBlogFollingNow.length > 0 )
-                        {
-                            // listBlogFollowings.push(listOneBlogFollingNow)
-                            // console.log("day"+listBlogFollowings);
+                    // console.log("Số following của bạn: " + objMyUser.followings.length)
+                    var listFollowing = objMyUser.followers;
+                    for (let i = 0; i < listFollowing.length; i++) {
+                        var listOneBlogFollingNow = await mdBlog.BlogModel.find({ idUser: String(listFollowing[i].idFollow) }).sort({ createdAt: -1 });
+                        if (listOneBlogFollingNow.length > 0) {
+                            listOneBlogFollingNow = listOneBlogFollingNow.slice(0, 1); 
+                            listBlogFollowings = listBlogFollowings.concat(listOneBlogFollingNow)
                         }
-                    })                    
-                } else {
-                    console.log("Bạn không follow ai cả");
-                }   
+                    }
+                }
+
+                /** Bài viết của người mình đã từng like mà chưa follow*/ 
+               
             }
-            // console.log("caafn: "+listBlogFollowings);
-            listAllBlogRequested = [...listTop10Blog, ...listNotTop10Blog];
+            // console.log(listBlogFollowings);
+
+            listAllBlogRequested = [...listTop10Blog,...listBlogFollowings, ...listNotTop10Blog];
 
             return res.status(200).json({ success: true, data: listAllBlogRequested, message: "Lấy danh sách bài viết thành công" });
         }
