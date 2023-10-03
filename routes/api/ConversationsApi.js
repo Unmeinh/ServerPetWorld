@@ -6,6 +6,6 @@ var router = express.Router();
 
 // router.get('/list/myFollowing', mdJWT.api_auth , ConversCtrl.myFollowing);
 // router.get('/list/following/:idUser', mdJWT.api_auth, FollowCtrl.userFollowing);
-router.post('/',mdJWT.api_auth, ConversCtrl.convertS);
-router.get('/',mdJWT.api_auth, ConversCtrl.convertS);
+router.post('/insert',mdJWT.api_auth, ConversCtrl.convertS);
+router.get('/listConverts',mdJWT.api_auth, ConversCtrl.convertS);
 module.exports = router;
