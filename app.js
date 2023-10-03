@@ -28,7 +28,7 @@ var followRouter = require('./routes/api/followApi');
 var savenoticeRouter= require('./routes/api/noticeApi');
 var commentRouter= require('./routes/api/commentApi');
 var favoriteProductsRouter=require('./routes/api/myFavoriteProductApi');
-// var billProductRouter = require('./routes/api/billProductApi');
+var billProductRouter = require('./routes/api/billProductApi');
 var voucherShopRouter = require('./routes/api/voucherShopApi');
 var voucherServerRouter = require('./routes/api/voucherServerApi');
 var appointmentRouter = require('./routes/api/appointmentApi');
@@ -72,7 +72,7 @@ app.use('/api/pet', petApiRouter);
 app.use('/api/follow', followRouter);
 app.use('/api/notice',savenoticeRouter)
 app.use('/api/comment',commentRouter)
-// app.use('/api/bill-product', billProductRouter);
+app.use('/api/bill-product', billProductRouter);
 app.use('/api/favorite',favoriteProductsRouter);
 app.use('/api/voucherShop',voucherShopRouter);
 app.use('/api/voucherServer',voucherServerRouter);
