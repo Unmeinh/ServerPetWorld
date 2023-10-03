@@ -5,6 +5,6 @@ mongoose.connect('mongodb+srv://duymai2k3:10diemDATN@cluster0.pc8eymc.mongodb.ne
 })
 .catch((err)=>{
     console.log(err.message);
-    console.log('Lỗi kết nối CSDL');
+    console.log('[mongodb] Lỗi kết nối CSDL!');
 })
 module.exports={mongoose};

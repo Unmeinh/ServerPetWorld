@@ -215,7 +215,8 @@ exports.addProduct = async (req, res, next) => {
             !req.body.amountProduct &&
             !req.body.quantitySold &&
             !req.body.idCategoryPr &&
-            !req.body.discount
+            !req.body.discount && 
+            !req.body.type
         ) {
             return res.status(400).json({ success: false, data: [], message: 'Vui lòng không để trống ô nhập' });
         }
@@ -229,6 +230,7 @@ exports.addProduct = async (req, res, next) => {
         newObj.detailProduct = req.body.detailProduct;
         newObj.quantitySold = 0;
         newObj.rate = 0;
+        newObj.type = 1;
         newObj.createdAt = new Date();
 
         if (req.files != undefined) {
@@ -304,7 +306,8 @@ exports.editProduct = async (req, res, next) => {
             !req.body.amountProduct &&
             !req.body.quantitySold &&
             !req.body.idCategoryPr &&
-            !req.body.discount
+            !req.body.discount && 
+            !req.body.type
         ) {
             return res.status(400).json({ success: false, data: [], message: 'Vui lòng không để trống ô nhập' });
         }
@@ -315,7 +318,7 @@ exports.editProduct = async (req, res, next) => {
         newObj.discount = req.body.discount;
         newObj.idCategoryPr = req.body.idCategoryPr;
         newObj.amountProduct = req.body.amountProduct;
-        newObj.detailProduct = req.body.detailProduct;
+        newObj.detailProduct = req.body.detailProduct;     
         newObj.quantitySold = 0;//cập nhật
         newObj.rate = 0;//cập nhật
 
