@@ -79,6 +79,7 @@ exports.addpet = async (req, res, next) => {
         newObj.amountPet = req.body.amountPet;
         newObj.detailPet = req.body.detailPet;
         newObj.idShop = req.body.idShop;
+        newObj.type = 0;
         newObj.createdAt = new Date();
         newObj.rate=0;
         if (req.files != undefined) {
@@ -152,7 +153,6 @@ exports.addpet = async (req, res, next) => {
 
 }
 exports.editPet = async (req, res, next) => {
-
 }
 exports.deletepet = async (req, res, next) => {
     let idPet = req.params.idPet;
