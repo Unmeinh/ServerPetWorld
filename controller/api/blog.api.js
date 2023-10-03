@@ -12,6 +12,9 @@ exports.listAllBlog = async (req, res, next) => {
     let totalCount = await mdBlog.BlogModel.countDocuments();
     let totalPage = Math.ceil(totalCount / limit);
     let listAllBlog = [];
+    let listTop10Blog = [];
+    let listNotTop10Blog = [];
+    let listAllBlogRequested = [];
 
     if (endIndex < list.length) {
         page = page + 1;
@@ -34,19 +37,31 @@ exports.listAllBlog = async (req, res, next) => {
             }
 
             listAllBlog = await mdBlog.BlogModel.find().populate('idUser').sort({ createdAt: -1 }).limit(limit).skip(startIndex).exec();
-
         }
         /** check chung 2 trường hợp */
         if (listAllBlog.length > 0) {
-
-            const maxInteract = listAllBlog.reduce(function (prev, current) {
-                return (prev && prev.interacts.length > current.interacts.length) ? prev : current
+            /**check bài viết đã like hay chưa để thêm vào listTop10Blog*/
+            listAllBlog.map((item, index, arr) => {
+                if (item.interacts.includes(req.user._id)) {
+                    listAllBlog = listAllBlog.filter(x => { return x != item })
+                }
             })
+            /**lấy 10 bài viết có lượt tương tác cao nhất*/
+            listTop10Blog = listAllBlog.sort((a, b) => b.interacts.length - a.interacts.length).slice(0, 10);
+            /**lấy tất cả các bài viết còn lại theo thời gian gần đây*/
+            var ids = new Set(listTop10Blog.map(({ id }) => id));
+            listNotTop10Blog = listAllBlog.filter(({ id }) => !ids.has(id));
+            /**Setup ngày hiển thị các bài viết chỉ 7 ngày */
+            
+            /**Hiển thị lại blog nếu có thêm comment của follow */
+            
+            /**Lấy  dữ liệu cuối cùng */
+            listAllBlogRequested = [...listTop10Blog, ...listNotTop10Blog];
 
-            return res.status(200).json({ success: true, data: [maxInteract, listAllBlog], message: "Lấy danh sách bài viết thành công" });
+            return res.status(200).json({ success: true, data: listAllBlogRequested, message: "Lấy danh sách bài viết thành công" });
         }
         else {
-            return res.status(203).json({ success: false, message: "Bạn đã xem hết bài viết rồi" });
+            return res.status(203).json({ success: false, message: "Không có bài viết nào!" });
         }
 
 
@@ -73,7 +88,7 @@ exports.listBlogFromIdUser = async (req, res, next) => {
     }
 
     let idUser = req.params.idUser;
-    let listBlogUser=[];
+    let listBlogUser = [];
 
     try {
         /**Validate */
@@ -83,15 +98,15 @@ exports.listBlogFromIdUser = async (req, res, next) => {
             if (isNaN(page)) {
                 return res.status(500).json({ success: false, message: "Số trang Page phải là số nguyên!" });
             }
-    
-           listBlogUser = await mdBlog.BlogModel.find({ idUser: idUser }).sort({ createdAt: -1 }).populate('idUser').limit(limit).skip(startIndex).exec();
+
+            listBlogUser = await mdBlog.BlogModel.find({ idUser: idUser }).sort({ createdAt: -1 }).populate('idUser').limit(limit).skip(startIndex).exec();
         }
-        
+
         if (listBlogUser.length > 0) {
             return res.status(200).json({ success: true, data: listBlogUser, message: "Lấy danh sách bài viết thành công" });
         }
         else {
-            return res.status(203).json({ success: false, message: "Bạn đã xem hết bài viết rồi" });
+            return res.status(203).json({ success: false, message: "Không có bài viết nào!" });
         }
 
     } catch (error) {
@@ -116,7 +131,7 @@ exports.listMyBlog = async (req, res, next) => {
     }
 
     let idMyUser = req.user._id;
-    let listMyBlog=[]
+    let listMyBlog = []
     console.log("idMyUser: " + idMyUser);
     try {
         /**Validate */
@@ -128,12 +143,12 @@ exports.listMyBlog = async (req, res, next) => {
             }
             listMyBlog = await mdBlog.BlogModel.find({ idUser: idMyUser }).sort({ createdAt: -1 }).populate('idUser').limit(limit).skip(startIndex).exec();
         }
-        
+
         if (listMyBlog.length > 0) {
             return res.status(200).json({ success: true, data: listMyBlog, message: "Lấy danh sách bài viết của bạn thành công" });
         }
         else {
-            return res.status(203).json({ success: false, data: [], message: "Bạn đã xem hết bài viết rồi!" });
+            return res.status(203).json({ success: false, data: [], message: "Không có bài viết nào!" });
         }
 
     } catch (error) {
