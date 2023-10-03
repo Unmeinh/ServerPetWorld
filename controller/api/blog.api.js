@@ -60,7 +60,7 @@ exports.listAllBlog = async (req, res, next) => {
             let myUser = await mdUser.UserModel.find({ _id: req.user._id }).populate('followings.idFollow');
             if (myUser.length > 0) {
                 var objMyUser = myUser[0];
-
+                
                  /** Blog của người mình đã follow: lấy 1 blog*/
                 if (objMyUser.followings.length > 0) {
                     // console.log("Số following của bạn: " + objMyUser.followings.length)
@@ -75,7 +75,14 @@ exports.listAllBlog = async (req, res, next) => {
                 }
 
                 /** Bài viết của người mình đã từng like mà chưa follow*/ 
-               
+                // var listFollowing = objMyUser.followers;
+                // for (let i = 0; i < listFollowing.length; i++) {
+                //     var listOneBlogFollingNow = await mdBlog.BlogModel.find({ idUser: String(listFollowing[i].idFollow) }).sort({ createdAt: -1 });
+                //     if (listOneBlogFollingNow.length > 0) {
+                //         listOneBlogFollingNow = listOneBlogFollingNow.slice(0, 1); 
+                //         listBlogFollowings = listBlogFollowings.concat(listOneBlogFollingNow)
+                //     }
+                // }
             }
             // console.log(listBlogFollowings);
 
