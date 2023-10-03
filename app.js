@@ -32,6 +32,7 @@ var billProductRouter = require('./routes/api/billProductApi');
 var voucherShopRouter = require('./routes/api/voucherShopApi');
 var voucherServerRouter = require('./routes/api/voucherServerApi');
 var appointmentRouter = require('./routes/api/appointmentApi');
+var ConversationsRouter = require('./routes/api/ConversationsApi');
 var app = express();
 
 // view engine setup
@@ -77,6 +78,7 @@ app.use('/api/favorite',favoriteProductsRouter);
 app.use('/api/voucherShop',voucherShopRouter);
 app.use('/api/voucherServer',voucherServerRouter);
 app.use('/api/appointment',appointmentRouter);
+app.use('/api/conversations', ConversationsRouter);
 
 // catch 404 and forward to error handler
 
