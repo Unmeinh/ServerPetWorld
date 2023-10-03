@@ -28,6 +28,7 @@ var followRouter = require('./routes/api/followApi');
 var savenoticeRouter= require('./routes/api/noticeApi');
 var commentRouter= require('./routes/api/commentApi');
 var billProductRouter = require('./routes/api/billProductApi');
+var ConversationsRouter = require('./routes/api/ConversationsApi');
 
 var app = express();
 
@@ -70,7 +71,7 @@ app.use('/api/follow', followRouter);
 app.use('/api/notice',savenoticeRouter)
 app.use('/api/comment',commentRouter)
 app.use('/api/bill-product', billProductRouter);
-
+app.use('/api/conversations', ConversationsRouter);
 // catch 404 and forward to error handler
 
 app.use(function(req, res, next) {
