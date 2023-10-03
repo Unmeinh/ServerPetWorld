@@ -67,11 +67,32 @@ exports.detailUser = async (req, res, next) => {
   let idUser = req.params.idUser;
   try {
     let objU = await mdUser.findById(idUser).populate('idAccount');
-    return res.status(200).json({
-      success: true,
-      data: objU,
-      message: "Lấy dữ liệu của người dùng khác thành công",
-    });
+    if (objU) {
+      let isFollowed = objU.followers.find((follow) => String(follow.idFollow) == String(req.user._id))
+      if (isFollowed) {
+        return res.status(200).json({
+          success: true,
+          data: {
+            ...objU.toObject(),
+            isFollowed: true
+          },
+          message: "Lấy dữ liệu của người dùng khác thành công",
+        });
+      } else {
+        return res.status(200).json({
+          success: true,
+          data: {
+            ...objU.toObject(),
+            isFollowed: false
+          },
+          message: "Lấy dữ liệu của người dùng khác thành công",
+        });
+      }
+    } else {
+      return res
+        .status(500)
+        .json({ success: false, data: {}, message: "Không tải được dữ liệu người dùng!" });
+    }
   } catch (error) {
     return res
       .status(500)

@@ -1,14 +1,14 @@
 let mdComment = require('../../model/comment.model');
+let mdBlog = require('../../model/blog.model').BlogModel;
 
 exports.listCommentFromIdBlog = async (req, res, next) => {
     let idBlog = req.params.idBlog;
     try {
-        let listCommentByBlog = await mdComment.CommentModel.find({ idBlog: idBlog }).populate('idBlog').populate('idUser');
-        if (listCommentByBlog.length > 0) {
+        let listCommentByBlog = await mdComment.CommentModel.find({ idBlog: idBlog }).populate('idUser').sort({ createdAt: -1 });
+        if (listCommentByBlog) {
             return res.status(200).json({ success: true, data: listCommentByBlog, message: "Lấy danh bình luận theo bài viết thành công" });
-        }
-        else {
-            return res.status(203).json({ success: false, data: [], message: "Không có dữ liệu bình luận" });
+        } else {
+            return res.status(200).json({ success: false, data: [], message: "Không có dữ liệu bình luận" });
         }
 
     } catch (error) {
@@ -18,16 +18,28 @@ exports.listCommentFromIdBlog = async (req, res, next) => {
 
 exports.addComment = async (req, res, next) => {
     let idUser = req.user._id;
+    let { idBlog, content } = req.body;
     if (req.method == 'POST') {
         try {
-            let newComment = new mdComment.CommentModel();
-            newComment.idBlog = req.body.idBlog;
-            newComment.idUser = idUser;
-            newComment.content = req.body.content;
-            newComment.createdAt = new Date()
+            if (idBlog && content) {
+                let newComment = new mdComment.CommentModel();
+                newComment.idBlog = idBlog;
+                newComment.idUser = idUser;
+                newComment.content = content;
+                newComment.interacts = [];
+                newComment.createdAt = new Date();
 
-            await newComment.save()
-            return res.status(201).json({ success: true, data: newComment, message: "Đã thêm bình luận mới" });
+                await newComment.save();
+                let comment = await newComment.populate('idUser');
+                let blog = await mdBlog.findById(idBlog);
+                if (blog) {
+                    blog.comments++;
+                    await mdBlog.findByIdAndUpdate(idBlog, blog);
+                }
+                return res.status(201).json({ success: true, data: comment, message: "Đăng bình luận thành công." });
+            } else {
+                return res.status(500).json({ success: false, data: {}, message: "Không đọc được dữ liệu tải lên!" });
+            }
         } catch (error) {
             return res.status(500).json({ success: false, data: {}, message: error.message });
         }
@@ -35,35 +47,44 @@ exports.addComment = async (req, res, next) => {
 }
 
 exports.editComment = async (req, res, next) => {
-    let idUser = req.user._id;
     if (req.method == 'PUT') {
-        let idComment = req.params.idComment;
-        
+        let { idBlog, idComment, content } = req.body;
         try {
-            let newComment = new mdComment.CommentModel();
-            newComment.idBlog = req.body.idBlog;
-            newComment.idUser = idUser;
-            newComment.content = req.body.content;
-            newComment.createdAt = new Date()
-            newComment._id = idComment;
-
-            await mdComment.CommentModel.findByIdAndUpdate(idComment, newComment).populate('idBlog').populate('idUser');
-
-            return res.status(200).json({ success: true, data: newComment, message: "Đã cập nhật bình luận mới" });
+            if (idBlog && idComment && content) {
+                let comment = await mdComment.CommentModel.findById(idComment);
+                if (comment) {
+                    comment.content = content;
+                    comment.createdAt = new Date()
+                    await mdComment.CommentModel.findByIdAndUpdate(idComment, comment);
+                    return res.status(201).json({ success: true, data: comment, message: "Cập nhật bình luận thành công!" });
+                }
+            } else {
+                return res.status(500).json({ success: false, data: {}, message: "Không đọc được dữ liệu tải lên!" });
+            }
         } catch (error) {
+            console.log(error);
             return res.status(500).json({ success: false, data: {}, message: error.message });
         }
     }
 }
 exports.deleteComment = async (req, res, next) => {
-    console.log('req... ' + req.method);
     if (req.method == 'DELETE') {
         let idComment = req.params.idComment;
-        console.log('==========');
         try {
-            await mdComment.CommentModel.findByIdAndDelete(idComment);
-
-            return res.status(200).json({ success: true, data: {}, message: "Đã xóa bình luận" });
+            if (idComment) {
+                let comment = await mdComment.CommentModel.findById(idComment);
+                if (comment) {
+                    await mdComment.CommentModel.findByIdAndDelete(idComment);
+                    let blog = await mdBlog.findById(comment.idBlog);
+                    if (blog) {
+                        blog.comments--;
+                        await mdBlog.findByIdAndUpdate(comment.idBlog, blog);
+                    }
+                    return res.status(203).json({ success: true, data: {}, message: "Đã xóa bình luận" });
+                }
+            } else {
+                return res.status(500).json({ success: false, data: {}, message: "Không đọc được dữ liệu tải lên!" });
+            }
         } catch (error) {
             return res.status(500).json({ success: false, data: {}, message: error.message });
         }
@@ -74,7 +95,7 @@ exports.addCommentInComment = async (req, res, next) => {
     let idUser = req.user._id;
     let idBlog = req.params.idBlog;
     let listCommentBlog = await mdComment.CommentModel.find({ idBlog: idBlog }).populate('idUser').populate('idBlog');
-    console.log("Listcomment: "+listCommentBlog);
+    console.log("Listcomment: " + listCommentBlog);
     if (req.method == 'POST') {
         try {
             if (!listCommentBlog) {
