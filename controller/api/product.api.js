@@ -2,16 +2,43 @@ let mdProduct = require('../../model/product.model');
 const fs = require("fs");
 const { match } = require('assert');
 exports.listProduct = async (req, res, next) => {
-    if (req.method == 'GET') {
-        let listProduct = await mdProduct.ProductModel.find().populate('idCategoryPr').populate('idShop');
-        if (listProduct) {
+    if (req.method !== 'GET') {
+        return res.status(400).json({ success: false, message: 'Method not allowed' });
+    }
+    try {
+        console.log(typeof Number(req.query.page));
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const totalCount = await mdProduct.ProductModel.countDocuments();
+        const totalPage = Math.ceil(totalCount / limit);
+        const startIndex = (page - 1) * limit;
+        const pageRegex = /^[0-9]+$/;
+        if (page <= 0) {
+            return res.status(500).json({ success: false, message: "Số trang phải lớn hơn 0" });
+        }
+        if (!pageRegex.test(page)) {
+            return res.status(500).json({ success: false, message: "Số trang phải là số nguyên!" });
+        }
+        if (page > totalPage) {
+            return res.status(500).json({ success: false, message: "Số trang không tồn tại!" });
+        }
+        const listProduct = await mdProduct.ProductModel
+            .find()
+            .populate('idCategoryPr')
+            .populate('idShop')
+            .limit(limit)
+            .skip(startIndex)
+            .exec();
+        if (listProduct.length > 0) {
             return res.status(200).json({ success: true, data: listProduct, message: 'Lấy danh sách sản phẩm thành công' });
         }
         else {
-            return res.status(500).json({ success: false, data: [], message: 'Không lấy được danh sách sản phẩm' });
+            return res.status(500).json({ success: false, message: 'Không có sản phẩm nào' });
         }
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
     }
-}
+};
 exports.listProductFromIdShop = async (req, res, next) => {
     let idShop = req.params.idShop;
     if (req.method == 'GET') {
@@ -50,7 +77,7 @@ exports.addProduct = async (req, res, next) => {
         ) {
             return res.status(400).json({ success: false, data: [], message: 'Vui lòng không để trống ô nhập' });
         }
-        
+
         let newObj = new mdProduct.ProductModel();
         newObj.nameProduct = req.body.nameProduct;
         newObj.priceProduct = req.body.priceProduct;
