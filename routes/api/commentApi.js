@@ -8,7 +8,7 @@ router.get('/list/:idBlog', CommentApiCtrl.listCommentFromIdBlog);
 
 router.post('/insert',mdJWT.api_auth, CommentApiCtrl.addComment);
 
-router.put('/update/:idComment', CommentApiCtrl.editComment);
+router.put('/update', CommentApiCtrl.editComment);
 
 router.delete('/delete/:idComment', CommentApiCtrl.deleteComment);
 //comment in comment

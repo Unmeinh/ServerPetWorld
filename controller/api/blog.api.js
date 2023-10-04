@@ -12,9 +12,6 @@ exports.listAllBlog = async (req, res, next) => {
     let totalCount = await mdBlog.BlogModel.countDocuments();
     let totalPage = Math.ceil(totalCount / limit);
     let listAllBlog = [];
-    let listTop10Blog = [];
-    let listNotTop10Blog = [];
-    let listAllBlogRequested = [];
 
     if (endIndex < list.length) {
         page = page + 1;
@@ -27,7 +24,14 @@ exports.listAllBlog = async (req, res, next) => {
     try {
         /**Validate */
         if (!req.query.hasOwnProperty('page') || req.query.page == 'undefined' || req.query.page == '') {
-            listAllBlog = await mdBlog.BlogModel.find().populate('idUser').sort({ createdAt: -1 });
+            console.log("no querry");
+            listAllBlog = await mdBlog.BlogModel.find().populate(['idUser', {
+                path: 'idUser',
+                populate: {
+                    path: 'idAccount',
+                    select: 'online'
+                },
+            }]).sort({ createdAt: -1 });
         } else {
             if (page <= 0) {
                 return res.status(500).json({ success: false, message: "Số trang phải lớn hơn 0" });
@@ -37,9 +41,10 @@ exports.listAllBlog = async (req, res, next) => {
             }
 
             listAllBlog = await mdBlog.BlogModel.find().populate('idUser').sort({ createdAt: -1 }).limit(limit).skip(startIndex).exec();
+
         }
-        /** check chung 2 trường hợp */
-        if (listAllBlog.length > 0) {
+        /** check chung 2 trường hợp có QUERY*/
+        if (listAllBlog) {
             /**check bài viết đã like hay chưa để thêm vào listTop10Blog*/
             listAllBlog.map((item, index, arr) => {
                 if (item.interacts.includes(req.user._id)) {
@@ -52,19 +57,45 @@ exports.listAllBlog = async (req, res, next) => {
             var ids = new Set(listTop10Blog.map(({ id }) => id));
             listNotTop10Blog = listAllBlog.filter(({ id }) => !ids.has(id));
             /**Setup ngày hiển thị các bài viết chỉ 7 ngày */
-            
-            /**Hiển thị lại blog nếu có thêm comment của follow */
-            
-            /**Lấy  dữ liệu cuối cùng */
-            listAllBlogRequested = [...listTop10Blog, ...listNotTop10Blog];
 
-            return res.status(200).json({ success: true, data: listAllBlogRequested, message: "Lấy danh sách bài viết thành công" });
+            /**HIỂN THỊ BLOG <-> FOLLOW*/
+            let myUser = await mdUser.UserModel.find({ _id: req.user._id }).populate('followings.idFollow');
+            if (myUser.length > 0) {
+                var objMyUser = myUser[0];
+
+                /** Blog của người mình đã follow: lấy 1 blog*/
+                if (objMyUser.followings.length > 0) {
+                    // console.log("Số following của bạn: " + objMyUser.followings.length)
+                    var listFollowing = objMyUser.followers;
+                    for (let i = 0; i < listFollowing.length; i++) {
+                        var listOneBlogFollingNow = await mdBlog.BlogModel.find({ idUser: String(listFollowing[i].idFollow) }).sort({ createdAt: -1 });
+                        if (listOneBlogFollingNow.length > 0) {
+                            listOneBlogFollingNow = listOneBlogFollingNow.slice(0, 1);
+                            listBlogFollowings = listBlogFollowings.concat(listOneBlogFollingNow)
+                        }
+                    }
+                }
+
+                /** Bài viết của người mình đã từng like mà chưa follow*/
+                // var listFollowing = objMyUser.followers;
+                // for (let i = 0; i < listFollowing.length; i++) {
+                //     var listOneBlogFollingNow = await mdBlog.BlogModel.find({ idUser: String(listFollowing[i].idFollow) }).sort({ createdAt: -1 });
+                //     if (listOneBlogFollingNow.length > 0) {
+                //         listOneBlogFollingNow = listOneBlogFollingNow.slice(0, 1); 
+                //         listBlogFollowings = listBlogFollowings.concat(listOneBlogFollingNow)
+                //     }
+                // }
+            }
+            // console.log(listBlogFollowings);
+
+            listAllBlogRequested = [...listTop10Blog, ...listBlogFollowings, ...listNotTop10Blog];
+
+            let blogs = getListWithFollow(listAllBlog, req.user._id);
+            return res.status(200).json({ success: true, data: blogs, message: "Lấy danh sách bài viết thành công" });
         }
         else {
-            return res.status(203).json({ success: false, message: "Không có bài viết nào!" });
+            return res.status(500).json({ success: false, message: "Không có bài viết nào!" });
         }
-
-
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
     }
@@ -102,17 +133,18 @@ exports.listBlogFromIdUser = async (req, res, next) => {
             listBlogUser = await mdBlog.BlogModel.find({ idUser: idUser }).sort({ createdAt: -1 }).populate('idUser').limit(limit).skip(startIndex).exec();
         }
 
-        if (listBlogUser.length > 0) {
+        if (listBlogUser) {
             return res.status(200).json({ success: true, data: listBlogUser, message: "Lấy danh sách bài viết thành công" });
         }
         else {
-            return res.status(203).json({ success: false, message: "Không có bài viết nào!" });
+            return res.status(500).json({ success: false, message: "Không có bài viết nào!" });
         }
 
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Lỗi: ' + error.message });
     }
 }
+
 exports.listMyBlog = async (req, res, next) => {
     let list = await mdBlog.BlogModel.find();
     let page = req.query.page;
@@ -144,17 +176,18 @@ exports.listMyBlog = async (req, res, next) => {
             listMyBlog = await mdBlog.BlogModel.find({ idUser: idMyUser }).sort({ createdAt: -1 }).populate('idUser').limit(limit).skip(startIndex).exec();
         }
 
-        if (listMyBlog.length > 0) {
+        if (listMyBlog) {
             return res.status(200).json({ success: true, data: listMyBlog, message: "Lấy danh sách bài viết của bạn thành công" });
         }
         else {
-            return res.status(203).json({ success: false, data: [], message: "Không có bài viết nào!" });
+            return res.status(500).json({ success: false, data: [], message: "Không có bài viết nào!" });
         }
 
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Lỗi: ' + error.message });
     }
 }
+
 exports.detailBlog = async (req, res, next) => {
     let idBlog = req.params.idBlog;
     try {
@@ -195,6 +228,7 @@ exports.addBlog = async (req, res, next) => {
         }
     }
 }
+
 exports.editBlog = async (req, res, next) => {
 
     let idBlog = req.params.idBlog;
@@ -238,6 +272,7 @@ exports.editBlog = async (req, res, next) => {
         }
     }
 }
+
 exports.deleteBlog = async (req, res, next) => {
     let idBlog = req.params.idBlog;
     if (req.method == 'DELETE') {
@@ -249,30 +284,60 @@ exports.deleteBlog = async (req, res, next) => {
         }
     }
 }
+
 exports.interactPost = async (req, res, next) => {
-    let idBlog = req.params.idBlog;
-
-    if (req.method == 'PATCH') {
-
+    if (req.method == 'POST') {
+        let idBlog = req.params.idBlog;
         try {
-            let listBlog = await mdBlog.BlogModel.find({ _id: idBlog }).populate('idUser');
-            if (listBlog.length > 0) {
-                var objBlog = listBlog[0]
-                var objInteract = objBlog.interacts
-                if (objInteract.includes(req.user._id)) {
-                    objInteract.splice(objInteract.indexOf(req.user._id), 1)
-
-                } else {
-                    objInteract.push(req.user._id)
+            if (idBlog) {
+                let objBlog = await mdBlog.BlogModel.findById({ _id: idBlog }).populate(['idUser', {
+                    path: 'idUser',
+                    populate: {
+                        path: 'idAccount',
+                        select: 'online'
+                    },
+                }]);
+                if (objBlog) {
+                    let arr_Interact = objBlog.interacts
+                    if (arr_Interact.includes(req.user._id)) {
+                        arr_Interact.splice(arr_Interact.indexOf(req.user._id), 1)
+                    } else {
+                        arr_Interact.push(req.user._id)
+                    }
+                    await mdBlog.BlogModel.findByIdAndUpdate(idBlog, objBlog);
                 }
 
-                await mdBlog.BlogModel.findByIdAndUpdate({ _id: idBlog }, objBlog);
+                return res.status(201).json({ success: true, data: objBlog, message: "Đã tương tác với bài viết" });
+            } else {
+                return res.status(500).json({ success: false, message: "Không đọc được dữ liệu tải lên!" });
             }
-
-            return res.status(200).json({ success: true, data: objBlog, message: "Đã tương tác với bài viết" });
         } catch (error) {
             return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
 
         }
     }
+}
+
+function getListWithFollow(blogs, loginId) {
+    let blogsWithFollow = [];
+    blogs.map((blog) => {
+        let user = blog.idUser;
+        let isFL = user.followers.find(follower => String(follower.idFollow) == String(loginId));
+        if (isFL) {
+            blogsWithFollow.push(
+                {
+                    ...blog.toObject(),
+                    isFollowed: true
+                }
+            );
+        } else {
+            blogsWithFollow.push(
+                {
+                    ...blog.toObject(),
+                    isFollowed: false
+                }
+            );
+        }
+    })
+    return blogsWithFollow;
 }
