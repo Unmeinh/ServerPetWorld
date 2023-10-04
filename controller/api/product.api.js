@@ -1,44 +1,187 @@
 let mdProduct = require('../../model/product.model');
+let mdbillProduct = require('../../model/billProduct.model');
 const fs = require("fs");
 const { match } = require('assert');
+const moment = require('moment');
 exports.listProduct = async (req, res, next) => {
-    if (req.method !== 'GET') {
-        return res.status(400).json({ success: false, message: 'Method not allowed' });
-    }
     try {
-        console.log(typeof Number(req.query.page));
-        const page = parseInt(req.query.page) || 1;
-        const limit = 10;
-        const totalCount = await mdProduct.ProductModel.countDocuments();
-        const totalPage = Math.ceil(totalCount / limit);
-        const startIndex = (page - 1) * limit;
-        const pageRegex = /^[0-9]+$/;
-        if (page <= 0) {
-            return res.status(500).json({ success: false, message: "Số trang phải lớn hơn 0" });
-        }
-        if (!pageRegex.test(page)) {
-            return res.status(500).json({ success: false, message: "Số trang phải là số nguyên!" });
-        }
-        if (page > totalPage) {
-            return res.status(500).json({ success: false, message: "Số trang không tồn tại!" });
-        }
-        const listProduct = await mdProduct.ProductModel
-            .find()
-            .populate('idCategoryPr')
-            .populate('idShop')
-            .limit(limit)
-            .skip(startIndex)
-            .exec();
-        if (listProduct.length > 0) {
-            return res.status(200).json({ success: true, data: listProduct, message: 'Lấy danh sách sản phẩm thành công' });
-        }
-        else {
-            return res.status(500).json({ success: false, message: 'Không có sản phẩm nào' });
+        if (req.query.hasOwnProperty('page') && req.query.hasOwnProperty('day')) {
+            const page = parseInt(req.query.page) || 1;
+            const days = parseInt(req.query.day, 10);
+
+            // Validate page and days
+            if (page <= 0 || isNaN(page) || days <= 0 || isNaN(days)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Số trang và số ngày không hợp lệ.',
+                });
+            }
+
+            const limit = 10;
+            const startIndex = (page - 1) * limit;
+            const startDate = moment().subtract(days, 'days').toDate();
+
+            // Get product IDs based on page and within the specified days
+            const productIds = await mdProduct.ProductModel
+                .find()
+                .limit(limit)
+                .skip(startIndex)
+                .select('_id')
+                .exec();
+
+            // Get product details for the retrieved product IDs within the specified days
+            const productDetails = await mdbillProduct.billProductModel.aggregate([
+                {
+                    $match: {
+                        purchaseDate: { $gte: startDate },
+                        'products.idProduct': { $in: productIds.map(id => id._id) }
+                    }
+                },
+                {
+                    $unwind: '$products'
+                },
+                {
+                    $group: {
+                        _id: '$products.idProduct',
+                        totalCount: { $sum: '$products.amount' }
+                    }
+                },
+                {
+                    $sort: { totalCount: -1 }
+                },
+                {
+                    $lookup: {
+                        from: 'Products',
+                        localField: '_id',
+                        foreignField: '_id',
+                        as: 'productDetails'
+                    }
+                },
+                {
+                    $unwind: '$productDetails'
+                },
+                {
+                    $replaceRoot: { newRoot: '$productDetails' } // Replace the root with productDetails
+                }
+            ]);
+
+            if (productDetails && productDetails.length > 0) {
+                return res.status(200).json({
+                    success: true,
+                    data: productDetails,
+                    message: `Sản phẩm được mua nhiều nhất trong thời gian qua ${days} ngày trên trang ${page}`,
+                });
+            } else {
+                return res.status(203).json({
+                    success: false,
+                    data: null,
+                    message: `Không tìm thấy sản phẩm nào được mua trong vòng ${days} ngày trên trang ${page}`,
+                });
+            }
+        } 
+        else if (req.query.hasOwnProperty('page')) {
+            const page = parseInt(req.query.page) || 1;
+            const limit = 10;
+            const totalCount = await mdProduct.ProductModel.countDocuments();
+            const totalPage = Math.ceil(totalCount / limit);
+            const startIndex = (page - 1) * limit;
+            const pageRegex = /^[0-9]+$/;
+
+            if (page <= 0) {
+                return res.status(500).json({ success: false, message: "Số trang phải lớn hơn 0" });
+            }
+
+            if (!pageRegex.test(page)) {
+                return res.status(500).json({ success: false, message: "Số trang phải là số nguyên!" });
+            }
+
+            if (page > totalPage) {
+                return res.status(500).json({ success: false, message: "Số trang không tồn tại!" });
+            }
+
+            const listProduct = await mdProduct.ProductModel
+                .find()
+                .populate('idCategoryPr')
+                .populate('idShop')
+                .limit(limit)
+                .skip(startIndex)
+                .exec();
+
+            if (listProduct.length > 0) {
+                return res.status(200).json({ success: true, data: listProduct, message: 'Lấy danh sách sản phẩm thành công' });
+            } else {
+                return res.status(500).json({ success: false, message: 'Không có sản phẩm nào' });
+            }
+        } else if (req.query.hasOwnProperty('day')) {
+            const days = parseInt(req.query.day, 10);
+
+            if (isNaN(days) || days <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Số ngày không hợp lệ hoặc bị thiếu (trang)',
+                });
+            }
+
+            const startDate = moment().subtract(days, 'days').toDate();
+
+            const productCounts = await mdbillProduct.billProductModel.aggregate([
+                {
+                    $match: {
+                        purchaseDate: { $gte: startDate }
+                    }
+                },
+                {
+                    $unwind: '$products'
+                },
+                {
+                    $group: {
+                        _id: '$products.idProduct',
+                        totalCount: { $sum: '$products.amount' }
+                    }
+                },
+                {
+                    $sort: { totalCount: -1 }
+                },
+                {
+                    $lookup: {
+                        from: 'Products',
+                        localField: '_id',
+                        foreignField: '_id',
+                        as: 'productDetails'
+                    }
+                },
+                {
+                    $unwind: '$productDetails'
+                },
+                {
+                    $replaceRoot: { newRoot: '$productDetails' } // Replace the root with productDetails
+                }
+            ]);
+
+            if (productCounts && productCounts.length > 0) {
+                return res.status(200).json({
+                    success: true,
+                    data: productCounts,
+                    message: `Sản phẩm được mua nhiều nhất trong thời gian qua ${days} ngày`,
+                });
+            } else {
+                return res.status(203).json({
+                    success: false,
+                    data: null,
+                    message: `Không tìm thấy idSản phẩm nào trong vòng ${days} ngày`,
+                });
+            }
+        } else {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid request. Please provide either "page" or "day" parameter.',
+            });
         }
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
     }
 };
+
 exports.listProductFromIdShop = async (req, res, next) => {
     let idShop = req.params.idShop;
     if (req.method == 'GET') {
@@ -72,7 +215,8 @@ exports.addProduct = async (req, res, next) => {
             !req.body.amountProduct &&
             !req.body.quantitySold &&
             !req.body.idCategoryPr &&
-            !req.body.discount
+            !req.body.discount && 
+            !req.body.type
         ) {
             return res.status(400).json({ success: false, data: [], message: 'Vui lòng không để trống ô nhập' });
         }
@@ -86,6 +230,7 @@ exports.addProduct = async (req, res, next) => {
         newObj.detailProduct = req.body.detailProduct;
         newObj.quantitySold = 0;
         newObj.rate = 0;
+        newObj.type = 1;
         newObj.createdAt = new Date();
 
         if (req.files != undefined) {
@@ -161,7 +306,8 @@ exports.editProduct = async (req, res, next) => {
             !req.body.amountProduct &&
             !req.body.quantitySold &&
             !req.body.idCategoryPr &&
-            !req.body.discount
+            !req.body.discount && 
+            !req.body.type
         ) {
             return res.status(400).json({ success: false, data: [], message: 'Vui lòng không để trống ô nhập' });
         }
@@ -172,7 +318,7 @@ exports.editProduct = async (req, res, next) => {
         newObj.discount = req.body.discount;
         newObj.idCategoryPr = req.body.idCategoryPr;
         newObj.amountProduct = req.body.amountProduct;
-        newObj.detailProduct = req.body.detailProduct;
+        newObj.detailProduct = req.body.detailProduct;     
         newObj.quantitySold = 0;//cập nhật
         newObj.rate = 0;//cập nhật
 

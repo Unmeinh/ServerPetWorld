@@ -22,7 +22,7 @@ exports.listUser = async (req, res, next) => {
             if (currentPage > totalPage) currentPage = totalPage;
             let skipCount = (currentPage - 1) * perPage;
 
-            let listUser = await mdUser.UserModel.find(filterSearch).sort(SortEmail).skip(skipCount).limit(perPage);
+            let listUser = await mdUser.UserModel.find(filterSearch).sort(SortEmail).populate('idAccount').skip(skipCount).limit(perPage);
             msg = 'Lấy danh sách user thành công';
             return res.render('User/listUser', { listUser: listUser, countAllUser: totalCount, countNowUser: listUser.length, msg: msg, currentPage: currentPage, totalPage: totalPage });
         } catch (error) {
@@ -34,7 +34,7 @@ exports.listUser = async (req, res, next) => {
 }
 exports.detailUser = async (req, res, next) => {
     let idUser = req.params.idUser;
-    let objU = await mdUser.UserModel.findById(idUser);
+    let objU = await mdUser.UserModel.findById(idUser).populate('idAccount');
     res.render('User/detailUser',{objU:objU,moment:moment});
 }
 exports.addUser = async (req, res, next) => {

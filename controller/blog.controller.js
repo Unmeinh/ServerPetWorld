@@ -1,4 +1,5 @@
 let mdBlog = require('../model/blog.model');
+let mdUserAcc = require('../model/userAccount.model');
 let moment = require('moment');
 let fs = require('fs');
 let hashFunction = require('../function/hashFunction')
@@ -46,7 +47,10 @@ exports.listAllBlog = async (req, res, next) => {
 exports.detailBlog = async (req, res, next) => {
     let idBlog = req.params.idBlog;
     let objB = await mdBlog.BlogModel.findById(idBlog).populate('idUser');
-    res.render('Blog/detailBlog', { objB: objB, moment: moment });
+    let idAccount = objB.idUser.idAccount
+    let objUserAcc = await mdUserAcc.UserAccountModel.findById(idAccount);
+    console.log("objAxx "+objUserAcc);
+    res.render('Blog/detailBlog', { objB: objB,objUserAcc:objUserAcc, moment: moment });
 }
 
 exports.addBlog = async (req, res, next) => {

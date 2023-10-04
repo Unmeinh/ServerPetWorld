@@ -1,5 +1,6 @@
 let mdFollow = require('../../model/follows.model').FollowsModel;
 let mdUser = require('../../model/user.model').UserModel;
+const unidecode = require('unidecode');
 
 exports.myFollowing = async (req, res, next) => {
     try {
@@ -14,6 +15,39 @@ exports.myFollowing = async (req, res, next) => {
         return res.status(500).json({ success: false, message: error.message });
     }
 }
+
+exports.searchMyFollowing = async (req, res, next) => {
+    try {
+        const { fullName } = req.query;
+        const normalizedFullName = unidecode(fullName).toLowerCase();
+        const user = await mdUser.findById(req.user._id).populate('followings.idFollow', 'fullName avatarUser');
+
+        if (!user) {
+            return res.status(500).json({ success: false, data: [], message: "User not found!" });
+        }
+
+        const matchingUsers = [];
+
+        for (const following of user.followings) {
+            const normalizedFollowingFullName = unidecode(following.idFollow.fullName).toLowerCase();
+            if (normalizedFollowingFullName.includes(normalizedFullName)) {
+                const { fullName, avatarUser } = following.idFollow;
+                matchingUsers.push({ fullName, avatarUser });
+            }
+        }
+
+        if (matchingUsers.length > 0) {
+            return res.status(200).json({ success: true, data: matchingUsers, type: "following", message: "Matching users found." });
+        } else {
+            return res.status(200).json({ success: true, data: [], message: "No matching users found." });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+
 
 exports.myFollower = async (req, res, next) => {
     try {
