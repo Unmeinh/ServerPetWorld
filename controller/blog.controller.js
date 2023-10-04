@@ -119,7 +119,7 @@ exports.shareBlog = async (req, res, next) => {
             let urlWithoutType = image.substring(0, image.lastIndexOf('.'));
             urlWithoutType = urlWithoutType.substring(0, urlWithoutType.lastIndexOf('blog'))
                 + "blogHDScale" + urlWithoutType.substring(urlWithoutType.lastIndexOf('/'));
-            imageUrl = urlWithoutType + "_HDScale.png";
+            imageUrl = urlWithoutType + "_HDScale.jpg";
         } else {
             imageUrl = "https://res.cloudinary.com/dcf7f43rh/image/upload/v1695556234/images/logo/s2vq9g9kmy10wxvmeekc.jpg";
         }

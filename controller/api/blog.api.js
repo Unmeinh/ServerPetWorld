@@ -210,16 +210,25 @@ exports.addBlog = async (req, res, next) => {
             let newBlog = new mdBlog.BlogModel();
             newBlog.contentBlog = req.body.contentBlog;
             newBlog.contentFont = req.body.contentFont;
-            newBlog.imageBlogs = await onUploadImages(req.files, 'blog')
+            let images = await onUploadImages(req.files, 'blog')
+            if (images != [] && images[0] == false) {
+                if (images[1].message.indexOf('File size too large.') > -1) {
+                    return res.status(500).json({ success: false, data: {}, message: "Dung lượng một ảnh tối đa là 10MB!" });
+                } else {
+                    return res.status(500).json({ success: false, data: {}, message: images[1].message });
+                }
+            } 
+            newBlog.imageBlogs = [...images];
             newBlog.aspectRatio = req.body.aspectRatio;
-            newBlog.idUser = req.body.idUser;
+            newBlog.idUser = req.user._id;
             newBlog.createdAt = new Date();
             newBlog.comments = 0;
             newBlog.shares = 0;
             newBlog.interacts = [];
 
             await newBlog.save();
-            return res.status(201).json({ success: true, data: newBlog, message: "Đã đăng bài viết mới" });
+            let blog = await getBlogWithFollow(newBlog, req.user._id)
+            return res.status(201).json({ success: true, data: blog, message: "Đã đăng bài viết mới" });
         } catch (error) {
             console.log(error.message);
             let message = '';
@@ -236,33 +245,30 @@ exports.addBlog = async (req, res, next) => {
 }
 
 exports.editBlog = async (req, res, next) => {
-
     let idBlog = req.params.idBlog;
     if (req.method == 'PUT') {
         try {
-            let newBlog = new mdBlog.BlogModel();
-            newBlog.contentBlog = req.body.contentBlog;
-            newBlog.contentFont = req.body.contentFont;
-
-            if (req.files != undefined) {
-                req.files.map((file, index, arr) => {
-                    if (file != {}) {
-                        fs.renameSync(file.path, '../../public/upload/' + file.originalname);
-                        let imagePath = 'http://localhost:3000/upload/' + file.originalname;
-                        newBlog.imageBlogs.push(imagePath);
-                    }
-                })
+            let oldBlog = await mdBlog.BlogModel.findById(idBlog);
+            oldBlog.contentBlog = req.body.contentBlog;
+            oldBlog.contentFont = req.body.contentFont;
+            oldBlog.aspectRatio = req.body.aspectRatio;
+            let images = await onUploadImages(req.files, 'blog');
+            if (images != [] && images[0] == false) {
+                if (images[1].message.indexOf('File size too large.') > -1) {
+                    return res.status(500).json({ success: false, data: {}, message: "Dung lượng một ảnh tối đa là 10MB!" });
+                } else {
+                    return res.status(500).json({ success: false, data: {}, message: images[1].message });
+                }
+            } 
+            if (JSON.parse(req.body.oldImages) != []) {
+                oldBlog.imageBlogs = [...JSON.parse(req.body.oldImages), ...images];
+            } else {
+                oldBlog.imageBlogs = [ ...images];
             }
 
-            newBlog.imageBlogs = req.body.imageBlogs;
-            // newBlog.aspectRatio = req.body.aspectRatio;
-            newBlog.idUser = req.user._id;
-            newBlog.createdAt = new Date();
-            // newBlog.comments = 0;
-            // newBlog.shares = 0;
-
-            await mdBlog.BlogModel.findByIdAndUpdate(idBlog, newBlog);
-            return res.status(200).json({ success: true, data: newBlog, message: "Đã sửa bài viết" });
+            await mdBlog.BlogModel.findByIdAndUpdate(idBlog, oldBlog);
+            let blog = await getBlogWithFollow(oldBlog, req.user._id);
+            return res.status(201).json({ success: true, data: blog, message: "Đã sửa bài viết" });
         } catch (error) {
             console.log(error.message);
             let message = '';
@@ -284,7 +290,7 @@ exports.deleteBlog = async (req, res, next) => {
     if (req.method == 'DELETE') {
         try {
             await mdBlog.BlogModel.findByIdAndDelete(idBlog);
-            return res.status(203).json({ success: true, data: {}, message: "Tài khoản này không còn tồn tại" });
+            return res.status(203).json({ success: true, data: {}, message: "Xóa blog thành công." });
         } catch (error) {
             return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
         }
@@ -346,4 +352,29 @@ function getListWithFollow(blogs, loginId) {
         }
     })
     return blogsWithFollow;
+}
+
+async function getBlogWithFollow(blog, loginId) {
+    let blogWithFollow = {};
+    let blogPopulate = await blog.populate(['idUser', {
+        path: 'idUser',
+        populate: {
+            path: 'idAccount',
+            select: 'online'
+        },
+    }]);
+    let user = blogPopulate.idUser;
+    let isFL = user.followers.find(follower => String(follower.idFollow) == String(loginId));
+    if (isFL) {
+        blogWithFollow = {
+            ...blogPopulate.toObject(),
+            isFollowed: true
+        };
+    } else {
+        blogWithFollow = {
+            ...blogPopulate.toObject(),
+            isFollowed: false
+        };
+    }
+    return blogWithFollow;
 }
