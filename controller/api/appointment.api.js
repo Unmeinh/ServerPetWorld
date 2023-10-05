@@ -34,6 +34,14 @@ let mdAppointment = require('../../model/appointment.model');
 
 exports.listAppointment = async (req, res, next) => {
   if (req.method == 'GET') {
+    let listCheck= await mdAppointment.AppointmentModel.find();
+    for (let i = 0; i < listCheck.length; i++) {
+      const appointment = listCheck[i];
+      if (new Date(appointment.createdAt) < new Date() && appointment.status == 0) {
+        appointment.status = "2";
+        await mdAppointment.AppointmentModel.findByIdAndUpdate(appointment._id, appointment);
+      }
+    }
     let listAppointment = await mdAppointment.AppointmentModel.aggregate([
       {
         $group: {
@@ -59,7 +67,7 @@ exports.listAppointment = async (req, res, next) => {
       },
       {
         $lookup: {
-          from: "PetModel",
+          from: "Pets",
           localField: "appointment.idPet",
           foreignField: "_id",
           as: "idPet"
@@ -67,7 +75,7 @@ exports.listAppointment = async (req, res, next) => {
       },
       {
         $lookup: {
-          from: "UserModel",
+          from: "User",
           localField: "appointment.idUser",
           foreignField: "_id",
           as: "idUser"
@@ -75,17 +83,28 @@ exports.listAppointment = async (req, res, next) => {
       },
       {
         $lookup: {
-          from: "ShopModel",
+          from: "Shop",
           localField: "appointment.idShop",
-          foreignField: "idShop",
+          foreignField: "_id",
           as: "idShop"
+        }
+      },
+      {
+        $set: {
+          "appointment.idPet": "$idPet"
+        }
+      },
+      {
+        $set: {
+          "appointment.idUser": "$idUser"
         }
       },
       {
         $set: {
           "appointment.idShop": "$idShop"
         }
-      }
+      },
+      { $sort: { "appointment.appointmentDate": -1 } }
     ]);
     if (listAppointment) {
       return res.status(200).json({ success: true, data: listAppointment, message: 'Lấy danh sách lịch hẹn thành công' });
