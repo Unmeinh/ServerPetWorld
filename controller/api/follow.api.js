@@ -10,7 +10,6 @@ exports.myFollowing = async (req, res, next) => {
         } else {
             return res.status(500).json({ success: false, data: [], message: "Không có người đang theo dõi!" });
         }
-
     } catch (error) {
         console.log(error);
         return res.status(500).json({ success: false, message: error.message });
@@ -140,7 +139,7 @@ exports.insertFollow = async (req, res, next) => {
                     await mdUser.findByIdAndUpdate(userFollow._id, userFollow);
                 }
 
-                return res.status(201).json({ success: true, data: [req.user, userFollow], message: "Lấy danh sách người theo dõi thành công." });
+                return res.status(201).json({ success: true, data: {}, message: "Theo dõi người dùng thành công." });
             } else {
                 return res.status(500).json({ success: false, data: {}, message: "Lỗi truy vấn cơ sở dữ liệu!" });
             }
