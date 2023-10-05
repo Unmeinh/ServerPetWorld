@@ -5,9 +5,12 @@ var mdJWT= require('../../middlewares/api.auth');
 
 router.get('/list',mdJWT.api_auth, appointmentCtrl.listAppointment);
 
+router.get('/detail/:idAppt',mdJWT.api_auth, appointmentCtrl.detailAppointment);
+
 router.post('/insert',mdJWT.api_auth,appointmentCtrl.addAppointment);
 
 router.put('/update/:idAppt',mdJWT.api_auth,appointmentCtrl.editAppointment);
+//phân chia hẹn theo tháng, trả về cần check thời gian xem quá hẹn chưa
 
 // router.put('/update/:idNotice',mdJWT.api_auth, noticeCtrl.editNotice);
 
