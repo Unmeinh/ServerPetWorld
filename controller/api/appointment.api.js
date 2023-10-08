@@ -1,60 +1,58 @@
-const moment = require('moment/moment');
 let mdAppointment = require('../../model/appointment.model');
-
-// exports.listAppointment = async (req, res, next) => {
-//   if (req.method == 'GET') {
-//     let listAppointment = await mdAppointment.AppointmentModel.find().populate('idShop').populate('idPet').populate('idUser').sort({ appointmentDate: -1 });
-//     if (listAppointment) {
-//       let listByMonth = [];
-//       for (let i = 0; i < listAppointment.length; i++) {
-//         const appointment = listAppointment[i];
-//         if (new Date(appointment.createdAt) < new Date() && appointment.status == 0) {
-//           appointment.status = 2;
-//           await mdAppointment.AppointmentModel.findByIdAndUpdate(appointment._id, appointment);
-//         }
-//         let monthYear = moment(new Date(appointment.createdAt)).format("YYYY-MM");
-//         let isExist = listByMonth.find((aM) => String(aM.month) == String(monthYear));
-//         if (isExist) {
-
-//         } else {
-//           let apmMonth = {
-//             month: monthYear,
-//             arr_apm: [appointment]
-//           }
-//           listByMonth.push
-//         }
-//       }
-//       return res.status(200).json({ success: true, data: listAppointment, message: 'Lấy danh sách lịch hẹn thành công' });
-//     }
-//     else {
-//       return res.status(500).json({ success: false, data: [], message: 'Không lấy được danh sách lịch hẹn' });
-//     }
-//   }
-// }
 
 exports.listAppointment = async (req, res, next) => {
   if (req.method == 'GET') {
-    let listCheck= await mdAppointment.AppointmentModel.find();
+    let listCheck = await mdAppointment.AppointmentModel.find({ idUser: req.user._id });
     for (let i = 0; i < listCheck.length; i++) {
       const appointment = listCheck[i];
-      if (new Date(appointment.createdAt) < new Date() && appointment.status == 0) {
+      if (new Date(appointment.appointmentDate) < new Date() && appointment.status == 0) {
         appointment.status = "2";
         await mdAppointment.AppointmentModel.findByIdAndUpdate(appointment._id, appointment);
       }
     }
     let listAppointment = await mdAppointment.AppointmentModel.aggregate([
       {
+        $match: {
+          idUser: req.user._id
+        }
+      },
+      { $sort: { appointmentDate: -1 } },
+      {
+        $lookup: {
+          from: "Pets",
+          localField: "idPet",
+          foreignField: "_id",
+          as: "iPet"
+        }
+      },
+      {
+        $lookup: {
+          from: "User",
+          localField: "idUser",
+          foreignField: "_id",
+          as: "iUser"
+        }
+      },
+      {
+        $lookup: {
+          from: "Shop",
+          localField: "idShop",
+          foreignField: "_id",
+          as: "iShop"
+        }
+      },
+      {
         $group: {
           _id: {
-            year: { $year: "$createdAt" },
-            month: { $month: "$createdAt" }
+            year: { $year: "$appointmentDate" },
+            month: { $month: "$appointmentDate" }
           },
-          appointment: {
+          appointments: {
             $push: {
               _id: "$_id",
-              idPet: "$idPet",
-              idUser: "$idUser",
-              idShop: "$idShop",
+              idPet: "$iPet",
+              idUser: "$iUser",
+              idShop: "$iShop",
               amountPet: "$amountPet",
               location: "$location",
               deposits: "$deposits",
@@ -65,51 +63,12 @@ exports.listAppointment = async (req, res, next) => {
           }
         }
       },
-      {
-        $lookup: {
-          from: "Pets",
-          localField: "appointment.idPet",
-          foreignField: "_id",
-          as: "idPet"
-        }
-      },
-      {
-        $lookup: {
-          from: "User",
-          localField: "appointment.idUser",
-          foreignField: "_id",
-          as: "idUser"
-        }
-      },
-      {
-        $lookup: {
-          from: "Shop",
-          localField: "appointment.idShop",
-          foreignField: "_id",
-          as: "idShop"
-        }
-      },
-      {
-        $set: {
-          "appointment.idPet": "$idPet"
-        }
-      },
-      {
-        $set: {
-          "appointment.idUser": "$idUser"
-        }
-      },
-      {
-        $set: {
-          "appointment.idShop": "$idShop"
-        }
-      },
-      { $sort: { "appointment.appointmentDate": -1 } }
+      { $project: { _id: '$_id', appointments: '$appointments' } },
+      { $sort: { _id: -1 } },
     ]);
     if (listAppointment) {
-      return res.status(200).json({ success: true, data: listAppointment, message: 'Lấy danh sách lịch hẹn thành công' });
-    }
-    else {
+      return res.status(200).json({ success: true, data: listAppointment, message: 'Lấy danh sách lịch hẹn thành công.' });
+    } else {
       return res.status(500).json({ success: false, data: [], message: 'Không lấy được danh sách lịch hẹn' });
     }
   }
@@ -120,159 +79,116 @@ exports.detailAppointment = async (req, res, next) => {
     let appointment = await mdAppointment.AppointmentModel.findById(req.params.idAppt).populate('idShop').populate('idPet').populate('idUser');
     if (appointment) {
       if (appointment != {}) {
-        if (new Date(appointment.createdAt) < new Date() && appointment.status == 0) {
+        if (new Date(appointment.appointmentDate) < new Date() && appointment.status == 0) {
           appointment.status = 2;
           await mdAppointment.AppointmentModel.findByIdAndUpdate(appointment._id, appointment);
-          return res.status(200).json({ success: true, data: appointment, message: 'Lấy lịch hẹn thành công' });
+          return res.status(200).json({ success: true, data: appointment, message: 'Lấy lịch hẹn thành công.' });
         }
       }
-      return res.status(200).json({ success: true, data: appointment, message: 'Lấy lịch hẹn thành công' });
+      return res.status(200).json({ success: true, data: appointment, message: 'Lấy lịch hẹn thành công.' });
+    } else {
+      return res.status(500).json({ success: false, data: {}, message: 'Không lấy được lịch hẹn' });
     }
-    else {
-      return res.status(500).json({ success: false, data: [], message: 'Không lấy được danh sách lịch hẹn' });
-    }
   }
-}
-
-function validateAppointmentData(appointmentData) {
-  const message = [];
-
-  if (!appointmentData.amountPet || appointmentData.amountPet.trim().length === 0) {
-    message.push('Vui lòng không bỏ trống tên voucher!');
-  }
-
-  if (!appointmentData.location || appointmentData.location.trim().length === 0) {
-    message.push('Vui lòng không bỏ trống discount!');
-  }
-
-  if (!appointmentData.deposits || appointmentData.deposits.trim().length === 0) {
-    message.push('Vui lòng không bỏ trống số tiền tối thiểu!');
-  }
-
-  if (!appointmentData.status || appointmentData.status.trim().length === 0) {
-    message.push('Vui lòng không bỏ trống !');
-  }
-
-  if (!appointmentData.idPet || appointmentData.idPet.trim().length === 0) {
-    message.push('Vui lòng không bỏ trống !');
-  }
-
-  if (!appointmentData.idShop || appointmentData.idShop.trim().length === 0) {
-    message.push('Vui lòng không bỏ trống !');
-  }
-
-  if (!appointmentData.idUser || appointmentData.idUser.trim().length === 0) {
-    message.push('Vui lòng không bỏ trống !');
-  }
-
-  // Kiểm tra các điều kiện khác cần thiết
-  return message;
 }
 
 exports.addAppointment = async (req, res, next) => {
-  let msg = '';
-  const appointmentDate = req.body.appointmentDate || new Date();
-  const apptErrors = validateAppointmentData(req.body);
-
-  if (apptErrors.length > 0) {
-    // Xử lý lỗi nếu có
-    return res.status(400).json({ message: apptErrors });
-  }
-
-  const newObjAppt = new mdAppointment.AppointmentModel();
-  newObjAppt.amountPet = req.body.amountPet;
-  newObjAppt.location = req.body.location;
-  newObjAppt.deposits = req.body.deposits;
-  newObjAppt.status = req.body.status;
-  newObjAppt.idPet = req.body.idPet;
-  newObjAppt.idUser = req.body.idUser;
-  newObjAppt.idShop = req.body.idShop;
-  newObjAppt.appointmentDate = appointmentDate;
-  newObjAppt.createdAt = new Date();
-
-
-  // const expirationDate = new Date();
-  // expirationDate.setDate(expirationDate.getDate() + 30);// + 30 ngày sau thì hết hạn
-  // newObjVoucher.expiedAt = expirationDate;
-
-
-
   try {
-    await newObjAppt.save();
+    let { amountPet, location, deposits, appointmentDate, idPet, idShop } = req.body;
+    if (req.method == "POST") {
+      if (amountPet && location && deposits && appointmentDate && idPet && idShop) {
+        let listApm = await mdAppointment.AppointmentModel.find({ idPet: idPet, idUser: req.user._id })
+        if (listApm && listApm.length > 0) {
+          let last = listApm.length - 1;
+          if (listApm[last].status == "-1" || listApm[last].status == "0") {
+            return res.status(201).json({ success: false, data: {}, message: "Thú cưng này đang có lịch hẹn!" });
+          }
+        }
 
-    return res.status(200).json({ success: true, data: newObjAppt, message: 'Đặt lịch hẹn thành công!' });
+        const newObjAppt = new mdAppointment.AppointmentModel();
+        newObjAppt.amountPet = amountPet;
+        newObjAppt.location = location;
+        newObjAppt.deposits = deposits;
+        newObjAppt.status = "-1";
+        newObjAppt.idPet = idPet;
+        newObjAppt.idUser = req.user._id;
+        newObjAppt.idShop = idShop;
+        newObjAppt.appointmentDate = appointmentDate;
+        newObjAppt.createdAt = new Date();
+
+        await newObjAppt.save();
+        return res.status(201).json({ success: true, data: newObjAppt, message: 'Đặt lịch hẹn thành công.' });
+      } else {
+        return res.status(500).json({ success: false, data: {}, message: "Không đọc được giữ liệu tải lên!" });
+      }
+    }
   } catch (error) {
-    console.log(error.message);
-
-    msg = error.message;
-    return res.status(500).json({ success: false, data: {}, message: msg });
+    return res.status(500).json({ success: false, data: {}, message: error.message });
   }
 }
 
 exports.editAppointment = async (req, res, next) => {
-  let msg = '';
-  let idAppt = req.params.idAppt;
+  try {
+    let { status, idAppt } = req.body;
+    if (req.method == "PUT") {
+      if (status && idAppt) {
+        const objAppt = await mdAppointment.AppointmentModel.findById(idAppt);
+        if (!objAppt) {
+          return res.status(500).json({ success: false, message: 'Không tìm thấy lịch hẹn.' });
+        }
 
-  const apptErrors = validateAppointmentData(req.body);
+        if (status == "0" || status == "1" || status == "2" || status == "3") {
+          objAppt.status = status;
+          let mes = "";
+          switch (status) {
+            case "0":
+              mes = "Đổi trạng thái thành đang hẹn thành công."
+              break;
+            case "1":
+              mes = "Đổi trạng thái thành đã hẹn thành công."
+              break;
+            case "2":
+              mes = "Đổi trạng thái thành lỡ hẹn thành công."
+              break;
+            case "3":
+              mes = "Hủy hẹn thành công."
+              break;
 
-  if (apptErrors.length > 0) {
-    // Xử lý lỗi nếu có
-    return res.status(400).json({ message: apptErrors });
-  }
+            default:
+              break;
+          }
 
-  if (!idAppt) {
-    return res.status(500).json({
-      success: false,
-      message: 'idAppt không hợp lệ',
-    });
-  }
-  // Lấy thông tin cuộc hẹn hiện tại
-  const objAppt = await mdAppointment.AppointmentModel.findById(idAppt);
-
-  // Xử lý PUT
-  if (req.method === 'PUT') {
-    try {
-      // Kiểm tra giá trị trạng thái từ query parameter hoặc req.body
-      let status = req.body.status;
-      let appointmentStatus = null;
-
-      if (status == 0 || status == 1 || status == 2 || status == 3) {
-        appointmentStatus = status;
+          await mdAppointment.AppointmentModel.findByIdAndUpdate(idAppt, objAppt);
+          return res.status(201).json({ success: true, data: objAppt, message: mes });
+        } else {
+          return res.status(500).json({ success: false, message: 'Trạng thái không hợp lệ.' });
+        }
       } else {
-        return res.status(400).json({ success: false, message: 'Trạng thái không hợp lệ.' });
+        return res.status(500).json({ success: false, data: {}, message: "Không đọc được giữ liệu tải lên!" });
       }
-
-      // Sửa trường status của đối tượng objAppt
-      objAppt.status = appointmentStatus;
-
-      // Lưu lại cuộc hẹn đã sửa
-      await objAppt.save();
-
-      msg = 'Đã sửa trạng thái thành công';
-      return res.status(200).json({ success: true, message: msg });
-    } catch (error) {
-      msg = 'Lỗi ' + error.message;
-      console.log(error);
-      return res.status(500).json({ success: false, data: {}, message: msg });
     }
+  } catch (error) {
+    return res.status(500).json({ success: false, data: {}, message: error.message });
   }
 };
 
 exports.deleteAppointment = async (req, res, next) => {
-  let idAppt = req.params.idAppt;
+  try {
+    let { idAppt } = req.params;
+    if (req.method == "DELETE") {
+      if (idAppt) {
+        const objAppt = await mdAppointment.AppointmentModel.findById(idAppt);
+        if (!objAppt) {
+          return res.status(500).json({ success: false, message: 'Không tìm thấy lịch hẹn.' });
+        }
 
-  if (!idAppt) {
-    return res.status(500).json({
-      success: false,
-      message: 'idAppt không hợp lệ',
-    });
-  }
-  if (req.method == 'DELETE') {
-    try {
-      await mdAppointment.AppointmentModel.findByIdAndDelete(idAppt);
-      return res.status(203).json({ success: true, data: {}, message: "Lịch hẹn này không còn tồn tại" });
-    } catch (error) {
-      return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+        await mdAppointment.AppointmentModel.findByIdAndDelete(idAppt);
+        return res.status(203).json({ success: true, data: {}, message: 'Xóa lịch hẹn thành công.' });
+      } else {
+        return res.status(500).json({ success: false, data: {}, message: "Không đọc được giữ liệu tải lên!" });
+      }
     }
+  } catch (error) {
+    return res.status(500).json({ success: false, data: {}, message: error.message });
   }
 }
