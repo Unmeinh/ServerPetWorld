@@ -147,7 +147,7 @@ exports.listAllBlog = async (req, res, next) => {
             listAllBlogRequested = [...listBlogFollowings, ...listBlogLikeNotFollowings, ...listBlogLikeAndFollowings, ...listTop10Blog, ...listNotTop10BlogEndRemain];
 
             let blogs = getListWithFollow(listAllBlog, req.user._id);
-            return res.status(200).json({ success: true, data: listAllBlogRequested, message: "Lấy danh sách bài viết thành công" });
+            return res.status(200).json({ success: true, data: blogs, message: "Lấy danh sách bài viết thành công" });
         }
         else {
             return res.status(500).json({ success: false, message: "Không có bài viết nào!" });
