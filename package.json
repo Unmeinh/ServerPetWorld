@@ -7,7 +7,7 @@
     "test": "nodemon npm start"
   },
   "dependencies": {
-    "bcrypt": "^5.1.0",
+    "bcrypt": "^5.1.1",
     "cloudinary": "^1.40.0",
     "cookie-parser": "~1.4.4",
     "crypto": "^1.0.1",
