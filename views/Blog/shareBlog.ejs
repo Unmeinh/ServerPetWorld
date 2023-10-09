@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        <%= "Chia sẻ blog" %>
+    </title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <% if (typeof(blog) != undefined) { %>
+        <meta property="og:url"
+            content="<%= imageBlog %>" />
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content="<%= contentBlog %>" />
+        <meta property="og:description" content="" />
+        <meta property="og:image"
+            content="<%= imageBlog %>" />
+        <% } %>
+</head>
+
+<body>
+    <img src="https://assets-global.website-files.com/5c7fdbdd4e3feeee8dd96dd2/6134707265a929f4cdfc1f6d_5.gif"
+        alt="loading.gif" width="1000" height="auto" />
+</body>
+
+</html>

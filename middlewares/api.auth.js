@@ -6,7 +6,6 @@ const string_word_secret = process.env.TOKEN_SEC_KEY;
 
 const api_auth = async (req, res, next) => {
     let header_token = req.header('Authorization');
-    console.log("header_token" + header_token);
     if (typeof (header_token) == 'undefined') {
         console.log('Không xác định token');
         return res.status(403).json({ success: false, message: 'Không xác định token!' });
@@ -14,12 +13,11 @@ const api_auth = async (req, res, next) => {
     const token = header_token.replace('Bearer ', '');
     try {
         const data = jwt.verify(token, string_word_secret)
-        console.log(data);
-        let account = await mdUserAccount.findOne({ idUser: data._id, token: token })
+        let account = await mdUserAccount.findOne({ idUser: data._id, token: token });
         if (!account) {
             return res.status(401).json({ success: false, data: {}, message: 'Không xác định được tài khoản!' });
         }
-        let user = await mdUser.findById(account.idUser);
+        let user = await mdUser.findById(account.idUser).populate("idAccount");
         if (!user) {
             return res.status(401).json({ success: false, data: {}, message: 'Không xác định được người dùng!' });
         }

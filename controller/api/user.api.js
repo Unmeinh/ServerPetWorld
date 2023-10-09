@@ -4,7 +4,8 @@ let bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const OTPEmailModel = require("../../model/otpemail.model").OTPEmailModel;
 const otpGenerator = require("otp-generator");
-let hashFunction = require("../../function/hashEmail");
+let { encodeToSha256 } = require("../../function/hashFunction");
+const { onUploadImages } = require("../../function/uploadImage");
 
 exports.listUser = async (req, res, next) => {
   try {
@@ -66,11 +67,32 @@ exports.detailUser = async (req, res, next) => {
   let idUser = req.params.idUser;
   try {
     let objU = await mdUser.findById(idUser).populate('idAccount');
-    return res.status(200).json({
-      success: true,
-      data: objU,
-      message: "Lấy dữ liệu của người dùng khác thành công",
-    });
+    if (objU) {
+      let isFollowed = objU.followers.find((follow) => String(follow.idFollow) == String(req.user._id))
+      if (isFollowed) {
+        return res.status(200).json({
+          success: true,
+          data: {
+            ...objU.toObject(),
+            isFollowed: true
+          },
+          message: "Lấy dữ liệu của người dùng khác thành công",
+        });
+      } else {
+        return res.status(200).json({
+          success: true,
+          data: {
+            ...objU.toObject(),
+            isFollowed: false
+          },
+          message: "Lấy dữ liệu của người dùng khác thành công",
+        });
+      }
+    } else {
+      return res
+        .status(500)
+        .json({ success: false, data: {}, message: "Không tải được dữ liệu người dùng!" });
+    }
   } catch (error) {
     return res
       .status(500)
@@ -135,7 +157,8 @@ exports.loginUser = async (req, res, next) => {
           .json({ success: false, message: "Sai thông tin đăng nhập!" });
       }
       objU.online = 0;
-      await mdUserAccount.findByIdAndUpdate(objU._id, objU)
+      await mdUserAccount.findByIdAndUpdate(objU._id, objU);
+      console.log("token: " + objU.token,);
       return res.status(201).json({
         success: true,
         data: {},
@@ -169,7 +192,7 @@ exports.logoutUser = async (req, res, next) => {
   }
 };
 
-exports.updateInfo = async (req, res, next) => {
+exports.updateUser = async (req, res, next) => {
   if (req.method == "PUT") {
     if (req.body.typeInfo) {
       try {
@@ -198,11 +221,79 @@ exports.updateInfo = async (req, res, next) => {
           default:
             break;
         }
+        return res.status(201).json({ success: true, data: {}, message: "Cập nhật dữ liệu thành công " });
       } catch (error) {
-        return res.status(500).json({ success: false, msg: "Lỗi: " + error.message });
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
       }
     } else {
       return res.status(500).json({ success: false, data: {}, message: "Không đọc được dữ liệu tải lên! " });
+    }
+  }
+};
+
+exports.updateAvatar = async (req, res, next) => {
+  if (req.method == "PUT") {
+    try {
+      let result = await onUploadImages(req.files, "user");
+      if (result != []) {
+        req.user.avatarUser = result[0];
+        await mdUser.findByIdAndUpdate(req.user._id, req.user)
+        return res.status(201).json({ success: true, data: {}, message: "Cập nhật ảnh đại diện thành công." });
+      } else {
+        return res.status(201).json({ success: false, data: {}, message: "Không có ảnh tải lên!" });
+      }
+    } catch (error) {
+      return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+  }
+};
+
+exports.updateAccount = async (req, res, next) => {
+  if (req.method == "PUT") {
+    if (req.body.typeInfo) {
+      try {
+        switch (req.body.typeInfo) {
+          case "phoneNumber":
+            req.account.phoneNumber = req.body.valueUpdate;
+            req.account.isVerifyPhoneNumber = 0;
+            await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
+            return res.status(201).json({ success: true, data: {}, message: "Cập nhật dữ liệu thành công!" });
+          case "emailAddress":
+            req.account.emailAddress = req.body.valueUpdate;
+            req.account.isVerifyEmail = 1;
+            await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
+            let encode = encodeToSha256(req.body.valueUpdate);
+            let linkVerify = "https://0732-2402-800-61c4-c98-dcce-9914-21bc-1dd3.ngrok-free.app/account/verifyEmail/" + encode;
+            await sendEmailLink(req.body.valueUpdate, linkVerify, res);
+            break;
+
+          default:
+            break;
+        }
+      } catch (error) {
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+      }
+    } else {
+      return res.status(500).json({ success: false, data: {}, message: "Không đọc được dữ liệu tải lên! " });
+    }
+  }
+};
+
+exports.deleteEmail = async (req, res, next) => {
+  if (req.method == "DELETE") {
+    try {
+      req.account.emailAddress = "Chưa thiết lập";
+      req.account.isVerifyEmail = 1;
+      await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
+      return res.status(203).json({
+        success: true,
+        data: {},
+        message: "Hủy liên kết email thành công.",
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ success: false, message: "Lỗi: " + error.message });
     }
   }
 };
@@ -211,7 +302,8 @@ exports.deleteUser = async (req, res, next) => {
   let idUser = req.params.idUser;
   if (req.method == "DELETE") {
     try {
-      await mdUser.findByIdAndDelete({ _id: idUser });
+      await mdUser.findByIdAndDelete({ _id: req.user._id });
+      await mdUserAccount.findByIdAndDelete({ _id: req.account._id });
       return res.status(203).json({
         success: true,
         data: {},
@@ -273,8 +365,8 @@ exports.sendVerifyEmail = async (req, res, next) => {
       var data = await mdUserAccount.find({ emailAddress: req.body.email });
       if (data.length > 0) {
         if (data[0].isVerifyEmail == 1) {
-          let encode = hashFunction.encodeEmail(req.body.email);
-          let linkVerify = "https://73a8-2402-800-61c4-c98-5b7-54b0-1d1b-346e.ngrok-free.app/account/verifyEmail/" + encode;
+          let encode = encodeToSha256(req.body.email);
+          let linkVerify = "https://0732-2402-800-61c4-c98-dcce-9914-21bc-1dd3.ngrok-free.app/account/verifyEmail/" + encode;
           await sendEmailLink(req.body.email, linkVerify, res);
         } else {
           return res
@@ -417,12 +509,12 @@ async function sendEmailLink(email, link, res) {
       console.log(err);
       return res
         .status(500)
-        .json({ success: false, data: {}, message: "Gửi link xác minh thất bại!" });
+        .json({ success: false, data: {}, message: "Link xác minh email gửi thất bại!" });
     } else {
       console.log("Message sent: " + info.response);
       return res
-        .status(200)
-        .json({ success: true, data: {}, message: "Gửi link xác minh thành công." });
+        .status(201)
+        .json({ success: true, data: {}, message: "Link xác minh email đã được gửi." });
     }
   });
 }

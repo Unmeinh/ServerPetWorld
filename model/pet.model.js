@@ -14,7 +14,8 @@ let PetSchema = new db.mongoose.Schema(
         idShop:{type: db.mongoose.Schema.Types.ObjectId, ref:'ShopModel'},
         createdAt:{type:Date,required:true},
         rate:{type:Number, require:false},
-        disCount:{type:Number, require:false}
+        discount:{type:Number, require:false},
+        type:{type:Number, require:false},
         //  disCount:{type:db.mongoose.Schema.Types.ObjectId, ref:''}
     },
     {

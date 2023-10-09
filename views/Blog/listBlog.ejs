@@ -57,7 +57,12 @@
                             </a>
                         </td>
                         <td class="col-5">
-                            <%= row.contentBlog %>
+                            <% if(row.contentBlog.length > 53 ){ %>
+                                <%= row.contentBlog.substring(0,52) %> ...
+                            <% } else { %>
+                                <%= row.contentBlog %>
+                                <% }%>
+
                         </td>
                         <td>
                             <%= moment(row.createdAt).format('DD/MM/YYYY hh:mm:ss a') %>

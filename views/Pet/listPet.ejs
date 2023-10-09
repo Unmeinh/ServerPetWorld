@@ -70,7 +70,7 @@
             <%= row.amountPet %>
           </td>
           <td>
-            <%= moment(row.createdAt).format('DD-MM-YYYY hh:mm:ss a') %>
+            <%= moment(row.createdAt).format('DD/MM/  YYYY hh:mm:ss a') %>
           </td>
           <td><a href="/pet/detail/<%= row._id%>"
               style="background-color: #F582AE;padding: 8px;border-radius: 10px;text-decoration: none;color: white; font-weight: bold;">Chi
@@ -88,25 +88,25 @@
         </p>
         <nav>
           <ul class="pagination">
-            <% if (currentPage> 1) { %>
+            <% if (page> 1) { %>
               <li class="page-item">
-                <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
+                <a class="page-link" href="?page=<%= page - 1 %>" aria-label="Previous">
                   <span aria-hidden="true">&laquo;</span>
                 </a>
               </li>
               <% } %>
 
                 <% for (let i=1; i <=totalPages; i++) { %>
-                  <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                  <li class="page-item <%= i === page ? 'active' : '' %>">
                     <a class="page-link" href="?page=<%= i %>">
                       <%= i %>
                     </a>
                   </li>
                   <% } %>
 
-                    <% if (currentPage < totalPages) { %>
+                    <% if (page < totalPages) { %>
                       <li class="page-item">
-                        <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                        <a class="page-link" href="?page=<%= page + 1 %>" aria-label="Next">
                           <span aria-hidden="true">&raquo;</span>
                         </a>
                       </li>
