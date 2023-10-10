@@ -10,6 +10,7 @@ let PetSchema = new db.mongoose.Schema(
         weightPet:{type:Number,required:true},
         pricePet:{type:Number,required:true},
         amountPet:{type:Number,required:true},
+        quantitySold:{type:Number,required:true},
         idCategoryP:{type: db.mongoose.Schema.Types.ObjectId, ref:'CategoryPetModel'},
         idShop:{type: db.mongoose.Schema.Types.ObjectId, ref:'ShopModel'},
         createdAt:{type:Date,required:true},
