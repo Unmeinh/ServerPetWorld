@@ -22,9 +22,9 @@ exports.listbillProduct = async (req, res, next) => {
   }
 };
 exports.billProductUser = async (req, res, next) => {
-  console.log(req.body)
   const { _id } = req.user;
-  const { products: { idProduct, amount, price, discount }, location, total, paymentMethods, deliveryStatus, discountBill, type } = req.body;
+  const { products, location, total, paymentMethods, deliveryStatus, discountBill, type } = req.body;
+  const { idProduct, amount, price, discount } = products ?? { idProduct:'', amount:'', price:'', discount:'' }
   if (req.method == "POST") {
     let newbillProduct = new mdbillProduct.billProductModel();
     newbillProduct.idUser = _id;
@@ -37,7 +37,7 @@ exports.billProductUser = async (req, res, next) => {
     if (type == 1) {
       let listCartUser = await mdCart.CartModel.findOne({ idUser: _id }).populate("carts.idProduct");
       let billProduct = [];
-      listCartUser.carts.map((item) => {
+      listCartUser.carts.map((item,index) => {
         if (item.isSelected) {
           const product = {
             idProduct: item.idProduct._id,
@@ -46,8 +46,10 @@ exports.billProductUser = async (req, res, next) => {
             discount: item.idProduct.discount
           }
           billProduct.push(product);
+          listCartUser.carts.splice(index, 1);
         }
       })
+      await mdCart.CartModel.findByIdAndUpdate({_id: listCartUser._id},listCartUser)
       newbillProduct.products = billProduct;
     } else if (type == 0) {
       const itembillProduct = {
