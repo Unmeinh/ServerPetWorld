@@ -56,7 +56,6 @@ exports.detailShop = async (req, res, next) => {
     let idShop = req.params.idShop;
     let ObjShop = await mdShop.ShopModel.findById(idShop).populate('idUserShop')
     res.render('Shop/detailShop', { ObjShop: ObjShop ,moment:moment});
-    console.log("objjjjj" + ObjShop);
 }
 
 exports.deleteShop = async (req, res, next) => {
