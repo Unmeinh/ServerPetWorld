@@ -1,0 +1,117 @@
+<%- include('../inc/top',{title:'Chi tiết Sản Phẩm'}) %>
+
+    <div class="container mt-2">
+
+        <div class="form-group row m-2">
+            <label for="nameAdmin" class="col-sm-5 col-form-label" style="color: #848485;">Trang này để xem chi tiết sản
+                phẩm</label>
+            <div class="col-sm-5">
+            </div>
+        </div>
+        <form action="http://localhost:3000/product" method="get">
+            <!-- Các trường người dùng và giới tính ở đây -->
+            <!-- Tên người dùng -->
+
+
+            <div class="form-group row m-3" style="align-items: center;">
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Ảnh sản phẩm </label>
+                <div class="col-sm-5">
+                    <% if (typeof(ObjProduct.arrProduct) !='undefined' && ObjProduct.arrProduct.length> 0) { %>
+                        <% ObjProduct.arrProduct.forEach((image)=> { %>
+                            <img src="<%= image %>" style="width: 100px; height: 100px; border-radius: 10px;"
+                                class="img-fluid">
+                            <% }); %>
+                                <% } else { %>
+                                    <p>No images available.</p>
+                                    <% } %>
+                </div>
+            </div>
+
+
+            <div class="form-group row m-3">
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Tên sản phẩm</label>
+                <div class="col-sm-3">
+                    <label type="text" class="form-control" style="width: 200px;">
+                        <%= ObjProduct.nameProduct%>
+                    </label>
+                </div>
+
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Giá tiền</label>
+                <div class="col-sm-3">
+                    <label type="text" style="width: 200px;" class="form-control">
+                        <%= ObjProduct.priceProduct%>
+                    </label>
+                </div>
+
+            </div>
+
+            <div class="form-group row m-3">
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Số lượng sản phẩm</label>
+                <div class="col-sm-3">
+                    <label type="text" class="form-control" style="width: 200px;">
+                        <%= ObjProduct.amountProduct%>
+                    </label>
+                </div>
+
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Số lượng bán</label>
+                <div class="col-sm-3">
+                    <label type="text" style="width: 200px;" class="form-control">
+                        <%= ObjProduct.quantitySold %>
+                    </label>
+                </div>
+
+            </div>
+
+            <div class="form-group row m-3">
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Đánh giá</label>
+                <div class="col-sm-3">
+
+                    <label type="text" class="form-control" style="width: 200px;">
+                        <%= ObjProduct.rate %>
+                    </label>
+
+
+                </div>
+
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Giảm giá</label>
+                <div class="col-sm-3">
+                    <label type="text" style="width: 200px;" class="form-control">
+                        <%= ObjProduct.discount %>
+                    </label>
+                </div>
+
+            </div>
+            <div class="form-group row m-3">
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Chi tiết sản phẩm</label>
+                <div class="col-sm-3">
+                    <label type="text" class="form-control" style="width: 200px;">
+                        <%= ObjProduct.detailProduct %>
+                    </label>
+                </div>
+
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Thể loại</label>
+                <div class="col-sm-3">
+
+                    <% if(typeof( ObjProduct.idCategoryPr )!='undefined' ){%>
+                        <label type="text" class="form-control" style="width: 200px;">
+                            <%= ObjProduct.idCategoryPr.nameCategory %>
+                        </label>
+                        <%} else {%>
+                            <label type="text" class="form-control" style="width: 200px;">
+                                Không có thể loại
+                            </label>
+                            <%}%>
+                </div>
+            </div>
+            <div class="form-group row m-3">
+                <div class="col-sm-10">
+                    <a href="/product" style="background-color: #F582AE;" class="btn btn-secondary ">Quay lại</a>
+                </div>
+            </div>
+    </div>
+   
+    </form>
+
+    </div>
+
+    <%- include('../inc/bottom') %>

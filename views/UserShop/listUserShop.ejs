@@ -1,0 +1,134 @@
+<%- include('../inc/top',{title:'Quản lý người dùng shop'}) %>
+  <div class="container-fluid " style="width: 98%;">
+    <div class="row col m-3">
+
+      <form action="" class="row col-3 me-2" method="get">
+        <div
+          style="background-color: #F0F4F8;border-radius: 25px;align-items: center;display: flex;flex-direction: row;">
+          <div style="width: 10%;">
+            <button type="submit" style="border: none;"><img src="/upload/iconFind.png"
+                style="width: 20px;height: 20px;"></button>
+          </div>
+          <div style="width: 90%;">
+            <input name="filterSearch"
+              style="border: none;background-color: #F0F4F8;border-radius: 25px; box-shadow: none;" class="form-control"
+              placeholder="Tìm kiếm">
+          </div>
+        </div>
+      </form>
+
+      <form action="" method="get" class="row col-4 me-5"
+        style="display: flex; flex-direction: row; justify-content: space-between;">
+        <select name="SortEmail" class="row col-10 form-select"
+          style="background-color: #F0F4F8;border-radius: 20px;border: none;box-shadow: none; width: 80%;">
+          <option selected disabled>Sắp xếp email</option>
+          <option value="1">Sắp xếp từ a-z</option>
+          <option value="-1">Sắp xếp từ z-a</option>
+        </select>
+
+        <button class="btn" type="submit"
+          style="width: 20%;font-weight: bold;color: #F0F4F8;background-color: #8BD3DD;">Lọc</button>
+      </form>
+      <div class="row col-3">
+
+      </div>
+      <div class="row col-2 ms-1" style="align-items: center;">
+        <a href="/user-shop/add"
+          style="text-decoration: none; background-color: #F582AE; border-radius: 6px;text-align: center;padding: 7px;">
+          <span style="color: white;font-weight: bold;">Thêm user shop</span>
+        </a>
+      </div>
+    </div>
+
+    <table class="table  align-middle" style="border: white; ">
+
+      <tr style="background-color: #8BD3DD;">
+        <th style="border-radius: 6px 0 0 6px;">Tên đăng nhập</th>
+        <th>Email</th>
+        <th>Họ tên</th>
+
+        <th>Ngày tạo</th>
+        <th style="border-radius: 0 6px 6px 0;"></th>
+      </tr>
+
+      <% listUserShop.forEach((row)=>{ %>
+        <tr>
+          <td style="display: flex;flex-direction: row;">
+            <% if(typeof(row.avatarUserShop)!='undefined' ) { %>
+              <img src=" <%= row.avatarUserShop %>" style="width: 50px;height: 50px;border-radius: 8px;">
+              <% } else { %>
+                <img src="/upload/avatar_null.png"
+                  style="width: 50px;height: 50px;border-radius: 8px;">
+                <% }%>
+
+                  <div class="box" style="line-height: 8px;margin: 5px;">
+                    <p>
+                      <%= row.userName %>
+                    </p>
+
+                    <a href="/user-shop/delete/<%= row._id %>"
+                      style="text-decoration: none;color: rgb(171, 169, 169);">Xóa</a>
+                  </div>
+
+
+
+          </td>
+          <td>
+
+            <%= row.email %>
+
+          </td>
+          <td>
+
+            <%= row.fullName %>
+          </td>
+
+          <td>
+            <%= moment(row.createdAt).format('DD/MM/YYYY hh:mm:ss a') %>
+          </td>
+          <td><a href="/user-shop/detail/<%= row._id%>"
+              style="background-color: #F582AE;padding: 8px;border-radius: 10px;text-decoration: none;color: white; font-weight: bold;">Chi
+              tiết</a></td>
+        </tr>
+        <% }) %>
+    </table>
+
+    <div
+      style="display: flex; flex-direction: row; align-items: center;justify-content: space-between;position:absolute ; bottom: 0; width: 96%;">
+      <p> Số bản ghi: <span style="font-weight: bold;">
+          <%= countNowUserShop %>/<%= countAllUserShop %>
+        </span></p>
+
+      <nav>
+        <ul class="pagination">
+          <% if (currentPage> 1) { %>
+            <li class="page-item">
+              <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            <% } %>
+
+              <% for (let i=1; i <=totalPages; i++) { %>
+                <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                  <a class="page-link" href="?page=<%= i %>">
+                    <%= i %>
+                  </a>
+                </li>
+                <% } %>
+
+                  <% if (currentPage < totalPages) { %>
+                    <li class="page-item">
+                      <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                      </a>
+                    </li>
+                    <% } %>
+        </ul>
+      </nav>
+
+
+    </div>
+
+  </div>
+  <%- include('../inc/bottom') %>

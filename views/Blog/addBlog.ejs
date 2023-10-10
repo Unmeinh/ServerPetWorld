@@ -1,0 +1,62 @@
+<%- include('../inc/top',{title:'Thêm bài viết'}) %>
+<div class="container mt-2">
+
+    <div class="form-group row m-2">
+        <label for="nameAdmin" class="col-sm-5 col-form-label" style="color: #848485;">
+            Tạo một bài viết mới để thông tin cho mọi người
+        </label>
+        <div class="col-sm-5">
+        </div>
+    </div>
+    <% if(msg) { %>
+        <div class="row">
+            <span class="p-3"
+                style="background-color: rgb(175, 214, 239); border-radius: 10px;color: red;font-weight: bold;">
+                <%= msg %>
+            </span>
+        </div>
+        <% }%>
+
+
+            <form action="" method="post" enctype="multipart/form-data">
+                <div class="form-group row  m-2">
+                    <label for="contentBlog" form="bold" class="col-sm-3 col-form-label">Nội dung</label>
+                    <div class="col-sm-5">
+                        
+                        <textarea name="contentBlog"  class="form-control" id="contentBlog" cols="30" rows="4"></textarea>
+                    </div>
+                </div>
+                <div class="form-group row m-2">
+                    <label for="imageBlogs" class="col-sm-3 col-form-label">Ảnh bài viết</label>
+                    <div class="col-sm-5">
+                        <input name="imageBlogs" type="file" class="form-control" id="imageBlogs"  required>
+                    </div>
+                </div>
+                
+                <!-- <div class="form-group row m-2" style="align-items: center;">
+                    <label for="sendNotify" class="col-sm-3 col-form-label">Gửi thông báo đến người dùng</label>
+                    <div class="col-sm-8">
+                        <input name="sendNotify" class="form-check-input" type="checkbox" value="" id="sendNotify"
+                            style="margin-left: 1px;">
+                        <label style="margin-left: 20px; color: #001858;" for="sendNotify"> Gửi cho thành viên mới
+                            đăng ký chứa email chứa
+                            thông tin tài
+                            khoản của họ</label>
+                        </label>
+                    </div>
+                </div> -->
+
+                <div class="form-group row m-2 mt-4">
+                    <div class="col-sm-10">
+                        <button style="background-color: #F582AE;margin-right: 20px;" type="submit" class="btn btn-secondary ">
+                            Thêm bài viết
+                        </button>
+                        <a href="http://localhost:3000/blog" style=" background-color: #001858" class="btn btn-secondary">Hủy bỏ</a>
+                    </div>
+                </div>
+            </form>
+
+
+
+</div>
+<%- include('../inc/bottom') %>

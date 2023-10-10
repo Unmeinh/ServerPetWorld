@@ -1,0 +1,90 @@
+.divider:after,
+.divider:before {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #eee;
+}
+
+.h-custom {
+    height: calc(100% - 0px);
+}
+
+@import url('https://fonts.googleapis.com/css?family=Roboto::wght@300;400;500;600;700&display=swap');
+
+/* CSS cho thẻ div chứa hình ảnh */
+.col-md-9.col-lg-6 {
+    background-color: #F3D2C1;
+    padding: 20px;
+    display: flex;
+    /* Sử dụng Flexbox */
+    justify-content: center;
+    /* Căn giữa theo chiều ngang */
+    align-items: center;
+    /* Căn giữa theo chiều dọc */
+    height: 100%;
+    /* Để nó chiếm toàn bộ chiều cao của container */
+}
+
+/* CSS cho thẻ div chứa biểu mẫu đăng nhập */
+.formlogin {
+    background-color: #F3F6E4;
+    /* Sử dụng Flexbox */
+    align-items: center;
+    /* Căn giữa theo chiều dọc */
+    height: 100%;
+    /* Để nó chiếm toàn bộ chiều cao của container */
+
+}
+
+.form-control {
+    width: 85%;
+    /* Đặt chiều rộng 100% để chiếm toàn bộ không gian của form-outline */
+}
+
+.formlogin form {
+    margin-left: 120px;
+    margin-top: 120px;
+
+}
+
+.form-label {
+    font-family: 'Roboto';
+    font-size: 16px;
+    color: #001858;
+    font-weight: 500;
+}
+
+.slogan-header {
+    display: block;
+    justify-content: center;
+    text-align: center;
+    margin-top: 200px;
+}
+
+.slogan-header p {
+    color: #001858;
+    font-size: 50px;
+    font-family: 'Roboto';
+    font-weight: bold;
+}
+
+.password-toggle-icon {
+    position: absolute;
+    top: 50%;
+    margin-left: 640px;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.text-center button {
+    margin-top: 100px;
+    width: 85%;
+    height: 45%;
+}
+
+@media (max-width: 450px) {
+    .h-custom {
+        height: 100%;
+    }
+}

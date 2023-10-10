@@ -1,0 +1,143 @@
+<%- include('../inc/top',{title:'Quản lý tài khoản Admin'}) %>
+  <div class="container-fluid " style="width: 98%;">
+    <div class="row col m-3">
+      <form action="" class="row col-3 me-2" method="get">
+        <div
+          style="background-color: #F0F4F8;border-radius: 25px;align-items: center;display: flex;flex-direction: row;">
+          <div style="width: 10%;">
+            <button type="submit" style="border: none;"><img src="/upload/iconFind.png"
+                style="width: 20px;height: 20px;"></button>
+          </div>
+          <div style="width: 90%;">
+            <input name="filterSearch"
+              style="border: none;background-color: #F0F4F8;border-radius: 25px; box-shadow: none;" class="form-control"
+              placeholder="Tìm kiếm">
+          </div>
+        </div>
+      </form>
+
+      <form action="" method="get" id="sortForm" class="row col-4 me-5"
+        style="display: flex; flex-direction: row; justify-content: space-between;">
+        <select name="sortOption" id="sortOption" class="row col-10 form-select"
+          style="background-color: #F0F4F8;border-radius: 20px;border: none;box-shadow: none; width: 80%;">
+          <option selected disabled>Sắp xếp email</option>
+          <option value="1">Sắp xếp từ a-z</option>
+          <option value="-1">Sắp xếp từ z-a</option>
+        </select>
+      </form>
+
+      <div class="row col-3">
+
+      </div>
+      <div class="row col-2 ms-1" style="align-items: center;">
+        <a href="/admin/add"
+          style="text-decoration: none; background-color: #F582AE; border-radius: 6px;text-align: center;padding: 7px;">
+          <span style="color: white;font-weight: bold;">Thêm admin</span>
+        </a>
+      </div>
+    </div>
+
+    <% if(msg) { %>
+      <div class="row">
+        <span class="p-3"
+          style="background-color: rgb(175, 214, 239); border-radius: 10px;color: red;font-weight: bold;">
+          <%= msg %>
+        </span>
+      </div>
+      <% }%>
+        <% if (typeof listAdmin !='undefined' && listAdmin.length> 0) { %>
+          <table class="table table-curved  align-middle" style="border: white;">
+
+            <tr style="background: #8BD3DD;">
+              <th style="border-radius: 6px 0 0 6px;">Họ tên</th>
+              <th>Email</th>
+              <th>Username</th>
+              <th style="border-radius: 0 6px 6px 0;"></th>
+            </tr>
+
+            <% listAdmin.forEach((row)=>{ %>
+              <tr>
+                <td style="display: flex;flex-direction: row;">
+                  <img src=" <%= row.avatarAdmin %>" style="width: 50px;height: 50px;border-radius: 8px;">
+
+                  <div class="box" style="line-height: 8px;margin: 5px;">
+                    <p>
+                      <%= row.fullName %>
+                    </p>
+                    <a href="/admin/delete/<%= row._id %>" style="text-decoration: none;color: rgb(171, 169, 169);">
+                      Xóa</a>
+                  </div>
+
+                </td>
+                <td>
+                  <%= row.email %>
+                </td>
+                <td>
+                  <%= row.userName %>
+                </td>
+                <td>
+                  <a href="/admin/detail/<%= row._id%>"
+                    style="background-color: #F582AE;padding: 8px;border-radius: 10px;text-decoration: none;color: white; font-weight: bold;">Chi
+                    tiết
+                  </a>
+                </td>
+
+              </tr>
+
+
+              <% }) %>
+
+          </table>
+
+          <div
+            style="display: flex; flex-direction: row; align-items: center;justify-content: space-between;position:absolute ; bottom: 0; width: 96%;">
+            <p> Số bản ghi: <span style="font-weight: bold;">
+                <%= countNowAdmin %>/<%= countAllAdmin %>
+              </span></p>
+
+            <nav>
+              <ul class="pagination">
+                <% if (currentPage> 1) { %>
+                  <li class="page-item">
+                    <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
+                      <span aria-hidden="true">&laquo;</span>
+                    </a>
+                  </li>
+                  <% } %>
+
+                    <% for (let i=1; i <=totalPage; i++) { %>
+                      <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                        <a class="page-link" href="?page=<%= i %>">
+                          <%= i %>
+                        </a>
+                      </li>
+                      <% } %>
+
+                        <% if (currentPage < totalPage) { %>
+                          <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                              <span aria-hidden="true">&raquo;</span>
+                            </a>
+                          </li>
+                          <% } %>
+              </ul>
+            </nav>
+
+
+          </div>
+          <% } else { %>
+            <div class="no-results-message">
+              <p>Không tìm thấy kết quả</p>
+            </div>
+            <% } %>
+  </div>
+
+  <script>
+    const sortOptionDropdown = document.getElementById('sortOption');
+    const sortForm = document.getElementById('sortForm');
+
+    sortOptionDropdown.addEventListener('change', function () {
+      sortForm.submit();
+    });
+  </script>
+  <%- include('../inc/bottom') %>

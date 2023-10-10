@@ -1,0 +1,100 @@
+<%- include('../inc/top',{title:'Chi tiết người dùng'}) %>
+    <div class="ms-5 mt-2">
+        <div class="form-group row m-7">
+            <label class="col-sm-5 col-form-label" style="color: #848485;">Thông tin chi tiết của người dùng
+            </label>
+            <div class="col-sm-5">
+            </div>
+        </div>
+        <div class="row mt-1 ">
+            <div class="col-md-6">
+                <!-- Cột 1 -->
+                <form>
+                    <div class="form-group row p-3 ">
+                        <label for="username" form="bold" class="col-sm-3 me-auto col-form-label">Tên đăng nhập </label>
+                        <div class="col-sm-7">
+                            <input type="text" class="form-control" id="username" value="<%= objU.idAccount.userName %>">
+
+                        </div>
+                    </div>
+                    <div class="form-group row p-3">
+                        <label for="name" form="bold" class="col-sm-3 me-auto col-form-label">Họ và tên</label>
+                        <div class="col-sm-7">
+                            <input type="text" class="form-control" id="fullname" value="<%= objU.fullName%>" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row p-3 ">
+                        <label for="birthday" class="col-sm-3 me-auto col-form-label">Ngày sinh</label>
+                        <div class="col-sm-7">
+                            <input type="text" class="form-control" id="birthday" value="<%= moment(objU.birthday).format('DD/MM/YYYY')  %>" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row p-3 ">
+                        <label for="address" class="col-sm-3 me-auto col-form-label">Địa chỉ</label>
+                        <div class="col-sm-7">
+                            <input type="text" class="form-control" id="address" value="<%= objU.locationUser %>">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group row p-3">
+                        <label for="email" class="col-sm-3 me-auto col-form-label">Email</label>
+                        <div class="col-sm-7">
+                            <input type="email" class="form-control" id="email" value="<%= objU.idAccount.emailAddress %>" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row p-3">
+                        <label for="phone" class="col-sm-3 me-auto col-form-label">Số điện thoại</label>
+                        <div class="col-sm-7">
+                            <input type="tel" class="form-control" id="phone" value="<%= objU.idAccount.phoneNumber %>" readonly>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="col-md-6">
+                <!-- Cột 2 -->
+                <form>
+                    <div class="form-group row p-3">
+                        <label for="followe" form="bold" class="col-sm-3 col-form-label">Người theo dõi</label>
+                        <div class="col-sm-3">
+                            <input type="text" class="form-control" id="follower" value="<%= objU.followers.length %>"
+                                readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row p-3">
+                        <label for="following" form="bold" class="col-sm-3 col-form-label">Đang theo dõi</label>
+                        <div class="col-sm-3">
+                            <input type="text" class="form-control" id="following" value="<%= objU.followings.length %>"
+                                readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row p-3">
+                        <label for="mypet" form="bold" class="col-sm-3 col-form-label">MyPet</label>
+                        <div class="col-sm-3">
+                            <input type="text" class="form-control" id="following" value="<%= objU.myPet.length %>" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row p-3">
+                        <label for="nickname" form="bold" class="col-sm-3  col-form-label">Nickname</label>
+                        <div class="col-sm-3">
+                            <% if(typeof(objU.nickName)!='undefined'){ %>
+                                <input type="text" class="form-control" id="nickname" value="<%= objU.nickName %>">
+                                <% } else{%>
+                                    <input type="text" class="form-control" id="nickname" value="Chưa đặt"
+                                    readonly>
+                                    <% } %>
+                           
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- ... -->
+        <div class="form-group row ms-1">
+            <div class="col-sm-5">
+                <a href="/user" style="background-color: #F582AE; color: white;" type="submit" class="btn  ">Quay
+                    lại</a>
+            </div>
+        </div>
+    </div>
+    <%- include('../inc/bottom') %>

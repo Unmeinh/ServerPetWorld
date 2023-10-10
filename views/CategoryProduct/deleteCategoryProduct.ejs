@@ -1,0 +1,22 @@
+<%- include('../inc/top',{title:'Xóa Thể loại'}) %>
+<div class="container">
+    <% if(message) { %>
+        <div class="row mb-2">
+            <span class="p-3"
+                style="background-color: rgb(175, 214, 239); border-radius: 10px;color: red;font-weight: bold;">
+                <%= message %>
+            </span>
+        </div>
+        <% }%>
+    <div class="col-5 m-auto" style="box-shadow: 0 0 2px 2px #9c9999; border-radius: 8px; padding: 20px;">
+        <form action="" method="post">
+            <h3 style="color: rgb(150, 145, 145); margin-bottom: 20px;">Xóa Thể loại</h3>
+            <h4 style="margin: 30px;">Bạn muốn xóa thể loại: <span style="font-weight: bold;"><%= Objdata.nameCategory %></span> ?</h4>
+            <button class="btn" style="background-color: #F85555; font-weight: bold;margin: 20px;" type="submit">Xóa ngay</button>
+            <a href="/category-product" class="btn" style="background-color: rgb(216, 212, 212);font-weight: bold;margin: 20px;">Hủy bỏ</a>
+        </form>
+        
+
+    </div>
+</div>
+<%- include('../inc/bottom') %>
