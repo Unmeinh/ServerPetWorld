@@ -1,5 +1,6 @@
 let mdShop = require('../../model/shop.model');
 let fs = require("fs");
+const { onUploadImages } = require("../../function/uploadImage");
 let validator = require('email-validator');
 var phoneValidate = /^\d{9}$/
 
@@ -39,15 +40,17 @@ exports.addShop = async (req, res, next) => {
         newObj.nameShop = req.body.nameShop;
         newObj.email = req.body.email;
         newObj.locationShop = req.body.locationShop;
-        if (req.file) {
-            fs.renameSync(req.file.path, './public/upload/' + req.file.originalname);
-            newObj.avatarShop = "http://localhost:3000/upload/" + req.file.originalname;
-        } else {
-            // Set a default image URL if the user didn't upload an image
-            newObj.avatarShop = "http://localhost:3000/upload/avatar_null.png";
-        }
+        let images = await onUploadImages(req.files, 'shop')
+            if (images != [] && images[0] == false) {
+                if (images[1].message.indexOf('File size too large.') > -1) {
+                    return res.status(500).json({ success: false, data: {}, message: "Dung lượng một ảnh tối đa là 10MB!" });
+                } else {
+                    return res.status(500).json({ success: false, data: {}, message: images[1].message });
+                }
+            } 
+            newObj.avatarShop = [...images];
         newObj.description = req.body.description;
-        newObj.status = 'Chưa được duyệt';
+        newObj.status = 0;
         newObj.followers = 0;
         newObj.idUserShop = req.body.idUserShop;
         newObj.revenue = 0;
@@ -118,15 +121,17 @@ exports.editShop = async (req, res, next) => {
         newObj.nameShop = req.body.nameShop;
         newObj.email = req.body.email;
         newObj.locationShop = req.body.locationShop;
-        if (req.file) {
-            fs.renameSync(req.file.path, './public/upload/' + req.file.originalname);
-            newObj.avatarShop = "http://localhost:3000/upload/" + req.file.originalname;
-        } else {
-            // Set a default image URL if the user didn't upload an image
-            newObj.avatarShop = "http://localhost:3000/upload/avatar_null.png";
-        }
+        let images = await onUploadImages(req.files, 'shop')
+            if (images != [] && images[0] == false) {
+                if (images[1].message.indexOf('File size too large.') > -1) {
+                    return res.status(500).json({ success: false, data: {}, message: "Dung lượng một ảnh tối đa là 10MB!" });
+                } else {
+                    return res.status(500).json({ success: false, data: {}, message: images[1].message });
+                }
+            } 
+            newObj.avatarShop = [...images];
         newObj.description = req.body.description;
-        newObj.status = 'Chưa được duyệt';
+        newObj.status = 0;
         newObj.followers = 0;
         newObj.idUserShop = req.body.idUserShop;
         newObj.revenue = 0;

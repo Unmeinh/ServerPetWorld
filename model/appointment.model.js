@@ -7,7 +7,7 @@ let AppointmentSchema = new db.mongoose.Schema(
         amountPet:{type:Number,required:false},
         location:{type:String,required:false},
         deposits:{type:Number,required:false},
-        status:{type:String,required:false},
+        status:{type:Number,required:false},
         appointmentDate:{type:Date,require:true},
         createdAt:{type:Date,require:true}
     },  

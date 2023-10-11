@@ -1,5 +1,5 @@
 let mdNoti = require('../../model/notice.model');
-
+const { onUploadImages } = require('../../function/uploadImage');
 exports.listAllNotice = async (req, res, next) => {
   const {_id}=req.user;
   try {
@@ -46,14 +46,15 @@ exports.addNoti = async (req, res, next) => {
       newObj.status = req.body.status;
       newObj.idUser = req.user._id;
       newObj.createdAt = new Date();
-      if (req.file) {
-        fs.renameSync(req.file.path, './public/upload/' + req.file.originalname);
-        console.log("url:http://localhost:3000/upload/" + req.file.originalname);
-        newObj.image = "http://localhost:3000/upload/" + req.file.originalname;
-      } else {
-        // Set a default image URL if the user didn't upload an image
-        newObj.image = "http://localhost:3000/upload/jiso.png";
-      }
+      let images = await onUploadImages(req.files, 'notice')
+            if (images != [] && images[0] == false) {
+                if (images[1].message.indexOf('File size too large.') > -1) {
+                    return res.status(500).json({ success: false, data: {}, message: "Dung lượng một ảnh tối đa là 10MB!" });
+                } else {
+                    return res.status(500).json({ success: false, data: {}, message: images[1].message });
+                }
+            } 
+            newObj.image = [...images];
       const validationErrors = validateNotificationData(newObj);
 
       if (validationErrors.length > 0) {

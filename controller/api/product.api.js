@@ -3,6 +3,7 @@ let mdbillProduct = require('../../model/billProduct.model');
 const fs = require("fs");
 const { match } = require('assert');
 const moment = require('moment');
+const { onUploadImages } = require('../../function/uploadImage');
 exports.listProduct = async (req, res, next) => {
     try {
         if (req.query.hasOwnProperty('page') && req.query.hasOwnProperty('day')) {
@@ -215,6 +216,7 @@ exports.addProduct = async (req, res, next) => {
             !req.body.amountProduct &&
             !req.body.quantitySold &&
             !req.body.idCategoryPr &&
+            !req.body.idShop &&
             !req.body.discount && 
             !req.body.type
         ) {
@@ -226,24 +228,22 @@ exports.addProduct = async (req, res, next) => {
         newObj.priceProduct = req.body.priceProduct;
         newObj.discount = req.body.discount;
         newObj.idCategoryPr = req.body.idCategoryPr;
+        newObj.idShop = req.body.idShop;
         newObj.amountProduct = req.body.amountProduct;
         newObj.detailProduct = req.body.detailProduct;
         newObj.quantitySold = 0;
         newObj.rate = 0;
         newObj.type = 1;
         newObj.createdAt = new Date();
-
-        if (req.files != undefined) {
-            console.log("check " + req.files);
-            req.files.map((file, index, arr) => {
-
-                if (file != {}) {
-                    fs.renameSync(file.path, './public/upload/' + file.originalname);
-                    let imagePath = 'http://localhost:3000/upload/' + file.originalname;
-                    newObj.arrProduct.push(imagePath);
+        let images = await onUploadImages(req.files, 'product')
+            if (images != [] && images[0] == false) {
+                if (images[1].message.indexOf('File size too large.') > -1) {
+                    return res.status(500).json({ success: false, data: {}, message: "Dung lượng một ảnh tối đa là 10MB!" });
+                } else {
+                    return res.status(500).json({ success: false, data: {}, message: images[1].message });
                 }
-            })
-        }
+            } 
+            newObj.arrProduct = [...images];
 
         try {
             await newObj.save();
@@ -306,6 +306,7 @@ exports.editProduct = async (req, res, next) => {
             !req.body.amountProduct &&
             !req.body.quantitySold &&
             !req.body.idCategoryPr &&
+            !req.body.idShop &&
             !req.body.discount && 
             !req.body.type
         ) {
@@ -317,6 +318,7 @@ exports.editProduct = async (req, res, next) => {
         newObj.priceProduct = req.body.priceProduct;
         newObj.discount = req.body.discount;
         newObj.idCategoryPr = req.body.idCategoryPr;
+        newObj.idShop = req.body.idShop;
         newObj.amountProduct = req.body.amountProduct;
         newObj.detailProduct = req.body.detailProduct;     
         newObj.quantitySold = 0;//cập nhật
@@ -324,17 +326,15 @@ exports.editProduct = async (req, res, next) => {
 
         newObj.createdAt = new Date();
 
-        if (req.files != undefined) {
-            console.log("check " + req.files);
-            req.files.map((file, index, arr) => {
-
-                if (file != {}) {
-                    fs.renameSync(file.path, './public/upload/' + file.originalname);
-                    let imagePath = 'http://localhost:3000/upload/' + file.originalname;
-                    newObj.arrProduct.push(imagePath);
+        let images = await onUploadImages(req.files, 'product')
+            if (images != [] && images[0] == false) {
+                if (images[1].message.indexOf('File size too large.') > -1) {
+                    return res.status(500).json({ success: false, data: {}, message: "Dung lượng một ảnh tối đa là 10MB!" });
+                } else {
+                    return res.status(500).json({ success: false, data: {}, message: images[1].message });
                 }
-            })
-        }
+            } 
+            newObj.arrProduct = [...images];
         newObj._id = idPR;
 
         try {
