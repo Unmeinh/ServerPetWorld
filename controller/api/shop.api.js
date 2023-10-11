@@ -50,7 +50,7 @@ exports.addShop = async (req, res, next) => {
             } 
             newObj.avatarShop = [...images];
         newObj.description = req.body.description;
-        newObj.status = 'Chưa được duyệt';
+        newObj.status = 0;
         newObj.followers = 0;
         newObj.idUserShop = req.body.idUserShop;
         newObj.revenue = 0;
@@ -131,7 +131,7 @@ exports.editShop = async (req, res, next) => {
             } 
             newObj.avatarShop = [...images];
         newObj.description = req.body.description;
-        newObj.status = 'Chưa được duyệt';
+        newObj.status = 0;
         newObj.followers = 0;
         newObj.idUserShop = req.body.idUserShop;
         newObj.revenue = 0;
