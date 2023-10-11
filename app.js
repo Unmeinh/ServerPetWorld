@@ -31,6 +31,7 @@ var favoriteProductsRouter=require('./routes/api/myFavoriteProductApi');
 var billProductRouter = require('./routes/api/billProductApi');
 var voucherShopRouter = require('./routes/api/voucherShopApi');
 var voucherServerRouter = require('./routes/api/voucherServerApi');
+var searchApi = require('./routes/api/searchApi');
 // var appointmentRouter = require('./routes/api/appointmentApi');
 var ConversationsRouter = require('./routes/api/ConversationsApi');
 var app = express();
@@ -77,6 +78,7 @@ app.use('/api/bill-product', billProductRouter);
 app.use('/api/favorite',favoriteProductsRouter);
 app.use('/api/voucherShop',voucherShopRouter);
 app.use('/api/voucherServer',voucherServerRouter);
+app.use('/api/search',searchApi);
 // app.use('/api/appointment',appointmentRouter);
 app.use('/api/conversations', ConversationsRouter);
 
