@@ -1,6 +1,7 @@
 let mdUserShop = require('../model/userShop.model');
 let moment = require('moment');
 let bcrypt = require('bcrypt');
+const { onUploadImages } = require("../../function/uploadImage");
 const fs = require("fs");
 
 exports.listUserShop = async (req, res, next) => {
@@ -82,14 +83,15 @@ exports.addUserShop = async (req, res, next) => {
     newObj.passWord = req.body.matkhau;
     newObj.email = req.body.email;
     newObj.createdAt = new Date();
-    if (req.file) {
-      fs.renameSync(req.file.path, './public/upload/' + req.file.originalname);
-      console.log("url:http://localhost:3000/upload/" + req.file.originalname);
-      newObj.avatarUserShop = "http://localhost:3000/upload/" + req.file.originalname;
-    } else {
-      // Set a default image URL if the user didn't upload an image
-      newObj.avatarUserShop = "http://localhost:3000/upload/avatar_null.png";
-    }
+    let images = await onUploadImages(req.files, 'usershop')
+            if (images != [] && images[0] == false) {
+                if (images[1].message.indexOf('File size too large.') > -1) {
+                    return res.status(500).json({ success: false, data: {}, message: "Dung lượng một ảnh tối đa là 10MB!" });
+                } else {
+                    return res.status(500).json({ success: false, data: {}, message: images[1].message });
+                }
+            } 
+            newObj.avatarUserShop = [...images];
     try {
       await newObj.save();
       message = 'Thêm người dùng shop thành công!';

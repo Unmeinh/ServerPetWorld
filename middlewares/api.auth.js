@@ -6,7 +6,6 @@ const string_word_secret = process.env.TOKEN_SEC_KEY;
 
 const api_auth = async (req, res, next) => {
     let header_token = req.header('Authorization');
-    console.log("header_token" + header_token);
     if (typeof (header_token) == 'undefined') {
         console.log('Không xác định token');
         return res.status(403).json({ success: false, message: 'Không xác định token!' });
