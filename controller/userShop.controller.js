@@ -1,7 +1,7 @@
 let mdUserShop = require('../model/userShop.model');
 let moment = require('moment');
 let bcrypt = require('bcrypt');
-const { onUploadImages } = require("../../function/uploadImage");
+const { onUploadImages } = require("../function/uploadImage");
 const fs = require("fs");
 
 exports.listUserShop = async (req, res, next) => {
