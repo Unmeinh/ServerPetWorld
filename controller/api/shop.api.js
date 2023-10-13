@@ -42,20 +42,20 @@ exports.addShop = async (req, res, next) => {
         newObj.locationShop = req.body.locationShop;
         let images = await onUploadImages(req.files, 'shop')
             if (images != [] && images[0] == false) {
-                if (images[1].message.indexOf('File size too large.') > -1) {
-                    return res.status(500).json({ success: false, data: {}, message: "Dung lượng một ảnh tối đa là 10MB!" });
-                } else {
-                    return res.status(500).json({ success: false, data: {}, message: images[1].message });
-                }
-            } 
-            newObj.avatarShop = [...images];
-        newObj.description = req.body.description;
-        newObj.status = 0;
-        newObj.followers = 0;
-        newObj.idUserShop = req.body.idUserShop;
-        newObj.revenue = 0;
-        newObj.hotline = req.body.hotline;
-        newObj.createdAt = new Date();
+            if (images[1].message.indexOf('File size too large.') > -1) {
+                return res.status(500).json({ success: false, data: {}, message: "Dung lượng một ảnh tối đa là 10MB!" });
+            } else {
+                return res.status(500).json({ success: false, data: {}, message: images[1].message });
+            }
+        }
+        newShop.avatarShop = images[0];
+        let ownerIdentity = JSON.stringify({
+            nameIdentity: encodeToSha256(String(req.body.nameIdentity)),
+            numberIdentity: encodeToSha256(String(req.body.numberIdentity)),
+            dateIdentity: encodeToSha256(String(req.body.dateIdentity)),
+            imageIdentity: [encodeToSha256(images[1]), encodeToSha256(images[2])]
+        });
+        await newShop.encodeOwnerIdentity(newShop, encodeToAscii(ownerIdentity));
 
         try {
             await newObj.save();
