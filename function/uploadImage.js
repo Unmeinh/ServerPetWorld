@@ -7,6 +7,27 @@ cloudinary.config({
     api_secret: 'gCIS8V0xZxl60iza7rPhHGR8EVs'
 });
 
+exports.onUploadImage = async (file, folder) => {
+    try {
+        if (file) {
+            const folderName = 'images/upload/' + folder;
+            const fileName = generateRandomFileName(10);
+            let pathFile = './public/upload/' + fileName + ".jpg";
+            await sharp(file.path).toFormat('jpg').toFile(pathFile);
+            const result = await cloudinary.uploader.upload(pathFile, {
+                public_id: `${folderName}/${fileName}`,
+            });
+
+            return result.secure_url;
+        } else {
+            return "";
+        }
+    } catch (e) {
+        console.log("Lỗi " + JSON.stringify(e));
+        return [false, e];
+    }
+}
+
 exports.onUploadImages = async (files, folder) => {
     try {
         if (files && files.length > 0) {
