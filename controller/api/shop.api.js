@@ -41,7 +41,7 @@ exports.addShop = async (req, res, next) => {
         newObj.email = req.body.email;
         newObj.locationShop = req.body.locationShop;
         let images = await onUploadImages(req.files, 'shop')
-            if (images != [] && images[0] == false) {
+        if (images != [] && images[0] == false) {
             if (images[1].message.indexOf('File size too large.') > -1) {
                 return res.status(500).json({ success: false, data: {}, message: "Dung lượng một ảnh tối đa là 10MB!" });
             } else {
