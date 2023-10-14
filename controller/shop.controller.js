@@ -34,7 +34,6 @@ exports.listShop = async (req, res, next) => {
                 .limit(perPage);
 
             msg = 'Lấy danh sách shop thành công';
-            console.log('lisstDhsHOP ' + listShop);
             return res.render('Shop/listShop', {
                 listShop: listShop,
                 countNowShop: listShop.length,
@@ -91,7 +90,6 @@ exports.deleteShop = async (req, res, next) => {
     let message = ""
     let idShop = req.params.idShop;
     let ObjShop = await mdShop.ShopModel.findById(idShop);
-    console.log("idShop  " + idShop);
     if (req.method == 'POST') {
         try {
             await mdShop.ShopModel.findByIdAndDelete(idShop);
