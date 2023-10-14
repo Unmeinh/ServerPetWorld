@@ -5,6 +5,7 @@ var router = express.Router();
 router.get('/listBillProduct',mdJWT.api_user_auth, billProductApiCtrl.listbillProduct);
 router.get('/detailBillProduct/:idBillPr',mdJWT.api_user_auth, billProductApiCtrl.detailBillProduct);
 router.post('/insert',mdJWT.api_user_auth, billProductApiCtrl.billProductUser);
+router.post('/cancelBill/:id',mdJWT.api_user_auth, billProductApiCtrl.cancelBill);
 //router.post('/edit',mdJWT.api_user_auth, billProductApiCtrl.editCart);
 
 module.exports = router;
