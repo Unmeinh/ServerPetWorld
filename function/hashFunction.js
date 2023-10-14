@@ -1,6 +1,6 @@
 const crypto = require("crypto")
 
-function encodeToSha256(email) {
+function encodeToSha256(text) {
     // const hash = crypto.createHash('sha256');
     // hash.update(email, 'binary');
     // let hashFunction = hash.digest('hex');
@@ -9,7 +9,7 @@ function encodeToSha256(email) {
         const key = crypto.createHash('sha256').digest('base64').substr(0, 32);
         const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
 
-        let encrypted = cipher.update(email);
+        let encrypted = cipher.update(text);
         encrypted = Buffer.concat([encrypted, cipher.final()])
         return iv.toString('hex') + ':' + encrypted.toString('hex');
     } catch (error) {
@@ -35,17 +35,17 @@ function decodeFromSha256(hashText) {
     }
 }
 
+function encodeToAscii(inputString) {
+    return inputString.split("")
+        .map(c => c.charCodeAt(0).toString(16).padStart(2, "0"))
+        .join("");
+}
+
 function decodeFromAscii(inputString) {
-    console.log(inputString);
-    // let result = '';
-    // for (let i = 0; i < inputString.length; i++) {
-    //     result += String.fromCharCode(parseInt(inputString[i], 16));
-    // }
-    // const result = inputString.split('').map(hexCode => parseInt(hexCode, 16)).map(num => String.fromCharCode(num)).toString('ascii');
     return inputString.split(/(\w\w)/g)
         .filter(p => !!p)
         .map(c => String.fromCharCode(parseInt(c, 16)))
         .join("")
 }
 
-module.exports = { encodeToSha256, decodeFromSha256, decodeFromAscii };
+module.exports = { encodeToSha256, decodeFromSha256, encodeToAscii, decodeFromAscii };
