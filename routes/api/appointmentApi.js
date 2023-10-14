@@ -1,5 +1,5 @@
 var express = require('express');
-var appointmentCtrl = require('../../controller/api/Appointment.api');
+var appointmentCtrl = require('../../controller/api/appointment.api');
 var mdJWT = require('../../middlewares/api.auth');
 var router = express.Router();
 
