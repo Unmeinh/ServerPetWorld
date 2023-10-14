@@ -7,6 +7,7 @@ var router = express.Router();
 router.get('/', ShopCtrl.listShop);
 
 router.get('/detail/:idShop', ShopCtrl.detailShop);//bổ sung /:idUser khi làm 
+router.get('/detailOwner/:idShop', ShopCtrl.detailOwner);//bổ sung /:idUser khi làm 
 
 router.get('/delete/:idShop',ShopCtrl.deleteShop);
 router.post('/delete/:idShop',ShopCtrl.deleteShop);
