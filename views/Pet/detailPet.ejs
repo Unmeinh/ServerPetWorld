@@ -9,17 +9,17 @@
             </div>
         </div>
         <form action="/pet" method="get">
-
             <div class="form-group row m-3" style="align-items: center;">
                 <label for="username" form="bold" class="col-sm-2 col-form-label">Ảnh thú cưng</label>
                 <div class="col-sm-5">
                     <% if (typeof(Objpet.imagesPet) !=='undefined' && Objpet.imagesPet.length> 0) { %>
-                        <% Objpet.imagesPet.forEach((image)=> { %>
-                            <img src="<%= image %>" style="width: 100px; height: 100px; border-radius: 8px;"
-                                class="img-fluid">
-                            <% }); %>
+                            <img src="<%= Objpet.imagesPet[0] %>" style="width: 80px; height: 80px; border-radius: 8px; ">
+                            <img src="<%= Objpet.imagesPet[1] %>" style="width: 80px; height: 80px; border-radius: 8px; ">
+                            <img src="<%= Objpet.imagesPet[2] %>" style="width: 80px; height: 80px; border-radius: 8px; ">
+                            <img src="<%= Objpet.imagesPet[3] %>" style="width: 80px; height: 80px; border-radius: 8px; ">
+                            <span style="font-size: 22px; margin-left: 10px; color: #848485;">    +   <%= Objpet.imagesPet.length - 4 %></span>
                                 <% } else { %>
-                                    <p>No images available.</p>
+                                    <p>Thú cưng này không có ảnh</p>
                                     <% } %>
                 </div>
             </div>
@@ -51,9 +51,14 @@
 
                 <label for="username" form="bold" class="col-sm-2 col-form-label">Loài</label>
                 <div class="col-sm-3">
-                    <label type="text" style="width: 200px;" class="form-control">
-                        <%= Objpet.speciesPet %>
-                    </label>
+                    <% if( typeof(Objpet.speciesPet) !='undefined') { %>
+                        <label type="text" style="width: 200px;" class="form-control">
+                            <%= Objpet.speciesPet %>
+                        </label>
+                        <% } else { %>
+                            <span type="text" style="width: 200px;" class="form-control">Không có dữ liệu</span>
+                       <% }%>
+                  
                 </div>
 
             </div>
@@ -81,11 +86,9 @@
                     </label>
                 </div>
 
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Chi tiết Pet</label>
-                <div class="col-sm-3">
-                    <label type="text" style="width: 200px;" class="form-control">
-                        <%= Objpet.detailPet %>
-                    </label>
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Mô tả về pet</label>
+                <div class="col-sm-5">
+                    <textarea class="form-control" name="" id="" cols="80" rows="3" readonly><%= Objpet.detailPet %></textarea>  
                 </div>
 
             </div>
