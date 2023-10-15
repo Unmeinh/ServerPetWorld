@@ -1,14 +1,13 @@
 var express = require('express');
 var ProductCtrl = require('../controller/product.controller');
-var multer = require('multer');
-var uploader = multer({ dest: './tmp' });
+var checkLoginServer = require('../middlewares/checkLogin')
 var router = express.Router();
 
-router.get('/', ProductCtrl.listProduct);
+router.get('/',checkLoginServer.check_request_login, ProductCtrl.listProduct);
 
-router.get('/detail/:idPR', ProductCtrl.detailProduct);
+router.get('/detail/:idPR',checkLoginServer.check_request_login, ProductCtrl.detailProduct);
 
-router.get('/delete/:idPR',ProductCtrl.deleteProduct);
+router.get('/delete/:idPR',checkLoginServer.check_request_login,ProductCtrl.deleteProduct);
 router.post('/delete/:idPR',ProductCtrl.deleteProduct);
 
 module.exports = router;
