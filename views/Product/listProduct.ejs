@@ -16,16 +16,19 @@
         </div>
       </form>
       
-      <form action="" method="get" id="sortForm" class="row col-4 me-5"
-        style="display: flex; flex-direction: row; justify-content: space-between;">
-        <select name="sortOption" id="sortOption" class="row col-10 form-select"
-          style="background-color: #F0F4F8;border-radius: 20px;border: none;box-shadow: none; width: 80%;">
-          <option selected disabled>Sắp xếp tên sản phẩm</option>
-          <option value="1"><button type="submit">Sắp xếp từ a-z</button></option>
-          <option value="-1"><button type="submit">Sắp xếp từ z-a</button></option>
-
-        </select>
-      </form>
+      <% if (typeof(listProduct) !== 'undefined' && listProduct.length > 0) { %>
+        <form action="" method="get" id="sortForm" class="row col-4 me-5"
+          style="display: flex; flex-direction: row; justify-content: space-between;">
+          <select name="sortOption" id="sortOption" class="row col-10 form-select"
+            style="background-color: #F0F4F8;border-radius: 20px;border: none;box-shadow: none; width: 80%;">
+            <option selected disabled>Sắp xếp tên sản phẩm</option>
+            <option value="1"><button type="submit">Sắp xếp từ a-z</button></option>
+            <option value="-1"><button type="submit">Sắp xếp từ z-a</button></option>
+          </select>
+        </form>
+        <% } else { %>
+          <div class="row col-4 me-5"></div>
+          <% } %>
 
       <div class="row col-3">
         
