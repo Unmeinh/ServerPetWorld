@@ -6,19 +6,19 @@ var multer = require('multer')
 var uploader = multer({ dest: './tmp' });
 
 router.get('/list/all', UserApiCtrl.listUser);
-router.get('/myDetail', mdJWT.api_auth, UserApiCtrl.myDetail);
-router.get('/autoLogin', mdJWT.api_auth, UserApiCtrl.autoLogin);
+router.get('/myDetail', mdJWT.api_user_auth, UserApiCtrl.myDetail);
+router.get('/autoLogin', mdJWT.api_user_auth, UserApiCtrl.autoLogin);
 router.post('/checkPhoneNumber', UserApiCtrl.checkPhoneNumber);
-router.get('/userDetail/:idUser', mdJWT.api_auth, UserApiCtrl.detailUser);
+router.get('/userDetail/:idUser', mdJWT.api_user_auth, UserApiCtrl.detailUser);
 router.post('/register', UserApiCtrl.registerUser);
 router.post('/login', UserApiCtrl.loginUser);
 router.get('/logout', UserApiCtrl.logoutUser);
-router.put('/updateUser', mdJWT.api_auth, UserApiCtrl.updateUser);
-router.put('/updateAvatar', mdJWT.api_auth, uploader.any(), UserApiCtrl.updateAvatar);
-router.put('/updateAccount', mdJWT.api_auth, UserApiCtrl.updateAccount);
-router.put('/updatePassword', mdJWT.api_auth, UserApiCtrl.updatePassword);
-router.put('/changePassword', mdJWT.api_auth, UserApiCtrl.changePassword);
-router.delete('/deleteEmail', mdJWT.api_auth, UserApiCtrl.deleteEmail);
+router.put('/updateUser', mdJWT.api_user_auth, UserApiCtrl.updateUser);
+router.put('/updateAvatar', mdJWT.api_user_auth, uploader.any(), UserApiCtrl.updateAvatar);
+router.put('/updateAccount', mdJWT.api_user_auth, UserApiCtrl.updateAccount);
+router.put('/updatePassword', mdJWT.api_user_auth, UserApiCtrl.updatePassword);
+router.put('/changePassword', mdJWT.api_user_auth, UserApiCtrl.changePassword);
+router.delete('/deleteEmail', mdJWT.api_user_auth, UserApiCtrl.deleteEmail);
 router.delete('/delete/:idUser', UserApiCtrl.deleteUser);
 router.post('/sendVerifyEmail', UserApiCtrl.sendVerifyEmail);
 router.post('/sendResetPasswordEmail', UserApiCtrl.sendResetPassword);
