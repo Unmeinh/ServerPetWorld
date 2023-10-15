@@ -113,17 +113,17 @@ exports.registerUser = async (req, res, next) => {
       newAccount.createAt = new Date();
       newAccount.online = 1;
       newAccount.status = 0;
-      newAccount.emailAddress = "Chưa thiết lập";
+      newAccount.emailAddress = "";
       const salt = await bcrypt.genSalt(10);
       newAccount.passWord = await bcrypt.hash(req.body.passWord, salt);
       await newAccount.generateAuthToken(newAccount);
       newUser.fullName = req.body.fullName;
       newUser.avatarUser =
         "https://i.pinimg.com/564x/0c/a6/ec/0ca6ecf671331f3ca3bbee9966359e32.jpg";
-      newUser.nickName = "Chưa thiết lập";
-      newUser.description = "Chưa thiết lập";
+      newUser.nickName = "";
+      newUser.description = "";
       newUser.birthday = new Date();
-      newUser.locationUser = "Chưa thiết lập";
+      newUser.locationUser = "";
       newUser.locationDelivery = [];
       newUser.blogs = 0;
       newUser.followers = 0;

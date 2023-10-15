@@ -131,7 +131,6 @@ exports.listAllBlog = async (req, res, next) => {
             // console.log("4.0: data mà mình chưa có like: " + listAllBlog);
             /** 4.1: lấy 10 bài viết có lượt tương tác cao nhất mà chưa like*/
             listTop10Blog = listAllBlog.sort((a, b) => b.interacts.length - a.interacts.length).slice(0, 10);
-
             /**5:lấy tất cả các bài viết còn lại theo thời gian gần đây*/
             var ids = new Set(listTop10Blog.map(({ id }) => id));
             listNotTop10BlogEndRemain = listAllBlog.filter(({ id }) => !ids.has(id));

@@ -1,6 +1,6 @@
 let mdPet = require('../../model/pet.model');
 const fs = require("fs");
-
+const { onUploadImages } = require('../../function/uploadImage');
 exports.listpet = async (req, res, next) => {
     if (req.method !== 'GET') {
         return res.status(400).json({ success: false, message: 'Method not allowed' });
@@ -69,30 +69,29 @@ exports.addpet = async (req, res, next) => {
 
         let newObj = new mdPet.PetModel();
         newObj.namePet = req.body.namePet;
+        let images = await onUploadImages(req.files, 'pet')
+            if (images != [] && images[0] == false) {
+                if (images[1].message.indexOf('File size too large.') > -1) {
+                    return res.status(500).json({ success: false, data: {}, message: "Dung lượng một ảnh tối đa là 10MB!" });
+                } else {
+                    return res.status(500).json({ success: false, data: {}, message: images[1].message });
+                }
+            } 
+        newObj.imagesPet = [...images];
         // newObj.speciesPet = req.body.speciesPet;
         newObj.weightPet = req.body.weightPet;
         newObj.heightPet = req.body.heightPet;
         newObj.sizePet = req.body.sizePet;
         newObj.idCategoryP = req.body.idCategoryP;
         newObj.pricePet = req.body.pricePet;
-        newObj.disCount=0;
+        newObj.discount=0;
+        newObj.quantitySold = 0;
         newObj.amountPet = req.body.amountPet;
         newObj.detailPet = req.body.detailPet;
         newObj.idShop = req.body.idShop;
         newObj.type = 0;
         newObj.createdAt = new Date();
         newObj.rate=0;
-        if (req.files != undefined) {
-            console.log("check " + req.files);
-            req.files.map((file, index, arr) => {
-
-                if (file != {}) {
-                    fs.renameSync(file.path, './public/upload/' + file.originalname);
-                    let imagePath = 'http://localhost:3000/upload/' + file.originalname;
-                    newObj.imagesPet.push(imagePath);
-                }
-            })
-        }
 
         try {
             await newObj.save();
