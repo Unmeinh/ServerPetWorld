@@ -13,16 +13,12 @@
                 <label for="username" form="bold" class="col-sm-3 col-form-label">Ảnh bài viết</label>
                 <div class="col-sm-5 ">
                     <% if(typeof(objB.imageBlogs )!='undefined' ) { 
-                        objB.imageBlogs.forEach((item)=>{ %>
-                       
+                        objB.imageBlogs.forEach((item)=>{ %>                       
                             <img src="<%= item %>" style="width: 100px;height: 100px; border-radius: 8px;" class="img-fluid">
-                           
-                        
                         <%}) } else { %>
-                            <img src="http://localhost:3000/upload/avatar_null.png" style="width: 100px;height: 100px;"
+                            <img src="/upload/avatar_null.png" style="width: 100px;height: 100px;"
                                 class="img-fluid">
                             <% }%>
-
                 </div>
             </div>
             
