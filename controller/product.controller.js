@@ -7,7 +7,7 @@ exports.listProduct = async (req, res, next) => {
     let sortOption=null;
     let filterSearch = null;
     let currentPage = parseInt(req.query.page) || 1;
-
+    
     if (req.method == 'GET') {
         try {
             if (typeof req.query.filterSearch !== 'undefined' && req.query.filterSearch.trim() !== '') {

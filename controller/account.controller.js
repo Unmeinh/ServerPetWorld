@@ -12,7 +12,7 @@ exports.login = async (req, res, next) => {
                 let check_pass = await bcrypt.compare(req.body.passWord, objAd.passWord);
                 if (check_pass) {
                     req.session.adLogin = objAd;
-                    return res.redirect('/admin');
+                    return res.redirect('/pet');
                 }
                 else {
                     msg = 'Thông tin đăng nhập chưa đúng';
@@ -58,4 +58,27 @@ exports.verifyEmail = async (req, res, next) => {
 exports.verifyResult = async (req, res, next) => {
     let isVerify = req.query.isVerify;
     res.render('account/verifyResult', { isVerify: isVerify })
+}
+
+exports.profile = async (req, res, next) => {
+    let msg = '';
+
+    if (req.method == 'GET') {
+
+    }
+    res.render('Account/profileAdmin', { msg: msg })
+}
+exports.logout = async (req, res, next) => {
+    let msg = '';
+    if (req.method == 'POST') {
+        if (req.session != null)
+            req.session.destroy((err) => {
+                if (err) {
+                    return next(err);
+                } else {
+                    res.redirect('/account/login');
+                }
+            });
+    }
+    res.render('Account/logoutAdmin', { msg: msg })
 }
