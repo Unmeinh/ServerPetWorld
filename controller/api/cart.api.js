@@ -34,7 +34,7 @@ exports.cartUser = async (req, res, next) => {
         );
         return res.status(200).json({
           success: true,
-          data: [],
+          data: listCartUser,
           message: "Thêm sản phẩm vào giỏ hàng thành công",
         });
       } catch (error) {

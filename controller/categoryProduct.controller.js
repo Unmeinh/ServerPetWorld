@@ -66,20 +66,20 @@ exports.addCategoryProduct = async (req, res, next) => {
 
     let msg = '';
     if (req.method == 'POST') {
-        if(req.body.tentheloai.trim()==0)
+        if(req.body.nameCategory.trim()==0)
         {
             msg='Vui lòng không để trống tên thể loại!'
             return res.render('CategoryProduct/addCategoryProduct', { msg: msg });
         }
-        if(req.body.tenicon.trim()==0)
+        if(req.body.nameIcon.trim()==0)
         {
             msg='Vui lòng không để trống tên icon!'
             return res.render('CategoryProduct/addCategoryProduct', { msg: msg });
         }
         
         let newObj = new mdCategoryProduct.CategoryProductModel();
-        newObj.nameCategory = req.body.tentheloai;
-        newObj.nameIcon = req.body.tenicon;
+        newObj.nameCategory = req.body.nameCategory;
+        newObj.nameIcon = req.body.nameIcon;
         newObj.createdAt = new Date();
         try {
             msg = 'Thêm thể loại sản phẩm thành công';
@@ -106,19 +106,19 @@ exports.editCategoryProduct = async (req, res, next) => {
 
     if (req.method == 'POST') {
         
-        if(req.body.tentheloai.trim()==0)
+        if(req.body.nameCategory.trim()==0)
         {
             msg='Vui lòng không để trống tên thể loại!'
             return res.render('CategoryProduct/editCategoryProduct', { Objdata: Objdata ,msg:msg});
         }
-        if(req.body.tenicon.trim()==0)
+        if(req.body.nameIcon.trim()==0)
         {
             msg='Vui lòng không để trống tên icon!'
             return res.render('CategoryProduct/editCategoryProduct', { Objdata: Objdata ,msg:msg});
         }
         let newObj = new mdCategoryProduct.CategoryProductModel();
-        newObj.nameCategory = req.body.tentheloai;
-        newObj.nameIcon = req.body.tenicon;
+        newObj.nameCategory = req.body.nameCategory;
+        newObj.nameIcon = req.body.nameIcon;
         newObj.createdAt = new Date();
         newObj._id= idCat;
         try {

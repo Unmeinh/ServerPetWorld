@@ -65,7 +65,6 @@ exports.detailProduct = async (req, res, next) => {
     let idPR = req.params.idPR;
     let ObjProduct = await mdProduct.ProductModel.findById(idPR).populate('idCategoryPr');
     res.render('Product/detailProduct', { ObjProduct: ObjProduct });
-    console.log("objjjjj" + ObjProduct);
 }
 
 exports.deleteProduct = async (req, res, next) => {

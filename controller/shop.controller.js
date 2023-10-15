@@ -1,6 +1,8 @@
 let mdShop = require('../model/shop.model');
 var moment = require('moment')
-const fs = require("fs");
+const jwt = require('jsonwebtoken')
+const string_word_secret = process.env.TOKEN_SEC_KEY;
+const { decodeFromSha256, decodeFromAscii, encodeToAscii, encodeToSha256 } = require("../function/hashFunction");
 exports.listShop = async (req, res, next) => {
     const perPage = 7;
     let msg = '';
@@ -26,13 +28,12 @@ exports.listShop = async (req, res, next) => {
             if (currentPage > totalPages) currentPage = totalPages;
 
             const skipCount = (currentPage - 1) * perPage;
-            let listShop = await mdShop.ShopModel.find(filterSearch).populate('idUserShop')
+            let listShop = await mdShop.ShopModel.find(filterSearch)
                 .sort(sortOption)
                 .skip(skipCount)
                 .limit(perPage);
 
             msg = 'Lấy danh sách shop thành công';
-            console.log('lisstDhsHOP '+listShop);
             return res.render('Shop/listShop', {
                 listShop: listShop,
                 countNowShop: listShop.length,
@@ -49,28 +50,53 @@ exports.listShop = async (req, res, next) => {
     }
 
     // If no search results are found, render a message
-    res.render('Shop/listShop', {msg: msg});
+    res.render('Shop/listShop', { msg: msg });
 }
 exports.detailShop = async (req, res, next) => {
-   
+
     let idShop = req.params.idShop;
-    let ObjShop = await mdShop.ShopModel.findById(idShop).populate('idUserShop')
-    res.render('Shop/detailShop', { ObjShop: ObjShop ,moment:moment});
-    console.log("objjjjj" + ObjShop);
+    let ObjShop = await mdShop.ShopModel.findById(idShop)
+    res.render('Shop/detailShop', { ObjShop: ObjShop, moment: moment });
+}
+
+exports.detailOwner = async (req, res, next) => {
+    let idShop = req.params.idShop;
+    let ObjShop = await mdShop.ShopModel.findById(idShop);
+    let objOwner = {};
+
+    if (ObjShop) {
+        const data = jwt.verify(ObjShop.ownerIdentity, string_word_secret);
+        if (data) {
+            if (data._id == idShop) {
+                let encodeOwnerIdentity = data.ownerIdentity;
+                let decodeData = await decodeFromAscii(encodeOwnerIdentity);
+                let decodeObj = { ...JSON.parse(decodeData) };
+                let images = [];
+                for (let i = 0; i < decodeObj.imageIdentity.length; i++) {
+                    const image = decodeFromSha256(decodeObj.imageIdentity[i]);
+                    images.push(image);
+                }
+                decodeObj.imageIdentity = [...images];
+                decodeObj.nameIdentity = decodeFromSha256(decodeObj.nameIdentity);
+                decodeObj.numberIdentity = decodeFromSha256(decodeObj.numberIdentity);
+                objOwner = { ...decodeObj };
+            }
+        }
+    }
+    res.render('Shop/detailOwner', { objOwner: objOwner, moment: moment });
 }
 
 exports.deleteShop = async (req, res, next) => {
     let message = ""
     let idShop = req.params.idShop;
     let ObjShop = await mdShop.ShopModel.findById(idShop);
-    console.log("idShop  " + idShop);
     if (req.method == 'POST') {
         try {
             await mdShop.ShopModel.findByIdAndDelete(idShop);
             console.log("Xóa thành công");
             return res.redirect('/shop');
         } catch (error) {
-            message=error.message;
+            message = error.message;
             console.log(message);
         }
     }
