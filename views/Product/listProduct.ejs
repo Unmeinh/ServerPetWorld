@@ -15,20 +15,22 @@
           </div>
         </div>
       </form>
-      
-      <form action="" method="get" id="sortForm" class="row col-4 me-5"
-        style="display: flex; flex-direction: row; justify-content: space-between;">
-        <select name="sortOption" id="sortOption" class="row col-10 form-select"
-          style="background-color: #F0F4F8;border-radius: 20px;border: none;box-shadow: none; width: 80%;">
-          <option selected disabled>Sắp xếp tên sản phẩm</option>
-          <option value="1"><button type="submit">Sắp xếp từ a-z</button></option>
-          <option value="-1"><button type="submit">Sắp xếp từ z-a</button></option>
 
-        </select>
-      </form>
-
+      <% if (typeof(listProduct) !== 'undefined' && listProduct.length > 0) { %>
+        <form action="" method="get" id="sortForm" class="row col-4 me-5"
+          style="display: flex; flex-direction: row; justify-content: space-between;">
+          <select name="sortOption" id="sortOption" class="row col-10 form-select"
+            style="background-color: #F0F4F8;border-radius: 20px;border: none;box-shadow: none; width: 80%;">
+            <option selected disabled>Sắp xếp tên sản phẩm</option>
+            <option value="1"><button type="submit">Sắp xếp từ a-z</button></option>
+            <option value="-1"><button type="submit">Sắp xếp từ z-a</button></option>
+          </select>
+        </form>
+        <% } else { %>
+          <div class="row col-4 me-5"></div>
+          <% } %>
       <div class="row col-3">
-        
+      
       </div>
       <div class="row col-2 ms-1" style="align-items: center;">
         <a href="/category-product"
@@ -52,7 +54,7 @@
         <div class="box" style="line-height: 8px;margin: 5px;">
 
           <p>
-            <%= row.nameProduct%>
+            <%= row.nameProduct || 'Không có dữ liệu'%>
           </p>
           <a href="/product/delete/<%= row._id %>" style="text-decoration: none;color: rgb(171, 169, 169);"
             data-bs-toggle="modal" data-bs-target="#ModalDeleteSP" data-bs-whatever="@mdo">
@@ -62,11 +64,11 @@
         </div>
       </td>
       <td>
-        <%= row.priceProduct %>
+        <%= row.priceProduct || 'Không có dữ liệu' %>
 
       </td>
       <td>
-        <%= row.amountProduct%>
+        <%= row.amountProduct || 'Không có dữ liệu' %>
       </td>
 
       <td>
@@ -116,9 +118,10 @@
     </nav>
   </div>
   <% } else { %>
-    <div class="no-results-message">
-      <p>Không tìm thấy kết quả</p>
-    </div>
+    <div class="no-results-message" style="text-align: center;">
+      <p style="color: #F582AE; font-size: 24px; margin-top: 150px; ">Không có dữ liệu</p>
+      <img src="https://png.pngtree.com/png-clipart/20190924/original/pngtree-empty-box-icon-for-your-project-png-image_4820798.jpg" alt="No data" style="width: 150px; height: 150px;" />
+  </div>
     <% } %>
 
       </div>

@@ -12,7 +12,7 @@ exports.searchApi = async (req, res, next) => {
           { namePet: { $regex: searchTerm, $options: "i" } },
           { detailPet: { $regex: searchTerm, $options: "i" } },
         ],
-      }).limit(5);
+      }).limit(5).populate('idShop');
 
       // Tìm kiếm trong bảng Product
       const products = await mdProduct.ProductModel.find({
@@ -20,7 +20,7 @@ exports.searchApi = async (req, res, next) => {
           { nameProduct: { $regex: searchTerm, $options: "i" } },
           { detailProduct: { $regex: searchTerm, $options: "i" } },
         ],
-      }).limit(5);
+      }).limit(5).populate('idShop');
       const searchResults = [...pets, ...products];
       if (searchResults.length > 0) {
         res

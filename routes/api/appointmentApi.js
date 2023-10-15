@@ -1,7 +1,7 @@
 var express = require('express');
-var appointmentCtrl = require('../../controller/api/Appointment.api');
-var router = express.Router();
+var appointmentCtrl = require('../../controller/api/appointment.api');
 var mdJWT = require('../../middlewares/api.auth');
+var router = express.Router();
 
 router.get('/list', mdJWT.api_user_auth, appointmentCtrl.listAppointment);
 

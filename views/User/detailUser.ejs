@@ -20,32 +20,32 @@
                     <div class="form-group row p-3">
                         <label for="name" form="bold" class="col-sm-3 me-auto col-form-label">Họ và tên</label>
                         <div class="col-sm-7">
-                            <input type="text" class="form-control" id="fullname" value="<%= objU.fullName%>" readonly>
+                            <input type="text" class="form-control" id="fullname" value="<%= objU.fullName% || 'Không có dữ liệu'>" readonly>
                         </div>
                     </div>
                     <div class="form-group row p-3 ">
                         <label for="birthday" class="col-sm-3 me-auto col-form-label">Ngày sinh</label>
                         <div class="col-sm-7">
-                            <input type="text" class="form-control" id="birthday" value="<%= moment(objU.birthday).format('DD/MM/YYYY')  %>" readonly>
+                            <input type="text" class="form-control" id="birthday" value="<%= moment(objU.birthday).format('DD/MM/YYYY')  %> || 'Không có dữ liệu'" readonly>
                         </div>
                     </div>
                     <div class="form-group row p-3 ">
                         <label for="address" class="col-sm-3 me-auto col-form-label">Địa chỉ</label>
                         <div class="col-sm-7">
-                            <input type="text" class="form-control" id="address" value="<%= objU.locationUser %>">
+                            <input type="text" class="form-control" id="address" value="<%= objU.locationUser %>|| 'Không có dữ liệu'">
                         </div>
                     </div>
                     
                     <div class="form-group row p-3">
                         <label for="email" class="col-sm-3 me-auto col-form-label">Email</label>
                         <div class="col-sm-7">
-                            <input type="email" class="form-control" id="email" value="<%= objU.idAccount.emailAddress %>" readonly>
+                            <input type="email" class="form-control" id="email" value="<%= objU.idAccount.emailAddress %>|| 'Không có dữ liệu'" readonly>
                         </div>
                     </div>
                     <div class="form-group row p-3">
                         <label for="phone" class="col-sm-3 me-auto col-form-label">Số điện thoại</label>
                         <div class="col-sm-7">
-                            <input type="tel" class="form-control" id="phone" value="<%= objU.idAccount.phoneNumber %>" readonly>
+                            <input type="tel" class="form-control" id="phone" value="<%= objU.idAccount.phoneNumber %>|| 'Không có dữ liệu'" readonly>
                         </div>
                     </div>
 
