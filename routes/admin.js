@@ -8,12 +8,12 @@ router.get('/',checkLogin.check_request_login, AdminCtrl.listAdmin);
 router.get('/detail/:idAdmin',checkLogin.check_request_login, AdminCtrl.detailAdmin);//bổ sung /:idAdmin khi làm 
 
 router.get('/add',checkLogin.check_request_login, AdminCtrl.addAdmin);
-router.post('/add', AdminCtrl.addAdmin);
+router.post('/add',checkLogin.check_request_login, AdminCtrl.addAdmin);
 
 // router.get('/edit', AdminCtrl.editAdmin); //bổ sung /:idAdmin khi làm 
 // router.put('/edit', AdminCtrl.editAdmin);//bổ sung /:idAdmin khi làm 
 
 router.get('/delete/:idAdmin',checkLogin.check_request_login,AdminCtrl.deleteAdmin);//bổ sung /:idAdmin khi làm 
-router.post('/delete/:idAdmin',AdminCtrl.deleteAdmin);//bổ sung /:idAdmin khi làm 
+router.post('/delete/:idAdmin',checkLogin.check_request_login,AdminCtrl.deleteAdmin);//bổ sung /:idAdmin khi làm
 
 module.exports = router;
