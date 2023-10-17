@@ -7,7 +7,7 @@ let ShopSchema = new db.mongoose.Schema(
         locationShop:{type:String,required:true},
         avatarShop:{type:String,required:true},
         description:{type:String,required:true}, 
-        status:{type:String,required:true}, 
+        status:{type:Number,required:true}, 
         followers:{type:Number,required:true},
         hotline:{type:Number,required:true},
         createdAt:{type:Date,required:true},

@@ -1,0 +1,228 @@
+<%- include('../inc/top', { title: 'Quản lý shop chưa duyệt' }) %>
+<div
+  class="container-fluid"
+  style="width: 98%; display: flex; flex-direction: column"
+>
+  <div class="row m-3">
+    <form action="" class="col-12 col-md-3 me-2" method="get">
+      <div
+        style="
+          background-color: #f0f4f8;
+          border-radius: 25px;
+          display: flex;
+          align-items: center;
+        "
+      >
+        <div style="width: 10%">
+          <button type="submit" style="border: none">
+            <img src="/upload/iconFind.png" style="width: 20px; height: 20px" />
+          </button>
+        </div>
+        <div style="width: 90%">
+          <input
+            name="filterSearch"
+            class="form-control"
+            style="
+              border: none;
+              background-color: #f0f4f8;
+              border-radius: 25px;
+              box-shadow: none;
+            "
+            placeholder="Tìm kiếm"
+            onfocus="hideSortSelect()"
+            onblur="showSortSelect()"
+          />
+        </div>
+      </div>
+    </form>
+
+    <form
+      action=""
+      method="get"
+      id="sortForm"
+      class="col-12 col-md-4 me-5"
+      style="display: flex; justify-content: space-between"
+    >
+      <select
+        name="sortOption"
+        id="sortOption"
+        class="form-select sort-select"
+        style="
+          background-color: #f0f4f8;
+          border-radius: 20px;
+          border: none;
+          box-shadow: none;
+        "
+      >
+        <option selected disabled>Sắp xếp tên shop</option>
+        <option value="1">Sắp xếp từ a-z</option>
+        <option value="-1">Sắp xếp từ z-a</option>
+      </select>
+    </form>
+    <div class="row col-2 ms-3" style="align-items: right;"></div>
+    <div class="row col-2 ms-1" style="align-items: right;">
+      <a href="/shop/confirmAll"
+        style="text-decoration: none; background-color: #F582AE; border-radius: 6px;text-align: center;padding: 7px;">
+        <span style="color: white;font-weight: bold;">Duyệt tất cả</span>
+      </a>
+    </div>
+
+    <div class="row col-2 ms-1" style="align-items: right"></div>
+  </div>
+
+  <% if (typeof listShop !=='undefined' && listShop.length> 0) { %>
+  <table class="table align-middle" style="border: white">
+    <tr style="background-color: #8bd3dd">
+      <th scope="col" style="border-radius: 6px 0 0 6px">Tên shop</th>
+      <th scope="col">Email</th>
+      <th scope="col">Trạng thái</th>
+      <th scope="col">Ngày tạo</th>
+      <th scope="col"></th>
+      <th scope="col">Trạng thái</th>
+      <th scope="col" style="border-radius: 0 6px 6px 0"></th>
+    </tr>
+
+    <% listShop.forEach((row)=> { %> <% if (row.status !==1) { %>
+    <tr>
+      <td>
+        <div class="box" style="line-height: 8px; margin: 5px">
+          <p><%= row.nameShop %></p>
+          <a
+            href="/shop/delete/<%= row._id %>"
+            style="text-decoration: none; color: rgb(171, 169, 169)"
+            data-bs-toggle="modal"
+            data-bs-target="#ModalDeleteSP"
+            data-bs-whatever="@mdo"
+          >
+            <span>Xóa</span>
+          </a>
+        </div>
+      </td>
+      <td><%= row.email %></td>
+      <td>
+        <% if (row.status===0) { %> Đang chờ duyệt <% } else if (row.status===1)
+        { %> Đã duyệt <% } else { %> Trạng thái không xác định <% } %>
+      </td>
+      <td><%= moment(row.createdAt).format('DD/MM/YYYY hh:mm:ss a') %></td>
+      <td>
+        <a
+          href="/shop/detail/<%= row._id %>"
+          style="
+            background-color: #f582ae;
+            padding: 8px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+          "
+          >Chi tiết</a
+        >
+      </td>
+      <td>
+        <form method="get">
+          <a
+            href="/shop/update/<%= row._id %>"
+            class="approve-button"
+            data-shop-id="<%= row._id %>"
+            style="
+              background-color: #f582ae;
+              padding: 8px;
+              border-radius: 10px;
+              text-decoration: none;
+              color: white;
+              font-weight: bold;
+            "
+          >
+            Duyệt
+          </a>
+        </form>
+      </td>
+      <td>
+        <a
+          style="
+            background-color: #66d9f3;
+            padding: 8px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+          "
+          >Từ chối</a
+        >
+      </td>
+    </tr>
+    <% } %> <% }) %>
+  </table>
+  <div
+    style="
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      position: absolute;
+      bottom: 0;
+      width: 96%;
+    "
+  >
+    <p>
+      Số bản ghi:
+      <span style="font-weight: bold">
+        <%= countNowShop %>/<%= countAllShop %>
+      </span>
+    </p>
+    <nav>
+      <ul class="pagination">
+        <% if (currentPage> 1) { %>
+        <li class="page-item">
+          <a
+            class="page-link"
+            href="?page=<%= currentPage - 1 %>"
+            aria-label="Previous"
+          >
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+        <% } %> <% for (let i=1; i <=totalPages; i++) { %>
+        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+          <a class="page-link" href="?page=<%= i %>"> <%= i %> </a>
+        </li>
+        <% } %> <% if (currentPage < totalPages) { %>
+        <li class="page-item">
+          <a
+            class="page-link"
+            href="?page=<%= currentPage + 1 %>"
+            aria-label="Next"
+          >
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+        <% } %>
+      </ul>
+    </nav>
+  </div>
+
+  <% } else { %>
+  <div class="no-results-message">
+    <p class="m-3">Không tìm thấy kết quả</p>
+  </div>
+  <% } %>
+</div>
+<%- include('../inc/bottom') %>
+
+<script>
+  function hideSortSelect() {
+    const sortSelect = document.querySelector(".sort-select");
+    sortSelect.style.display = "none";
+  }
+  function showSortSelect() {
+    const sortSelect = document.querySelector(".sort-select");
+    sortSelect.style.display = "block";
+  }
+  const searchInput = document.querySelector('input[name="filterSearch"]');
+  const noResultsMessage = document.querySelector(".no-results-message");
+  searchInput.addEventListener("focus", hideSortSelect);
+  searchInput.addEventListener("blur", showSortSelect);
+  if (noResultsMessage) {
+    hideSortSelect();
+  }
+</script>

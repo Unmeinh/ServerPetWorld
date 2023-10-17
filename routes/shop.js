@@ -3,12 +3,15 @@ var ShopCtrl = require('../controller/shop.controller');
 var multer = require('multer');
 var uploader = multer({ dest: './tmp' });
 var router = express.Router();
-
 router.get('/', ShopCtrl.listShop);
-
-router.get('/detail/:idShop', ShopCtrl.detailShop);//bổ sung /:idUser khi làm 
-
+router.get('/confirm', ShopCtrl.listShopConfirm);
+router.get('/detail/:idShop', ShopCtrl.detailShop);
 router.get('/delete/:idShop',ShopCtrl.deleteShop);
 router.post('/delete/:idShop',ShopCtrl.deleteShop);
 
+router.get('/update/:idShop', ShopCtrl.updateShopStatus);
+router.post('/update/:idShop', ShopCtrl.updateShopStatus);
+
+router.get('/update/confirmAll', ShopCtrl.confirmAll);
+router.post('/update/confirmAll', ShopCtrl.confirmAll);
 module.exports = router;

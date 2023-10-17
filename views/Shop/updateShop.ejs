@@ -1,4 +1,4 @@
-<%- include('../inc/top', { title: 'Xóa shop' }) %>
+<%- include('../inc/top', { title: 'Duyệt shop' }) %>
 <div class="container">
     <% if(message) { %>
         <div class="row mb-2">
@@ -9,9 +9,9 @@
     <% } %>
     <div class="col-12 col-md-5 mx-auto" style="box-shadow: 0 0 2px 2px #9c9999; border-radius: 8px; padding: 20px;">
         <form action="" method="post">
-            <h3 class="text-muted" style="margin-bottom: 20px;">Xóa shop</h3>
-            <h4 style="margin: 30px;">Bạn muốn xóa shop: <span style="font-weight: bold;"><%= ObjShop.nameShop %></span>?</h4>
-            <button class="btn btn-danger" type="submit">Xóa ngay</button>
+            <h3 class="text-muted" style="margin-bottom: 20px;">Xác nhận duyệt</h3>
+            <h4 style="margin: 30px;">Xác nhận <span style="font-weight: bold;"><%= ObjShop.nameShop %></span>?</h4>
+            <button class="btn btn-danger" type="submit">Xác nhận</button>
             <a href="http://localhost:3000/shop" class="btn btn-secondary">Hủy bỏ</a>
         </form>
     </div>

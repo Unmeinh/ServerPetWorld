@@ -4,7 +4,7 @@ let bcrypt = require('bcrypt');
 const fs = require("fs");
 
 exports.listUserShop = async (req, res, next) => {
-  const perPage = 6;
+  const perPage = 10;
   let msg = '';
   let filterSearch = {};
   let currentPage = parseInt(req.query.page) || 1;
@@ -16,7 +16,7 @@ exports.listUserShop = async (req, res, next) => {
         const searchTerm = req.query.filterSearch.trim();
         filterSearch = { userName: new RegExp(searchTerm, 'i') };
       }
-
+//// tìm kiếm 
       let sortOption = {};
       const selectedSortOption = req.query.sortOption;
       if (selectedSortOption === 'az') {
@@ -24,7 +24,7 @@ exports.listUserShop = async (req, res, next) => {
       } else if (selectedSortOption === 'za') {
         sortOption = { userName: -1 }; // -1 for descending order (Z-A)
       }
-
+//////////////////////////
       const totalCount = await mdUserShop.UserShopModel.countDocuments(filterSearch);
       const totalPages = Math.ceil(totalCount / perPage);
 

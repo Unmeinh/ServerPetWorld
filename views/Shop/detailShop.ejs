@@ -1,127 +1,90 @@
-<%- include('../inc/top',{title:'Chi tiết Shop'}) %>
+<%- include('../inc/top', { title: 'Chi tiết Shop' }) %>
 
-    <div class="container mt-2">
-
-        <div class="form-group row m-2">
-            <label for="nameAdmin" class="col-sm-5 col-form-label" style="color: #848485;">Trang này để xem chi tiết
-                Shop </label>
+<div class="container mt-2">
+    <div class="form-group row m-2">
+        <label class="col-sm-5 col-form-label text-muted">Trang này để xem chi tiết Shop</label>
+    </div>
+    <form action="" method="get">
+        <div class="form-group row m-3 align-items-center">
+            <label class="col-sm-2 col-form-label">Avatar</label>
             <div class="col-sm-5">
+                <% if (typeof(ObjShop.avatarShop) !== 'undefined') { %>
+                    <img src="<%= ObjShop.avatarShop %>" class="img-fluid rounded" alt="Avatar"
+                        style="max-width: 100px; max-height: 100px;">
+                <% } else { %>
+                    <p>No images available.</p>
+                <% } %>
             </div>
         </div>
-        <form action="" method="get">
-
-            <div class="form-group row m-3" style="align-items: center;">
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Avatar</label>
-                <div class="col-sm-5">
-                    <% if (typeof(ObjShop.avatarShop) !=='undefined' ) { %>
-
-                        <img src="<%= ObjShop.avatarShop %>" style="width: 100px; height: 100px; border-radius: 10px;"
-                            class="img-fluid">
-
-                        <% } else { %>
-                            <p>No images available.</p>
-                            <% } %>
-                </div>
-            </div>
-
-            <div class="form-group row m-3">
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Tên Shop</label>
-                <div class="col-sm-3">
-                    <label type="text" class="form-control" style="width: 200px;">
+        <div class="form-group row m-3">
+            <label class="col-sm-2 col-form-label">Tên Shop</label>
+            <div class="col-sm-3">
+                <% if(typeof(ObjShop.nameShop)!='undefined' ) { %>
+                    <p class="form-control-static">
                         <%= ObjShop.nameShop %>
-                    </label>
-                </div>
+                    </p>
 
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Email Shop</label>
-                <div class="col-sm-3">
-                    <label type="text" style="width: 200px;" class="form-control">
-                        <%= ObjShop.email %>
-                    </label>
-                </div>
-
+                    <%} else { %>
+                        <p class="form-control-static">
+                          Không có dữ liệu
+                        </p>
+                        <% } %>
             </div>
-
-            <div class="form-group row m-3">
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Địa chỉ Shop</label>
-                <div class="col-sm-3">
-                    <label type="text" class="form-control" style="width: 200px;">
-                        <%= ObjShop.locationShop %>
-                    </label>
-                </div>
-
-                <label for="username" form="bold" class="col-sm-2 col-form-label">followers</label>
-                <div class="col-sm-3">
-                    <label type="text" style="width: 200px;" class="form-control">
-                        <%= ObjShop.followers %>
-                    </label>
-                </div>
-
+            <label class="col-sm-2 col-form-label">Email Shop</label>
+            <div class="col-sm-3">
+                <p class="form-control-static"><%= ObjShop.email %></p>
             </div>
-            <div class="form-group row m-3">
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Số điện thoại</label>
-                <div class="col-sm-3">
-                    <label type="text" class="form-control" style="width: 200px;">
-                        <%= ObjShop.hotline %>
-                    </label>
-                </div>
-
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Doanh thu</label>
-                <div class="col-sm-3">
-                    <label type="text" style="width: 200px;" class="form-control">
-                        <%= ObjShop.revenue %>
-                    </label>
-                </div>
-
+        </div>
+        <div class="form-group row m-3">
+            <label class="col-sm-2 col-form-label">Địa chỉ Shop</label>
+            <div class="col-sm-3">
+                <p class="form-control-static"><%= ObjShop.locationShop %></p>
             </div>
-            <div class="form-group row m-3">
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Trạng thái Shop</label>
-                <div class="col-sm-3">
-                    <label type="text" class="form-control" style="width: 200px;">
-                        <%= ObjShop.status %>
-                    </label>
-                </div>
-
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Mô tả shop</label>
-                <div class="col-sm-3">
-                    <label type="text" style="width: 200px; height: 100px;" class="form-control">
-                        <%= ObjShop.description %>
-                    </label>
-                </div>
-
+            <label class="col-sm-2 col-form-label">Followers</label>
+            <div class="col-sm-3">
+                <p class="form-control-static"><%= ObjShop.followers %></p>
             </div>
-
-            <div class="form-group row m-3">
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Tên người dùng Shop</label>
-                <div class="col-sm-3">
-
-                    <% if(typeof( ObjShop.idUserShop)!='undefined' ){%>
-                        <label type="text" class="form-control" style="width: 200px;">
-                            <%= ObjShop.idUserShop.userName %>
-                        </label>
-                        <%} else {%>
-
-                            <label type="text" class="form-control" style="width: 200px;">
-                                Không có người dùng shop
-                            </label>
-                            <%}%>
-                </div>
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Ngày tạo</label>
-                <div class="col-sm-3">
-                    <label type="text" style="width: 200px;" class="form-control">
-                        <%= moment(ObjShop.createdAt).format('DD/MM/YYYY aa:mm:ss a') %>
-                    </label>
-                </div>
-
+        </div>
+        <div class="form-group row m-3">
+            <label class="col-sm-2 col-form-label">Số điện thoại</label>
+            <div class="col-sm-3">
+                <p class="form-control-static"><%= ObjShop.hotline %></p>
             </div>
-
-    </div>
+            <label class="col-sm-2 col-form-label">Doanh thu</label>
+            <div class="col-sm-3">
+                <p class="form-control-static"><%= ObjShop.revenue %></p>
+            </div>
+        </div>
+        <div class="form-group row m-3">
+            <label class="col-sm-2 col-form-label">Trạng thái Shop</label>
+            <div class="col-sm-3">
+                <p class="form-control-static"><%= ObjShop.status %></p>
+            </div>
+            <label class="col-sm-2 col-form-label">Mô tả shop</label>
+            <div class="col-sm-3">
+                <p class="form-control-static" style="max-height: 100px; overflow-y: auto;"><%= ObjShop.description %></p>
+            </div>
+        </div>
+        <div class="form-group row m-3">
+            <label class="col-sm-2 col-form-label">Tên người dùng Shop</label>
+            <div class="col-sm-3">
+                <% if (typeof(ObjShop.idUserShop) !== 'undefined') { %>
+                    <p class="form-control-static"><%= ObjShop.idUserShop.userName %></p>
+                <% } else { %>
+                    <p class="form-control-static">Không có người dùng shop</p>
+                <% } %>
+            </div>
+            <label class="col-sm-2 col-form-label">Ngày tạo</label>
+            <div class="col-sm-3">
+                <p class="form-control-static"><%= moment(ObjShop.createdAt).format('DD/MM/YYYY hh:mm:ss a') %></p>
+            </div>
+        </div>
+    </form>
     <div class="form-group row m-3">
-        <div class="col-sm-10" style="margin-left: 90px;">
-            <a style="background-color: #F582AE;" href="/shop" class="btn btn-secondary ">Quay lại</a>
+        <div class="col-sm-10 offset-sm-2">
+            <a href="/shop" class="btn btn-secondary" style="background-color: #F582AE;">Quay lại</a>
         </div>
     </div>
-    </form>
+</div>
 
-    </div>
-
-    <%- include('../inc/bottom') %>
+<%- include('../inc/bottom') %>

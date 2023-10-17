@@ -4,22 +4,75 @@ let validator = require('email-validator');
 var phoneValidate = /^\d{9}$/
 
 exports.listShop = async (req, res, next) => {
-    let filterSearch = null;
+    try {
+        if (req.query.hasOwnProperty('page') && req.query.hasOwnProperty('day')) {
+            const page = parseInt(req.query.page) || 1;
+    
 
-    if (req.method == 'GET') {
-        try {
-            if (typeof (req.query.filterSearch) != 'undefined' && req.query.filterSearch.trim() != '') {
-                const searchTerm = req.query.filterSearch.trim();
-                filterSearch = { fullName: new RegExp(searchTerm, 'i') };
+            // Validate page and days
+            if (page <= 0 || isNaN(page) ) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Số trang và số ngày không hợp lệ.',
+                });
             }
-            let listShop = await mdShop.ShopModel.find(filterSearch).populate('idUserShop');
-            return res.status(200).json({ success: true, data: listShop, message: 'Lấy danh sách shop thành công' });
-        } catch (error) {
-            return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
-        }
-    }
 
-}
+            const limit = 10;
+            const startIndex = (page - 1) * limit;
+          
+
+            // Get product IDs based on page and within the specified days
+            const productIds = await mdShop.ShopModel
+                .find()
+                .limit(limit)
+                .skip(startIndex)
+                .select('_id')
+                .exec();
+            // Get product details for the retrieved product IDs within the specified days
+         if (req.query.hasOwnProperty('page')) {
+            const page = parseInt(req.query.page) || 1;
+            const limit = 10;
+            const totalCount = await mdShop.ShopModel.countDocuments();
+            const totalPage = Math.ceil(totalCount / limit);
+            const startIndex = (page - 1) * limit;
+            const pageRegex = /^[0-9]+$/;
+
+            if (page <= 0) {
+                return res.status(500).json({ success: false, message: "Số trang phải lớn hơn 0" });
+            }
+
+            if (!pageRegex.test(page)) {
+                return res.status(500).json({ success: false, message: "Số trang phải là số nguyên!" });
+            }
+
+            if (page > totalPage) {
+                return res.status(500).json({ success: false, message: "Số trang không tồn tại!" });
+            }
+
+            const listShop = await mdShop.ShopModel
+                .find()
+                .populate('idUserShop')
+                .populate('_id')
+                .limit(limit)
+                .skip(startIndex)
+                .exec();
+
+            if (listShop.length > 0) {
+                return res.status(200).json({ success: true, data: listShop, message: 'Lấy danh sách sản phẩm thành công' });
+            } else {
+                return res.status(500).json({ success: false, message: 'Không có sản phẩm nào' });
+            }
+        } 
+        } else {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid request. Please provide either "page" or "day" parameter.',
+            });
+        }
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
 exports.detailShop = async (req, res, next) => {
 
     let idShop = req.params.idShop;

@@ -1,5 +1,6 @@
 var express = require('express');
 var UserCtrl = require('../controller/user.controller');
+
 var router = express.Router();
 
 router.get('/', UserCtrl.listUser);
