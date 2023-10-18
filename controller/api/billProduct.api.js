@@ -1,10 +1,11 @@
 let mdbillProduct = require("../../model/billProduct.model");
-let mdCart = require("../../model/cart.model");
 let mdTransition = require("../../model/transaction.modal");
 let mdServer = require("../../model/server.modal");
 let mdNoti = require("../../model/notice.model");
 let mdPet = require("../../model/pet.model");
 let mdProduct = require("../../model/product.model");
+let mdShop = require("../../model/shop.model");
+
 exports.listbillProduct = async (req, res, next) => {
   try {
     // console.log("req: "+req.user);
@@ -308,21 +309,50 @@ exports.billProductUser = async (req, res) => {
   const { products, location, paymentMethods, detailCard } = req.body;
   if (req.method === "POST") {
     try {
-      products?.forEach(async (item) => {
-        try {
-          let newbillProduct = new mdbillProduct.billProductModel({
+      const productPromises = [];
+      await Promise.all(
+        products?.map(async (item) => {
+          const itemPromises = item.items?.map(async (subItem) => {
+            const product = await mdProduct.ProductModel.findById(
+              subItem.idProduct
+            );
+            if (product) {
+              const discoutProduct =
+                (product.priceProduct / 100) * product.discount;
+              item.total =
+                (item.total ?? 0) + product.priceProduct - discoutProduct;
+              item.discount = (item.discount ?? 0) + discoutProduct;
+              subItem.price = product.priceProduct;
+              subItem.discount = product.discount;
+            } else {
+              return res.status(500).json({
+                success: false,
+                message: "Không tìm thấy sản phẩm",
+                data: [],
+              });
+            }
+          });
+          await Promise.all(itemPromises);
+
+          productPromises.push(item);
+        })
+      );
+      await Promise.all(
+        productPromises.map(async (item) => {
+          const newbillProduct = new mdbillProduct.billProductModel({
             idUser: _id,
-            location: location ?? '',
-            total: item?.total,
+            location: location ?? "",
+            total: item.total,
             deliveryStatus: 0,
-            discountBill: item.discountBill,
-            moneyShip: item?.moneyShip,
-            products: item?.items,
-            idShop: item?.idShop,
+            discountBill: item.discount,
+            moneyShip: item.moneyShip,
+            products: item.items,
+            idShop: item.idShop,
             paymentMethods: paymentMethods ?? 0,
             detailCard: paymentMethods == 1 ? detailCard : null,
             purchaseDate: new Date(),
           });
+
           const server = await mdServer.serverModal.findOne({});
           const createTransition = new mdTransition.TransactionModal({
             fee: (newbillProduct.total / 100) * server.fee,
@@ -334,21 +364,18 @@ exports.billProductUser = async (req, res) => {
             total:
               newbillProduct.total - (newbillProduct.total / 100) * server.fee,
           });
-          await newbillProduct.save();
-          await createTransition.save();
+
           server.totalNumberOfOrdersSold += 1;
-          await mdServer.serverModal.findByIdAndUpdate(
-            { _id: server._id },
-            server
-          );
-        } catch (error) {
-          res.status(500).json({
-            success: false,
-            message: error.message,
-            data: [],
-          });
-        }
-      });
+          Promise.all([
+            await newbillProduct.save(),
+            await createTransition.save(),
+            await mdServer.serverModal.findByIdAndUpdate(
+              { _id: server._id },
+              server
+            ),
+          ]);
+        })
+      );
       res.status(201).json({
         success: true,
         message: "Tạo hóa đơn thành công!",
