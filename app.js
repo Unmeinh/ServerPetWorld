@@ -35,7 +35,6 @@ var searchApi = require('./routes/api/searchApi');
 var appointmentRouter = require('./routes/api/appointmentApi');
 var ConversationsRouter = require('./routes/api/ConversationsApi');
 var boxChatRouter = require('./routes/api/boxChatApi');
-
 var app = express();
 
 // view engine setup
