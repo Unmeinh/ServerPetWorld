@@ -34,6 +34,7 @@ var voucherServerRouter = require('./routes/api/voucherServerApi');
 var searchApi = require('./routes/api/searchApi');
 var appointmentRouter = require('./routes/api/appointmentApi');
 var ConversationsRouter = require('./routes/api/ConversationsApi');
+var boxChatRouter = require('./routes/api/boxChatApi');
 var serverRouter = require('./routes/api/serverApi')
 var app = express();
 
@@ -82,6 +83,7 @@ app.use('/api/voucherServer',voucherServerRouter);
 app.use('/api/search',searchApi);
 app.use('/api/appointment',appointmentRouter);
 app.use('/api/conversations', ConversationsRouter);
+app.use('/api/boxChat', boxChatRouter);
 app.use('/api/server', serverRouter);
 
 
