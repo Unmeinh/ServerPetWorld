@@ -6,23 +6,24 @@ const string_word_secret = process.env.TOKEN_SEC_KEY;
 
 let ShopSchema = new db.mongoose.Schema(
     {
-        nameShop:{type:String,required:true},
-        email:{type:String,required:true},
-        locationShop:{type:String,required:true},
-        avatarShop:{type:String,required:true},
-        description:{type:String,required:false}, 
-        status:{type:Number,required:true}, 
-        followers:{type:Number,required:false},
-        hotline:{type:Number,required:true},
-        createdAt:{type:Date,required:true},
-        revenue:{type:Number,required:true},
+        nameShop: { type: String, required: true },
+        email: { type: String, required: true },
+        locationShop: { type: String, required: true },
+        avatarShop: { type: String, required: true },
+        description: { type: String, required: false },
+        status: { type: Number, required: true },
+        followers: { type: Number, required: false },
+        hotline: { type: Number, required: true },
+        createdAt: { type: Date, required: true },
+        revenue: { type: Number, required: true },
         userName: { type: String, required: true, index: { unique: true } },
         passWord: { type: String, required: true },
         ownerIdentity: { type: String, required: true },
         token: { type: String, required: true },
+        online: { type: Number, required: true }
     },
     {
-        collection:'Shop'
+        collection: 'Shop'
     }
 )
 
@@ -51,6 +52,6 @@ ShopSchema.statics.findByCredentials = async (userName, passWord) => {
     return shop;
 }
 
-let ShopModel = db.mongoose.model('ShopModel',ShopSchema);
+let ShopModel = db.mongoose.model('ShopModel', ShopSchema);
 
-module.exports={ShopModel};
+module.exports = { ShopModel };
