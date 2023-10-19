@@ -50,7 +50,7 @@ exports.listpet = async (req, res, next) => {
                 hidden = "hidden";
             }
             msg = 'Lấy danh sách  sản phẩm thành công';
-            return res.render('pet/listPet', {
+            return res.render('Pet/listPet', {
                 listpet: listpet,
                 countNowpet: listpet.length,
                 countAllpet: totalCount,
@@ -67,7 +67,7 @@ exports.listpet = async (req, res, next) => {
         }
     }
 
-    res.render('pet/listPet', {
+    res.render('Pet/listPet', {
         msg: 'Không tìm thấy kết quả phù hợp',
         moment: moment
     });
@@ -76,7 +76,7 @@ exports.detailpet = async (req, res, next) => {
     let msg = '';
     let idP = req.params.idP;
     let Objpet = await mdpet.PetModel.findById(idP).populate('idCategoryP').populate('idShop');
-    res.render('pet/detailPet', { Objpet: Objpet });
+    res.render('Pet/detailPet', { Objpet: Objpet });
 }
 
 exports.deletepet = async (req, res, next) => {
@@ -95,7 +95,7 @@ exports.deletepet = async (req, res, next) => {
         }
     }
 
-    res.render('pet/deletePet', { message: message, Objpet: Objpet });
+    res.render('Pet/deletePet', { message: message, Objpet: Objpet });
 }
 
 exports.reasonDeletepPet = async (req, res, next) => {
