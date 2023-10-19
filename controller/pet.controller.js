@@ -50,7 +50,7 @@ exports.listpet = async (req, res, next) => {
                 hidden = "hidden";
             }
             msg = 'Lấy danh sách  sản phẩm thành công';
-            return res.render('Pet/listpet', {
+            return res.render('pet/listpet', {
                 listpet: listpet,
                 countNowpet: listpet.length,
                 countAllpet: totalCount,
@@ -67,7 +67,7 @@ exports.listpet = async (req, res, next) => {
         }
     }
 
-    res.render('Pet/listpet', {
+    res.render('pet/listpet', {
         msg: 'Không tìm thấy kết quả phù hợp',
         moment: moment
     });
@@ -95,7 +95,7 @@ exports.deletepet = async (req, res, next) => {
         }
     }
 
-    res.render('Pet/deletepet', { message: message, Objpet: Objpet });
+    res.render('pet/deletepet', { message: message, Objpet: Objpet });
 }
 
 exports.reasonDeletepPet = async (req, res, next) => {
