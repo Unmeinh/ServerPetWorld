@@ -231,6 +231,7 @@ exports.addProduct = async (req, res, next) => {
         newObj.idShop = req.body.idShop;
         newObj.amountProduct = req.body.amountProduct;
         newObj.detailProduct = req.body.detailProduct;
+        newObj.idShop = req.body.idShop;
         newObj.quantitySold = 0;
         newObj.rate = 0;
         newObj.type = 1;
@@ -269,7 +270,6 @@ exports.addProduct = async (req, res, next) => {
             else if (error.message.match(new RegExp('.+amountProduct: Cast to Number failed for value+.'))) {
                 msg = 'Số lượng sản phẩm phải nhập số!';
             }
-
             else if (newObj.amountProduct <= 0) {
                 msg = 'Số lượng sản phẩm phải lớn hơn 0!';
             }

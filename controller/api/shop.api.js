@@ -18,7 +18,7 @@ exports.listShop = async (req, res, next) => {
                 const searchTerm = req.query.filterSearch.trim();
                 filterSearch = { fullName: new RegExp(searchTerm, 'i') };
             }
-            let listShop = await mdShop.ShopModel.find(filterSearch).populate('idUserShop');
+            let listShop = await mdShop.ShopModel.find(filterSearch);
             return res.status(200).json({ success: true, data: listShop, message: 'Lấy danh sách shop thành công' });
         } catch (error) {
             return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
