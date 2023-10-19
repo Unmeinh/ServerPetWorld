@@ -1,4 +1,4 @@
-let server = require("../model/server.modal");
+var serverModal = require("../model/server.modal");
 
 // exports.insert = async (req, res) => {
 //   try {
@@ -23,3 +23,22 @@ let server = require("../model/server.modal");
 //     console.log(error);
 //   }
 // };
+
+exports.getPaymentMethods = async (req, res) => {
+  try {
+    const payments = await serverModal.serverModal.findOne({});
+    res
+      .status(200)
+      .json({
+        success: true,
+        data: payments.payments,
+        message: "Lấy phương thức thanh toán thành công",
+      });
+  } catch (error) {
+    res.status(500).json({
+        success: false,
+        data: [],
+        message: "Lấy phương thức thanh toán thất bại",
+      });
+  }
+};
