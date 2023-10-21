@@ -69,7 +69,8 @@ exports.listpet = async (req, res, next) => {
 
     res.render('Pet/listPet', {
         msg: 'Không tìm thấy kết quả phù hợp',
-        moment: moment
+        moment: moment,
+        adminLogin: req.session.adLogin
     });
 }
 exports.detailpet = async (req, res, next) => {
