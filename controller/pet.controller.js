@@ -76,7 +76,7 @@ exports.detailpet = async (req, res, next) => {
     let msg = '';
     let idP = req.params.idP;
     let Objpet = await mdpet.PetModel.findById(idP).populate('idCategoryP').populate('idShop');
-    res.render('Pet/detailPet', { Objpet: Objpet });
+    res.render('Pet/detailPet', { Objpet: Objpet, adminLogin: req.session.adLogin });
 }
 
 exports.deletepet = async (req, res, next) => {
