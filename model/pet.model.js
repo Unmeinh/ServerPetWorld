@@ -13,6 +13,7 @@ let PetSchema = new db.mongoose.Schema(
         idCategoryP:{type: db.mongoose.Schema.Types.ObjectId, ref:'CategoryPetModel'},
         idShop:{type: db.mongoose.Schema.Types.ObjectId, ref:'ShopModel'},
         createdAt:{type:Date,required:true},
+        rate:{type:Number, require:false},
         ratings:{type:Array, require:false},
         discount:{type:Number, require:false},
         type:{type:Number, require:false},
