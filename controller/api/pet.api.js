@@ -108,6 +108,7 @@ exports.addpet = async (req, res, next) => {
         newObj.detailPet = detail;
         newObj.idShop = req.shop._id;
         newObj.type = 0;
+        newObj.rate = 0;
         newObj.ratings = [];
         switch (String(size)) {
             case '0':

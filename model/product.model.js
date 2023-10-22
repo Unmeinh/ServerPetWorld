@@ -8,6 +8,7 @@ let ProductSchema = new db.mongoose.Schema(
         priceProduct:{type:Number,required:true},
         amountProduct:{type:Number,required:true},
         quantitySold:{type:Number,required:true},
+        rate:{type:Number, require:false},
         ratings:{type:Array, require:false},
         discount:{type:Number,required:false},
         type:{type:Number, require:false},

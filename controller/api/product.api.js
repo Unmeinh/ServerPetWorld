@@ -249,6 +249,7 @@ exports.addProduct = async (req, res, next) => {
         newObj.amountProduct = Number(amount);
         newObj.detailProduct = detail;
         newObj.quantitySold = 0;
+        newObj.rate = 0;
         newObj.ratings = [];
         newObj.type = 1;
         newObj.createdAt = new Date();
@@ -325,6 +326,7 @@ exports.editProduct = async (req, res, next) => {
         newObj.amountProduct = req.body.amountProduct;
         newObj.detailProduct = req.body.detailProduct;
         newObj.quantitySold = 0;//cập nhật
+        newObj.rate = 0;
         newObj.ratings = [];//cập nhật
 
         newObj.createdAt = new Date();
