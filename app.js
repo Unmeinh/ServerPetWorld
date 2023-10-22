@@ -18,13 +18,12 @@ var shopRouter = require('./routes/shop');
 //api
 var userApiRouter = require('./routes/api/userApi');
 var blogApiRouter = require('./routes/api/blogApi');
-var itemCartApiRouter = require('./routes/api/itemCartApi');
+// var itemCartApiRouter = require('./routes/api/itemCartApi');
 var cartApiRouter = require('./routes/api/cartApi');
 var productApiRouter = require('./routes/api/productApi');
 var shopApiRouter = require('./routes/api/shopApi');
 var CatAllApiRouter = require('./routes/api/categoryAll');
 var petApiRouter = require('./routes/api/petApi');
-var followRouter = require('./routes/api/followApi');
 var savenoticeRouter= require('./routes/api/noticeApi');
 var commentRouter= require('./routes/api/commentApi');
 var favoriteProductsRouter=require('./routes/api/myFavoriteProductApi');
@@ -66,13 +65,12 @@ app.use('/shop', shopRouter);
 //api
 app.use('/api/user', userApiRouter);
 app.use('/api/blog', blogApiRouter);
-app.use('/api/item-carts', itemCartApiRouter);
+// app.use('/api/item-carts', itemCartApiRouter);
 app.use('/api/cart', cartApiRouter);
 app.use('/api/product', productApiRouter);
 app.use('/api/shop', shopApiRouter);
 app.use('/api/category', CatAllApiRouter);
 app.use('/api/pet', petApiRouter);
-app.use('/api/follow', followRouter);
 app.use('/api/notice',savenoticeRouter)
 app.use('/api/comment',commentRouter)
 app.use('/api/bill-product', billProductRouter);
