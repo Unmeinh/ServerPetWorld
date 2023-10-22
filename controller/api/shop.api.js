@@ -61,6 +61,18 @@ exports.checkStatus = async (req, res, next) => {
     }
 }
 
+exports.getShop = async (req, res, next) => {
+    try {
+        let id = "abc$";
+        let idRex = new RegExp(id);
+        console.log(idRex);
+        let shop = await mdShop.ShopModel.find({nameShop: idRex})
+        return res.status(200).json({ success: true, data: shop, message: "Lấy trạng thái thành công." });
+    } catch (error) {
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+}
+
 exports.registerShop = async (req, res, next) => {
     if (req.method == 'POST') {
         console.log(req.body);

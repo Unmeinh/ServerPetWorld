@@ -8,7 +8,7 @@ let ProductSchema = new db.mongoose.Schema(
         priceProduct:{type:Number,required:true},
         amountProduct:{type:Number,required:true},
         quantitySold:{type:Number,required:true},
-        rate:{type:Number,required:false},
+        ratings:{type:Array, require:false},
         discount:{type:Number,required:false},
         type:{type:Number, require:false},
         idShop:{type:db.mongoose.Schema.Types.ObjectId,required:false,ref:'ShopModel'},

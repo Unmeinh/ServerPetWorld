@@ -1,5 +1,6 @@
 let mdProduct = require('../../model/product.model');
 let mdbillProduct = require('../../model/billProduct.model');
+let mdCategory = require('../../model/categoryProduct.model').CategoryProductModel;
 const fs = require("fs");
 const { match } = require('assert');
 const moment = require('moment');
@@ -79,7 +80,7 @@ exports.listProduct = async (req, res, next) => {
                     message: `Không tìm thấy sản phẩm nào được mua trong vòng ${days} ngày trên trang ${page}`,
                 });
             }
-        } 
+        }
         else if (req.query.hasOwnProperty('page')) {
             const page = parseInt(req.query.page) || 1;
             const limit = 10;
@@ -206,45 +207,51 @@ exports.detailProduct = async (req, res, next) => {
         return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
     }
 }
+
+exports.listCategory = async (req, res, next) => {
+    try {
+        let listCategory = await mdCategory.find();
+        if (listCategory) {
+            return res.status(200).json({ success: true, data: listCategory, message: "Lấy danh sách thể loại thành công." });
+        } else {
+            return res.status(500).json({ success: false, data: {}, message: "Lấy danh sách thể loại thất bại!" });
+        }
+    } catch (error) {
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+}
+
 exports.addProduct = async (req, res, next) => {
     let msg = '';
     if (req.method == 'POST') {
-        if (
-            !req.body.nameProduct &&
-            !req.body.priceProduct &&
-            !req.body.detailProduct &&
-            !req.body.amountProduct &&
-            !req.body.quantitySold &&
-            !req.body.idCategoryPr &&
-            !req.body.idShop &&
-            !req.body.discount && 
-            !req.body.type
+        let { nameProduct, price, discount, amount, category, detail } = req.body;
+        if (!nameProduct || !price || !discount
+            || !amount || !category || !detail
         ) {
-            return res.status(400).json({ success: false, data: [], message: 'Vui lòng không để trống ô nhập' });
+            return res.status(500).json({ success: false, data: {}, message: 'Không đọc được dữ liệu tải lên!' });
         }
 
         let newObj = new mdProduct.ProductModel();
-        newObj.nameProduct = req.body.nameProduct;
-        newObj.priceProduct = req.body.priceProduct;
-        newObj.discount = req.body.discount;
-        newObj.idCategoryPr = req.body.idCategoryPr;
-        newObj.idShop = req.body.idShop;
-        newObj.amountProduct = req.body.amountProduct;
-        newObj.detailProduct = req.body.detailProduct;
-        newObj.idShop = req.body.idShop;
+        let images = await onUploadImages(req.files, 'product')
+        if (images != [] && images[0] == false) {
+            if (images[1].message.indexOf('File size too large.') > -1) {
+                return res.status(500).json({ success: false, data: {}, message: "Dung lượng một ảnh tối đa là 10MB!" });
+            } else {
+                return res.status(500).json({ success: false, data: {}, message: images[1].message });
+            }
+        }
+        newObj.nameProduct = nameProduct;
+        newObj.arrProduct = [...images];
+        newObj.priceProduct = Number(price);
+        newObj.discount = Number(discount);
+        newObj.idCategoryPr = category;
+        newObj.idShop = req.shop._id;
+        newObj.amountProduct = Number(amount);
+        newObj.detailProduct = detail;
         newObj.quantitySold = 0;
         newObj.rate = 0;
         newObj.type = 1;
         newObj.createdAt = new Date();
-        let images = await onUploadImages(req.files, 'product')
-            if (images != [] && images[0] == false) {
-                if (images[1].message.indexOf('File size too large.') > -1) {
-                    return res.status(500).json({ success: false, data: {}, message: "Dung lượng một ảnh tối đa là 10MB!" });
-                } else {
-                    return res.status(500).json({ success: false, data: {}, message: images[1].message });
-                }
-            } 
-            newObj.arrProduct = [...images];
 
         try {
             await newObj.save();
@@ -252,35 +259,31 @@ exports.addProduct = async (req, res, next) => {
         } catch (error) {
             console.log(error.message);
             if (error.message.match(new RegExp('.+`nameProduct` is require+.'))) {
-                msg = 'Tên sản phẩm đang trống!';
+                msg = 'Tên sản phẩm không được trống!';
             }
             else if (error.message.match(new RegExp('.+`priceProduct` is require+.'))) {
-                msg = 'Giá sản phẩm đang trống!';
+                msg = 'Giá sản phẩm không được trống!';
             }
             else if (error.message.match(new RegExp('.+priceProduct: Cast to Number failed for value+.'))) {
                 msg = 'Giá sản phẩm phải nhập số!';
             }
-
             else if (newObj.priceProduct <= 0) {
-                msg = 'Giá sản phẩm phải lớn hơn 0!';
+                msg = 'Giá sản phẩm cần lớn hơn 0!';
             }
             else if (error.message.match(new RegExp('.+`amountProduct` is require+.'))) {
-                msg = 'Số lượng sản phẩm đang trống!';
+                msg = 'Số lượng sản phẩm không được trống!';
             }
             else if (error.message.match(new RegExp('.+amountProduct: Cast to Number failed for value+.'))) {
                 msg = 'Số lượng sản phẩm phải nhập số!';
             }
             else if (newObj.amountProduct <= 0) {
-                msg = 'Số lượng sản phẩm phải lớn hơn 0!';
+                msg = 'Số lượng sản phẩm cần lớn hơn 0!';
             }
             else if (error.message.match(new RegExp('.+`detailProduct` is require+.'))) {
-                msg = 'Chi tiết sản phẩm đang trống!';
+                msg = 'Chi tiết sản phẩm không được trống!';
             }
             else if (error.message.match(new RegExp('.+`quantitySold` is require+.'))) {
-                msg = 'Số lượng bán đang trống!';
-            }
-            else if (error.message.match(new RegExp('.+`amountProduct` is require+.'))) {
-                msg = 'Số lượng bán đang trống!';
+                msg = 'Số lượng bán không được trống!';
             }
             else if (isNaN(newObj.amountProduct) || newObj.amountProduct <= 0) {
                 msg = 'Giá sản phẩm phải nhập số!';
@@ -307,7 +310,7 @@ exports.editProduct = async (req, res, next) => {
             !req.body.quantitySold &&
             !req.body.idCategoryPr &&
             !req.body.idShop &&
-            !req.body.discount && 
+            !req.body.discount &&
             !req.body.type
         ) {
             return res.status(400).json({ success: false, data: [], message: 'Vui lòng không để trống ô nhập' });
@@ -320,21 +323,21 @@ exports.editProduct = async (req, res, next) => {
         newObj.idCategoryPr = req.body.idCategoryPr;
         newObj.idShop = req.body.idShop;
         newObj.amountProduct = req.body.amountProduct;
-        newObj.detailProduct = req.body.detailProduct;     
+        newObj.detailProduct = req.body.detailProduct;
         newObj.quantitySold = 0;//cập nhật
         newObj.rate = 0;//cập nhật
 
         newObj.createdAt = new Date();
 
         let images = await onUploadImages(req.files, 'product')
-            if (images != [] && images[0] == false) {
-                if (images[1].message.indexOf('File size too large.') > -1) {
-                    return res.status(500).json({ success: false, data: {}, message: "Dung lượng một ảnh tối đa là 10MB!" });
-                } else {
-                    return res.status(500).json({ success: false, data: {}, message: images[1].message });
-                }
-            } 
-            newObj.arrProduct = [...images];
+        if (images != [] && images[0] == false) {
+            if (images[1].message.indexOf('File size too large.') > -1) {
+                return res.status(500).json({ success: false, data: {}, message: "Dung lượng một ảnh tối đa là 10MB!" });
+            } else {
+                return res.status(500).json({ success: false, data: {}, message: images[1].message });
+            }
+        }
+        newObj.arrProduct = [...images];
         newObj._id = idPR;
 
         try {

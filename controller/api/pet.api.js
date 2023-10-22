@@ -1,4 +1,5 @@
 let mdPet = require('../../model/pet.model');
+let mdCategory = require('../../model/categoryPet.model').CategoryPetModel;
 const fs = require("fs");
 const { onUploadImages } = require('../../function/uploadImage');
 exports.listpet = async (req, res, next) => {
@@ -64,84 +65,111 @@ exports.detailpet = async (req, res, next) => {
     }
 }
 
+exports.listCategory = async (req, res, next) => {
+    try {
+        let listCategory = await mdCategory.find();
+        if (listCategory) {
+            return res.status(200).json({ success: true, data: listCategory, message: "Lấy danh sách thể loại thành công." });
+        } else {
+            return res.status(500).json({ success: false, data: {}, message: "Lấy danh sách thể loại thất bại!" });
+        }
+    } catch (error) {
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+}
+
 exports.addpet = async (req, res, next) => {
     if (req.method == 'POST') {
-
+        let { namePet, weight, height, price, discount, amount, size, category, detail } = req.body;
+        if (!namePet || !weight || !height || !price ||
+            !discount || !amount || !size || !category || !detail
+        ) {
+            return res.status(500).json({ success: false, data: {}, message: 'Không đọc được dữ liệu tải lên!' });
+        }
         let newObj = new mdPet.PetModel();
-        newObj.namePet = req.body.namePet;
         let images = await onUploadImages(req.files, 'pet')
-            if (images != [] && images[0] == false) {
-                if (images[1].message.indexOf('File size too large.') > -1) {
-                    return res.status(500).json({ success: false, data: {}, message: "Dung lượng một ảnh tối đa là 10MB!" });
-                } else {
-                    return res.status(500).json({ success: false, data: {}, message: images[1].message });
-                }
-            } 
+        if (images != [] && images[0] == false) {
+            if (images[1].message.indexOf('File size too large.') > -1) {
+                return res.status(500).json({ success: false, data: {}, message: "Dung lượng một ảnh tối đa là 10MB!" });
+            } else {
+                return res.status(500).json({ success: false, data: {}, message: images[1].message });
+            }
+        }
+        newObj.namePet = namePet;
         newObj.imagesPet = [...images];
-        // newObj.speciesPet = req.body.speciesPet;
-        newObj.weightPet = req.body.weightPet;
-        newObj.heightPet = req.body.heightPet;
-        newObj.sizePet = req.body.sizePet;
-        newObj.idCategoryP = req.body.idCategoryP;
-        newObj.pricePet = req.body.pricePet;
-        newObj.discount=0;
+        // newObj.speciesPet = speciesPet;
+        newObj.weightPet = Number(weight);
+        newObj.heightPet = Number(height);
+        newObj.idCategoryP = category;
+        newObj.pricePet = Number(price);
+        newObj.discount = Number(discount);
         newObj.quantitySold = 0;
-        newObj.amountPet = req.body.amountPet;
-        newObj.detailPet = req.body.detailPet;
-        newObj.idShop = req.body.idShop;
+        newObj.amountPet = Number(amount);
+        newObj.detailPet = detail;
+        newObj.idShop = req.shop._id;
         newObj.type = 0;
+        newObj.rate = 0;
+        switch (String(size)) {
+            case '0':
+                newObj.sizePet = "Small";
+                break;
+            case '1':
+                newObj.sizePet = "Small";
+                break;
+            case '2':
+                newObj.sizePet = "Small";
+                break;
+
+            default:
+                break;
+        }
         newObj.createdAt = new Date();
-        newObj.rate=0;
 
         try {
             await newObj.save();
             return res.status(201).json({ success: true, data: newObj, message: 'Thêm thú cưng thành công' });
         } catch (error) {
             console.log(error.message);
+            let msg = "";
             if (error.message.match(new RegExp('.+`namePet` is require+.'))) {
-                msg = 'Tên thú cưng đang trống!';
+                msg = 'Tên thú cưng không được trống!';
             }
             else if (error.message.match(new RegExp('.+`weightPet` is require+.'))) {
-                msg = 'Cân nặng Pet đang trống!';
+                msg = 'Cân nặng không được trống!';
             }
             else if (isNaN(newObj.weightPet) || newObj.weightPet <= 0) {
-                msg = 'Cân nặng phải nhập số lớn hơn 0!';
+                msg = 'Cân nặng cần lớn hơn 0!';
                 return res.status(500).json({ success: false, data: {}, message: msg });
             }
             else if (error.message.match(new RegExp('.+`heightPet` is require+.'))) {
-                msg = 'Chiều cao Pet đang trống!';
+                msg = 'Chiều cao không được trống!';
             }
             else if (isNaN(newObj.heightPet) || newObj.heightPet <= 0) {
-                msg = 'Chiều cao phải nhập số lớn hơn 0!';
+                msg = 'Chiều cao cần lớn hơn 0!';
                 return res.status(500).json({ success: false, data: {}, message: msg });
             }
             else if (error.message.match(new RegExp('.+`sizePet` is require+.'))) {
-                msg = 'Kích cỡ Pet đang trống!';
+                msg = 'Kích cỡ không được trống!';
             }
             else if (error.message.match(new RegExp('.+`pricePet` is require+.'))) {
-                msg = 'giá sản phẩm đang trống!';
+                msg = 'Giá bán không được trống!';
             }
             else if (isNaN(newObj.pricePet) || newObj.pricePet <= 0) {
-                msg = 'Giá Pet phải nhập số lớn hơn 0!';
+                msg = 'Giá bán cần lớn hơn 0!';
                 return res.status(500).json({ success: false, data: {}, message: msg });
             }
             else if (error.message.match(new RegExp('.+`amountPet` is require+.'))) {
-                msg = 'Số lượng Pet đang trống!';
+                msg = 'Số lượng không được trống!';
             }
             else if (isNaN(newObj.amountPet) || newObj.amountPet <= 0) {
-                msg = 'Số lượng Pet phải nhập số!';
+                msg = 'Số lượng cần lớn hơn 0!';
                 return res.status(500).json({ success: false, data: {}, message: msg });
             }
             else if (error.message.match(new RegExp('.+`detailPet` is require+.'))) {
-                msg = 'Chi tiết Pet đang trống!';
+                msg = 'Mô tả không được trống!';
             }
-            else if (error.message.match(new RegExp('.+`speciesPet` is require+.'))) {
-                msg = 'Loài Pet đang trống!';
-            }
-           
-            
             else if (error.message.match(new RegExp('.+`imagesPet` is require+.'))) {
-                msg = 'ảnh sản phẩm đang trống!';
+                msg = 'Ảnh thú cưng không được trống!';
             }
             else {
                 msg = error.message;
