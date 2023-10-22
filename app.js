@@ -8,7 +8,7 @@ var session = require('express-session');
 
 var adminRouter= require('./routes/admin');
 var usersRouter = require('./routes/user');
-var usersShopRouter = require('./routes/userShop');
+// var usersShopRouter = require('./routes/userShop');
 var blogsRouter = require('./routes/blog');
 var accountRouter= require('./routes/account');
 var productRouter = require('./routes/product');
@@ -56,7 +56,7 @@ app.use(session({
 app.use('/',blogsRouter);
 app.use('/admin',adminRouter);
 app.use('/user', usersRouter);
-app.use('/user-shop', usersShopRouter);
+// app.use('/user-shop', usersShopRouter);
 app.use('/blog', blogsRouter);
 app.use('/account',accountRouter );
 app.use('/product', productRouter);
