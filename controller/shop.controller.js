@@ -80,6 +80,7 @@ exports.detailOwner = async (req, res, next) => {
                 decodeObj.imageIdentity = [...images];
                 decodeObj.nameIdentity = decodeFromSha256(decodeObj.nameIdentity);
                 decodeObj.numberIdentity = decodeFromSha256(decodeObj.numberIdentity);
+                decodeObj.dateIdentity = decodeFromSha256(decodeObj.dateIdentity);
                 objOwner = { ...decodeObj };
             }
         }
