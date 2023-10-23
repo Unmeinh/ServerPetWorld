@@ -26,6 +26,7 @@ exports.listShop = async (req, res, next) => {
     }
 
 }
+
 exports.detailShop = async (req, res, next) => {
 
     let idShop = req.params.idShop;
@@ -47,6 +48,26 @@ exports.checkPhoneNumber = async (req, res, next) => {
         } else {
             return res.status(201).json({ success: false, data: objU, message: "Số điện thoại đã được đăng ký." });
         }
+    } catch (error) {
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+}
+
+exports.checkStatus = async (req, res, next) => {
+    try {
+        return res.status(200).json({ success: true, data: req.shop.status, message: "Lấy trạng thái thành công." });
+    } catch (error) {
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+}
+
+exports.getShop = async (req, res, next) => {
+    try {
+        let id = "abc$";
+        let idRex = new RegExp(id);
+        console.log(idRex);
+        let shop = await mdShop.ShopModel.find({nameShop: idRex})
+        return res.status(200).json({ success: true, data: shop, message: "Lấy trạng thái thành công." });
     } catch (error) {
         return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
     }
@@ -97,6 +118,38 @@ exports.registerShop = async (req, res, next) => {
 
 }
 
+exports.loginShop = async (req, res, next) => {
+    if (req.method == "POST") {
+      try {
+        let objS = await mdShop.ShopModel.findByCredentials(
+          req.body.userName,
+          req.body.passWord
+        );
+        if (!objS) {
+          return res
+            .status(201)
+            .json({ success: false, message: "Sai thông tin đăng nhập!" });
+        }
+        objS.online = 0;
+        await mdShop.ShopModel.findByIdAndUpdate(objS._id, objS);
+        return res.status(201).json({
+          success: true,
+          data: {shopStatus: objS.status},
+          token: objS.token,
+          message: "Đăng nhập thành công.",
+        });
+      } catch (error) {
+        console.error("err: " + error.message);
+  
+        return res.status(500).json({
+          success: false,
+          data: {},
+          message: error.message,
+        });
+      }
+    }
+  };
+  
 exports.editShop = async (req, res, next) => {
     let msg = '';
     let idShop = req.params.idShop;
@@ -195,7 +248,6 @@ exports.deleteShop = async (req, res, next) => {
 
 }
 
-
 exports.sendVerifyEmail = async (req, res, next) => {
     if (req.method == "POST") {
         if (req.body.email != undefined) {
@@ -257,7 +309,6 @@ exports.verifyCode = async (req, res, next) => {
         }
     }
 };
-
 
 async function sendEmailOTP(email, otp, data, res) {
     var transporter = nodemailer.createTransport({
