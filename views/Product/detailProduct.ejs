@@ -42,8 +42,8 @@
 
                 <label for="username" form="bold" class="col-sm-2 col-form-label">Giá tiền</label>
                 <div class="col-sm-3">
-                    <label type="text" style="width: 200px;" class="form-control">
-                        <%= ObjProduct.priceProduct || 'Không có dữ liệu' %>
+                    <label type="text" style="width: 200px; font-weight: bold; color: rgb(92, 90, 90);" class="form-control">
+                        <%= ObjProduct.priceProduct.toLocaleString('vi-VN') %> VNĐ
                     </label>
                 </div>
 

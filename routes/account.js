@@ -11,10 +11,10 @@ router.get('/verifyResult', AccountnCtrl.verifyResult);
 router.get('/profile',checkLoginServer.check_request_login, AccountnCtrl.profile);
 router.get('/logout',checkLoginServer.check_request_login, AccountnCtrl.logout);
 
-// router.get('/edit', AdminCtrl.editAdmin); //bổ sung /:idAdmin khi làm 
-// router.put('/edit', AdminCtrl.editAdmin);//bổ sung /:idAdmin khi làm 
+// router.get('/edit', AdminCtrl.editAdmin);
+// router.put('/edit', AdminCtrl.editAdmin);
 
-// router.get('/delete/:idAdmin',AdminCtrl.deleteAdmin);//bổ sung /:idAdmin khi làm 
-// router.post('/delete/:idAdmin',AdminCtrl.deleteAdmin);//bổ sung /:idAdmin khi làm 
+// router.get('/delete/:idAdmin',AdminCtrl.deleteAdmin);
+// router.post('/delete/:idAdmin',AdminCtrl.deleteAdmin);
 
 module.exports = router;

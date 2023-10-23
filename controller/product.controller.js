@@ -15,8 +15,7 @@ exports.listProduct = async (req, res, next) => {
                 filterSearch = { nameProduct: new RegExp(searchTerm, 'i') };
             }
 
-            sortOption = { createdAt: -1 };  // Sort by createdAt in descending order
-            console.log("duy: " + JSON.stringify(req.session.adLogin));
+            sortOption = { createdAt: -1 };
             const totalCount = await mdProduct.ProductModel.countDocuments(filterSearch);
             const totalPages = Math.ceil(totalCount / perPage);
             if (currentPage > totalPages || currentPage < 1) {
@@ -74,17 +73,15 @@ exports.deleteProduct = async (req, res, next) => {
     let message = ""
     let idPR = req.params.idPR;
     let ObjProduct = await mdProduct.ProductModel.findById(idPR);
-    console.log("idPR  " + idPR);
     if (req.method == 'POST') {
         try {
             await mdProduct.ProductModel.findByIdAndDelete(idPR);
-            console.log("xoa thành công");
+        
             return res.redirect('/product');
         } catch (error) {
             console.log(error.message);
-            console.log("falll");
         }
     }
 
-    res.render('Product/deleteProduct', { message: message, ObjProduct: ObjProduct });
+    res.render('Product/deleteProduct', { message: message, ObjProduct: ObjProduct, adminLogin: req.session.adLogin  });
 }

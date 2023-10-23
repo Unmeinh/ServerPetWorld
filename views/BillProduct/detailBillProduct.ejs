@@ -80,14 +80,14 @@
                 <label for="username" form="bold" class="col-sm-2 col-form-label">Giảm giá hóa đơn</label>
                 <div class="col-sm-3">
                     <label type="text" class="form-control" style="width: 200px;">
-                        <%= objBP.discountBill %>
+                        <%= objBP.discountBill.toLocaleString('vi-VN') %> VNĐ
                     </label>
                 </div>
 
                 <label for="username" form="bold" class="col-sm-2 col-form-label">Phí giao hàng</label>
                 <div class="col-sm-3">
                     <label type="text" style="width: 200px;" class="form-control">
-                        <%= objBP.moneyShip %>
+                        <%= objBP.moneyShip.toLocaleString('vi-VN') %> VNĐ
                     </label>
                 </div>
 
@@ -95,8 +95,8 @@
             <div class="form-group row m-3">
                 <label for="username" form="bold" class="col-sm-2 col-form-label">Thành tiền</label>
                 <div class="col-sm-3">
-                    <label type="text" class="form-control" style="width: 200px;">
-                        <%= objBP.total %>
+                    <label type="text" class="form-control" style="width: 200px; font-weight: bold; color: rgb(92, 90, 90);">
+                        <%= objBP.total.toLocaleString('vi-VN') %> VNĐ
                     </label>
                 </div>
 

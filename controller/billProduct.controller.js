@@ -28,6 +28,5 @@ exports.detailBillProduct = async (req, res, next) => {
     let message = '';
     let idBP = req.params.idBP;
     let objBP = await mdbillProduct.billProductModel.findById(idBP).populate('products.idProduct').populate('idUser');
-    console.log("obj: "+objBP);
     res.render('BillProduct/detailBillProduct', { objBP: objBP, message: message, adminLogin: req.session.adLogin, moment:moment });
 }

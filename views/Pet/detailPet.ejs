@@ -31,7 +31,7 @@
             </div>
 
             <div class="form-group row m-3">
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Tên Pet</label>
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Tên thú cưng</label>
                 <div class="col-sm-3">
                     <label type="text" class="form-control" style="width: 200px;">
                         <%= Objpet.namePet %>
@@ -40,11 +40,10 @@
 
                 <label for="username" form="bold" class="col-sm-2 col-form-label">Giá tiền</label>
                 <div class="col-sm-3">
-                    <label type="text" style="width: 200px;" class="form-control">
-                        <%= Objpet.pricePet %>
+                    <label type="text" style="width: 200px; font-weight: bold; color: rgb(92, 90, 90);" class="form-control">
+                        <%= Objpet.pricePet.toLocaleString('vi-VN') %> VNĐ
                     </label>
                 </div>
-
             </div>
 
             <div class="form-group row m-3">

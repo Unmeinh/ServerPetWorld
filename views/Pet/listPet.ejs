@@ -16,10 +16,10 @@
           </div>
         </div>
       </form>
-      
+
       <form action="" method="get" id="sortForm" class="row col-4 me-5"
         style="display: flex; flex-direction: row; justify-content: space-between;">
-        <select <%= hidden %> name="sortOption" id="sortOption" class="row col-10 form-select"
+        <select <%=hidden %> name="sortOption" id="sortOption" class="row col-10 form-select"
           style="background-color: #F0F4F8;border-radius: 20px;border: none;box-shadow: none; width: 80%;">
           <option selected disabled>Sắp xếp tên thú cưng</option>
           <option value="1"><button type="submit">Sắp xếp từ a-z</button></option>
@@ -54,7 +54,11 @@
           <td>
             <div class="box" style="line-height: 8px;margin: 5px;">
               <p>
-                <%= row.namePet%>
+                <% if(row.namePet.length> 40 ){ %>
+                  <%= row.namePet.substring(0,39) %> ...
+                    <% } else { %>
+                      <%= row.namePet %>
+                        <% }%>
               </p>
               <a href="/pet/delete/<%= row._id %>" style="text-decoration: none;color: rgb(171, 169, 169);">
                 Xóa
@@ -62,8 +66,8 @@
 
             </div>
           </td>
-          <td>
-            <%= row.pricePet %>
+          <td style="font-weight: bold; color: rgb(92, 90, 90);">
+            <%= row.pricePet.toLocaleString('vi-VN') %> VNĐ
 
           </td>
           <td>
