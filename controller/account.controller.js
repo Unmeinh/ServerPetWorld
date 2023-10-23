@@ -80,5 +80,5 @@ exports.logout = async (req, res, next) => {
                 }
             });
     }
-    res.render('Account/logoutAdmin', { msg: msg })
+    res.render('Account/logoutAdmin', { msg: msg, adminLogin:req.session.adLogin })
 }

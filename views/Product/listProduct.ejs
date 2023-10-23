@@ -44,7 +44,7 @@
     <tr style="background-color: #8BD3DD;">
       <th style="border-radius: 6px 0 0 6px;">Tên sản phẩm</th>
       <th>Giá tiền</th>
-      <th>Số lượng sản phẩm</th>
+      <th>Số lượng</th>
       <th>Ngày tạo</th>
       <th style="border-radius: 0 6px 6px 0;"></th>
       <% listProduct.forEach((row)=> { %>
@@ -54,7 +54,11 @@
         <div class="box" style="line-height: 8px;margin: 5px;">
 
           <p>
-            <%= row.nameProduct || 'Không có dữ liệu'%>
+            <% if(row.nameProduct.length> 41 ){ %>
+              <%= row.nameProduct.substring(0,40) %> ...
+                <% } else { %>
+                  <%= row.nameProduct %>
+                    <% }%>
           </p>
           <a href="/product/delete/<%= row._id %>" style="text-decoration: none;color: rgb(171, 169, 169);"
             data-bs-toggle="modal" data-bs-target="#ModalDeleteSP" data-bs-whatever="@mdo">
@@ -63,8 +67,8 @@
 
         </div>
       </td>
-      <td>
-        <%= row.priceProduct || 'Không có dữ liệu' %>
+      <td style="font-weight: bold; color: rgb(92, 90, 90);">
+        <%= row.priceProduct.toLocaleString('vi-VN') %> VNĐ
 
       </td>
       <td>

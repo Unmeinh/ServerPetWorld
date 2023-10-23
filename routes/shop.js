@@ -7,8 +7,8 @@ var router = express.Router();
 
 router.get('/',checkLogin.check_request_login, ShopCtrl.listShop);
 
-router.get('/detail/:idShop',checkLogin.check_request_login, ShopCtrl.detailShop);//bổ sung /:idUser khi làm 
-router.get('/detailOwner/:idShop',checkLogin.check_request_login, ShopCtrl.detailOwner);//bổ sung /:idUser khi làm 
+router.get('/detail/:idShop',checkLogin.check_request_login, ShopCtrl.detailShop);
+router.get('/detailOwner/:idShop',checkLogin.check_request_login, ShopCtrl.detailOwner); 
 
 router.get('/delete/:idShop',checkLogin.check_request_login,ShopCtrl.deleteShop);
 router.post('/delete/:idShop',checkLogin.check_request_login,ShopCtrl.deleteShop);
