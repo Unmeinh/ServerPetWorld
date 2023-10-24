@@ -37,6 +37,8 @@ var searchApiRouter = require('./routes/api/searchApi');
 var appointmentApiRouter = require('./routes/api/appointmentApi');
 var conversationsApiRouter = require('./routes/api/ConversationsApi');
 var boxChatApiRouter = require('./routes/api/boxChatApi');
+var serverApiRouter = require('./routes/api/serverApi');
+
 var app = express();
 
 // view engine setup
@@ -85,6 +87,7 @@ app.use('/api/search',searchApiRouter);
 app.use('/api/appointment',appointmentApiRouter);
 app.use('/api/conversations', conversationsApiRouter);
 app.use('/api/boxChat', boxChatApiRouter);
+app.use('/api/server', serverApiRouter);
 
 
 // catch 404 and forward to error handler
