@@ -11,8 +11,8 @@ router.get('/detail/:idUS', UserShopCtrl.detailUserShop);
 router.get('/add',UserShopCtrl.addUserShop);
 router.post('/add',uploader.single('anh_usershop'), UserShopCtrl.addUserShop);
 
-// router.get('/edit', UserShopCtrl.editUserShop);//bổ sung /:idUserShop khi làm
-// router.put('/edit', UserShopCtrl.editUserShop);//bổ sung /:idUserShop khi làm
+// router.get('/edit', UserShopCtrl.editUserShop);
+// router.put('/edit', UserShopCtrl.editUserShop);
 
 router.get('/delete/:idUS',UserShopCtrl.deleteUserShop);
 router.post('/delete/:idUS',UserShopCtrl.deleteUserShop);

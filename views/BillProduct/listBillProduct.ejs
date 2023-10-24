@@ -1,6 +1,5 @@
-<%- include('../inc/top',{title:'Quản lý thú cưng', adminLogin: adminLogin }) %>
+<%- include('../inc/top',{title:'Quản lý hóa đơn sản phẩm',adminLogin:adminLogin}) %>
   <div class="container-fluid " style="width: 98%;display: flex; flex-direction: column">
-
     <div class="row col m-3">
       <form action="" class="row col-3 me-2" method="get">
         <div
@@ -17,66 +16,58 @@
         </div>
       </form>
 
-      <form action="" method="get" id="sortForm" class="row col-4 me-5"
-        style="display: flex; flex-direction: row; justify-content: space-between;">
-        <select <%=hidden %> name="sortOption" id="sortOption" class="row col-10 form-select"
-          style="background-color: #F0F4F8;border-radius: 20px;border: none;box-shadow: none; width: 80%;">
-          <option selected disabled>Sắp xếp tên thú cưng</option>
-          <option value="1"><button type="submit">Sắp xếp từ a-z</button></option>
-          <option value="-1"><button type="submit">Sắp xếp từ z-a</button></option>
+      <% if (typeof(listBillProduct) !=='undefined' && listBillProduct.length> 0) { %>
+        <form action="" method="get" id="sortForm" class="row col-4 me-5"
+          style="display: flex; flex-direction: row; justify-content: space-between;">
+          <select name="sortOption" id="sortOption" class="row col-10 form-select"
+            style="background-color: #F0F4F8;border-radius: 20px;border: none;box-shadow: none; width: 80%;">
+            <option selected disabled>Sắp xếp hóa đơn</option>
+            <option value="1"><button type="submit">Sắp xếp từ a-z</button></option>
+            <option value="-1"><button type="submit">Sắp xếp từ z-a</button></option>
+          </select>
+        </form>
+        <% } else { %>
+          <div class="row col-4 me-5"></div>
+          <% } %>
+            <div class="row col-3">
 
-        </select>
-      </form>
-
-      <div class="row col-3">
-
-      </div>
-      <div class="row col-2 ms-1" style="align-items: center;">
-        <a href="/category-pet"
-          style="text-decoration: none; background-color: #66d9f3; border-radius: 6px;text-align: center;padding: 7px;">
-          <span style="color: white;font-weight: bold;">Thể loại</span>
-        </a>
-      </div>
+            </div>
+            <div class="row col-2 ms-1" style="align-items: center;">
+              <a href="/add"
+                style="text-decoration: none; background-color: #66d9f3; border-radius: 6px;text-align: center;padding: 7px;">
+                <span style="color: white;font-weight: bold;">Tạo hóa đơn</span>
+              </a>
+            </div>
     </div>
-
-    <% if (typeof listpet !='undefined' && listpet.length> 0) { %>
-      <table class="table align-middle " style="border: white;">
-
+    <% if (typeof(listBillProduct) !='undefined' && listBillProduct.length> 0) { %>
+      <table class="table align-middle" style="border: white; ">
         <tr style="background-color: #8BD3DD;">
-          <th scope="col" style="border-radius: 6px 0 0 6px;">Tên thú cưng</th>
-          <th scope="col">Giá tiền</th>
-          <th scope="col">Số lượng</th>
-          <th scope="col">Ngày tạo</th>
-          <th scope="col" style="border-radius: 0 6px 6px 0;"></th>
-          <% listpet.forEach((row)=> { %>
+          <th style="border-radius: 6px 0 0 6px;">Tên khách hàng</th>
+          <th>Số sản phẩm</th>
+          <th>Tổng tiền</th>
+          <th>Ngày mua hàng</th>
+          <th style="border-radius: 0 6px 6px 0;"></th>       
         </tr>
+        <% listBillProduct.forEach((row)=> { %>
         <tr>
           <td>
             <div class="box" style="line-height: 8px;margin: 5px;">
               <p>
-                <% if(row.namePet.length> 40 ){ %>
-                  <%= row.namePet.substring(0,39) %> ...
-                    <% } else { %>
-                      <%= row.namePet %>
-                        <% }%>
+                <%= row.idUser.fullName %>
               </p>
-              <a href="/pet/delete/<%= row._id %>" style="text-decoration: none;color: rgb(171, 169, 169);">
-                Xóa
-              </a>
-
+                <span style="color: #aaa8a8;">Liên hệ</span>
             </div>
           </td>
+          <td>
+            <%= row.products.length %> sản phẩm
+          </td>
           <td style="font-weight: bold; color: rgb(92, 90, 90);">
-            <%= row.pricePet.toLocaleString('vi-VN') %> VNĐ
-
+            <%= row.total.toLocaleString('vi-VN') %>  VNĐ
           </td>
           <td>
-            <%= row.amountPet %>
+            <%= moment(row.purchaseDate).format('DD/MM/YYYY hh:mm:ss a') %>
           </td>
-          <td>
-            <%= moment(row.createdAt).format('DD/MM/ YYYY hh:mm:ss a') %>
-          </td>
-          <td><a href="/pet/detail/<%= row._id%>"
+          <td><a href="/bill-product/detail/<%= row._id%>"
               style="background-color: #F582AE;padding: 8px;border-radius: 10px;text-decoration: none;color: white; font-weight: bold;">Chi
               tiết</a></td>
         </tr>
@@ -87,9 +78,8 @@
       <div
         style="display: flex; flex-direction: row; align-items: center;justify-content: space-between;position:absolute ; bottom: 0; width: 96%;">
         <p> Số bản ghi: <span style="font-weight: bold;">
-            <%= countNowpet %>/<%= countAllpet %>
-          </span>
-        </p>
+            <%= countNowBill %>/<%= countAllBill %>
+          </span></p>
         <nav>
           <ul class="pagination">
             <% if (page> 1) { %>
@@ -119,11 +109,11 @@
         </nav>
       </div>
       <% } else { %>
-        <div class="row m-auto" style="width: 97%;">
-          <span class="p-3"
-            style="background-color: rgb(175, 214, 239); border-radius: 10px;color: red;font-weight: bold;">Không tìm
-            thấy kết quả
-          </span>
+        <div class="no-results-message" style="text-align: center;">
+          <p style="color: #F582AE; font-size: 24px; margin-top: 150px; ">Không có dữ liệu</p>
+          <img
+            src="https://png.pngtree.com/png-clipart/20190924/original/pngtree-empty-box-icon-for-your-project-png-image_4820798.jpg"
+            alt="No data" style="width: 150px; height: 150px;" />
         </div>
         <% } %>
 

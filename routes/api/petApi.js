@@ -11,7 +11,10 @@ router.get('/list/shop/:idShop',mdJWT.api_user_auth, PetApiCtrl.listPetFromIdSho
 
 router.get('/detail/:idPet',mdJWT.api_user_auth, PetApiCtrl.detailpet);
 
-router.post('/insert',mdJWT.api_user_auth, uploader.any(), PetApiCtrl.addpet);
+//Seller
+router.get('/list/category',mdJWT.api_shop_auth, PetApiCtrl.listCategory);
+
+router.post('/insert',mdJWT.api_shop_auth, uploader.any(), PetApiCtrl.addpet);
 
 // router.put('/update/:idPR', uploader.any(), ProducttApiCtrl.editProduct);
 

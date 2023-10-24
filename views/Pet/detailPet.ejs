@@ -1,4 +1,4 @@
-<%- include('../inc/top',{title:'Chi tiết thú cưng'}) %>
+<%- include('../inc/top',{title:'Chi tiết thú cưng', adminLogin: adminLogin}) %>
 
     <div class="container mt-2">
 
@@ -10,22 +10,28 @@
         </div>
         <form action="/pet" method="get">
             <div class="form-group row m-3" style="align-items: center;">
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Ảnh thú cưng</label>
-                <div class="col-sm-5">
-                    <% if (typeof(Objpet.imagesPet) !=='undefined' && Objpet.imagesPet.length> 0) { %>
-                            <img src="<%= Objpet.imagesPet[0] %>" style="width: 80px; height: 80px; border-radius: 8px; ">
-                            <img src="<%= Objpet.imagesPet[1] %>" style="width: 80px; height: 80px; border-radius: 8px; ">
-                            <img src="<%= Objpet.imagesPet[2] %>" style="width: 80px; height: 80px; border-radius: 8px; ">
-                            <img src="<%= Objpet.imagesPet[3] %>" style="width: 80px; height: 80px; border-radius: 8px; ">
-                            <span style="font-size: 22px; margin-left: 10px; color: #848485;">    +   <%= Objpet.imagesPet.length - 4 %></span>
-                                <% } else { %>
-                                    <p>Thú cưng này không có ảnh</p>
-                                    <% } %>
+                <label for="username" form="bold" class="col-2 col-form-label">Ảnh thú cưng</label>
+                <div class="col-10">
+                    <% var imageShow=0; %>
+                        <% if(typeof(Objpet.imagesPet) !=='undefined' && Objpet.imagesPet.length> 0) {
+                            Objpet.imagesPet.slice(0,5).map(image=>{ %>
+                            <img src="<%= image %>"
+                                style="width: 12%; height: 100px; border-radius: 8px; box-shadow: 3px 3px #bfb8bb; margin: 5px;">
+                            <% imageShow ++; }).join('') %>
+
+                                <% if(Objpet.imagesPet.length> 5) { %>
+                                    <span
+                                        style="font-size: 18px; margin-left: 10px; color: #ffffff; background-color: rgb(199, 202, 202);padding: 12px; border-radius: 60px;">
+                                        + <%= Objpet.imagesPet.length - imageShow %></span>
+                                    <% }%>
+                                        <% } else { %>
+                                            <p>Thú cưng không có ảnh</p>
+                                            <% } %>
                 </div>
             </div>
 
             <div class="form-group row m-3">
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Tên Pet</label>
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Tên thú cưng</label>
                 <div class="col-sm-3">
                     <label type="text" class="form-control" style="width: 200px;">
                         <%= Objpet.namePet %>
@@ -34,11 +40,10 @@
 
                 <label for="username" form="bold" class="col-sm-2 col-form-label">Giá tiền</label>
                 <div class="col-sm-3">
-                    <label type="text" style="width: 200px;" class="form-control">
-                        <%= Objpet.pricePet %>
+                    <label type="text" style="width: 200px; font-weight: bold; color: rgb(92, 90, 90);" class="form-control">
+                        <%= Objpet.pricePet.toLocaleString('vi-VN') %> VNĐ
                     </label>
                 </div>
-
             </div>
 
             <div class="form-group row m-3">
@@ -51,14 +56,14 @@
 
                 <label for="username" form="bold" class="col-sm-2 col-form-label">Loài</label>
                 <div class="col-sm-3">
-                    <% if( typeof(Objpet.speciesPet) !='undefined') { %>
+                    <% if( typeof(Objpet.speciesPet) !='undefined' ) { %>
                         <label type="text" style="width: 200px;" class="form-control">
                             <%= Objpet.speciesPet %>
                         </label>
                         <% } else { %>
                             <span type="text" style="width: 200px;" class="form-control">Không có dữ liệu</span>
-                       <% }%>
-                  
+                            <% }%>
+
                 </div>
 
             </div>
@@ -86,9 +91,10 @@
                     </label>
                 </div>
 
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Mô tả về pet</label>
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Mô tả thú cưng</label>
                 <div class="col-sm-5">
-                    <textarea class="form-control" name="" id="" cols="80" rows="3" readonly><%= Objpet.detailPet %></textarea>  
+                    <textarea class="form-control" rows="4" style="box-shadow: none;" readonly><%= Objpet.detailPet %>
+                    </textarea>
                 </div>
 
             </div>
@@ -130,7 +136,7 @@
                 </div>
             </div>
     </div>
-    
+
     </form>
 
     </div>

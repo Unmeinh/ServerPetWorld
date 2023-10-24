@@ -12,10 +12,11 @@ router.get('/detail/:idShop', mdJWT.api_user_auth, ShopApiCtrl.detailShop);
 
 //seller
 router.post('/checkPhoneNumber', ShopApiCtrl.checkPhoneNumber);
-
-router.post('/login', mdJWT.api_shop_auth, uploader.any(), ShopApiCtrl.registerShop);
+router.get('/autoLogin', mdJWT.api_shop_auth, ShopApiCtrl.checkStatus);
 
 router.post('/register', uploader.any(), ShopApiCtrl.registerShop);
+router.post('/login', ShopApiCtrl.loginShop);
+router.get('/regex', ShopApiCtrl.getShop);
 router.post('/sendVerifyCodeEmail', ShopApiCtrl.sendVerifyEmail);
 router.post('/verifyCodeEmail', ShopApiCtrl.verifyCode);
 
