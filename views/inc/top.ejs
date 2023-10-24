@@ -1,17 +1,19 @@
 <!DOCTYPE html>
-<!-- Created by CodingLab |www.youtube.com/CodingLabYT-->
 <html lang="en" dir="ltr">
 
 <head>
   <meta charset="UTF-8" />
-  <!--<title> Drop Down Sidebar Menu | CodingLab </title>-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="../../stylesheets/sidebar.css" />
   <!-- Boxiocns CDN Link -->
   <link href="https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="../../bootstrap/css/bootstrap.min.css">
+<<<<<<< HEAD
 
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+=======
+>>>>>>> 0f768fb01a5a7ee664b0390baebf3031cc9f81d3
   <title>
     <%= title %>
   </title>
@@ -20,8 +22,8 @@
 <body>
   <div class="sidebar close">
     <div class="logo-details">
-      <img src="/upload/logoclose.png" width="70" height="70" class="logo_close">
-      <span class="logo_name"><img src="/upload/logopetworld.png" width="150" height="100"></span>
+      <a href="/pet"><img src="/upload/logoclose.png" class="logo_close"></a>
+      <a class="logo_name" href="/pet"><img src="/upload/logopetworld.png" style="width: 100%;"></a>
     </div>
     <ul class="nav-links">
       <li>
@@ -44,6 +46,17 @@
           <li><a class="link_name" href="/product">Sản phẩm</a></li>
         </ul>
       </li>
+
+      <li>
+        <a href="/bill-product" class="color-link" onclick="changeColor(this)">
+          <span class="iconify" data-icon="uil:bill"></span>
+          <span class="link_name">Hóa đơn sản phẩm</span>
+        </a>
+        <ul class="sub-menu blank">
+          <li><a class="link_name" href="/product">Hóa đơn sản phẩm</a></li>
+        </ul>
+      </li>
+
 
       <li>
         <a href="/blog" class="color-link" onclick="changeColor(this)">
@@ -138,24 +151,46 @@
         </ul>
       </li>
       <li>
-        <div class="profile-details">
-          <div class="profile-content">
-            <!--<img src="image/profile.jpg" alt="profileImg">-->
-          </div>
-          <div class="name-job">
-            <div class="profile_name">Đào Minh Hoàn</div>
-            <div class="job">Admin</div>
-          </div>
-          <i class="bx bx-log-out"></i>
-        </div>
+        <a href="/account/logout" class="color-link" onclick="changeColor(this)">
+          <span class="iconify" data-icon="humbleicons:logout"></span>
+          <span class="link_name">Đăng xuất</span>
+        </a>
+
+        <ul class="sub-menu blank">
+          <li><a class="link_name" href="/account/logout">Đăng xuất</a></li>
+        </ul>
       </li>
+
     </ul>
   </div>
   <section class="home-section">
     <div class="home-content">
-      <i class="bx bx-menu"></i>
-      <span class="text">
-        <%= title %>
-      </span>
+      <div class="col-10" style="display: flex;">
+        <i class="bx bx-menu"></i>
+        <span class="text">
+          <%= title %>
+        </span>
+      </div>
+      <div class="col-1" style="background-color: #D9D9D9;
+        width: 150px;
+        padding: 3px; 
+        border-radius: 90px; 
+        display: flex; 
+        flex-direction: row;
+        margin:15px;
+        align-items: center; 
+        cursor: pointer;
+        position: absolute;
+        right: 0px;">
+        <% if(typeof(adminLogin)!='undefined' ) { %>
+          <img src="<%= adminLogin.avatarAdmin %>" alt="" style="border-radius: 80px;width: 20%; height: 30px;">
+          <span>
+            <a href="/account/profile" style="text-decoration: none;font-weight: 700;margin: 6px; color: #403f3f;">
+              <%= adminLogin.userName %>
+            </a>
+          </span>
+          <% } %>
+
+      </div>
 
     </div>

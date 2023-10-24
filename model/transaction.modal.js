@@ -11,6 +11,11 @@ let Transaction = new db.mongoose.Schema(
       require: true,
       ref: "billProductModel",
     },
+    idShop: {
+      type: db.mongoose.Schema.Types.ObjectId,
+      require: true,
+      ref: "ShopModel",
+    },
     status: {
       type: Number,
       require: true,

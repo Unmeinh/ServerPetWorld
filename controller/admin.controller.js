@@ -7,40 +7,124 @@ exports.listAdmin = async (req, res, next) => {
     let perPage = 6;
     let currentPage = parseInt(req.query.page) || 1;
 
-    if (req.method == 'GET') {
-        try {
+    try {
+        if (req.method === 'GET') {
             if (typeof req.query.filterSearch !== 'undefined' && req.query.filterSearch.trim() !== '') {
                 const searchTerm = req.query.filterSearch.trim();
                 filterSearch = { fullName: new RegExp(searchTerm, 'i') };
             }
 
-            if (typeof (req.query.sortOption) != 'undefined') {
-                sortOption = { email: req.query.sortOption };
+            // Determine the sorting option based on the selected option
+            if (req.query.sortOption === '1') {
+                sortOption = { fullName: 1 }; // Sort by fullName in ascending order (A-Z)
+            } else if (req.query.sortOption === '-1') {
+                sortOption = { fullName: -1 }; // Sort by fullName in descending order (Z-A)
+            } else {
+                // Default sorting by fullName in ascending order (A-Z)
+                sortOption = { fullName: 1 };
             }
+
+            // Case-insensitive collation for sorting
+            const collation = { locale: 'en', strength: 2 }; // 'en' for English, strength: 2 for case-insensitive
 
             let totalCount = await mdAdmin.AdminModel.countDocuments(filterSearch);
             const totalPage = Math.ceil(totalCount / perPage);
-            if (currentPage < 1) currentPage = 1;
-            if (currentPage > totalPage) currentPage = totalPage;
-            let skipCount = (perPage * currentPage) -perPage;
 
-            let listAdmin = await mdAdmin.AdminModel.find(filterSearch).sort(sortOption).skip(skipCount).limit(perPage).exec();
-          
-            // msg = 'Lấy danh sách admin thành công';
-            return res.render('Admin/listAdmin', { listAdmin: listAdmin, countAllAdmin: totalCount, countNowAdmin: listAdmin.length, msg: msg, currentPage: currentPage, totalPage: totalPage });
-        } catch (error) {
-            msg = '' + error.message;
-            console.log('Không lấy được danh sách  admin: ' + error.message);
-            return res.render('Admin/listAdmin', { listAdmin: listAdmin, countAllAdmin: totalCount, countNowAdmin: listAdmin.length, msg: msg, currentPage: currentPage, totalPage: totalPage });
+            let skipCount = (perPage * (currentPage - 1)); // Adjust skip count based on current page
+
+            let listAdmin = await mdAdmin.AdminModel.find(filterSearch)
+                .sort(sortOption)
+                .collation(collation) // Apply collation for case-insensitive sorting
+                .skip(skipCount)
+                .limit(perPage)
+                .exec();
+
+            return res.render('Admin/listAdmin', {
+                listAdmin: listAdmin,
+                countAllAdmin: totalCount,
+                countNowAdmin: listAdmin.length,
+                msg: msg,
+                currentPage: currentPage,
+                totalPage: totalPage, 
+                adminLogin:req.session.adLogin
+            });
         }
+    } catch (error) {
+        msg = 'Error: ' + error.message;
+        console.log('Error fetching admin list: ' + error.message);
+        return res.render('Admin/listAdmin', {
+            listAdmin: [],
+            countAllAdmin: 0,
+            countNowAdmin: 0,
+            msg: msg,
+            currentPage: 1,
+            totalPage: 1,
+            adminLogin:req.session.adLogin
+        });
     }
-}
+};
+
+
+// exports.listAdmin = async (req, res, next) => {
+//     let msg = '';
+//     let filterSearch = null;
+//     let sortOption = null;
+//     let perPage = 6;
+//     let currentPage = parseInt(req.query.page) || 1;
+
+//     try {
+//         if (req.method === 'GET') {
+//             if (typeof req.query.filterSearch !== 'undefined' && req.query.filterSearch.trim() !== '') {
+//                 const searchTerm = req.query.filterSearch.trim();
+//                 filterSearch = { fullName: new RegExp(searchTerm, 'i') };
+//             }
+
+//             if (typeof req.query.sortOption !== 'undefined') {
+//                 sortOption = { fullName: req.query.sortOption };
+//             }
+
+//             let totalCount = await mdAdmin.AdminModel.countDocuments(filterSearch);
+//             const totalPage = Math.ceil(totalCount / perPage);
+
+//             if (currentPage < 1) {
+//                 currentPage = 1;
+//             }
+//             let skipCount = (perPage * (currentPage - 1)); // Adjust skip count based on current page
+
+//             let listAdmin = await mdAdmin.AdminModel.find(filterSearch)
+//                 .sort(sortOption)
+//                 .skip(skipCount)
+//                 .limit(perPage)
+//                 .exec();
+
+//             return res.render('Admin/listAdmin', {
+//                 listAdmin: listAdmin,
+//                 countAllAdmin: totalCount,
+//                 countNowAdmin: listAdmin.length,
+//                 msg: msg,
+//                 currentPage: currentPage,
+//                 totalPage: totalPage
+//             });
+//         }
+//     } catch (error) {
+//         msg = 'Error: ' + error.message;
+//         console.log('Error fetching admin list: ' + error.message);
+//         return res.render('Admin/listAdmin', {
+//             listAdmin: [],
+//             countAllAdmin: 0,
+//             countNowAdmin: 0,
+//             msg: msg,
+//             currentPage: 1,
+//             totalPage: 1
+//         });
+//     }
+// };
 exports.detailAdmin = async (req, res, next) => {
 
     let idAdmin = req.params.idAdmin;
     let objAd = await mdAdmin.AdminModel.findById(idAdmin);
 
-    res.render('Admin/detailAdmin', { objAd: objAd });
+    res.render('Admin/detailAdmin', { objAd: objAd , adminLogin:req.session.adLogin});
 }
 exports.addAdmin = async (req, res, next) => {
     let msg = '';
@@ -91,7 +175,7 @@ exports.addAdmin = async (req, res, next) => {
 
         }
     }
-    res.render('Admin/addAdmin', { msg: msg });
+    res.render('Admin/addAdmin', { msg: msg , adminLogin:req.session.adLogin});
 }
 // exports.editAdmin = async (req, res, next) => {
 //     res.render('Admin/editAdmin');
@@ -114,6 +198,6 @@ exports.deleteAdmin = async (req, res, next) => {
             console.log(error.message);
         }
     }
-    res.render('Admin/deleteAdmin', { msg: msg, objAd: objAd });
+    res.render('Admin/deleteAdmin', { msg: msg, objAd: objAd, adminLogin:req.session.adLogin });
 
 }

@@ -1,4 +1,4 @@
-<%- include('../inc/top',{title:'Chi tiết bài viết'}) %>
+<%- include('../inc/top',{title:'Chi tiết bài viết', adminLogin:adminLogin}) %>
     <div class="container mt-2">
 
         <div class="form-group row m-2">
@@ -11,31 +11,38 @@
         <form action="" method="get">
             <div class="form-group row m-2" style="align-items: center;">
                 <label for="username" form="bold" class="col-sm-3 col-form-label">Ảnh bài viết</label>
-                <div class="col-sm-5 ">
-                    <% if(typeof(objB.imageBlogs )!='undefined' ) { 
-                        objB.imageBlogs.forEach((item)=>{ %>
-                       
-                            <img src="<%= item %>" style="width: 100px;height: 100px; border-radius: 8px;" class="img-fluid">
-                           
-                        
-                        <%}) } else { %>
-                            <img src="http://localhost:3000/upload/avatar_null.png" style="width: 100px;height: 100px;"
-                                class="img-fluid">
-                            <% }%>
+                <div class="col-sm-8">
+                    <% var imageShow=0; %>
+                        <% if(typeof(objB.imageBlogs) !=='undefined' && objB.imageBlogs.length> 0) {
+                            objB.imageBlogs.slice(0,5).map(image=>{ %>
+                            <img src="<%= image %>"
+                                style="width: 15%; height: 100px; border-radius: 8px; box-shadow: 3px 3px #bfb8bb; margin: 5px;">
+                            <% imageShow ++; }).join('') %>
 
+                                <% if(objB.imageBlogs.length > 5) { %>
+                                    <span
+                                        style="font-size: 18px; margin-left: 10px; color: #ffffff; background-color: rgb(199, 202, 202);padding: 12px; border-radius: 60px;">
+                                        + <%= objB.imageBlogs.length - imageShow %></span>
+                                    <% }%>
+                                        <% } else { %>
+                                            <p>Bài viết không có ảnh</p>
+                                            <% } %>
                 </div>
             </div>
-            
+
             <div class="row col-12 m-2">
                 <div class="row col-9">
                     <label for="username" form="bold" class="col-sm-3 col-form-label">Nội dung</label>
                     <div class="col-sm-4">
-                        <textarea id="username" cols="50" rows="4" class="form-control" style="box-shadow: none;width: 350px;margin-left: 70px;" readonly><%= objB.contentBlog%></textarea>
+                        <textarea id="username" rows="4" class="form-control"
+                            style="box-shadow: none;width: 350px;margin-left: 70px;"
+                            readonly><%= objB.contentBlog%></textarea>
                     </div>
                 </div>
-                
+
                 <div class="row col-3">
-                    <label for="interect" form="bold" class="col-sm-3 col-form-label" style="width: 100px;">Tương tác</label>
+                    <label for="interect" form="bold" class="col-sm-3 col-form-label" style="width: 100px;">Tương
+                        tác</label>
                     <div class="col-sm-4">
                         <label type="text" class="form-control" id="interect" style="width: 100px;">
                             <%= objB.interacts.length %>
@@ -52,7 +59,8 @@
                     </label>
                 </div>
                 <div class="row col-3" style="margin-left: 160px;">
-                    <label for="comment" form="bold" class="col-sm-3 col-form-label" style="width: 100px;">Bình luận</label>
+                    <label for="comment" form="bold" class="col-sm-3 col-form-label" style="width: 100px;">Bình
+                        luận</label>
                     <div class="col-sm-4">
                         <label type="text" class="form-control" id="comment" style="width: 100px;">
                             <%= objB.comments %>
@@ -60,7 +68,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="form-group row m-2">
                 <label class="col-sm-3 col-form-label">Chủ bài đăng</label>
                 <div class="col-sm-4">
@@ -88,7 +96,8 @@
             </div>
             <div class="form-group row m-2">
                 <div class="col-sm-10">
-                    <a href="/blog" style="background-color: #F582AE; color: aliceblue;" type="submit" class="btn">Quay lại</a>
+                    <a href="/blog" style="background-color: #F582AE; color: aliceblue;" type="submit" class="btn">Quay
+                        lại</a>
                 </div>
             </div>
         </form>

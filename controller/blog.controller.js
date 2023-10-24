@@ -31,7 +31,7 @@ exports.listAllBlog = async (req, res, next) => {
             let listAllBlog = await mdBlog.BlogModel.find(filterSearch).populate('idUser').sort(sortOption).skip(skipCount).limit(perPage);
             msg = 'Lấy danh sách tất cả blog thành công';
             // console.log(listAllBlog);
-            return res.render('Blog/listBlog', { listAllBlog: listAllBlog, countAllBlog: totalCount, countNowBlog: listAllBlog.length, msg: msg, moment: moment, currentPage: currentPage, totalPage: totalPage });
+            return res.render('Blog/listBlog', { listAllBlog: listAllBlog, countAllBlog: totalCount, countNowBlog: listAllBlog.length, msg: msg, moment: moment, currentPage: currentPage, totalPage: totalPage, adminLogin:req.session.adLogin });
         } catch (error) {
             msg = 'Lỗi: ' + error.message;
             console.log(msg);
@@ -50,7 +50,7 @@ exports.detailBlog = async (req, res, next) => {
     let idAccount = objB.idUser.idAccount
     let objUserAcc = await mdUserAcc.UserAccountModel.findById(idAccount);
     console.log("objAxx "+objUserAcc);
-    res.render('Blog/detailBlog', { objB: objB,objUserAcc:objUserAcc, moment: moment });
+    res.render('Blog/detailBlog', { objB: objB,objUserAcc:objUserAcc, moment: moment, adminLogin:req.session.adLogin });
 }
 
 exports.addBlog = async (req, res, next) => {
