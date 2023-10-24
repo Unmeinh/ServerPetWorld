@@ -11,7 +11,6 @@ let CommentSchema = new db.mongoose.Schema(
                 idUser: { type: db.mongoose.Schema.Types.ObjectId, ref: 'UserModel'},
                 interact:{type:String,required:true}
             }
-           
         ]
     },
     {

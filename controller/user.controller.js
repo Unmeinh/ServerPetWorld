@@ -22,10 +22,10 @@ exports.listUser = async (req, res, next) => {
             const totalPage = Math.ceil(totalCount / perPage);
             if (currentPage <=0) {
                 msg = 'Không có dữ liệu.';
-                return res.render('User/listUser', { listUser: [], countAllUser: 0, countNowUser: 0, msg: msg, currentPage: currentPage, totalPage: totalPage });
+                return res.render('User/listUser', { listUser: [], countAllUser: 0, countNowUser: 0, msg: msg, currentPage: currentPage, totalPage: totalPage , adminLogin:req.session.adLogin});
             } else if (currentPage > totalPage) {
                 msg = 'Không có dữ liệu.';
-                return res.render('User/listUser', { listUser: [], countAllUser: 0, countNowUser: 0, msg: msg, currentPage: currentPage, totalPage: totalPage });
+                return res.render('User/listUser', { listUser: [], countAllUser: 0, countNowUser: 0, msg: msg, currentPage: currentPage, totalPage: totalPage, adminLogin:req.session.adLogin });
             } 
             let skipCount = (currentPage - 1) * perPage;
 
@@ -36,7 +36,7 @@ exports.listUser = async (req, res, next) => {
                 return res.render('User/listUser', { listUser: [], countAllUser: 0, countNowUser: 0, msg: msg, currentPage: currentPage, totalPage: totalPage });
             }
             msg = 'Lấy danh sách user thành công';
-            return res.render('User/listUser', { listUser: listUser, countAllUser: totalCount, countNowUser: listUser.length, msg: msg, currentPage: currentPage, totalPage: totalPage });
+            return res.render('User/listUser', { listUser: listUser, countAllUser: totalCount, countNowUser: listUser.length, msg: msg, currentPage: currentPage, totalPage: totalPage, adminLogin:req.session.adLogin });
         } catch (error) {
             msg = 'Không lấy được danh sách user: ' + error.message;
             console.log(msg);
@@ -49,7 +49,7 @@ exports.listUser = async (req, res, next) => {
 exports.detailUser = async (req, res, next) => {
     let idUser = req.params.idUser;
     let objU = await mdUser.UserModel.findById(idUser).populate('idAccount');
-    res.render('User/detailUser',{objU:objU,moment:moment});
+    res.render('User/detailUser',{objU:objU,moment:moment, adminLogin:req.session.adLogin});
 }
 exports.addUser = async (req, res, next) => {
     let msg = '';
@@ -76,7 +76,7 @@ exports.addUser = async (req, res, next) => {
 
             await objUser.save();
             msg = 'Đã thêm thành công';
-            return res.redirect('/user?msg=Thêm+người+dùng+thành+công')
+            return res.redirect('/user?msg=Thêm+người+dùng+thành+công',{adminLogin:req.session.adLogin})
 
         } catch (error) {
             console.log(error.message);
@@ -117,7 +117,7 @@ exports.addUser = async (req, res, next) => {
         }
 
     }
-    res.render('User/addUser', { listUser: listUser, msg: msg });
+    res.render('User/addUser', { listUser: listUser, msg: msg , adminLogin:req.session.adLogin});
 }
 
 exports.deleteUser = async (req, res, next) => {
@@ -132,5 +132,5 @@ exports.deleteUser = async (req, res, next) => {
             console.log(error.message);
         }
     }
-    res.render('User/deleteUser',{msg:msg,objU:objU});
+    res.render('User/deleteUser',{msg:msg,objU:objU, adminLogin:req.session.adLogin});
 }

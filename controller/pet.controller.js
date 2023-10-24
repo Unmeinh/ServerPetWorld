@@ -69,7 +69,8 @@ exports.listpet = async (req, res, next) => {
 
     res.render('Pet/listPet', {
         msg: 'Không tìm thấy kết quả phù hợp',
-        moment: moment
+        moment: moment,
+        adminLogin: req.session.adLogin
     });
 }
 exports.detailpet = async (req, res, next) => {
@@ -83,7 +84,7 @@ exports.deletepet = async (req, res, next) => {
     let message = ""
     let idP = req.params.idP;
     let Objpet = await mdpet.PetModel.findById(idP);
-    console.log("idP  " + idP);
+  
     if (req.method == 'POST') {
         try {
             await mdpet.PetModel.findByIdAndDelete(idP);
@@ -95,7 +96,7 @@ exports.deletepet = async (req, res, next) => {
         }
     }
 
-    res.render('Pet/deletePet', { message: message, Objpet: Objpet });
+    res.render('Pet/deletePet', { message: message, Objpet: Objpet, adminLogin: req.session.adLogin });
 }
 
 exports.reasonDeletepPet = async (req, res, next) => {

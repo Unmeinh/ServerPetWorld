@@ -41,7 +41,8 @@ exports.listShop = async (req, res, next) => {
                 msg: msg,
                 currentPage: currentPage,
                 totalPages: totalPages,
-                moment: moment
+                moment: moment,
+                adminLogin:req.session.adLogin
             });
         } catch (error) {
             msg = '' + error.message;
@@ -56,7 +57,7 @@ exports.detailShop = async (req, res, next) => {
 
     let idShop = req.params.idShop;
     let ObjShop = await mdShop.ShopModel.findById(idShop)
-    res.render('Shop/detailShop', { ObjShop: ObjShop, moment: moment });
+    res.render('Shop/detailShop', { ObjShop: ObjShop, moment: moment, adminLogin:req.session.adLogin });
 }
 
 exports.detailOwner = async (req, res, next) => {
@@ -79,11 +80,12 @@ exports.detailOwner = async (req, res, next) => {
                 decodeObj.imageIdentity = [...images];
                 decodeObj.nameIdentity = decodeFromSha256(decodeObj.nameIdentity);
                 decodeObj.numberIdentity = decodeFromSha256(decodeObj.numberIdentity);
+                decodeObj.dateIdentity = decodeFromSha256(decodeObj.dateIdentity);
                 objOwner = { ...decodeObj };
             }
         }
     }
-    res.render('Shop/detailOwner', { objOwner: objOwner, moment: moment });
+    res.render('Shop/detailOwner', { objOwner: objOwner, moment: moment, adminLogin:req.session.adLogin });
 }
 
 exports.deleteShop = async (req, res, next) => {
@@ -101,5 +103,5 @@ exports.deleteShop = async (req, res, next) => {
         }
     }
 
-    res.render('Shop/deleteShop', { message: message, ObjShop: ObjShop });
+    res.render('Shop/deleteShop', { message: message, ObjShop: ObjShop, adminLogin:req.session.adLogin });
 }

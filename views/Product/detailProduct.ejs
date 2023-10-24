@@ -1,4 +1,4 @@
-<%- include('../inc/top',{title:'Chi tiết Sản Phẩm'}) %>
+<%- include('../inc/top',{title:'Chi tiết sản phẩm'}) %>
 
     <div class="container mt-2">
 
@@ -8,39 +8,30 @@
             <div class="col-sm-5">
             </div>
         </div>
-        <form action="http://localhost:3000/product" method="get">
+        <form action="" method="get">
             <!-- Các trường người dùng và giới tính ở đây -->
             <!-- Tên người dùng -->
             <div class="form-group row m-3" style="align-items: center;">
                 <label for="username" class="col-sm-2 col-form-label">Ảnh sản phẩm</label>
                 <div class="col-sm-10" style="display: flex; align-items: center;">
-                  <% if (typeof(ObjProduct.arrProduct) !== 'undefined' && ObjProduct.arrProduct.length > 0) { %>
-                    <div style="display: flex;">
-                      <% var displayedImages = 0; %>
-                      <% ObjProduct.arrProduct.forEach((image, index) => { %>
-                        <% if (displayedImages < 5) { %>
-                          <div style="position: relative; margin-right: 10px;">
-                            <img src="<%= image %>" style="width: 100px; height: 100px; border-radius: 10px; border: 2px solid #000;" class="img-fluid">
-                            <% if (displayedImages === 4 && ObjProduct.arrProduct.length > 5) { %>
-                              <div style="position: absolute; top: -25px; right: 0; background-color: rgba(0, 0, 0, 0.7); color: white; border-radius: 10px; padding: 5px 10px;">
-                                +<%= ObjProduct.arrProduct.length - 5 %>
-                              </div>
-                            <% } %>
-                            <% displayedImages++; %>
-                          </div>
-                        <% } %>
-                      <% }); %>
-                    </div>
-                  <% } else { %>
-                    <p>No images available.</p>
-                  <% } %>
+                    <% var imageShow=0; %>
+                        <% if(typeof(ObjProduct.arrProduct) !=='undefined' && ObjProduct.arrProduct.length> 0) {
+                            ObjProduct.arrProduct.slice(0,5).map(image=>{ %>
+                            <img src="<%= image %>"
+                                style="width: 12%; height: 100px; border-radius: 8px; box-shadow: 3px 3px #bfb8bb; margin: 5px;">
+                            <% imageShow ++; }).join('') %>
+
+                                <% if(ObjProduct.arrProduct.length> 5) { %>
+                                    <span
+                                        style="font-size: 18px; margin-left: 10px; color: #ffffff; background-color: rgb(199, 202, 202);padding: 12px; border-radius: 60px;">
+                                        + <%= ObjProduct.arrProduct.length - imageShow %></span>
+                                    <% }%>
+                                        <% } else { %>
+                                            <p>Sản phẩm không có ảnh</p>
+                                            <% } %>
                 </div>
-              </div>
-              
-              
-              
-              
-              
+            </div>
+
             <div class="form-group row m-3">
                 <label for="username" form="bold" class="col-sm-2 col-form-label">Tên sản phẩm</label>
                 <div class="col-sm-3">
@@ -51,8 +42,8 @@
 
                 <label for="username" form="bold" class="col-sm-2 col-form-label">Giá tiền</label>
                 <div class="col-sm-3">
-                    <label type="text" style="width: 200px;" class="form-control">
-                        <%= ObjProduct.priceProduct || 'Không có dữ liệu' %>
+                    <label type="text" style="width: 200px; font-weight: bold; color: rgb(92, 90, 90);" class="form-control">
+                        <%= ObjProduct.priceProduct.toLocaleString('vi-VN') %> VNĐ
                     </label>
                 </div>
 
@@ -89,7 +80,7 @@
                 <label for="username" form="bold" class="col-sm-2 col-form-label">Giảm giá</label>
                 <div class="col-sm-3">
                     <label type="text" style="width: 200px;" class="form-control">
-                        <%= ObjProduct.discount || 'Không có dữ liệu'%>
+                        <%= ObjProduct.discount || 'Không có dữ liệu' %>
                     </label>
                 </div>
 
@@ -108,22 +99,20 @@
                             </label>
                             <%}%>
                 </div>
-                <label for="username" form="bold" class="col-sm-2 col-form-label>Chi tiết sản phẩm</label>
-                <div class="col-sm-5"> 
-                    <div class="container mt-2 scrollable-details">
-                        <label type="text" class="form-control float-right" style="max-width: 200px; max-height: 100px; overflow-y: auto;">
-                            <%= ObjProduct.detailProduct || 'Không có dữ liệu' %>
-                        </label>
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Mô tả sản phẩm</label>
+                <div class="col-sm-5">
+                    <textarea class="form-control" rows="4" style="box-shadow: none;"
+                        readonly><%= ObjProduct.detailProduct || 'Không có dữ liệu' %>
+                    </textarea>
+                </div>
+                <div class="form-group row mt-3">
+                    <div class="col-sm-10">
+                        <a href="/product" style="background-color: #F582AE;" class="btn btn-secondary ">Quay lại</a>
                     </div>
-            </div>
-            <div class="form-group row m-3">
-                <div class="col-sm-10">
-                    <a href="/product" style="background-color: #F582AE;" class="btn btn-secondary ">Quay lại</a>
                 </div>
             </div>
-    </div>
-   
-    </form>
+
+        </form>
 
     </div>
 

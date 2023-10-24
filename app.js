@@ -6,35 +6,39 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var session = require('express-session');
 
+/** Contact with SERVER write in here */
 var adminRouter= require('./routes/admin');
 var usersRouter = require('./routes/user');
-var usersShopRouter = require('./routes/userShop');
+// var usersShopRouter = require('./routes/userShop');
 var blogsRouter = require('./routes/blog');
 var accountRouter= require('./routes/account');
 var productRouter = require('./routes/product');
 var categoryProduct = require('./routes/categoryProduct');
 var petRouter = require('./routes/pet');
 var shopRouter = require('./routes/shop');
-//api
+var billProductRouter = require('./routes/billProduct');
+
+/** Contact with API write in here */
 var userApiRouter = require('./routes/api/userApi');
 var blogApiRouter = require('./routes/api/blogApi');
-var itemCartApiRouter = require('./routes/api/itemCartApi');
+// var itemCartApiRouter = require('./routes/api/itemCartApi');
 var cartApiRouter = require('./routes/api/cartApi');
 var productApiRouter = require('./routes/api/productApi');
 var shopApiRouter = require('./routes/api/shopApi');
-var CatAllApiRouter = require('./routes/api/categoryAll');
+var catAllApiRouter = require('./routes/api/categoryAll');
 var petApiRouter = require('./routes/api/petApi');
-var followRouter = require('./routes/api/followApi');
-var savenoticeRouter= require('./routes/api/noticeApi');
-var commentRouter= require('./routes/api/commentApi');
-var favoriteProductsRouter=require('./routes/api/myFavoriteProductApi');
-var billProductRouter = require('./routes/api/billProductApi');
-var voucherShopRouter = require('./routes/api/voucherShopApi');
-var voucherServerRouter = require('./routes/api/voucherServerApi');
-var searchApi = require('./routes/api/searchApi');
-var appointmentRouter = require('./routes/api/appointmentApi');
-var ConversationsRouter = require('./routes/api/ConversationsApi');
-var boxChatRouter = require('./routes/api/boxChatApi');
+var noticeApiRouter= require('./routes/api/noticeApi');
+var commentApiRouter= require('./routes/api/commentApi');
+var favoriteProductsApiRouter=require('./routes/api/myFavoriteProductApi');
+var billProductApiRouter = require('./routes/api/billProductApi');
+var voucherShopApiRouter = require('./routes/api/voucherShopApi');
+var voucherServerApiRouter = require('./routes/api/voucherServerApi');
+var searchApiRouter = require('./routes/api/searchApi');
+var appointmentApiRouter = require('./routes/api/appointmentApi');
+var conversationsApiRouter = require('./routes/api/ConversationsApi');
+var boxChatApiRouter = require('./routes/api/boxChatApi');
+var serverApiRouter = require('./routes/api/serverApi');
+
 var app = express();
 
 // view engine setup
@@ -56,33 +60,34 @@ app.use(session({
 app.use('/',blogsRouter);
 app.use('/admin',adminRouter);
 app.use('/user', usersRouter);
-app.use('/user-shop', usersShopRouter);
+// app.use('/user-shop', usersShopRouter);
 app.use('/blog', blogsRouter);
 app.use('/account',accountRouter );
 app.use('/product', productRouter);
 app.use('/category-product', categoryProduct);
 app.use('/pet', petRouter);
 app.use('/shop', shopRouter);
-//api
+app.use('/bill-product', billProductRouter);
+//api use in here
 app.use('/api/user', userApiRouter);
 app.use('/api/blog', blogApiRouter);
-app.use('/api/item-carts', itemCartApiRouter);
+// app.use('/api/item-carts', itemCartApiRouter);
 app.use('/api/cart', cartApiRouter);
 app.use('/api/product', productApiRouter);
 app.use('/api/shop', shopApiRouter);
-app.use('/api/category', CatAllApiRouter);
+app.use('/api/category', catAllApiRouter);
 app.use('/api/pet', petApiRouter);
-app.use('/api/follow', followRouter);
-app.use('/api/notice',savenoticeRouter)
-app.use('/api/comment',commentRouter)
-app.use('/api/bill-product', billProductRouter);
-app.use('/api/favorite',favoriteProductsRouter);
-app.use('/api/voucherShop',voucherShopRouter);
-app.use('/api/voucherServer',voucherServerRouter);
-app.use('/api/search',searchApi);
-app.use('/api/appointment',appointmentRouter);
-app.use('/api/conversations', ConversationsRouter);
-app.use('/api/boxChat', boxChatRouter);
+app.use('/api/notice',noticeApiRouter)
+app.use('/api/comment',commentApiRouter)
+app.use('/api/bill-product', billProductApiRouter);
+app.use('/api/favorite',favoriteProductsApiRouter);
+app.use('/api/voucherShop',voucherShopApiRouter);
+app.use('/api/voucherServer',voucherServerApiRouter);
+app.use('/api/search',searchApiRouter);
+app.use('/api/appointment',appointmentApiRouter);
+app.use('/api/conversations', conversationsApiRouter);
+app.use('/api/boxChat', boxChatApiRouter);
+app.use('/api/server', serverApiRouter);
 
 
 // catch 404 and forward to error handler
