@@ -1,4 +1,4 @@
-<%- include('../inc/top',{title:'Chi tiết admin'}) %>
+<%- include('../inc/top',{title:'Chi tiết admin', adminLogin: adminLogin}) %>
 
     <div class="container mt-2">
 
@@ -18,9 +18,8 @@
                 <% if(typeof(objAd.avatarAdmin )!='undefined') { %>
                     <img src="<%= objAd.avatarAdmin %>" style="width: 100px;height: 100px;" class="img-fluid">
                     <% } else { %>
-                        <img src="http://localhost:3000/upload/avatar_null.png" style="width: 100px;height: 100px;" class="img-fluid">
-                        <%  }%>
-                        
+                        <img src="/upload/avatar_null.png" style="width: 100px;height: 100px;" class="img-fluid">
+                        <%  }%>                      
             </div>
         </div>
 
@@ -28,7 +27,7 @@
             <label for="username" form="bold" class="col-sm-3 col-form-label">Tên admin</label>
             <div class="col-sm-4">
                 <label type="text" class="form-control" id="username">
-                    <%= objAd.fullName%>
+                    <%= objAd.fullName  || 'Không có dữ liệu' %>
                 </label>
             </div>
         </div>
@@ -37,7 +36,7 @@
             <label for="username" form="bold" class="col-sm-3 col-form-label">Tên đăng nhập</label>
             <div class="col-sm-4">
                 <label type="text" class="form-control" id="username">
-                    <%= objAd.userName%>
+                    <%= objAd.userName || 'Không có dữ liệu'%>
                 </label>
             </div>
         </div>
@@ -46,7 +45,7 @@
             <label class="col-sm-3 col-form-label">Email</label>
             <div class="col-sm-4">
                 <label type="text" class="form-control" id="diachi">
-                    <%= objAd.email%>
+                    <%= objAd.email || 'Không có dữ liệu'%>
                 </label>
             </div>
         </div>

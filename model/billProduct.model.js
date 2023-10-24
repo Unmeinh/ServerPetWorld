@@ -3,7 +3,12 @@ let db = require("./db");
 let billProductSchema = new db.mongoose.Schema(
   {
     idUser: { type: db.mongoose.Schema.Types.ObjectId, ref: "UserModel" },
-    location: { type: String, required: true },
+    idShop: { type: db.mongoose.Schema.Types.ObjectId, ref: "ShopModel" },
+    locationDetail: {
+      fullName: { type: String, required: true },
+      phoneNumber: { type: Number, required: true },
+      location: { type: String, required: true },
+    },
     total: { type: Number, required: true },
     paymentMethods: { type: Number, required: true },
     purchaseDate: { type: Date, required: true },

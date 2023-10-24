@@ -14,38 +14,38 @@
   top: 0;
   left: 0;
   height: 100%;
-  width: 260px;
+  width: 270px;
   background: #F3D2C1;
   z-index: 100;
   transition: all 0.5s ease;
 }
 
 .sidebar.close {
-  width: 82px;
+  width: 90px;
 }
 
 .sidebar .logo-details {
-  height: 60px;
+  height: 70px;
   width: 100%;
   display: flex;
   align-items: center;
 }
 
 .sidebar .logo-details .logo_close {
-  font-size: 40px;
   color: #fff;
-  height: 60px;
-  min-width: 78px;
+  height: 70px;
+  min-width: 90px;
   margin-top: 25px;
   text-align: center;
   line-height: 50px;
 }
 
 .sidebar .logo-details .logo_name {
-  font-size: 22px;
-  color: #fff;
-  font-weight: 600;
-  margin-top: 60px;
+ position: absolute;
+ left: 0;
+ margin: 25px;
+  width: 200px;
+  height: 100px;
   transition: 0.3s ease;
   transition-delay: 0.1s;
 
@@ -74,13 +74,13 @@
 
 .sidebar .nav-links {
   height: 100%;
-  padding: 30px 0 150px 0;
+  padding: 30px 0 100px 0;
   overflow: auto;
-  margin-top: 40px;
+  margin-top: 30px;
 }
 
 .sidebar.close .nav-links {
-  overflow: visible;
+  overflow: scroll;
 }
 
 .sidebar .nav-links::-webkit-scrollbar {
@@ -95,7 +95,6 @@
 
 .sidebar .nav-links li:hover {
   background: #FEF6E4;
-
 }
 
 .sidebar .nav-links li .iocn-link {
@@ -113,10 +112,9 @@
   min-width: 34px;
   text-align: center;
   line-height: 50px;
-  color: #000000;
+  color: #303030;
   font-size: 20px;
-  margin-left: 55px;
-
+  margin-left: 35px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -131,10 +129,9 @@
 }
 
 .sidebar.close .nav-links li a .iconify {
-  height: 24px;
-  width: 24px;
+  height: 25px;
+  width: 25px;
   margin-left: 25px;
-
 }
 
 .sidebar .nav-links li i {
@@ -142,7 +139,7 @@
   min-width: 78px;
   text-align: center;
   line-height: 50px;
-  color: #000000;
+  color: #363636;
   font-size: 20px;
 
   cursor: pointer;
@@ -159,7 +156,6 @@
   display: flex;
   align-items: center;
   text-decoration: none;
-
 }
 
 .sidebar .nav-links li a .link_name {
@@ -168,9 +164,7 @@
   color: #000000;
   font-family: 'Roboto';
   transition: all 0.1s ease;
-  margin-left: 22px;
-
-
+  margin-left: 20px;
 }
 
 .sidebar.close .nav-links li {

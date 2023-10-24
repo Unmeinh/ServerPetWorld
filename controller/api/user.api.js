@@ -10,6 +10,7 @@ const { onUploadImages } = require("../../function/uploadImage");
 exports.listUser = async (req, res, next) => {
   try {
     let listUser = await mdUser.find().populate('idAccount');
+
     if (listUser) {
       return res.status(200).json({
         success: true,
