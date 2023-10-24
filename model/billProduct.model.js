@@ -5,7 +5,7 @@ let billProductSchema = new db.mongoose.Schema(
     idUser: { type: db.mongoose.Schema.Types.ObjectId, ref: "UserModel" },
     idShop: { type: db.mongoose.Schema.Types.ObjectId, ref: "ShopModel" },
     locationDetail: {
-      name: { type: String, required: true },
+      fullName: { type: String, required: true },
       phoneNumber: { type: Number, required: true },
       location: { type: String, required: true },
     },
