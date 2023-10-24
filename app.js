@@ -15,6 +15,8 @@ var productRouter = require('./routes/product');
 var categoryProduct = require('./routes/categoryProduct');
 var petRouter = require('./routes/pet');
 var shopRouter = require('./routes/shop');
+var paymentRouter = require('./routes/payment');
+var notificationRouter=require('./routes/notification');
 //api
 var userApiRouter = require('./routes/api/userApi');
 var blogApiRouter = require('./routes/api/blogApi');
@@ -62,6 +64,8 @@ app.use('/product', productRouter);
 app.use('/category-product', categoryProduct);
 app.use('/pet', petRouter);
 app.use('/shop', shopRouter);
+app.use('/payment', paymentRouter);
+app.use('/notification',notificationRouter)
 //api
 app.use('/api/user', userApiRouter);
 app.use('/api/blog', blogApiRouter);

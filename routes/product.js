@@ -4,7 +4,7 @@ var multer = require('multer');
 var uploader = multer({ dest: './tmp' });
 var router = express.Router();
 
-router.get('/', ProductCtrl.listProduct);
+router.get('/', ProductCtrl.listProduct);   
 
 router.get('/detail/:idPR', ProductCtrl.detailProduct);
 
