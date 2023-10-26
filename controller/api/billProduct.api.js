@@ -5,7 +5,7 @@ let mdNoti = require("../../model/notice.model");
 let mdPet = require("../../model/pet.model");
 let mdProduct = require("../../model/product.model");
 let mdShop = require("../../model/shop.model");
-
+let mdCart = require("../../model/cart.model");
 exports.listbillProduct = async (req, res, next) => {
   try {
     // console.log("req: "+req.user);
@@ -33,7 +33,7 @@ exports.listbillProduct = async (req, res, next) => {
 //   const { _id } = req.user;
 //   const {
 //     products,
-//     location,
+//     locationDetail,
 //     total,
 //     paymentMethods,
 //     discountBill,
@@ -51,7 +51,7 @@ exports.listbillProduct = async (req, res, next) => {
 //     if (req.method == "POST") {
 //       let newbillProduct = new mdbillProduct.billProductModel();
 //       newbillProduct.idUser = _id;
-//       newbillProduct.location = location;
+//       newbillProduct.locationDetail = locationDetail;
 //       newbillProduct.total = total;
 //       newbillProduct.paymentMethods = paymentMethods;
 //       newbillProduct.moneyShip = moneyShip;
@@ -146,7 +146,7 @@ exports.listbillProduct = async (req, res, next) => {
 //       } catch (error) {
 //         console.log(error);
 
-//         if (error.message.match(new RegExp(".+`location` is require+."))) {
+//         if (error.message.match(new RegExp(".+`locationDetail` is require+."))) {
 //           msg = "Địa chỉ đang trống!";
 //         } else if (error.message.match(new RegExp(".+`total` is require+."))) {
 //           msg = "Tổng tiền đang trống!";
@@ -306,7 +306,7 @@ exports.cancelBill = async (req, res) => {
 };
 exports.billProductUser = async (req, res) => {
   const { _id } = req.user;
-  const { products, location, paymentMethods, detailCard } = req.body;
+  const { products, locationDetail, paymentMethods, detailCard } = req.body;
   if (req.method === "POST") {
     try {
       const productPromises = [];
@@ -320,8 +320,10 @@ exports.billProductUser = async (req, res) => {
               const discoutProduct =
                 (product.priceProduct / 100) * product.discount;
               item.total =
-                (item.total ?? 0) + product.priceProduct - discoutProduct;
-              item.discount = (item.discount ?? 0) + discoutProduct;
+                (item.total ?? 0) +
+                (product.priceProduct - discoutProduct) * subItem?.amount;
+              item.discount =
+                (item.discount ?? 0) + discoutProduct * subItem?.amount;
               subItem.price = product.priceProduct;
               subItem.discount = product.discount;
             } else {
@@ -341,7 +343,7 @@ exports.billProductUser = async (req, res) => {
         productPromises.map(async (item) => {
           const newbillProduct = new mdbillProduct.billProductModel({
             idUser: _id,
-            location: location ?? "",
+            locationDetail: locationDetail ?? "",
             total: item.total,
             deliveryStatus: 0,
             discountBill: item.discount,
@@ -364,18 +366,32 @@ exports.billProductUser = async (req, res) => {
             total:
               newbillProduct.total - (newbillProduct.total / 100) * server.fee,
           });
-
           server.totalNumberOfOrdersSold += 1;
-          Promise.all([
+          await Promise.all([
             await newbillProduct.save(),
             await createTransition.save(),
             await mdServer.serverModal.findByIdAndUpdate(
               { _id: server._id },
               server
             ),
+            newbillProduct.products.map(async (item) => {
+              const product = await mdProduct.ProductModel.findById(
+                item?.idProduct
+              );
+              if (product) {
+                product.quantitySold += item.amount;
+                if (product.amountProduct > 0) {
+                  product.amountProduct -= item.amount;
+                }
+                await product.save();
+              }
+            }),
           ]);
         })
       );
+      const cartUser = await mdCart.CartModel.findOne({ idUser: _id });
+      cartUser.carts = cartUser.carts.find((item) => item.isSelected === false);
+      await cartUser.save();
       res.status(201).json({
         success: true,
         message: "Tạo hóa đơn thành công!",

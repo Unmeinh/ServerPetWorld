@@ -45,7 +45,8 @@ exports.listAdmin = async (req, res, next) => {
                 countNowAdmin: listAdmin.length,
                 msg: msg,
                 currentPage: currentPage,
-                totalPage: totalPage
+                totalPage: totalPage, 
+                adminLogin:req.session.adLogin
             });
         }
     } catch (error) {
@@ -57,7 +58,8 @@ exports.listAdmin = async (req, res, next) => {
             countNowAdmin: 0,
             msg: msg,
             currentPage: 1,
-            totalPage: 1
+            totalPage: 1,
+            adminLogin:req.session.adLogin
         });
     }
 };
@@ -122,7 +124,7 @@ exports.detailAdmin = async (req, res, next) => {
     let idAdmin = req.params.idAdmin;
     let objAd = await mdAdmin.AdminModel.findById(idAdmin);
 
-    res.render('Admin/detailAdmin', { objAd: objAd });
+    res.render('Admin/detailAdmin', { objAd: objAd , adminLogin:req.session.adLogin});
 }
 exports.addAdmin = async (req, res, next) => {
     let msg = '';
@@ -173,7 +175,7 @@ exports.addAdmin = async (req, res, next) => {
 
         }
     }
-    res.render('Admin/addAdmin', { msg: msg });
+    res.render('Admin/addAdmin', { msg: msg , adminLogin:req.session.adLogin});
 }
 // exports.editAdmin = async (req, res, next) => {
 //     res.render('Admin/editAdmin');
@@ -196,6 +198,6 @@ exports.deleteAdmin = async (req, res, next) => {
             console.log(error.message);
         }
     }
-    res.render('Admin/deleteAdmin', { msg: msg, objAd: objAd });
+    res.render('Admin/deleteAdmin', { msg: msg, objAd: objAd, adminLogin:req.session.adLogin });
 
 }
