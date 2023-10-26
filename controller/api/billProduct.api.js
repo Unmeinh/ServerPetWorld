@@ -7,26 +7,121 @@ let mdProduct = require("../../model/product.model");
 let mdShop = require("../../model/shop.model");
 let mdCart = require("../../model/cart.model");
 exports.listbillProduct = async (req, res, next) => {
-  try {
-    // console.log("req: "+req.user);
-    let listbillProduct = await mdbillProduct.billProductModel
-      .find()
-      .populate("products.idProduct");
-    if (listbillProduct) {
-      return res.status(200).json({
-        success: true,
-        data: listbillProduct,
-        message: "Lấy danh sách hóa đơn thành công",
-      });
-    } else {
-      return res.status(203).json({
-        success: false,
-        data: [],
-        message: "Không có dữ hóa đơn",
-      });
+  const { _id } = req.user;
+  const index = req.query?.idStatus;
+  if (typeof index !== "undefined") {
+    try {
+      let listbillProduct = await mdbillProduct.billProductModel.aggregate([
+        {
+          $unwind: "$products",
+        },
+        {
+          $match: {
+            idUser: _id,
+            deliveryStatus: Number(index),
+          },
+        },
+        {
+          $lookup: {
+            from: "Shop",
+            localField: "idShop",
+            foreignField: "_id",
+            as: "shopInfo",
+          },
+        },
+        {
+          $lookup: {
+            from: "Products",
+            localField: "products.idProduct",
+            foreignField: "_id",
+            as: "productInfo",
+          },
+        },
+        {
+          $lookup: {
+            from: "Pets",
+            localField: "products.idProduct",
+            foreignField: "_id",
+            as: "petInfo",
+          },
+        },
+        {
+          $addFields: {
+            "productInfo.amount": "$products.amount",
+            "productInfo.discount": "$products.discount",
+            "productInfo.price": "$products.price",
+            "petInfo.amount": "$products.amount",
+            "petInfo.discount": "$products.discount",
+            "petInfo.price": "$products.price",
+          },
+        },
+        {
+          $group: {
+            _id: "$_id",
+            idUser: { $first: "$idUser" },
+            idShop: { $first: "$idShop" },
+            locationDetail: { $first: "$locationDetail" },
+            total: { $first: "$total" },
+            paymentMethods: { $first: "$paymentMethods" },
+            purchaseDate: { $first: "$purchaseDate" },
+            deliveryStatus: { $first: "$deliveryStatus" },
+            discountBill: { $first: "$discountBill" },
+            moneyShip: { $first: "$moneyShip" },
+            productInfo: { $push: "$productInfo" },
+            petInfo: { $first: "$petInfo" },
+            shopInfo:{ $first: "$shopInfo" }
+          },
+        },
+        {
+          $project: {
+            idUser: 1,
+            idShop: 1,
+            locationDetail: 1,
+            total: 1,
+            paymentMethods: 1,
+            purchaseDate: 1,
+            deliveryStatus: 1,
+            discountBill: 1,
+            moneyShip: 1,
+            products: 1,
+            "productInfo.nameProduct": 1,
+            "productInfo.arrProduct": 1,
+            "productInfo._id": 1,
+            "petInfo.namePet": 1,
+            "petInfo.imagesPet": 1,
+            "petInfo._id": 1,
+            "productInfo.amount": 1,
+            "productInfo.price": 1,
+            "petInfo.amount": 1,
+            "productInfo.discount": 1,
+            "petInfo.discount": 1,
+            "petInfo.price": 1,
+            "shopInfo.nameShop": 1,
+            "shopInfo.avatarShop": 1,
+            "shopInfo._id": 1,
+          },
+        },
+      ]);
+      if (listbillProduct) {
+        return res.status(200).json({
+          success: true,
+          data: listbillProduct,
+          message: "Lấy danh sách hóa đơn thành công",
+        });
+      } else {
+        return res.status(203).json({
+          success: false,
+          data: [],
+          message: "Không có dữ hóa đơn",
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({ success: false, message: error.message });
     }
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+  } else {
+    return res
+      .status(500)
+      .json({ success: false, message: "idStatus is require" });
   }
 };
 // exports.billProductUser = async (req, res, next) => {
@@ -327,11 +422,17 @@ exports.billProductUser = async (req, res) => {
               subItem.price = product.priceProduct;
               subItem.discount = product.discount;
             } else {
-              return res.status(500).json({
-                success: false,
-                message: "Không tìm thấy sản phẩm",
-                data: [],
-              });
+              const pet = await mdPet.PetModel.findById(subItem.idProduct);
+              if (pet) {
+                const discoutProduct = (pet.pricePet / 100) * pet.discount;
+                item.total =
+                  (item.total ?? 0) +
+                  (pet.pricePet - discoutProduct) * subItem?.amount;
+                item.discount =
+                  (item.discount ?? 0) + discoutProduct * subItem?.amount;
+                subItem.price = pet.pricePet;
+                subItem.discount = pet.discount;
+              }
             }
           });
           await Promise.all(itemPromises);
@@ -398,6 +499,7 @@ exports.billProductUser = async (req, res) => {
         data: [],
       });
     } catch (error) {
+      console.log(error);
       res.status(500).json({
         success: false,
         message: error.message,
