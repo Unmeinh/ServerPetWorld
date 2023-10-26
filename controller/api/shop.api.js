@@ -1,4 +1,6 @@
 let mdShop = require('../../model/shop.model');
+let mdPet = require('../../model/pet.model').PetModel;
+let mdProduct = require('../../model/product.model').ProductModel;
 let fs = require("fs");
 const jwt = require('jsonwebtoken');
 let bcrypt = require("bcrypt");
@@ -25,6 +27,40 @@ exports.listShop = async (req, res, next) => {
         }
     }
 
+}
+
+exports.listPet = async (req, res, next) => {
+    let filterSearch = null;
+
+    if (req.method == 'GET') {
+        try {
+            if (typeof (req.query.filterSearch) != 'undefined' && req.query.filterSearch.trim() != '') {
+                const searchTerm = req.query.filterSearch.trim();
+                filterSearch = { fullName: new RegExp(searchTerm, 'i') };
+            }
+            let listPet = await mdPet.find({idShop: req.shop._id}).populate('idCategoryP').sort({createdAt: -1});
+            return res.status(200).json({ success: true, data: listPet, message: 'Lấy danh sách pet thành công' });
+        } catch (error) {
+            return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
+        }
+    }
+}
+
+exports.listProduct = async (req, res, next) => {
+    let filterSearch = null;
+
+    if (req.method == 'GET') {
+        try {
+            if (typeof (req.query.filterSearch) != 'undefined' && req.query.filterSearch.trim() != '') {
+                const searchTerm = req.query.filterSearch.trim();
+                filterSearch = { fullName: new RegExp(searchTerm, 'i') };
+            }
+            let listPet = await mdProduct.find({idShop: req.shop._id}).populate('idCategoryPr').sort({createdAt: -1});
+            return res.status(200).json({ success: true, data: listPet, message: 'Lấy danh sách product thành công' });
+        } catch (error) {
+            return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
+        }
+    }
 }
 
 exports.detailShop = async (req, res, next) => {

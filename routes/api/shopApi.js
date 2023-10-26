@@ -11,6 +11,8 @@ router.get('/', mdJWT.api_user_auth, ShopApiCtrl.listShop);
 router.get('/detail/:idShop', mdJWT.api_user_auth, ShopApiCtrl.detailShop);
 
 //seller
+router.get('/list/pet', mdJWT.api_shop_auth, ShopApiCtrl.listPet);
+router.get('/list/product', mdJWT.api_shop_auth, ShopApiCtrl.listProduct);
 router.post('/checkPhoneNumber', ShopApiCtrl.checkPhoneNumber);
 router.get('/autoLogin', mdJWT.api_shop_auth, ShopApiCtrl.checkStatus);
 
