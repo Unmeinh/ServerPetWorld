@@ -32,7 +32,6 @@ exports.searchApi = async (req, res, next) => {
           .json({ success: true, data: searchResults, message: "Không có dữ liệu" });
       }
     } catch (error) {
-      console.log(error.message);
       res.status(500).json({ error: "Đã xảy ra lỗi" });
     }
   } else {
