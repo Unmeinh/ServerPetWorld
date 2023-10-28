@@ -7,204 +7,123 @@ let mdProduct = require("../../model/product.model");
 let mdShop = require("../../model/shop.model");
 let mdCart = require("../../model/cart.model");
 exports.listbillProduct = async (req, res, next) => {
-  try {
-    // console.log("req: "+req.user);
-    let listbillProduct = await mdbillProduct.billProductModel
-      .find()
-      .populate("products.idProduct");
-    if (listbillProduct) {
-      return res.status(200).json({
-        success: true,
-        data: listbillProduct,
-        message: "Lấy danh sách hóa đơn thành công",
-      });
-    } else {
-      return res.status(203).json({
-        success: false,
-        data: [],
-        message: "Không có dữ hóa đơn",
-      });
+  const { _id } = req.user;
+  const index = req.query?.idStatus;
+  if (typeof index !== "undefined") {
+    try {
+      let listbillProduct = await mdbillProduct.billProductModel.aggregate([
+        {
+          $unwind: "$products",
+        },
+        {
+          $match: {
+            idUser: _id,
+            deliveryStatus: Number(index),
+          },
+        },
+        {
+          $lookup: {
+            from: "Shop",
+            localField: "idShop",
+            foreignField: "_id",
+            as: "shopInfo",
+          },
+        },
+        {
+          $lookup: {
+            from: "Products",
+            localField: "products.idProduct",
+            foreignField: "_id",
+            as: "productInfo",
+          },
+        },
+        {
+          $lookup: {
+            from: "Pets",
+            localField: "products.idProduct",
+            foreignField: "_id",
+            as: "petInfo",
+          },
+        },
+        {
+          $addFields: {
+            "productInfo.amount": "$products.amount",
+            "productInfo.discount": "$products.discount",
+            "productInfo.price": "$products.price",
+            "petInfo.amount": "$products.amount",
+            "petInfo.discount": "$products.discount",
+            "petInfo.price": "$products.price",
+          },
+        },
+        {
+          $group: {
+            _id: "$_id",
+            idUser: { $first: "$idUser" },
+            idShop: { $first: "$idShop" },
+            locationDetail: { $first: "$locationDetail" },
+            total: { $first: "$total" },
+            paymentMethods: { $first: "$paymentMethods" },
+            purchaseDate: { $first: "$purchaseDate" },
+            deliveryStatus: { $first: "$deliveryStatus" },
+            discountBill: { $first: "$discountBill" },
+            moneyShip: { $first: "$moneyShip" },
+            productInfo: { $push: "$productInfo" },
+            petInfo: { $first: "$petInfo" },
+            shopInfo: { $first: "$shopInfo" },
+          },
+        },
+        {
+          $project: {
+            idUser: 1,
+            idShop: 1,
+            locationDetail: 1,
+            total: 1,
+            paymentMethods: 1,
+            purchaseDate: 1,
+            deliveryStatus: 1,
+            discountBill: 1,
+            moneyShip: 1,
+            products: 1,
+            "productInfo.nameProduct": 1,
+            "productInfo.arrProduct": 1,
+            "productInfo._id": 1,
+            "petInfo.namePet": 1,
+            "petInfo.imagesPet": 1,
+            "petInfo._id": 1,
+            "productInfo.amount": 1,
+            "productInfo.price": 1,
+            "petInfo.amount": 1,
+            "productInfo.discount": 1,
+            "petInfo.discount": 1,
+            "petInfo.price": 1,
+            "shopInfo.nameShop": 1,
+            "shopInfo.avatarShop": 1,
+            "shopInfo._id": 1,
+          },
+        },
+      ]);
+      if (listbillProduct) {
+        return res.status(200).json({
+          success: true,
+          data: listbillProduct,
+          message: "Lấy danh sách hóa đơn thành công",
+        });
+      } else {
+        return res.status(203).json({
+          success: false,
+          data: [],
+          message: "Không có dữ hóa đơn",
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({ success: false, message: error.message });
     }
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+  } else {
+    return res
+      .status(500)
+      .json({ success: false, message: "idStatus is require" });
   }
 };
-// exports.billProductUser = async (req, res, next) => {
-//   const { _id } = req.user;
-//   const {
-//     products,
-//     locationDetail,
-//     total,
-//     paymentMethods,
-//     discountBill,
-//     type,
-//     detailCard,
-//     moneyShip,
-//   } = req.body;
-//   const { idProduct, amount, price, discount } = products ?? {
-//     idProduct: "",
-//     amount: "",
-//     price: "",
-//     discount: "",
-//   };
-//   try {
-//     if (req.method == "POST") {
-//       let newbillProduct = new mdbillProduct.billProductModel();
-//       newbillProduct.idUser = _id;
-//       newbillProduct.locationDetail = locationDetail;
-//       newbillProduct.total = total;
-//       newbillProduct.paymentMethods = paymentMethods;
-//       newbillProduct.moneyShip = moneyShip;
-//       newbillProduct.detailCard = paymentMethods == 1 ? detailCard : null;
-//       newbillProduct.purchaseDate = new Date();
-//       newbillProduct.deliveryStatus = 0;
-//       newbillProduct.discountBill = discountBill;
-//       if (type == 1) {
-//         let listCartUser = await mdCart.CartModel.findOne({
-//           idUser: _id,
-//         }).populate("carts.idProduct");
-//         let billProduct = [];
-//         let newCartItems = [];
-//         listCartUser.carts.map((item, index) => {
-//           if (item.isSelected) {
-//             const product = {
-//               idProduct: item.idProduct._id,
-//               amount: item.amount,
-//               price: item.idProduct.priceProduct,
-//               discount: item.idProduct.discount,
-//             };
-//             billProduct.push(product);
-//           } else {
-//             newCartItems.push(item);
-//           }
-//         });
-//         listCartUser.carts = newCartItems;
-//         await mdCart.CartModel.findByIdAndUpdate(
-//           { _id: listCartUser._id },
-//           listCartUser
-//         );
-//         newbillProduct.products = billProduct;
-//       } else if (type == 0) {
-//         const itembillProduct = {
-//           idProduct,
-//           amount,
-//           price,
-//           discount,
-//         };
-//         newbillProduct.products = [itembillProduct];
-//       }
-//       try {
-//         const createNotice = new mdNoti.NoticeModel({
-//           detail: `Bạn vừa đơn hàng trị giá ${total?.toLocaleString(
-//             "vi-VN"
-//           )}đ thành công`,
-//           idUser: _id,
-//           content: "Bạn vừa đặt đơn hàng thành công !",
-//           status: 0,
-//           createdAt: new Date(),
-//         });
-//         const server = await mdServer.serverModal.findOne({});
-//         const createTransition = new mdTransition.TransactionModal({
-//           fee: (newbillProduct.total / 100) * server.fee,
-//           idBill: newbillProduct._id,
-//           idCustommer: _id,
-//           paymentMethod: paymentMethods,
-//           status: newbillProduct.deliveryStatus,
-//           total:
-//             newbillProduct.total - (newbillProduct.total / 100) * server.fee,
-//         });
-
-//         const data = await newbillProduct.save();
-//         data.products.map(async (item) => {
-//           const pet = await mdPet.PetModel.findById(item?.idProduct);
-//           const product = await mdProduct.ProductModel.findById(
-//             item?.idProduct
-//           );
-//           if (pet) {
-//             pet.quantitySold += item.amount;
-//             pet.amountPet -= item.amount;
-//             await pet.save();
-//           }
-//           if (product) {
-//             product.quantitySold += item.amount;
-//             product.amountProduct -= item.amount;
-//             await product.save();
-//           }
-//         });
-//         await createNotice.save();
-//         server.totalNumberOfOrdersSold = server.totalNumberOfOrdersSold + 1;
-//         await mdServer.serverModal.findByIdAndUpdate(
-//           { _id: server._id },
-//           server
-//         );
-//         await createTransition.save();
-//         res.status(201).json({
-//           success: true,
-//           message: "Tạo hóa đơn thành công!",
-//           data: data,
-//         });
-//       } catch (error) {
-//         console.log(error);
-
-//         if (error.message.match(new RegExp(".+`locationDetail` is require+."))) {
-//           msg = "Địa chỉ đang trống!";
-//         } else if (error.message.match(new RegExp(".+`total` is require+."))) {
-//           msg = "Tổng tiền đang trống!";
-//         }
-//         if (
-//           typeof newbillProduct.total != "number" ||
-//           isNaN(newbillProduct.total) ||
-//           newbillProduct.total <= 0
-//         ) {
-//           msg = "Tổng tiền phải nhập số dương!";
-//         } else if (
-//           error.message.match(new RegExp(".+`paymentMethods` is require+."))
-//         ) {
-//           msg = " phương thức thanh toán đang trống!";
-//         } else if (
-//           error.message.match(new RegExp(".+`deliveryStatus` is require+."))
-//         ) {
-//           msg = "Trạng thái giao hàng đang trống!";
-//         } else if (
-//           error.message.match(new RegExp(".+`discountBill` is require+."))
-//         ) {
-//           msg = "Tổng số lượng hóa đơn đang trống!";
-//         } else if (
-//           isNaN(newbillProduct.discountBill) ||
-//           newbillProduct.discountBill <= 0
-//         ) {
-//           msg = "Tổng số lượng hóa đơn phải nhập số!";
-//         } else if (
-//           error.message.match(new RegExp(".+`idProduct` is require+."))
-//         ) {
-//           msg = "Id sản phẩm đang trống!";
-//         } else if (error.message.match(new RegExp(".+`amount` is require+."))) {
-//           msg = "Số lượng sản phẩm đang trống!";
-//         } else if (isNaN(newbillProduct.amount) || newbillProduct.amount <= 0) {
-//           msg = "Số lượng sản phẩm phải nhập số!";
-//           return res
-//             .status(500)
-//             .json({ success: false, data: {}, message: msg });
-//         } else if (
-//           error.message.match(new RegExp(".+`discount` is require+."))
-//         ) {
-//           msg = "Tổng Số lượng sản phẩm đang trống!";
-//         } else if (
-//           isNaN(newbillProduct.discount) ||
-//           newbillProduct.discount <= 0
-//         ) {
-//           msg = "Tổng Số lượng sản phẩm phải nhập số!";
-//         } else {
-//           msg = error.message;
-//         }
-//         return res.status(500).json({ success: false, message: error.message });
-//       }
-//     }
-//   } catch (error) {
-//     console.log(error);
-//     return res.status(500).json({ success: false, message: error.message });
-//   }
-// };
 
 exports.detailBillProduct = async (req, res, next) => {
   let idBillPr = req.params.idBillPr;
@@ -327,11 +246,17 @@ exports.billProductUser = async (req, res) => {
               subItem.price = product.priceProduct;
               subItem.discount = product.discount;
             } else {
-              return res.status(500).json({
-                success: false,
-                message: "Không tìm thấy sản phẩm",
-                data: [],
-              });
+              const pet = await mdPet.PetModel.findById(subItem.idProduct);
+              if (pet) {
+                const discoutProduct = (pet.pricePet / 100) * pet.discount;
+                item.total =
+                  (item.total ?? 0) +
+                  (pet.pricePet - discoutProduct) * subItem?.amount;
+                item.discount =
+                  (item.discount ?? 0) + discoutProduct * subItem?.amount;
+                subItem.price = pet.pricePet;
+                subItem.discount = pet.discount;
+              }
             }
           });
           await Promise.all(itemPromises);
@@ -398,6 +323,7 @@ exports.billProductUser = async (req, res) => {
         data: [],
       });
     } catch (error) {
+      console.log(error);
       res.status(500).json({
         success: false,
         message: error.message,
@@ -409,6 +335,47 @@ exports.billProductUser = async (req, res) => {
       success: false,
       message: "Tạo hóa đơn thất bại!",
       data: [],
+    });
+  }
+};
+
+exports.getCountBill = async (req, res) => {
+  const { _id } = req.user;
+  const statusArray = [0, 1, 2, 3];
+  try {
+    const pipeline = [
+      {
+        $match: {
+          idUser: _id,
+          deliveryStatus: { $in: statusArray },
+        },
+      },
+      {
+        $group: {
+          _id: "$deliveryStatus",
+          count: { $sum: 1 },
+        },
+      },
+    ];
+
+    const results = await mdbillProduct.billProductModel.aggregate(pipeline);
+
+    const statusCountObject = {};
+
+    results.forEach((result) => {
+      statusCountObject[result._id] = result.count;
+    });
+    return res.status(200).json({
+      success: true,
+      data: statusCountObject,
+      message: "Lấy danh sách hóa đơn thành công",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      data: [],
+      message: "Lấy danh sách hóa đơn thất bại",
     });
   }
 };
