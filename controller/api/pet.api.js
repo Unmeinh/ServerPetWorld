@@ -18,18 +18,22 @@ exports.listpet = async (req, res, next) => {
     const pageRegex = /^[1-9]+$/;
     if (page <= 0) {
       return res
-        .status(400)
-        .json({ success: false, message: "Số trang phải lớn hơn 0" });
+        .status(200)
+        .json({ success: false, data: [], message: "Số trang phải lớn hơn 0" });
     }
     if (page > totalPage) {
       return res
-        .status(404)
-        .json({ success: false, message: "Số trang không tồn tại!" });
+        .status(200)
+        .json({ success: false, data: [], message: "Số trang không tồn tại!" });
     }
     if (!pageRegex.test(page)) {
       return res
-        .status(500)
-        .json({ success: false, message: "Số trang phải là số nguyên!" });
+        .status(200)
+        .json({
+          success: false,
+          data: [],
+          message: "Số trang phải là số nguyên!",
+        });
     }
     const listpet = await mdPet.PetModel.find()
       .select("idShop namePet imagesPet type discount rate pricePet")
@@ -46,11 +50,13 @@ exports.listpet = async (req, res, next) => {
       });
     } else {
       return res
-        .status(404)
-        .json({ success: false, message: "Không có sản phẩm nào" });
+        .status(200)
+        .json({ success: false, data: [], message: "Không có sản phẩm nào" });
     }
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res
+      .status(200)
+      .json({ success: false, data: [], message: error.message });
   }
 };
 

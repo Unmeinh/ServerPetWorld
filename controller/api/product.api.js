@@ -59,11 +59,36 @@ exports.listProduct = async (req, res, next) => {
             as: "productDetails",
           },
         },
+
         {
           $unwind: "$productDetails",
         },
         {
           $replaceRoot: { newRoot: "$productDetails" }, // Replace the root with productDetails
+        },
+        {
+          $lookup: {
+            from: "Shop",
+            localField: "idShop",
+            foreignField: "_id",
+            as: "idShop",
+          },
+        },
+        {
+          $unwind: "$idShop",
+        },
+        {
+          $project: {
+            arrProduct: 1,
+            nameProduct: 1,
+            priceProduct: 1,
+            discount: 1,
+            type: 1,
+            "idShop.nameShop": 1,
+            "idShop.locationShop": 1,
+            "idShop.avatarShop": 1,
+            "idShop.status": 1,
+          },
         },
       ]);
 
@@ -90,26 +115,34 @@ exports.listProduct = async (req, res, next) => {
 
       if (page <= 0) {
         return res
-          .status(500)
-          .json({ success: false, message: "Số trang phải lớn hơn 0" });
+          .status(200)
+          .json({
+            success: true,
+            data: [],
+            message: "Số trang phải lớn hơn 0",
+          });
       }
 
       if (!pageRegex.test(page)) {
         return res
-          .status(500)
-          .json({ success: false, message: "Số trang phải là số nguyên!" });
+          .status(200)
+          .json({
+            success: true,
+            data: [],
+            message: "Số trang phải là số nguyên!",
+          });
       }
 
       if (page > totalPage) {
-        return res
-          .status(500)
-          .json({ success: false, message: "Số trang không tồn tại!" });
+        return res.status(200).json({
+          success: true,
+          data: [],
+          message: "Số trang không tồn tại!",
+        });
       }
 
       const listProduct = await mdProduct.ProductModel.find()
-        .select(
-          "idShop nameProduct arrProduct type discount rate priceProduct"
-        )
+        .select("idShop nameProduct arrProduct type discount rate priceProduct")
         .populate("idShop", "nameShop locationShop avatarShop status")
         .limit(limit)
         .skip(startIndex)
@@ -123,14 +156,14 @@ exports.listProduct = async (req, res, next) => {
         });
       } else {
         return res
-          .status(500)
+          .status(200)
           .json({ success: false, message: "Không có sản phẩm nào" });
       }
     } else if (req.query.hasOwnProperty("day")) {
       const days = parseInt(req.query.day, 10);
 
       if (isNaN(days) || days <= 0) {
-        return res.status(400).json({
+        return res.status(200).json({
           success: false,
           message: "Số ngày không hợp lệ hoặc bị thiếu (trang)",
         });
@@ -186,14 +219,14 @@ exports.listProduct = async (req, res, next) => {
         });
       }
     } else {
-      return res.status(400).json({
+      return res.status(200).json({
         success: false,
         message:
           'Invalid request. Please provide either "page" or "day" parameter.',
       });
     }
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(200).json({ success: false, message: error.message });
   }
 };
 
