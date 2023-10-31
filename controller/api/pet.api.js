@@ -82,21 +82,21 @@ exports.listPetFromIdShop = async (req, res, next) => {
   }
 };
 exports.detailpet = async (req, res, next) => {
-  let idPet = req.params.idPet;
-  try {
-    let objPet = await mdPet.PetModel.findById(idPet)
-      .populate("idCategoryP")
-      .populate("idShop");
-    return res.status(200).json({
-      success: true,
-      data: objPet,
-      message: "Lấy chi tiết thú cưng thành công",
-    });
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ success: false, data: {}, message: "Lỗi: " + error.message });
-  }
+    let idPet = req.params.idPet;
+    try {
+        let objPet = await mdPet.PetModel.findById(idPet)
+            .populate("idCategoryP")
+            .populate("idShop");
+        return res.status(200).json({
+            success: true,
+            data: objPet,
+            message: "Lấy chi tiết thú cưng thành công",
+        });
+    } catch (error) {
+        return res
+            .status(500)
+            .json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
 };
 
 exports.listCategory = async (req, res, next) => {
