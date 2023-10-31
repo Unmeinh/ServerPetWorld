@@ -1,6 +1,7 @@
 let mdShop = require('../../model/shop.model');
 let mdPet = require('../../model/pet.model').PetModel;
 let mdProduct = require('../../model/product.model').ProductModel;
+let mdAppointment = require('../../model/appointment.model').AppointmentModel;
 let fs = require("fs");
 const jwt = require('jsonwebtoken');
 let bcrypt = require("bcrypt");
@@ -38,7 +39,7 @@ exports.listPet = async (req, res, next) => {
                 const searchTerm = req.query.filterSearch.trim();
                 filterSearch = { fullName: new RegExp(searchTerm, 'i') };
             }
-            let listPet = await mdPet.find({idShop: req.shop._id}).populate('idCategoryP').sort({createdAt: -1});
+            let listPet = await mdPet.find({ idShop: req.shop._id }).populate('idCategoryP').sort({ createdAt: -1 });
             return res.status(200).json({ success: true, data: listPet, message: 'Lấy danh sách pet thành công' });
         } catch (error) {
             return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
@@ -55,11 +56,111 @@ exports.listProduct = async (req, res, next) => {
                 const searchTerm = req.query.filterSearch.trim();
                 filterSearch = { fullName: new RegExp(searchTerm, 'i') };
             }
-            let listPet = await mdProduct.find({idShop: req.shop._id}).populate('idCategoryPr').sort({createdAt: -1});
+            let listPet = await mdProduct.find({ idShop: req.shop._id }).populate('idCategoryPr').sort({ createdAt: -1 });
             return res.status(200).json({ success: true, data: listPet, message: 'Lấy danh sách product thành công' });
         } catch (error) {
             return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
         }
+    }
+}
+
+exports.listAppointment = async (req, res, next) => {
+    let listCheck = await mdAppointment.find({ idShop: req.shop._id });
+    for (let i = 0; i < listCheck.length; i++) {
+        const appointment = listCheck[i];
+        if (new Date(appointment.appointmentDate) < new Date() && appointment.status == 0) {
+            appointment.status = "2";
+            await mdAppointment.findByIdAndUpdate(appointment._id, appointment);
+        }
+    }
+    let listAppointment = await mdAppointment.aggregate([
+        {
+            $match: {
+                idShop: req.shop._id
+            }
+        },
+        { $sort: { appointmentDate: -1 } },
+        {
+            $lookup: {
+                from: "Pets",
+                localField: "idPet",
+                foreignField: "_id",
+                as: "iPet"
+            }
+        },
+        {
+            $lookup: {
+                from: "User",
+                localField: "idUser",
+                foreignField: "_id",
+                as: "iUser"
+            }
+        },
+        {
+            $lookup: {
+                from: "Shop",
+                localField: "idShop",
+                foreignField: "_id",
+                as: "iShop"
+            }
+        },
+        {
+            $group: {
+                _id: {
+                    year: { $year: "$appointmentDate" },
+                    month: { $month: "$appointmentDate" }
+                },
+                appointments: {
+                    $push: {
+                        _id: "$_id",
+                        idPet: "$iPet",
+                        idUser: "$iUser",
+                        idShop: "$iShop",
+                        amountPet: "$amountPet",
+                        location: "$location",
+                        deposits: "$deposits",
+                        status: "$status",
+                        appointmentDate: "$appointmentDate",
+                        createdAt: "$createdAt"
+                    }
+                }
+            }
+        },
+        { $project: { _id: '$_id', appointments: '$appointments' } },
+        { $sort: { _id: -1 } },
+    ]);
+    if (listAppointment) {
+        return res.status(200).json({ success: true, data: listAppointment, message: 'Lấy danh sách lịch hẹn thành công.' });
+    } else {
+        return res.status(500).json({ success: false, data: [], message: 'Không lấy được danh sách lịch hẹn' });
+    }
+}
+
+exports.detailAppointment = async (req, res, next) => {
+    if (req.method == 'GET') {
+        let appointment = await mdAppointment.findById(req.params.idAppt).populate('idShop').populate('idPet').populate('idUser');
+        if (appointment) {
+            if (appointment != {}) {
+                if (new Date(appointment.appointmentDate) < new Date() && appointment.status == 0) {
+                    appointment.status = 2;
+                    await mdAppointment.findByIdAndUpdate(appointment._id, appointment);
+                    return res.status(200).json({ success: true, data: appointment, message: 'Lấy lịch hẹn thành công.' });
+                }
+            }
+            return res.status(200).json({ success: true, data: appointment, message: 'Lấy lịch hẹn thành công.' });
+        } else {
+            return res.status(500).json({ success: false, data: {}, message: 'Không lấy được lịch hẹn' });
+        }
+    }
+}
+
+exports.myShopDetail = async (req, res, next) => {
+    try {
+        let ObjShop = await mdShop.ShopModel.findById(req.shop._id);
+        return res.status(200).json({ success: true, data: ObjShop, message: "Lấy dữ liệu chi tiết shop thành công" });
+
+    } catch (error) {
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
     }
 }
 
@@ -102,7 +203,7 @@ exports.getShop = async (req, res, next) => {
         let id = "abc$";
         let idRex = new RegExp(id);
         console.log(idRex);
-        let shop = await mdShop.ShopModel.find({nameShop: idRex})
+        let shop = await mdShop.ShopModel.find({ nameShop: idRex })
         return res.status(200).json({ success: true, data: shop, message: "Lấy trạng thái thành công." });
     } catch (error) {
         return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
@@ -156,36 +257,36 @@ exports.registerShop = async (req, res, next) => {
 
 exports.loginShop = async (req, res, next) => {
     if (req.method == "POST") {
-      try {
-        let objS = await mdShop.ShopModel.findByCredentials(
-          req.body.userName,
-          req.body.passWord
-        );
-        if (!objS) {
-          return res
-            .status(201)
-            .json({ success: false, message: "Sai thông tin đăng nhập!" });
+        try {
+            let objS = await mdShop.ShopModel.findByCredentials(
+                req.body.userName,
+                req.body.passWord
+            );
+            if (!objS) {
+                return res
+                    .status(201)
+                    .json({ success: false, message: "Sai thông tin đăng nhập!" });
+            }
+            objS.online = 0;
+            await mdShop.ShopModel.findByIdAndUpdate(objS._id, objS);
+            return res.status(201).json({
+                success: true,
+                data: { shopStatus: objS.status },
+                token: objS.token,
+                message: "Đăng nhập thành công.",
+            });
+        } catch (error) {
+            console.error("err: " + error.message);
+
+            return res.status(500).json({
+                success: false,
+                data: {},
+                message: error.message,
+            });
         }
-        objS.online = 0;
-        await mdShop.ShopModel.findByIdAndUpdate(objS._id, objS);
-        return res.status(201).json({
-          success: true,
-          data: {shopStatus: objS.status},
-          token: objS.token,
-          message: "Đăng nhập thành công.",
-        });
-      } catch (error) {
-        console.error("err: " + error.message);
-  
-        return res.status(500).json({
-          success: false,
-          data: {},
-          message: error.message,
-        });
-      }
     }
-  };
-  
+};
+
 exports.editShop = async (req, res, next) => {
     let msg = '';
     let idShop = req.params.idShop;
@@ -266,6 +367,102 @@ exports.editShop = async (req, res, next) => {
         }
     }
 }
+
+exports.updateInfo = async (req, res, next) => {
+    if (req.method == "PUT") {
+        if (req.body.typeInfo) {
+            try {
+                switch (req.body.typeInfo) {
+                    case "nameShop":
+                        req.shop.nameShop = req.body.valueUpdate;
+                        await mdShop.ShopModel.findByIdAndUpdate(req.shop._id, req.shop);
+                        break;
+                    case "locationShop":
+                        req.shop.locationShop = req.body.valueUpdate;
+                        await mdShop.ShopModel.findByIdAndUpdate(req.shop._id, req.shop);
+                        break;
+                    case "description":
+                        req.shop.description = req.body.valueUpdate;
+                        await mdShop.ShopModel.findByIdAndUpdate(req.shop._id, req.shop);
+                        break;
+
+                    default:
+                        break;
+                }
+                return res.status(201).json({ success: true, data: req.shop, message: "Cập nhật dữ liệu thành công." });
+            } catch (error) {
+                return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+            }
+        } else {
+            return res.status(500).json({ success: false, data: {}, message: "Không đọc được dữ liệu tải lên! " });
+        }
+    }
+};
+
+exports.updateAccount = async (req, res, next) => {
+    if (req.method == "PUT") {
+        if (req.body.typeInfo) {
+            try {
+                switch (req.body.typeInfo) {
+                    case "hotline":
+                        req.shop.hotline = req.body.valueUpdate;
+                        await mdShop.ShopModel.findByIdAndUpdate(req.shop._id, req.shop);
+                        return res.status(201).json({ success: true, data: {}, message: "Cập nhật dữ liệu thành công." });
+                    case "email":
+                        req.shop.email = req.body.valueUpdate;
+                        await mdShop.ShopModel.findByIdAndUpdate(req.shop._id, req.shop);
+                        return res.status(201).json({ success: true, data: {}, message: "Cập nhật dữ liệu thành công." });
+
+                    default:
+                        break;
+                }
+            } catch (error) {
+                console.log(error);
+                return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+            }
+        } else {
+            console.log("thiếu ?" + req.body);
+            return res.status(500).json({ success: false, data: {}, message: "Không đọc được dữ liệu tải lên! " });
+        }
+    }
+};
+
+exports.updatePassword = async (req, res, next) => {
+    if (req.method == "PUT") {
+        let { oldPassword, newPassword } = req.body;
+        if (!oldPassword || !newPassword || !req.body) {
+            return res.status(500).json({ success: false, data: {}, message: "Không đọc được dữ liệu tải lên!" });
+        }
+        const isPasswordMatch = await bcrypt.compare(oldPassword, req.shop.passWord);
+        if (!isPasswordMatch) {
+            return res.status(201).json({ success: false, data: {}, message: "Mật khẩu hiện tại nhập sai!" });
+        }
+        req.shop.passWord = newPassword;
+        await mdShop.ShopModel.findByIdAndUpdate(req.shop._id, req.shop);
+        return res.status(201).json({ success: true, data: {}, message: "Cập nhật mật khẩu thành công." });
+    }
+};
+
+exports.updateAvatar = async (req, res, next) => {
+    if (req.method == "PUT") {
+        try {
+            let images = await onUploadImages(req.files, 'shop')
+            if (images != [] && images[0] == false) {
+                if (images[1].message.indexOf('File size too large.') > -1) {
+                    return res.status(500).json({ success: false, data: {}, message: "Dung lượng một ảnh tối đa là 10MB!" });
+                } else {
+                    return res.status(500).json({ success: false, data: {}, message: images[1].message });
+                }
+            }
+            req.shop.avatarShop = images[0];
+            await mdShop.ShopModel.findByIdAndUpdate(req.shop._id, req.shop);
+            return res.status(201).json({ success: true, data: {}, message: "Cập nhật ảnh đại diện thành công." });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+        }
+    }
+};
 
 exports.deleteShop = async (req, res, next) => {
     let idShop = req.params.idShop;
