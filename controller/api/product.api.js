@@ -354,4 +354,4 @@ exports.deleteProduct = async (req, res, next) => {
             return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
         }
     }
-}
+};
