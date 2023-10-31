@@ -13,16 +13,12 @@ router.get(
   billProductApiCtrl.detailBillProduct
 );
 router.post("/insert", mdJWT.api_user_auth, billProductApiCtrl.billProductUser);
-router.post(
+router.get(
   "/cancelBill/:id",
   mdJWT.api_user_auth,
   billProductApiCtrl.cancelBill
 );
-router.get(
-  "/getCount",
-  mdJWT.api_user_auth,
-  billProductApiCtrl.getCountBill
-);
+router.get("/getCount", mdJWT.api_user_auth, billProductApiCtrl.getCountBill);
 //router.post('/edit',mdJWT.api_user_auth, billProductApiCtrl.editCart);
 
 module.exports = router;
