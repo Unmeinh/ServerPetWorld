@@ -1,237 +1,318 @@
-let mdProduct = require('../../model/product.model');
-let mdbillProduct = require('../../model/billProduct.model');
-let mdCategory = require('../../model/categoryProduct.model').CategoryProductModel;
+let mdProduct = require("../../model/product.model");
+let mdbillProduct = require("../../model/billProduct.model");
+let mdCategory =
+  require("../../model/categoryProduct.model").CategoryProductModel;
 const fs = require("fs");
-const { match } = require('assert');
-const moment = require('moment');
-const { onUploadImages } = require('../../function/uploadImage');
+const { match } = require("assert");
+const moment = require("moment");
+const { onUploadImages } = require("../../function/uploadImage");
 exports.listProduct = async (req, res, next) => {
-    try {
-        if (req.query.hasOwnProperty('page') && req.query.hasOwnProperty('day')) {
-            const page = parseInt(req.query.page) || 1;
-            const days = parseInt(req.query.day, 10);
+  try {
+    if (req.query.hasOwnProperty("page") && req.query.hasOwnProperty("day")) {
+      const page = parseInt(req.query.page) || 1;
+      const days = parseInt(req.query.day, 10);
 
-            // Validate page and days
-            if (page <= 0 || isNaN(page) || days <= 0 || isNaN(days)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Số trang và số ngày không hợp lệ.',
-                });
-            }
+      // Validate page and days
+      if (page <= 0 || isNaN(page) || days <= 0 || isNaN(days)) {
+        return res.status(400).json({
+          success: false,
+          message: "Số trang và số ngày không hợp lệ.",
+        });
+      }
 
-            const limit = 10;
-            const startIndex = (page - 1) * limit;
-            const startDate = moment().subtract(days, 'days').toDate();
+      const limit = 10;
+      const startIndex = (page - 1) * limit;
+      const startDate = moment().subtract(days, "days").toDate();
 
-            // Get product IDs based on page and within the specified days
-            const productIds = await mdProduct.ProductModel
-                .find()
-                .limit(limit)
-                .skip(startIndex)
-                .select('_id')
-                .exec();
+      // Get product IDs based on page and within the specified days
+      const productIds = await mdProduct.ProductModel.find()
+        .limit(limit)
+        .skip(startIndex)
+        .select("_id")
+        .exec();
 
-            // Get product details for the retrieved product IDs within the specified days
-            const productDetails = await mdbillProduct.billProductModel.aggregate([
-                {
-                    $match: {
-                        purchaseDate: { $gte: startDate },
-                        'products.idProduct': { $in: productIds.map(id => id._id) }
-                    }
-                },
-                {
-                    $unwind: '$products'
-                },
-                {
-                    $group: {
-                        _id: '$products.idProduct',
-                        totalCount: { $sum: '$products.amount' }
-                    }
-                },
-                {
-                    $sort: { totalCount: -1 }
-                },
-                {
-                    $lookup: {
-                        from: 'Products',
-                        localField: '_id',
-                        foreignField: '_id',
-                        as: 'productDetails'
-                    }
-                },
-                {
-                    $unwind: '$productDetails'
-                },
-                {
-                    $replaceRoot: { newRoot: '$productDetails' } // Replace the root with productDetails
-                }
-            ]);
+      // Get product details for the retrieved product IDs within the specified days
+      const productDetails = await mdbillProduct.billProductModel.aggregate([
+        {
+          $match: {
+            purchaseDate: { $gte: startDate },
+            "products.idProduct": { $in: productIds.map((id) => id._id) },
+          },
+        },
+        {
+          $unwind: "$products",
+        },
+        {
+          $group: {
+            _id: "$products.idProduct",
+            totalCount: { $sum: "$products.amount" },
+          },
+        },
+        {
+          $sort: { totalCount: -1 },
+        },
+        {
+          $lookup: {
+            from: "Products",
+            localField: "_id",
+            foreignField: "_id",
+            as: "productDetails",
+          },
+        },
 
-            if (productDetails && productDetails.length > 0) {
-                return res.status(200).json({
-                    success: true,
-                    data: productDetails,
-                    message: `Sản phẩm được mua nhiều nhất trong thời gian qua ${days} ngày trên trang ${page}`,
-                });
-            } else {
-                return res.status(203).json({
-                    success: false,
-                    data: null,
-                    message: `Không tìm thấy sản phẩm nào được mua trong vòng ${days} ngày trên trang ${page}`,
-                });
-            }
-        }
-        else if (req.query.hasOwnProperty('page')) {
-            const page = parseInt(req.query.page) || 1;
-            const limit = 10;
-            const totalCount = await mdProduct.ProductModel.countDocuments();
-            const totalPage = Math.ceil(totalCount / limit);
-            const startIndex = (page - 1) * limit;
-            const pageRegex = /^[0-9]+$/;
+        {
+          $unwind: "$productDetails",
+        },
+        {
+          $replaceRoot: { newRoot: "$productDetails" }, // Replace the root with productDetails
+        },
+        {
+          $lookup: {
+            from: "Shop",
+            localField: "idShop",
+            foreignField: "_id",
+            as: "idShop",
+          },
+        },
+        {
+          $unwind: "$idShop",
+        },
+        {
+          $project: {
+            arrProduct: 1,
+            nameProduct: 1,
+            priceProduct: 1,
+            discount: 1,
+            type: 1,
+            "idShop.nameShop": 1,
+            "idShop.locationShop": 1,
+            "idShop.avatarShop": 1,
+            "idShop.status": 1,
+          },
+        },
+      ]);
 
-            if (page <= 0) {
-                return res.status(500).json({ success: false, message: "Số trang phải lớn hơn 0" });
-            }
+      if (productDetails && productDetails.length > 0) {
+        return res.status(200).json({
+          success: true,
+          data: productDetails,
+          message: `Sản phẩm được mua nhiều nhất trong thời gian qua ${days} ngày trên trang ${page}`,
+        });
+      } else {
+        return res.status(203).json({
+          success: false,
+          data: null,
+          message: `Không tìm thấy sản phẩm nào được mua trong vòng ${days} ngày trên trang ${page}`,
+        });
+      }
+    } else if (req.query.hasOwnProperty("page")) {
+      const page = parseInt(req.query.page) || 1;
+      const limit = 10;
+      const totalCount = await mdProduct.ProductModel.countDocuments();
+      const totalPage = Math.ceil(totalCount / limit);
+      const startIndex = (page - 1) * limit;
+      const pageRegex = /^[0-9]+$/;
 
-            if (!pageRegex.test(page)) {
-                return res.status(500).json({ success: false, message: "Số trang phải là số nguyên!" });
-            }
+      if (page <= 0) {
+        return res
+          .status(200)
+          .json({
+            success: true,
+            data: [],
+            message: "Số trang phải lớn hơn 0",
+          });
+      }
 
-            if (page > totalPage) {
-                return res.status(500).json({ success: false, message: "Số trang không tồn tại!" });
-            }
+      if (!pageRegex.test(page)) {
+        return res
+          .status(200)
+          .json({
+            success: true,
+            data: [],
+            message: "Số trang phải là số nguyên!",
+          });
+      }
 
-            const listProduct = await mdProduct.ProductModel
-                .find()
-                .populate('idCategoryPr')
-                .populate('idShop')
-                .limit(limit)
-                .skip(startIndex)
-                .exec();
+      if (page > totalPage) {
+        return res.status(200).json({
+          success: true,
+          data: [],
+          message: "Số trang không tồn tại!",
+        });
+      }
 
-            if (listProduct.length > 0) {
-                return res.status(200).json({ success: true, data: listProduct, message: 'Lấy danh sách sản phẩm thành công' });
-            } else {
-                return res.status(500).json({ success: false, message: 'Không có sản phẩm nào' });
-            }
-        } else if (req.query.hasOwnProperty('day')) {
-            const days = parseInt(req.query.day, 10);
+      const listProduct = await mdProduct.ProductModel.find()
+        .select("idShop nameProduct arrProduct type discount rate priceProduct")
+        .populate("idShop", "nameShop locationShop avatarShop status")
+        .limit(limit)
+        .skip(startIndex)
+        .exec();
 
-            if (isNaN(days) || days <= 0) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Số ngày không hợp lệ hoặc bị thiếu (trang)',
-                });
-            }
+      if (listProduct.length > 0) {
+        return res.status(200).json({
+          success: true,
+          data: listProduct,
+          message: "Lấy danh sách sản phẩm thành công",
+        });
+      } else {
+        return res
+          .status(200)
+          .json({ success: false, message: "Không có sản phẩm nào" });
+      }
+    } else if (req.query.hasOwnProperty("day")) {
+      const days = parseInt(req.query.day, 10);
 
-            const startDate = moment().subtract(days, 'days').toDate();
+      if (isNaN(days) || days <= 0) {
+        return res.status(200).json({
+          success: false,
+          message: "Số ngày không hợp lệ hoặc bị thiếu (trang)",
+        });
+      }
 
-            const productCounts = await mdbillProduct.billProductModel.aggregate([
-                {
-                    $match: {
-                        purchaseDate: { $gte: startDate }
-                    }
-                },
-                {
-                    $unwind: '$products'
-                },
-                {
-                    $group: {
-                        _id: '$products.idProduct',
-                        totalCount: { $sum: '$products.amount' }
-                    }
-                },
-                {
-                    $sort: { totalCount: -1 }
-                },
-                {
-                    $lookup: {
-                        from: 'Products',
-                        localField: '_id',
-                        foreignField: '_id',
-                        as: 'productDetails'
-                    }
-                },
-                {
-                    $unwind: '$productDetails'
-                },
-                {
-                    $replaceRoot: { newRoot: '$productDetails' } // Replace the root with productDetails
-                }
-            ]);
+      const startDate = moment().subtract(days, "days").toDate();
 
-            if (productCounts && productCounts.length > 0) {
-                return res.status(200).json({
-                    success: true,
-                    data: productCounts,
-                    message: `Sản phẩm được mua nhiều nhất trong thời gian qua ${days} ngày`,
-                });
-            } else {
-                return res.status(203).json({
-                    success: false,
-                    data: null,
-                    message: `Không tìm thấy idSản phẩm nào trong vòng ${days} ngày`,
-                });
-            }
-        } else {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid request. Please provide either "page" or "day" parameter.',
-            });
-        }
-    } catch (error) {
-        return res.status(500).json({ success: false, message: error.message });
+      const productCounts = await mdbillProduct.billProductModel.aggregate([
+        {
+          $match: {
+            purchaseDate: { $gte: startDate },
+          },
+        },
+        {
+          $unwind: "$products",
+        },
+        {
+          $group: {
+            _id: "$products.idProduct",
+            totalCount: { $sum: "$products.amount" },
+          },
+        },
+        {
+          $sort: { totalCount: -1 },
+        },
+        {
+          $lookup: {
+            from: "Products",
+            localField: "_id",
+            foreignField: "_id",
+            as: "productDetails",
+          },
+        },
+        {
+          $unwind: "$productDetails",
+        },
+        {
+          $replaceRoot: { newRoot: "$productDetails" }, // Replace the root with productDetails
+        },
+      ]);
+
+      if (productCounts && productCounts.length > 0) {
+        return res.status(200).json({
+          success: true,
+          data: productCounts,
+          message: `Sản phẩm được mua nhiều nhất trong thời gian qua ${days} ngày`,
+        });
+      } else {
+        return res.status(203).json({
+          success: false,
+          data: null,
+          message: `Không tìm thấy idSản phẩm nào trong vòng ${days} ngày`,
+        });
+      }
+    } else {
+      return res.status(200).json({
+        success: false,
+        message:
+          'Invalid request. Please provide either "page" or "day" parameter.',
+      });
     }
+  } catch (error) {
+    return res.status(200).json({ success: false, message: error.message });
+  }
 };
 
 exports.listProductFromIdShop = async (req, res, next) => {
-    let idShop = req.params.idShop;
-    if (req.method == 'GET') {
-
-        let listProduct = await mdProduct.ProductModel.find({ idShop: idShop }).populate('idCategoryPr').populate('idShop');
-        if (listProduct) {
-            return res.status(200).json({ success: true, data: listProduct, message: 'Lấy danh sách sản phẩm theo shop thành công' });
-        }
-        else {
-            return res.status(500).json({ success: false, data: [], message: 'Không lấy được danh sách sản phẩm' });
-        }
+  let idShop = req.params.idShop;
+  if (req.method == "GET") {
+    let listProduct = await mdProduct.ProductModel.find({ idShop: idShop })
+      .populate("idCategoryPr")
+      .populate("idShop");
+    if (listProduct) {
+      return res.status(200).json({
+        success: true,
+        data: listProduct,
+        message: "Lấy danh sách sản phẩm theo shop thành công",
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        data: [],
+        message: "Không lấy được danh sách sản phẩm",
+      });
     }
-}
+  }
+};
 
 exports.detailProduct = async (req, res, next) => {
-    let idPR = req.params.idPR;
-    try {
-        let ObjProduct = await mdProduct.ProductModel.findById(idPR).populate('idCategoryPr').populate('idShop');
-        return res.status(200).json({ success: true, data: ObjProduct, message: "Lấy chi tiết sản phẩm thành công" });
-    } catch (error) {
-        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
-    }
-}
+  let idPR = req.params.idPR;
+  try {
+    let ObjProduct = await mdProduct.ProductModel.findById(idPR)
+      .populate("idCategoryPr")
+      .populate("idShop");
+    return res.status(200).json({
+      success: true,
+      data: ObjProduct,
+      message: "Lấy chi tiết sản phẩm thành công",
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, data: {}, message: "Lỗi: " + error.message });
+  }
+};
 
 exports.listCategory = async (req, res, next) => {
-    try {
-        let listCategory = await mdCategory.find();
-        if (listCategory) {
-            return res.status(200).json({ success: true, data: listCategory, message: "Lấy danh sách thể loại thành công." });
-        } else {
-            return res.status(500).json({ success: false, data: {}, message: "Lấy danh sách thể loại thất bại!" });
-        }
-    } catch (error) {
-        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+  try {
+    let listCategory = await mdCategory.find();
+    if (listCategory) {
+      return res.status(200).json({
+        success: true,
+        data: listCategory,
+        message: "Lấy danh sách thể loại thành công.",
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        data: {},
+        message: "Lấy danh sách thể loại thất bại!",
+      });
     }
-}
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, data: {}, message: "Lỗi: " + error.message });
+  }
+};
 
 exports.addProduct = async (req, res, next) => {
-    let msg = '';
-    if (req.method == 'POST') {
-        let { nameProduct, price, discount, amount, category, detail } = req.body;
-        if (!nameProduct || !price || !discount
-            || !amount || !category || !detail
-        ) {
-            return res.status(500).json({ success: false, data: {}, message: 'Không đọc được dữ liệu tải lên!' });
-        }
+  let msg = "";
+  if (req.method == "POST") {
+    let { nameProduct, price, discount, amount, category, detail } = req.body;
+    if (
+      !nameProduct ||
+      !price ||
+      !discount ||
+      !amount ||
+      !category ||
+      !detail
+    ) {
+      return res.status(500).json({
+        success: false,
+        data: {},
+        message: "Không đọc được dữ liệu tải lên!",
+      });
+    }
 
-        let newObj = new mdProduct.ProductModel();
+    let newObj = new mdProduct.ProductModel();
         let images = await onUploadImages(req.files, 'product')
         if (images != [] && images[0] == false) {
             if (images[1].message.indexOf('File size too large.') > -1) {
@@ -295,9 +376,8 @@ exports.addProduct = async (req, res, next) => {
             }
             return res.status(500).json({ success: false, data: {}, message: msg });
         }
-
-    }
-}
+  }
+};
 
 exports.editProduct = async (req, res, next) => {
     if (req.method == 'PUT') {
