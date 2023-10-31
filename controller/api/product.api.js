@@ -114,23 +114,19 @@ exports.listProduct = async (req, res, next) => {
       const pageRegex = /^[0-9]+$/;
 
       if (page <= 0) {
-        return res
-          .status(200)
-          .json({
-            success: true,
-            data: [],
-            message: "Số trang phải lớn hơn 0",
-          });
+        return res.status(200).json({
+          success: true,
+          data: [],
+          message: "Số trang phải lớn hơn 0",
+        });
       }
 
       if (!pageRegex.test(page)) {
-        return res
-          .status(200)
-          .json({
-            success: true,
-            data: [],
-            message: "Số trang phải là số nguyên!",
-          });
+        return res.status(200).json({
+          success: true,
+          data: [],
+          message: "Số trang phải là số nguyên!",
+        });
       }
 
       if (page > totalPage) {
@@ -233,9 +229,10 @@ exports.listProduct = async (req, res, next) => {
 exports.listProductFromIdShop = async (req, res, next) => {
   let idShop = req.params.idShop;
   if (req.method == "GET") {
-    let listProduct = await mdProduct.ProductModel.find({ idShop: idShop })
-      .populate("idCategoryPr")
-      .populate("idShop");
+    let listProduct = await mdProduct.ProductModel.find({
+      idShop: idShop,
+    }).select("type discount priceProduct nameProduct arrProduct");
+
     if (listProduct) {
       return res.status(200).json({
         success: true,

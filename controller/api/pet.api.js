@@ -27,13 +27,11 @@ exports.listpet = async (req, res, next) => {
         .json({ success: false, data: [], message: "Số trang không tồn tại!" });
     }
     if (!pageRegex.test(page)) {
-      return res
-        .status(200)
-        .json({
-          success: false,
-          data: [],
-          message: "Số trang phải là số nguyên!",
-        });
+      return res.status(200).json({
+        success: false,
+        data: [],
+        message: "Số trang phải là số nguyên!",
+      });
     }
     const listpet = await mdPet.PetModel.find()
       .select("idShop namePet imagesPet type discount rate pricePet")
@@ -63,9 +61,9 @@ exports.listpet = async (req, res, next) => {
 exports.listPetFromIdShop = async (req, res, next) => {
   let idShop = req.params.idShop;
   if (req.method == "GET") {
-    let listPet = await mdPet.PetModel.find({ idShop: idShop })
-      .populate("idCategoryP")
-      .populate("idShop");
+    let listPet = await mdPet.PetModel.find({ idShop: idShop }).select(
+      "namePet imagesPet type discount rate pricePet"
+    );
     if (listPet) {
       return res.status(200).json({
         success: true,
