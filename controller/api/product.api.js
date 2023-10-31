@@ -300,7 +300,6 @@ exports.addProduct = async (req, res, next) => {
 }
 
 exports.editProduct = async (req, res, next) => {
-    let msg = '';
     if (req.method == 'PUT') {
         let { id, nameProduct, price, discount, amount, category, detail } = req.body;
         if ( !id ||!nameProduct || !price || !discount
@@ -339,45 +338,6 @@ exports.editProduct = async (req, res, next) => {
             return res.status(201).json({ success: true, data: objProduct, message: 'Cập nhật sản phẩm thành công.' });
         } catch (error) {
             console.log(error.message);
-            // if (error.message.match(new RegExp('.+`nameProduct` is require+.'))) {
-            //     msg = 'Tên sản phẩm đang trống!';
-            // }
-            // else if (error.message.match(new RegExp('.+`priceProduct` is require+.'))) {
-            //     msg = 'Giá sản phẩm đang trống!';
-            // }
-            // else if (error.message.match(new RegExp('.+priceProduct: Cast to Number failed for value+.'))) {
-            //     msg = 'Giá sản phẩm phải nhập số!';
-            // }
-
-            // else if (newObj.priceProduct <= 0) {
-            //     msg = 'Giá sản phẩm phải lớn hơn 0!';
-            // }
-            // else if (error.message.match(new RegExp('.+`amountProduct` is require+.'))) {
-            //     msg = 'Số lượng sản phẩm đang trống!';
-            // }
-            // else if (error.message.match(new RegExp('.+amountProduct: Cast to Number failed for value+.'))) {
-            //     msg = 'Số lượng sản phẩm phải nhập số!';
-            // }
-
-            // else if (newObj.amountProduct <= 0) {
-            //     msg = 'Số lượng sản phẩm phải lớn hơn 0!';
-            // }
-            // else if (error.message.match(new RegExp('.+`detailProduct` is require+.'))) {
-            //     msg = 'Chi tiết sản phẩm đang trống!';
-            // }
-            // else if (error.message.match(new RegExp('.+`quantitySold` is require+.'))) {
-            //     msg = 'Số lượng bán đang trống!';
-            // }
-            // else if (error.message.match(new RegExp('.+`amountProduct` is require+.'))) {
-            //     msg = 'Số lượng bán đang trống!';
-            // }
-            // else if (isNaN(newObj.amountProduct) || newObj.amountProduct <= 0) {
-            //     msg = 'Giá sản phẩm phải nhập số!';
-            //     return res.status(400).json({ success: false, data: {}, message: msg });
-            // }
-            // else {
-            //     msg = error.message;
-            // }
             return res.status(500).json({ success: false, data: {}, message: error.message });
         }
     }
@@ -385,7 +345,6 @@ exports.editProduct = async (req, res, next) => {
 
 exports.deleteProduct = async (req, res, next) => {
     let idProduct = req.params.idProduct;
-    // let ObjProduct = await mdProduct.ProductModel.findById(idPR);
 
     if (req.method == 'DELETE') {
         try {
@@ -395,5 +354,4 @@ exports.deleteProduct = async (req, res, next) => {
             return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
         }
     }
-
 }
