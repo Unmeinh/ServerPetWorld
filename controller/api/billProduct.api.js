@@ -223,12 +223,14 @@ exports.cancelBill = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 exports.billProductUser = async (req, res) => {
   const { _id } = req.user;
   const { products, locationDetail, paymentMethods, detailCard } = req.body;
   if (req.method === "POST") {
     try {
       const productPromises = [];
+      const errorMessages = [];
       await Promise.all(
         products?.map(async (item) => {
           const itemPromises = item.items?.map(async (subItem) => {
@@ -236,6 +238,11 @@ exports.billProductUser = async (req, res) => {
               subItem.idProduct
             );
             if (product) {
+              if (product.amountProduct < subItem.amount) {
+                errorMessages.push(
+                  `${product.nameProduct} số lượng sản phẩm không đủ`
+                );
+              }
               const discoutProduct =
                 (product.priceProduct / 100) * product.discount;
               item.total =
@@ -247,6 +254,9 @@ exports.billProductUser = async (req, res) => {
               subItem.discount = product.discount;
             } else {
               const pet = await mdPet.PetModel.findById(subItem.idProduct);
+              if (pet.amountPet < subItem.amount) {
+                errorMessages.push(`${pet.namePet} số lượng không đủ`);
+              }
               if (pet) {
                 const discoutProduct = (pet.pricePet / 100) * pet.discount;
                 item.total =
@@ -264,6 +274,12 @@ exports.billProductUser = async (req, res) => {
           productPromises.push(item);
         })
       );
+      if (errorMessages.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: errorMessages.join(", "),
+        });
+      }
       await Promise.all(
         productPromises.map(async (item) => {
           const newbillProduct = new mdbillProduct.billProductModel({

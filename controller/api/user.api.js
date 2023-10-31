@@ -266,7 +266,7 @@ exports.updateAccount = async (req, res, next) => {
             let encode = encodeToSha256(req.body.valueUpdate);
             let linkVerify = "https://0732-2402-800-61c4-c98-dcce-9914-21bc-1dd3.ngrok-free.app/account/verifyEmail/" + encode;
             await sendEmailLink(req.body.valueUpdate, linkVerify, res);
-            break;
+            return res.status(201).json({ success: true, data: {}, message: "Cập nhật dữ liệu thành công!" });
 
           default:
             break;
