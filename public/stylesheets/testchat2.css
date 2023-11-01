@@ -1,0 +1,357 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto::wght@300;400;500;600;700&display=swap');
+
+body {
+    overflow: hidden;
+}
+
+
+
+
+.bordered {
+    border: 2px solid #000000;
+    /* Thay đổi màu sắc và độ dày của viền tùy theo mong muốn */
+    padding: 4px;
+    /* Thêm khoảng cách giữa viền và nội dung bên trong */
+    border-radius: 10px;
+    /* Bo tròn góc của viền */
+}
+
+.wide {
+    width: 500px;
+    /* Độ rộng mong muốn */
+    height: 80px;
+    /* Độ cao mong muốn */
+}
+
+.contacts_body {
+    padding: 0.75rem 0 !important;
+    overflow-y: auto;
+    white-space: nowrap;
+    margin-left: 30px;
+}
+
+/* Đảm bảo chat_right không tràn màn hình khi thu nhỏ */
+.chat_right {
+    max-width: 100%;
+}
+
+/* Đặt chiều rộng cố định cho chat_right khi phóng to */
+@media (min-width: 1200px) {
+    .chat_right {
+        max-width: 75%;
+    }
+}
+
+
+.today {
+    margin-top: 20px;
+}
+
+
+
+.container {
+    align-content: center;
+}
+
+
+.type_msg {
+    background-color: #E0E2E4 !important;
+    color: rgb(0, 0, 0) !important;
+    padding: 1px;
+    /* Tăng padding để tạo khoảng trắng xung quanh nội dung */
+    overflow-y: hidden;
+    /* Ẩn thanh cuộn dọc */
+    border-radius: 15px 15px 15px 15px !important;
+    resize: none;
+    /* Không cho phép thay đổi kích thước */
+    max-width: 100%;
+
+    /* Giới hạn chiều cao tối đa */
+    box-sizing: border-box;
+    word-wrap: break-word;
+}
+
+
+
+/* màu chữ trạng thái gửi */
+/* .message_status_container {
+    margin-bottom: 5px;
+    border-radius: 15px;
+    padding: 8px;
+    position: relative;
+    color: rgb(0, 0, 0);
+    align-self: flex-end;
+
+    max-width: 100%;
+    text-align: right;
+
+} */
+/* CSS cho message_status_container */
+.message_status_container {
+    position: relative;
+}
+
+.message-status {
+    border-radius: 15px;
+    position: relative;
+    max-width: 100%;
+    text-align: right;
+    display: block;
+}
+
+.success {
+    color: green;
+}
+
+.error {
+    color: red;
+}
+
+
+
+
+.type_msg:focus {
+    box-shadow: none !important;
+    outline: 0px !important;
+}
+
+.attach_btn {
+    border-radius: 15px 0 0 15px !important;
+    background-color: rgba(0, 0, 0, 0.3) !important;
+    border: 0 !important;
+    color: white !important;
+    cursor: pointer;
+}
+
+.send_btn {
+    border-radius: 0 15px 15px 0 !important;
+    background-color: rgba(0, 0, 0, 0.3) !important;
+    border: 0 !important;
+    color: white !important;
+    cursor: pointer;
+}
+
+.iconify {
+    width: 34;
+    height: 34;
+}
+
+.plus {
+    margin-right: 20px;
+    margin-top: 5px;
+}
+
+.send {
+    margin-left: 20px;
+    margin-top: 5px;
+}
+
+.contacts {
+    list-style: none;
+    padding: 10px;
+}
+
+.contacts li {
+    width: 100% !important;
+    padding: 5px 10px;
+    margin-bottom: 15px !important;
+}
+
+
+
+.user_img {
+    height: 70px;
+    width: 70px;
+    border: 1.5px solid #f5f6fa;
+
+}
+
+.user_img_msg {
+    height: 40px;
+    width: 40px;
+    border: 1.5px solid #f5f6fa;
+
+}
+
+.img_cont {
+    position: relative;
+    height: 70px;
+    width: 70px;
+}
+
+.img_cont_msg {
+    height: 40px;
+    width: 40px;
+}
+
+.online_icon {
+    position: absolute;
+    height: 15px;
+    width: 15px;
+    background-color: #4cd137;
+    border-radius: 50%;
+    bottom: 0.2em;
+    right: 0.4em;
+    border: 1.5px solid white;
+}
+
+.offline {
+    background-color: #c23616 !important;
+}
+
+.user_info {
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 15px;
+}
+
+.user_info span {
+    font-size: 20px;
+    color: #243B53;
+    font-family: 'Roboto';
+    font-weight: bold;
+}
+
+.hoverable {
+    overflow: hidden;
+    background-color: #ffffff;
+    transition: background-color 0.3s, box-shadow 0.3s;
+
+}
+
+.hoverable:hover {
+    background-color: #e4dede;
+
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    cursor: pointer;
+
+}
+
+
+.message_container {
+    max-height: 700px;
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px;
+    margin: 0;
+    display: flex;
+    min-height: 76vh;
+    flex-direction: column-reverse;
+    /* Đảo ngược thứ tự hiển thị */
+}
+
+.msg_cotainer_send {
+
+    border-radius: 15px;
+    background-color: #BAE8E8;
+    padding: 5px;
+    position: relative;
+    color: rgb(0, 0, 0);
+    align-self: flex-end;
+    word-wrap: break-word;
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+}
+
+.message-status {
+    position: relative;
+    color: rgb(0, 0, 0);
+    align-self: flex-end;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+
+}
+
+
+.success {
+    color: green;
+}
+
+.error {
+    color: red;
+}
+
+.message_content {
+    margin-bottom: 5px;
+    /* Thêm khoảng cách dưới nội dung tin nhắn */
+}
+
+/* Thời gian tin nhắn */
+.msg_time {
+    margin-top: 10px;
+    /* Thêm khoảng cách giữa nội dung và msg_time */
+    color: #A19595;
+    font-size: 10px;
+}
+
+
+.msg_cotainer_sendd {
+    border-radius: 15px;
+    background-color: #BAE8E8;
+    padding: 5px;
+    position: relative;
+    color: rgb(0, 0, 0);
+    align-self: flex-end;
+    word-wrap: break-word;
+    display: flex;
+    flex-direction: column;
+    /* Thêm dòng này */
+    max-width: 100%;
+    /* Để giới hạn chiều rộng tối đa của tin nhắn */
+}
+
+.message-client {
+    margin-bottom: 15px;
+    border-radius: 15px;
+    background-color: #BAE8E8;
+    padding: 5px;
+    position: relative;
+    color: rgb(0, 0, 0);
+    align-self: flex-end;
+    word-wrap: break-word;
+    display: flex;
+    flex-direction: column;
+    /* Thêm dòng này */
+    max-width: 100%;
+}
+
+.message-seller {
+    margin-bottom: 15px;
+    border-radius: 15px;
+    background-color: #BAE8E8;
+    padding: 5px;
+    position: relative;
+    color: rgb(0, 0, 0);
+    align-self: flex-end;
+    word-wrap: break-word;
+    display: flex;
+    flex-direction: column;
+    /* Thêm dòng này */
+    max-width: 100%;
+}
+
+/* Phần tử bọc nội dung và thời gian */
+.message-content {
+    margin-bottom: 5px;
+}
+
+/* Thời gian tin nhắn */
+.msg_timee1 {
+    margin-top: 5px;
+    /* Thêm khoảng cách giữa nội dung và msg_time */
+    color: #A19595;
+    font-size: 10px;
+}
+
+
+
+@media(max-width: 676px) {
+    .contacts_card {
+        margin-bottom: 15px !important;
+    }
+}
+
+/* Sử dụng flexbox để căn chỉnh và thích nghi */

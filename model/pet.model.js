@@ -4,7 +4,7 @@ let PetSchema = new db.mongoose.Schema(
         namePet:{type:String,required:true},
         imagesPet:{type:Array,required:false}, 
         detailPet:{type:String,required:true},
-        sizePet:{type:String,required:true},
+        sizePet:{type:Number,required:true},
         heightPet:{type:Number,required:true},
         weightPet:{type:Number,required:true},
         pricePet:{type:Number,required:true},
