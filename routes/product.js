@@ -5,6 +5,9 @@ var checkLogin = require('../middlewares/checkLogin');
 var uploader = multer({ dest: './tmp' });
 var router = express.Router();
 
+
+router.get('/', ProductCtrl.listProduct);   
+
 router.get('/', checkLogin.check_request_login, ProductCtrl.listProduct);
 
 router.get('/detail/:idPR', checkLogin.check_request_login, ProductCtrl.detailProduct);
