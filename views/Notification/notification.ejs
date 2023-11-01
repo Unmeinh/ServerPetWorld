@@ -110,7 +110,7 @@
                 role = 'client';
                 console.log('Role after clicking client button:', role);
 
-                //gửi yêu cầu
+
                 fetchMessages(role);
                 displayMessages(clientMessages);
                 console.log(clientMessages);
@@ -121,7 +121,7 @@
                 role = 'seller';
                 console.log('Role after clicking seller button:', role);
 
-                // Gửi yêu cầu 
+
                 fetchMessages(role);
                 displayMessages(sellerMessages);
             });
@@ -164,10 +164,7 @@
                     </div>
                 `;
 
-                        // Thêm tin nhắn mới vào đầu của messageContainer
                         messageContainer.insertBefore(messageDiv, messageContainer.firstChild);
-
-
                         const messageStatus = document.createElement('div');
                         messageStatus.classList.add('message-status', 'success');
                         const iconSpan = document.createElement('span');
@@ -179,7 +176,7 @@
 
                         messageStatus.appendChild(iconSpan);
                         messageContainer.insertBefore(messageStatus, messageContainer.firstChild);
-                        // Thêm thông báo vào cuối của messageContainer
+
 
                         messageContainer.scrollTop = messageContainer.scrollHeight;
                         messageInput.value = '';
@@ -200,31 +197,26 @@
 
                         messageStatus.appendChild(iconSpan);
 
-                        // Thêm thông báo vào phần tử tin nhắn
+
                         messageContainer.insertBefore(messageStatus, messageContainer.firstChild);
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    // messageStatus.classList.add('error');
-                    // // Hiển thị thông báo
-                    // messageStatus.style.display = 'block';
-                    // messageStatus.textContent = 'Không thể gửi';
                 }
             }
         });
 
         const textarea = document.getElementById('messageInput');
 
-        // Tự động tăng chiều cao của textarea khi nội dung vượt quá
         textarea.addEventListener('input', () => {
-            textarea.style.height = 'auto'; // Đặt chiều cao về tự động
-            textarea.style.height = `${textarea.scrollHeight}px`; // Đặt chiều cao mới dựa trên chiều cao nội dung
+            textarea.style.height = 'auto';
+            textarea.style.height = `${textarea.scrollHeight}px`;
         });
 
         function displayMessages(messages) {
             console.log(messages)
             const messageContainer = document.getElementById('messageContainer');
-            messageContainer.innerHTML = ''; // Xóa nội dung hiện tại của container
+            messageContainer.innerHTML = '';
 
             messages.forEach((messageObj) => {
                 const messageDiv = document.createElement('div');
@@ -238,7 +230,6 @@
         </div>
     `;
 
-                // Thêm messageDiv vào messageContainer
                 messageContainer.insertBefore(messageDiv, messageContainer.firstChild);
 
                 if (messageObj.role === 'client') {
@@ -252,8 +243,6 @@
                 }
             });
 
-
-            // Scroll đến cuối container để hiển thị tin nhắn mới nhất
             messageContainer.scrollTop = messageContainer.scrollHeight;
         }
 
@@ -278,10 +267,8 @@
                     </div>
                 </div>
                 `;
-                        // Thêm messageDiv vào messageContainer
-                        messageContainer.insertBefore(messageDiv, messageContainer.firstChild);
 
-                        // ... Tạo nội dung cho tin nhắn
+                        messageContainer.insertBefore(messageDiv, messageContainer.firstChild);
 
 
                         if (messageObj.role === 'client') {

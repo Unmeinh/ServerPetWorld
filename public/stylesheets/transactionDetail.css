@@ -113,7 +113,6 @@ b {
     display: grid;
     width: 96%;
     margin: 0 auto;
-    /* gap: 1rem; */
     grid-template-columns: 102rem auto 23rem;
 }
 
@@ -124,13 +123,13 @@ main {
 main .analyse {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 3.6rem;
+    gap: 4.6rem;
 }
 
 main .analyse>div {
     background-color: var(--color-white);
-    width: 600px;
-    height: 305px;
+    width: 650px;
+    height: 255px;
     border-radius: var(--card-border-radius);
     margin-top: 1rem;
 
@@ -138,20 +137,12 @@ main .analyse>div {
     cursor: pointer;
     transition: all 0.3s ease;
     max-width: 100%;
-    /* Giữ kích thước tối đa là 100% của cha mẹ */
 }
 
 main .analyse>div:hover {
     box-shadow: none;
 }
 
-main .analyse>div .status-head {
-
-    align-items: center;
-    flex-direction: column;
-    column-count: 2;
-    justify-content: space-between;
-}
 
 .status-head .info {
     display: flex;
@@ -178,12 +169,12 @@ main .analyse>div .status-head {
 
 .status-body {
     margin-top: 30px;
-    margin-left: 45px;
+    margin-left: 55px;
 }
 
 .status-body-2 {
     margin-top: 40px;
-    margin-left: 45px;
+    margin-left: 55px;
 }
 
 .status-body .info {
@@ -197,10 +188,9 @@ main .analyse>div .status-head {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
-    margin-top: 30px;
+    margin-top: 20px;
 }
 
-/* Thêm đoạn mã CSS sau để tạo một dòng mới cho mỗi phần tử .info */
 .info {
     clear: both;
 }
@@ -224,17 +214,13 @@ main .analyse p {
 }
 
 
-/* dropdown */
+
 .styled-select {
     border-radius: 10px;
-    /* Adjust the border radius as needed */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    /* Adjust the box shadow as needed */
     padding: 5px;
     margin-left: 140px;
     margin-top: 19px;
-
-    /* Add some padding to make it visually better */
 }
 
 

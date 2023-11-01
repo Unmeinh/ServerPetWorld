@@ -21,8 +21,6 @@
         timestamp: admin.database.ServerValue.TIMESTAMP
       });
 
-      console.log('Message saved successfully');
-
       const tokensSnapshot = await db.ref('tokens').once('value');
       tokensSnapshot.forEach((childSnapshot) => {
         const token = childSnapshot.val().token;

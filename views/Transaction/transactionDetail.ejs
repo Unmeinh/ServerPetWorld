@@ -1,14 +1,10 @@
 <%- include('../inc/top',{title:'Thanh toán'}) %>
-    <link rel="stylesheet" href="../../stylesheets/paymentDetail.css">
+    <link rel="stylesheet" href="../../stylesheets/transactionDetail.css">
     <div class="ms-5">
-        <!-- Sidebar Section -->
 
-        <!-- End of Sidebar Section -->
-
-        <!-- Main Content -->
         <main>
 
-            <!-- Analyses -->
+
             <div class="analyse">
                 <div class="sales">
                     <div class="info">
@@ -42,13 +38,6 @@
                             <p>Tổng
                             <p>
                         </div>
-
-                        <select name="cars" id="cars" class="styled-select">
-                            <option value="volvo">Hôm nay</option>
-                            <option value="saab">Tuần</option>
-                            <option value="opel">Tháng</option>
-                            <option value="audi">Năm</option>
-                        </select>
 
                     </div>
                     <div class="status-body-2">
@@ -91,9 +80,7 @@
                 </div>
 
             </div>
-            <!-- End of Analyses -->
 
-            <!-- New Users Section -->
             <div class="new-users">
                 <div class="container-fluid " style="width: 98%;display: flex; flex-direction: column">
                     <div class="row col m-3">
@@ -120,7 +107,7 @@
                     <% if (typeof(listDetailPayment) !='undefined' ) { %>
                         <table class="table align-middle" style="border: white; ">
                             <tr style="background-color: #5f9197;">
-                                <th>Sản phẩm đã mua</th>
+                                <th style="border-radius: 6px 0 0 6px;">Sản phẩm đã mua</th>
                                 <th>Số lượng</th>
                                 <th>Giảm giá</th>
                                 <th>Giá</th>
@@ -227,43 +214,27 @@
 
                         </table>
 
-                        <!-- ... Your existing table content ... -->
 
                         <div
-                            style="display: flex; flex-direction: row; align-items: center;justify-content: space-between;position:absolute ; bottom: 0; width: 96%;">
+                            style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; position: absolute; bottom: 0; width: 96%;">
                             <p> Số bản ghi: <span style="font-weight: bold;">
                                     <%= countNowProduct %>/<%= countAllProduct %>
                                 </span></p>
                             <nav>
                                 <ul class="pagination">
-                                    <% if (currentPage> 1) { %>
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page=<%= currentPage - 1 %>"
-                                                aria-label="Previous">
-                                                <span aria-hidden="true">&laquo;</span>
+                                    <% for (let page=1; page <=totalPages; page++) { %>
+                                        <li class="page-item <%= page === currentPage ? 'active' : '' %>">
+                                            <a class="page-link" href="?page=<%= page %>">
+                                                <%= page %>
                                             </a>
                                         </li>
                                         <% } %>
-
-                                            <% for (let i=1; i <=totalPages; i++) { %>
-                                                <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                                                    <a class="page-link" href="?page=<%= i %>">
-                                                        <%= i %>
-                                                    </a>
-                                                </li>
-                                                <% } %>
-
-                                                    <% if (currentPage < totalPages) { %>
-                                                        <li class="page-item">
-                                                            <a class="page-link" href="?page=<%= currentPage + 1 %>"
-                                                                aria-label="Next">
-                                                                <span aria-hidden="true">&raquo;</span>
-                                                            </a>
-                                                        </li>
-                                                        <% } %>
                                 </ul>
                             </nav>
                         </div>
+
+
+
                         <% } else { %>
                             <div class="no-results-message">
                                 <p>Không tìm thấy kết quả</p>
@@ -278,11 +249,3 @@
 
     </div>
     <%- include('../inc/bottom') %>
-        <script>
-            const sortOptionDropdown = document.getElementById('sortOption');
-            const sortForm = document.getElementById('sortForm');
-
-            sortOptionDropdown.addEventListener('change', function () {
-                sortForm.submit();
-            });
-        </script>

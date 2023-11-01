@@ -10,7 +10,6 @@ exports.searchApi = async (req, res, next) => {
       const pets = await mdPet.PetModel.find({
         $or: [
           { namePet: { $regex: searchTerm, $options: "i" } },
-          { detailPet: { $regex: searchTerm, $options: "i" } },
         ],
       }).limit(5).populate('idShop');
 

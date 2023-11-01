@@ -8,25 +8,25 @@ var session = require('express-session');
 
 var adminRouter= require('./routes/admin');
 var usersRouter = require('./routes/user');
-var usersShopRouter = require('./routes/userShop');
+// var usersShopRouter = require('./routes/userShop');
 var blogsRouter = require('./routes/blog');
 var accountRouter= require('./routes/account');
 var productRouter = require('./routes/product');
 var categoryProduct = require('./routes/categoryProduct');
 var petRouter = require('./routes/pet');
 var shopRouter = require('./routes/shop');
-var paymentRouter = require('./routes/payment');
+var transactionRouter = require('./routes/transaction');
 var notificationRouter=require('./routes/notification');
 //api
 var userApiRouter = require('./routes/api/userApi');
 var blogApiRouter = require('./routes/api/blogApi');
-var itemCartApiRouter = require('./routes/api/itemCartApi');
+// var itemCartApiRouter = require('./routes/api/itemCartApi');
 var cartApiRouter = require('./routes/api/cartApi');
 var productApiRouter = require('./routes/api/productApi');
 var shopApiRouter = require('./routes/api/shopApi');
 var CatAllApiRouter = require('./routes/api/categoryAll');
 var petApiRouter = require('./routes/api/petApi');
-var followRouter = require('./routes/api/followApi');
+// var followRouter = require('./routes/api/followApi');
 var savenoticeRouter= require('./routes/api/noticeApi');
 var commentRouter= require('./routes/api/commentApi');
 var favoriteProductsRouter=require('./routes/api/myFavoriteProductApi');
@@ -34,7 +34,7 @@ var billProductRouter = require('./routes/api/billProductApi');
 var voucherShopRouter = require('./routes/api/voucherShopApi');
 var voucherServerRouter = require('./routes/api/voucherServerApi');
 var searchApi = require('./routes/api/searchApi');
-// var appointmentRouter = require('./routes/api/appointmentApi');
+var appointmentRouter = require('./routes/api/appointmentApi');
 var ConversationsRouter = require('./routes/api/ConversationsApi');
 var app = express();
 
@@ -54,28 +54,28 @@ app.use(session({
   resave: false,
   saveUninitialized: true
 }))
-app.use('/',blogsRouter);
+// app.use('/',blogsRouter);
 app.use('/admin',adminRouter);
 app.use('/user', usersRouter);
-app.use('/user-shop', usersShopRouter);
+// app.use('/user-shop', usersShopRouter);
 app.use('/blog', blogsRouter);
 app.use('/account',accountRouter );
 app.use('/product', productRouter);
 app.use('/category-product', categoryProduct);
 app.use('/pet', petRouter);
 app.use('/shop', shopRouter);
-app.use('/payment', paymentRouter);
+app.use('/transaction', transactionRouter);
 app.use('/notification',notificationRouter)
 //api
 app.use('/api/user', userApiRouter);
 app.use('/api/blog', blogApiRouter);
-app.use('/api/item-carts', itemCartApiRouter);
+// app.use('/api/item-carts', itemCartApiRouter);
 app.use('/api/cart', cartApiRouter);
 app.use('/api/product', productApiRouter);
 app.use('/api/shop', shopApiRouter);
 app.use('/api/category', CatAllApiRouter);
 app.use('/api/pet', petApiRouter);
-app.use('/api/follow', followRouter);
+// app.use('/api/follow', followRouter);
 app.use('/api/notice',savenoticeRouter)
 app.use('/api/comment',commentRouter)
 app.use('/api/bill-product', billProductRouter);
@@ -83,7 +83,7 @@ app.use('/api/favorite',favoriteProductsRouter);
 app.use('/api/voucherShop',voucherShopRouter);
 app.use('/api/voucherServer',voucherServerRouter);
 app.use('/api/search',searchApi);
-// app.use('/api/appointment',appointmentRouter);
+app.use('/api/appointment',appointmentRouter);
 app.use('/api/conversations', ConversationsRouter);
 
 
