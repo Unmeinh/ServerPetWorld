@@ -13,7 +13,7 @@ exports.listProduct = async (req, res, next) => {
             if (typeof req.query.filterSearch !== 'undefined' && req.query.filterSearch.trim() !== '') {
                 const searchTerm = req.query.filterSearch.trim();
                 filterSearch = { nameProduct: new RegExp(searchTerm, 'i') };
-                console.log(filterSearch)
+        
             }
 
             sortOption = { createdAt: -1 };
