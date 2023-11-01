@@ -18,8 +18,8 @@ router.get('/list/category',mdJWT.api_shop_auth, ProducttApiCtrl.listCategory);
 
 router.post('/insert',mdJWT.api_shop_auth, uploader.any(), ProducttApiCtrl.addProduct);
 
-router.put('/update/:idPR',mdJWT.api_user_auth, uploader.any(), ProducttApiCtrl.editProduct);
+router.put('/update',mdJWT.api_shop_auth, uploader.any(), ProducttApiCtrl.editProduct);
 
-router.delete('/delete/:idPR',mdJWT.api_user_auth,ProducttApiCtrl.deleteProduct);
+router.delete('/delete/:idProduct',mdJWT.api_shop_auth,ProducttApiCtrl.deleteProduct);
 
 module.exports = router;
