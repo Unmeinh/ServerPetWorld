@@ -265,7 +265,7 @@
                                 </td>
 
                                 <td>
-                                    <a href="/payment/detail/<%= row._id %>"
+                                    <a href="/transaction/detail/<%= row._id %>"
                                         style="background-color: #DDE4F0; padding: 8px; border-radius: 10px; text-decoration: none; color: #5A6ACF; font-weight: bold;">
                                         Chi tiết
                                     </a>
@@ -298,9 +298,16 @@
                         </div>
 
                         <% } else { %>
-                            <div class="no-results-message">
-                                <%= message %>
+                            <div class="no-results-container">
+                                <div class="no-results-icon">
+                                    <img src="/upload/icon_noImage.png" width="100" height="100"
+                                        alt="Không có sản phẩm">
+                                </div>
+                                <div class="no-results-message">
+                                    Không lấy được danh sách sản phẩm
+                                </div>
                             </div>
+
                             <% } %>
 
                 </div>
@@ -312,23 +319,19 @@
     </div>
     <%- include('../inc/bottom') %>
         <script>
-
             const sortOptionDropdown = document.getElementById('interval');
             const sortForm = document.getElementById('dropDownForm');
 
-
             const selectedOption = localStorage.getItem('selectedOption');
 
-
-            if (!selectedOption || selectedOption === 'selectedOption') {
-                sortOptionDropdown.value = 'selectedOption';
+            if (selectedOption) {
+                sortOptionDropdown.value = selectedOption;
             }
 
             sortOptionDropdown.addEventListener('change', function () {
-
-                localStorage.setItem('selectedOption', sortOptionDropdown.value);
-
-
+                const newOption = sortOptionDropdown.value;
+                localStorage.setItem('selectedOption', newOption); // Use 'selectedOption' as the key
                 sortForm.submit();
             });
+
         </script>

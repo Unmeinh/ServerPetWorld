@@ -310,6 +310,20 @@ main .recent-orders a {
     color: var(--color-primary);
 }
 
+.no-results-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+}
+
+.no-results-message {
+    text-align: center;
+    font-size: 18px;
+    margin-top: 20px;
+
+}
 
 
 

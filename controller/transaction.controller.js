@@ -101,7 +101,7 @@ exports.listPayment = async (req, res, next) => {
                           totalStatusMinusOne: 1,
                           totalStatusZero: 1,
                           totalStatusOne: 1,
-                          "listPayment.idCustommer":1,
+                          "listPayment._id":1,
                           "listPayment.idBill":1,                        
                           "listPayment.status":1,
                           "listPayment.total":1,
@@ -178,6 +178,7 @@ exports.listPayment = async (req, res, next) => {
                           totalStatusMinusOne: 1,
                           totalStatusZero: 1,
                           totalStatusOne: 1,
+                          "listPayment._id":1,
                           "listPayment.idCustommer":1,
                           "listPayment.idBill":1,                        
                           "listPayment.status":1,
@@ -186,9 +187,9 @@ exports.listPayment = async (req, res, next) => {
                           "listPayment.paymentMethod":1,
                           "listPayment.createAt":1,
                           "listPayment.customer.fullName":1,
-                          "listPayment.bill.products":1,
-                          "listPayment._id":1
+                          "listPayment.bill.products.idProduct":1,
                           
+                 
                         },
                     },
                     
@@ -250,6 +251,7 @@ exports.detailPayment = async (req, res, next) => {
     const limit = perPage;
     let idTransaction=req.params.idTransaction
 
+
     if (req.method == 'GET') {
         try {
             
@@ -259,17 +261,18 @@ exports.detailPayment = async (req, res, next) => {
             .populate({
                 path: "idBill",
                 populate: {
-                    path: "products.idProduct"
+                    path: "products.idProduct",
+                    model: 'ProductModel'
                 }
             })
             .skip(skip)
             .limit(limit);
-
+            
             const totalCount = listDetailPayment.idBill.products.length;
             const totalPages = Math.ceil(totalCount / perPage);        
         
             msg = 'Lấy danh sách  sản phẩm thành công';
-            return res.render('Transaction/transaction', {
+            return res.render('Transaction/transactionDetail', {
                 listDetailPayment: listDetailPayment,
                 countNowProduct: listDetailPayment.idBill.products.length,
                 countAllProduct: listDetailPayment.idBill.products.length,
@@ -282,9 +285,10 @@ exports.detailPayment = async (req, res, next) => {
             msg = '' + error.message;
             console.log('Không lấy được danh sách sản phẩm: ' + msg);
         }
+        
     }
 
-    res.render('Transaction/transaction', {
+    res.render('Transaction/transactionDetail', {
         msg: 'Không tìm thấy kết quả phù hợp',
         moment: moment
     });
