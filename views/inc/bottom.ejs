@@ -1,4 +1,3 @@
-
 </section>
 <script>
   let arrow = document.querySelectorAll(".arrow");
@@ -17,19 +16,24 @@
 
   let currentActiveButton = null;
 
-function changeColor(button) {
-// Hủy màu của nút cũ nếu có
-if (currentActiveButton) {
-    currentActiveButton.classList.remove("active");
-}
+  function changeColor(button) {
+    // Hủy màu của nút cũ nếu có
+    if (currentActiveButton) {
+      currentActiveButton.classList.remove("active");
+    }
 
-// Đổi màu của nút mới
-button.classList.add("active");
-currentActiveButton = button;
-}
+    // Đổi màu của nút mới
+    button.classList.add("active");
+    currentActiveButton = button;
+    window.onbeforeunload = function () {
+      localStorage.clear();
+    };
+  }
+
 </script>
 
 <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
 </body>
+
 </html>
