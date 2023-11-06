@@ -25,7 +25,7 @@ let billProductSchema = new db.mongoose.Schema(
         _id: { type: db.mongoose.Schema.Types.ObjectId, select: false },
         idProduct: {
           type: db.mongoose.Schema.Types.ObjectId,
-          ref: "ProductModel",
+          required: true,
         },
         amount: { type: Number },
         price: { type: Number },
