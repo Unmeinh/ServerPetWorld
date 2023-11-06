@@ -1,0 +1,294 @@
+<%- include('../inc/top',{title:'Thông báo'}) %>
+    <link rel="stylesheet" type="text/css"
+        href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
+
+    <link rel="stylesheet" href="../../stylesheets/notification.css">
+    <div class="container " style=" background-color: #F4ECEC;">
+        <div class="row justify-content-center ">
+            <!-- left -->
+            <div class=" col-md-4 col-xl-3 chat_left">
+                <div class="card-left mb-sm-3 mb-md-0 contacts_card">
+                    <div class="card-body contacts_body">
+                        <ui class="contacts">
+                            <li>
+
+
+                                <div class="d-flex bd-highlight" id="clientButton">
+                                    <div class="user_info bordered wide d-flex align-items-center hoverable">
+                                        <div class="img_cont me-2">
+                                            <img src="../../upload/avatar.jpg" class=" rounded-circle
+                                                user_img">
+                                        </div>
+                                        <span>Client</span>
+                                    </div>
+                                </div>
+
+
+
+                            </li>
+                            <li>
+                                <div class="d-flex bd-highlight" id="sellerButton">
+                                    <div class="user_info bordered wide d-flex align-items-center hoverable">
+                                        <div class="img_cont me-2">
+                                            <img src="../../upload/avatar.jpg" class="rounded-circle user_img">
+                                        </div>
+                                        <span>Seller</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ui>
+                    </div>
+                </div>
+            </div>
+            <!-- right -->
+            <div class="col-md-6 col-xl-9 chat_right ">
+                <div class="card">
+                    <div class="card-header msg_head" style="background-color: #FEC7D7;">
+                        <div class="d-flex bd-highlight">
+                            <div class="img_cont">
+                                <img src="../../upload/avatar.jpg" class="rounded-circle user_img">
+
+                            </div>
+                            <div class="user_info">
+                                <span id="userType">Client</span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <div class="card-body msg_card_body" style="background-color: #F4ECEC;">
+                        <div id="messageContainer" class="message_container">
+
+                        </div>
+                        <div id="messageStatusContainer" class="message_status_container">
+                            <!-- Thông báo trạng thái gửi tin nhắn sẽ được thêm tại đây -->
+                        </div>
+                    </div>
+                    <div class="card-footer" style="background-color: #F4ECEC;">
+                        <div class="input-group">
+                            <div class="input-group-append rounded-circle me-3">
+                                <span class="iconify" data-icon="mingcute:dot-grid-fill" data-width="32"
+                                    data-height="32"></span>
+                            </div>
+
+                            <textarea name="" id="messageInput" class="form-control type_msg"
+                                placeholder="Viết tin nhắn..."></textarea>
+                            <div class="input-group-append rounded-circle ms-2"
+                                style=" display: flex; align-items: center; justify-content: center;">
+
+                                <a href="#" id="sendLink">
+                                    <button class="input-group-append rounded-circle ms-2" type="button"
+                                        style="background-color: #8BD3DD; display: flex; align-items: center; justify-content: center;">
+                                        <span class="iconify p-1" data-icon="tabler:send" data-width="32"
+                                            data-height="32"></span>
+                                    </button>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const sellerMessages = [];
+        const clientMessages = [];
+        let role = 'client';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const clientButton = document.querySelector('#clientButton');
+            const sellerButton = document.querySelector('#sellerButton');
+            const userTypeSpan = document.querySelector('#userType');
+
+
+            clientButton.addEventListener('click', async () => {
+                userTypeSpan.textContent = 'Client';
+                role = 'client';
+                console.log('Role after clicking client button:', role);
+
+
+                fetchMessages(role);
+                displayMessages(clientMessages);
+                console.log(clientMessages);
+            });
+
+            sellerButton.addEventListener('click', async () => {
+                userTypeSpan.textContent = 'Seller';
+                role = 'seller';
+                console.log('Role after clicking seller button:', role);
+
+
+                fetchMessages(role);
+                displayMessages(sellerMessages);
+            });
+
+
+        });
+
+
+        const messageStatus = document.getElementById('messageStatus');
+        const sendLink = document.getElementById('sendLink');
+        sendLink.addEventListener('click', async (event) => {
+            event.preventDefault();
+
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value;
+
+            if (message.trim() !== '') {
+                try {
+                    const response = await fetch('/notification/create', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ role, message })
+                    });
+
+                    if (response.ok) {
+                        console.log('Notification sent successfully');
+
+                        const messageContainer = document.getElementById('messageContainer');
+                        const messageDiv = document.createElement('div');
+
+                        messageDiv.className = 'd-flex justify-content-end msg_cotainer_send';
+                        messageDiv.innerHTML = `
+                    <div class="msg_cotainer_send">
+                        <div class="message_content">
+                          ${message}
+                        </div>
+                        <span class="msg_time">${new Date().toLocaleTimeString()}</span>
+                    </div>
+                `;
+
+                        messageContainer.insertBefore(messageDiv, messageContainer.firstChild);
+                        const messageStatus = document.createElement('div');
+                        messageStatus.classList.add('message-status', 'success');
+                        const iconSpan = document.createElement('span');
+                        iconSpan.className = 'iconify';
+                        iconSpan.setAttribute('data-icon', 'fluent-mdl2:completed-solid');
+                        iconSpan.style.color = 'green';
+                        iconSpan.setAttribute('data-width', '12');
+                        iconSpan.setAttribute('data-height', '12');
+
+                        messageStatus.appendChild(iconSpan);
+                        messageContainer.insertBefore(messageStatus, messageContainer.firstChild);
+
+
+                        messageContainer.scrollTop = messageContainer.scrollHeight;
+                        messageInput.value = '';
+                        messageInput.style.height = 'auto';
+                        window.scrollTo(0, 0);
+
+                    } else {
+                        console.error('Failed to send notification');
+                        const messageStatus = document.createElement('div');
+                        messageStatus.classList.add('message-status', 'error');
+
+                        const iconSpan = document.createElement('span');
+                        iconSpan.className = 'iconify';
+                        iconSpan.setAttribute('data-icon', 'carbon:warning-filled');
+                        iconSpan.style.color = 'red';
+                        iconSpan.setAttribute('data-width', '12');
+                        iconSpan.setAttribute('data-height', '12');
+
+                        messageStatus.appendChild(iconSpan);
+
+
+                        messageContainer.insertBefore(messageStatus, messageContainer.firstChild);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+        });
+
+        const textarea = document.getElementById('messageInput');
+
+        textarea.addEventListener('input', () => {
+            textarea.style.height = 'auto';
+            textarea.style.height = `${textarea.scrollHeight}px`;
+        });
+
+        function displayMessages(messages) {
+            console.log(messages)
+            const messageContainer = document.getElementById('messageContainer');
+            messageContainer.innerHTML = '';
+
+            messages.forEach((messageObj) => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = role === 'client' ? 'message-client' : 'message-seller';
+                messageDiv.innerHTML = `
+        <div class="${messageObj.sent ? 'msg_cotainer_send1' : 'message1'}">
+            <div class="msg_cotainer_send1">
+                ${messageObj.message}
+                <span class="msg_time1">${new Date(messageObj.timestamp).toLocaleTimeString()}</span>
+            </div>
+        </div>
+    `;
+
+                messageContainer.insertBefore(messageDiv, messageContainer.firstChild);
+
+                if (messageObj.role === 'client') {
+                    if (role === 'client') {
+                        clientMessages.push(messageObj);
+                    }
+                } else if (messageObj.role === 'seller') {
+                    if (role === 'seller') {
+                        sellerMessages.push(messageObj);
+                    }
+                }
+            });
+
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+
+        async function fetchMessages(role) {
+            try {
+                const response = await fetch(`/notification/messages?role=${role}`);
+                if (response.ok) {
+                    const messages = await response.json();
+                    const messageContainer = document.getElementById('messageContainer');
+                    console.log('Message Object:', messages);
+                    messages.forEach((messageObj) => {
+
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = role === 'client' ? 'message-client' : 'message-seller';
+                        messageDiv.innerHTML = `
+                    <div class="${messageObj.sent ? 'msg_cotainer_sendd' : 'message1'}">
+                        <div class="message-content">
+                        <div class="msg_cotainer_sendd">
+                            ${messageObj.message}
+                            <span class="msg_timee1">${new Date(messageObj.timestamp).toLocaleTimeString()}</span>
+                        </div>
+                    </div>
+                </div>
+                `;
+
+                        messageContainer.insertBefore(messageDiv, messageContainer.firstChild);
+
+
+                        if (messageObj.role === 'client') {
+                            clientMessages.push(messageObj);
+                        } else if (messageObj.role === 'seller') {
+                            sellerMessages.push(messageObj);
+                        }
+                        console.log('Client Messages:', clientMessages);
+                    });
+
+                    console.log('Seller Messages:', sellerMessages);
+                } else {
+                    console.error('Failed to fetch chat messages');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.js"></script>
+    <%- include('../inc/bottom') %>
