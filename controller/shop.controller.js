@@ -16,7 +16,7 @@ exports.listShop = async (req, res, next) => {
                 const searchTerm = req.query.filterSearch.trim();
                 filterSearch = { fullName: new RegExp(searchTerm, 'i') };
             }
-
+            
             if (typeof (req.query.sortOption) != 'undefined') {
                 sortOption = { fullName: req.query.sortOption };
             }
