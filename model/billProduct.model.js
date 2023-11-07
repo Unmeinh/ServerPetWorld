@@ -24,7 +24,7 @@ let billProductSchema = new db.mongoose.Schema(
       {
         idProduct: {
           type: db.mongoose.Schema.Types.ObjectId,
-          ref: "ProductModel",
+          required: true,
         },
         amount: { type: Number },
         price: { type: Number },
