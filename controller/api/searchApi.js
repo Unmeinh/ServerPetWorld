@@ -12,7 +12,10 @@ exports.searchApi = async (req, res, next) => {
           { namePet: { $regex: searchTerm, $options: "i" } },
           { detailPet: { $regex: searchTerm, $options: "i" } },
         ],
-      }).limit(5).populate('idShop');
+      })
+        .select("idShop namePet type")
+        .limit(5)
+        .populate("idShop", "nameShop locationShop avatarShop status");
 
       // Tìm kiếm trong bảng Product
       const products = await mdProduct.ProductModel.find({
@@ -20,19 +23,23 @@ exports.searchApi = async (req, res, next) => {
           { nameProduct: { $regex: searchTerm, $options: "i" } },
           { detailProduct: { $regex: searchTerm, $options: "i" } },
         ],
-      }).limit(5).populate('idShop');
+      })
+        .select("idShop nameProduct type")
+        .limit(5)
+        .populate("idShop", "nameShop locationShop avatarShop status");
       const searchResults = [...pets, ...products];
       if (searchResults.length > 0) {
         res
           .status(200)
           .json({ success: true, data: searchResults, message: "" });
-      }else {
-        res
-          .status(200)
-          .json({ success: true, data: searchResults, message: "Không có dữ liệu" });
+      } else {
+        res.status(200).json({
+          success: true,
+          data: searchResults,
+          message: "Không có dữ liệu",
+        });
       }
     } catch (error) {
-      console.log(error.message);
       res.status(500).json({ error: "Đã xảy ra lỗi" });
     }
   } else {
