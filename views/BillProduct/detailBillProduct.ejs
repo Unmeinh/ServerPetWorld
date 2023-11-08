@@ -93,17 +93,17 @@
 
         <table class="table align-middle mt-3" style="border: white; ">
             <tr style="background-color: #8BD3DD;">
-                <th style="border-radius: 6px 0 0 6px;">Tên sản phẩm</th>
+                <th style="border-radius: 6px 0 0 6px;">Mã sản phẩm</th>
                 <th>Số lượng</th>
                 <th>Giá tiền</th>
                 <th style="border-radius: 0 6px 6px 0;">Giảm giá</th>
                 <% objBP.products.map((row)=> { %>
             </tr>
             <tr>
-                <td>
+                <td style="width: 250px; overflow: hidden;">
                     <div class="box" style="line-height: 8px;margin: 5px;">
                         <p>
-                            <%= row.idProduct.nameProduct %>
+                            <%= row.idProduct %>
                         </p>
                     </div>
                 </td>
@@ -115,7 +115,7 @@
                 </td>
 
                 <td>
-                    <%= row.discount %>
+                    <%= row.discount %>%
                 </td>
             </tr>
             <% }) %>
