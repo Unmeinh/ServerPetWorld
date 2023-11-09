@@ -1,13 +1,5 @@
-<%- include('../inc/top',{title:'Chi tiết thú cưng', adminLogin: adminLogin}) %>
-
+<%- include('../inc/top',{title:'Chi tiết thú cưng'}) %>
     <div class="container mt-2">
-
-        <div class="form-group row m-2">
-            <label for="nameAdmin" class="col-sm-5 col-form-label" style="color: #848485;">Trang này để xem chi tiết thú
-                cưng </label>
-            <div class="col-sm-5">
-            </div>
-        </div>
         <form action="/pet" method="get">
             <div class="form-group row m-3" style="align-items: center;">
                 <label for="username" form="bold" class="col-2 col-form-label">Ảnh thú cưng</label>
@@ -47,18 +39,18 @@
             </div>
 
             <div class="form-group row m-3">
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Số lượng Pet</label>
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Số lượng thú cưng</label>
                 <div class="col-sm-3">
                     <label type="text" class="form-control" style="width: 200px;">
                         <%= Objpet.amountPet %>
                     </label>
                 </div>
 
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Loài</label>
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Số lượt đánh giá</label>
                 <div class="col-sm-3">
-                    <% if( typeof(Objpet.speciesPet) !='undefined' ) { %>
+                    <% if( typeof(Objpet.rate) !='undefined' ) { %>
                         <label type="text" style="width: 200px;" class="form-control">
-                            <%= Objpet.speciesPet %>
+                            <%= Objpet.rate %>
                         </label>
                         <% } else { %>
                             <span type="text" style="width: 200px;" class="form-control">Không có dữ liệu</span>
@@ -84,11 +76,15 @@
 
             </div>
             <div class="form-group row m-3">
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Kích Thước</label>
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Kích thước</label>
                 <div class="col-sm-3">
+                    <% if( typeof(Objpet.sizePet) !='undefined' ) { %>
                     <label type="text" class="form-control" style="width: 200px;">
-                        <%= Objpet.sizePet%>
+                        <%= Objpet.sizePet %>
                     </label>
+                        <% } else { %>
+                            <span type="text" style="width: 200px;" class="form-control">Không có dữ liệu</span>
+                            <% }%>
                 </div>
 
                 <label for="username" form="bold" class="col-sm-2 col-form-label">Mô tả thú cưng</label>
