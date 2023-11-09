@@ -201,7 +201,8 @@ exports.listPayment = async (req, res, next) => {
             if (results.length === 0) {          
                 return res.render('Transaction/transaction', {
                     message: "Hôm nay không có đơn hàng nào cả.",
-                    moment: moment
+                    moment: moment,
+                    adminLogin:req.session.adLogin
                 });
             }
             const {totalOfTotal3, totalOfTotal4, totalOfFee3, totalOfFee4,totalStatusMinusOne,totalStatusZero,totalStatusOne } = results[0];
@@ -230,7 +231,8 @@ exports.listPayment = async (req, res, next) => {
                 selectedInterval: selectedInterval,
                 perPage:perPage,
                 msg: msg,
-                moment: moment
+                moment: moment,
+                adminLogin:req.session.adLogin
             });
            
         } catch (error) {
@@ -279,7 +281,8 @@ exports.detailPayment = async (req, res, next) => {
                 msg: msg,
                 currentPage: currentPage,
                 totalPages: totalPages,
-                moment: moment
+                moment: moment,
+                adminLogin: req.session.adLogin
             });
         } catch (error) {
             msg = '' + error.message;
@@ -290,6 +293,7 @@ exports.detailPayment = async (req, res, next) => {
 
     res.render('Transaction/transactionDetail', {
         msg: 'Không tìm thấy kết quả phù hợp',
-        moment: moment
+        moment: moment,
+        adminLogin: req.session.adLogin
     });
 }

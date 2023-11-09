@@ -1,4 +1,4 @@
-<%- include('../inc/top',{title:'Quản lý hóa đơn sản phẩm',adminLogin:adminLogin}) %>
+<%- include('../inc/top',{title:'Quản lý hóa đơn sản phẩm'}) %>
   <div class="container-fluid " style="width: 98%;display: flex; flex-direction: column">
     <div class="row col m-3">
       <form action="" class="row col-3 me-2" method="get">
@@ -29,15 +29,7 @@
         <% } else { %>
           <div class="row col-4 me-5"></div>
           <% } %>
-            <div class="row col-3">
-
-            </div>
-            <div class="row col-2 ms-1" style="align-items: center;">
-              <a href="/add"
-                style="text-decoration: none; background-color: #66d9f3; border-radius: 6px;text-align: center;padding: 7px;">
-                <span style="color: white;font-weight: bold;">Tạo hóa đơn</span>
-              </a>
-            </div>
+            
     </div>
     <% if (typeof(listBillProduct) !='undefined' && listBillProduct.length> 0) { %>
       <table class="table align-middle" style="border: white; ">
