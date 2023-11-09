@@ -6,7 +6,7 @@ exports.cartUser = async (req, res, next) => {
   try {
     let listCartUser = await mdCart.CartModel.findOne({ idUser: _id }).populate(
       "carts.idProduct",
-      "idShop arrProduct discount type priceProduct nameProduct"
+      "idShop arrProduct discount type priceProduct nameProduct amountProduct"
     );
     if (req.method == "POST") {
       if (!listCartUser) {
@@ -154,7 +154,7 @@ exports.editLocationSelect = async (req, res) => {
   const { _id } = req.user;
   const idLocation = req.params.id;
   try {
-    if (req.method === "PUT") {
+    if (req.method === "POST") {
       if (idLocation) {
         const user = await mdUser.UserModel.findById(_id);
         user.locationDelivery.map((item, index) => {
@@ -191,7 +191,7 @@ exports.editLocation = async (req, res) => {
       phoneNumber &&
       location &&
       idLocation &&
-      req.method === "PUT"
+      req.method === "POST"
     ) {
       const user = await mdUser.UserModel.findById(_id);
       user.locationDelivery.map((item) => {

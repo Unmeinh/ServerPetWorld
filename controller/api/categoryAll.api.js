@@ -11,13 +11,11 @@ exports.listCategory = async (req, res, next) => {
     let listAllCat = [...listCatProduct, ...listCatPet];
 
     if (listAllCat) {
-      return res
-        .status(200)
-        .json({
-          success: true,
-          data: listAllCat,
-          message: "Lấy danh sách thể loại thành công",
-        });
+      return res.status(200).json({
+        success: true,
+        data: listAllCat,
+        message: "Lấy danh sách thể loại thành công",
+      });
     } else {
       return res
         .status(404)
@@ -35,40 +33,32 @@ exports.listAllFromIdCategory = async (req, res, next) => {
     try {
       let listProduct = await mdProduct.ProductModel.find({
         idCategoryPr: idCategory,
-      })
-        .populate("idCategoryPr")
-        .populate("idShop");
-      let listPet = await mdPet.PetModel.find({ idCategoryP: idCategory })
-        .populate("idCategoryP")
-        .populate("idShop");
+      }).select("arrProduct nameProduct priceProduct discount type idShop");
+      let listPet = await mdPet.PetModel.find({
+        idCategoryP: idCategory,
+      }).select("namePet imagesPet type discount rate pricePet");
 
       if (listProduct.length > 0 || listPet.length > 0) {
-        const data = [...listProduct ?? null, ...listPet ?? null]
-        
-        return res
-          .status(200)
-          .json({
-            success: true,
-            data: data,
-            message: "Lấy danh sách sản phẩm và pet theo thể loại thành công",
-          });
+        const data = [...(listProduct ?? null), ...(listPet ?? null)];
+
+        return res.status(200).json({
+          success: true,
+          data: data,
+          message: "Lấy danh sách sản phẩm và pet theo thể loại thành công",
+        });
       } else {
-        return res
-          .status(500)
-          .json({
-            success: false,
-            data: [],
-            message: "Không lấy được danh sách sản phẩm",
-          });
-      }
-    } catch (error) {
-      return res
-        .status(500)
-        .json({
+        return res.status(500).json({
           success: false,
           data: [],
-          message: "Không lấy được danh sách sản phẩm" + error.message,
+          message: "Không lấy được danh sách sản phẩm",
         });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        data: [],
+        message: "Không lấy được danh sách sản phẩm" + error.message,
+      });
     }
   }
 };

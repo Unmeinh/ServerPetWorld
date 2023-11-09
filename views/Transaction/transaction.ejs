@@ -1,0 +1,337 @@
+<%- include('../inc/top',{title:'Thanh toán'}) %>
+    <link rel="stylesheet" href="../../stylesheets/transaction.css">
+    <div class="ms-5">
+
+        <main>
+
+            <div class="analyse">
+                <div class="sales">
+                    <div class="status-head">
+                        <div class="info">
+                            <p>Doanh thu</p>
+                        </div>
+                        <form action="" method="get" id="dropDownForm">
+                            <select name="interval" id="interval" class="styled-select ">
+                                <option value="today" selected>Hôm nay</option>
+                                <option value="week">Tuần</option>
+                                <option value="month">Tháng</option>
+                                <option value="year">Năm</option>
+                            </select>
+                        </form>
+                    </div>
+                    <div class="status-body">
+
+                        <div class="info">
+                            <h2>Tổng doanh thu:</h2>
+                            <% if (typeof totalOfTotal3 !=='undefined' ) { %>
+                                <h1 style="color: #28D224;">
+                                    <%= totalOfTotal3.toLocaleString("vi-VN") + "đ" %>
+                                </h1>
+                                <% } else { %>
+                                    <h1 style="color: #28D224;">
+                                        0
+                                    </h1>
+                                    <% } %>
+
+
+                        </div>
+                        <div class="info">
+                            <h2>Lợi nhuận:</h2>
+                            <% if (typeof totalOfProfit3 !=='undefined' ) { %>
+
+                                <h1 style="color: #28D224;">
+                                    <%= totalOfProfit3?.toLocaleString("vi-VN")+ "đ" %>
+                                </h1>
+                                <% } else { %>
+                                    <h1 style="color: #28D224;">
+                                        0
+                                    </h1>
+                                    <% } %>
+                        </div>
+                        <div class="info">
+                            <h2>Tổng doanh thu thực:</h2>
+                            <% if (typeof totalOfTotal4 !=='undefined' ) { %>
+
+                                <h1 style="color: #28D224;">
+                                    <%= totalOfTotal4?.toLocaleString("vi-VN")+ "đ" %>
+                                </h1>
+                                <% } else { %>
+                                    <h1 style="color: #28D224;">
+                                        0
+                                    </h1>
+                                    <% } %>
+
+                        </div>
+                        <div class="info">
+                            <h2>Lợi nhuận thực:</h2>
+                            <% if (typeof totalOfProfit4 !=='undefined' ) { %>
+
+                                <h1 style="color: #28D224;">
+                                    <%= totalOfProfit4?.toLocaleString("vi-VN")+ "đ" %>
+                                </h1>
+                                <% } else { %>
+                                    <h1 style="color: #28D224;">
+                                        0
+                                    </h1>
+                                    <% } %>
+
+                        </div>
+
+                    </div>
+                </div>
+                <div class="visits">
+                    <div class="info">
+                        <p>Đơn</p>
+                    </div>
+                    <div class="status-body-2">
+
+                        <div class="info">
+                            <h2>Tổng đơn chờ xác nhận : </h2>
+                            <% if (typeof totalOfProfit4 !=='undefined' ) { %>
+
+                                <h1 style="color: #E7D429;">
+                                    <%= totalStatusZero %>
+
+                                </h1>
+                                <% } else { %>
+                                    <h1 style="color: #E7D429;">
+                                        0
+                                    </h1>
+                                    <% } %>
+
+                        </div>
+                        <div class="info">
+                            <h2>Tổng đơn đã xác nhận : </h2>
+                            <% if (typeof totalOfProfit4 !=='undefined' ) { %>
+
+                                <h1 style="color: #02EB28;">
+                                    <%= totalStatusOne %>
+                                </h1>
+                                <% } else { %>
+                                    <h1 style="color: #02EB28;">
+                                        0
+                                    </h1>
+                                    <% } %>
+
+                        </div>
+                        <div class="info">
+                            <h2>Tổng đơn đã hủy bỏ : </h2>
+                            <% if (typeof totalOfProfit4 !=='undefined' ) { %>
+
+                                <h1 style="color: #F70202;">
+                                    <%= totalStatusMinusOne %>
+                                </h1>
+                                <% } else { %>
+                                    <h1 style="color: #F70202;">
+                                        0
+                                    </h1>
+                                    <% } %>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="new-users">
+                <div class="container-fluid " style="width: 100%;display: flex; flex-direction: column">
+                    <div class="row col m-3">
+                        <form action="" class="row col-3 me-2" method="get">
+                            <div
+                                style="background-color: #F0F4F8;border-radius: 25px;align-items: center;display: flex;flex-direction: row;">
+                                <div style="width: 10%;">
+                                    <button type="submit" style="border: none;"><img src="/upload/iconFind.png"
+                                            style="width: 20px;height: 20px;"></button>
+                                </div>
+                                <div style="width: 90%;">
+                                    <input name="fullName"
+                                        style="border: none;background-color: #F0F4F8;border-radius: 25px; box-shadow: none;"
+                                        class="form-control" placeholder="Tìm kiếm">
+                                </div>
+                            </div>
+                        </form>
+
+
+                        <div class="row col-3">
+                        </div>
+
+                    </div>
+                    <% if (typeof (listPayment) !='undefined' && listPayment.length> 0) { %>
+                        <table class="table align-middle" style="border: white; ">
+                            <tr style="background-color: #8BD3DD;">
+
+                                <th style="border-radius: 6px 0 0 6px;">Tên khách hàng</th>
+                                <th>S.lượng SP đã mua</th>
+                                <th>Thời gian</th>
+                                <th>Tổng tiền</th>
+                                <th>Phí</th>
+                                <th>Phương thức thanh toán</th>
+                                <th>Trạng thái đơn hàng</th>
+                                <th style="border-radius: 0 6px 6px 0;"></th>
+                                <% listPayment.forEach((row)=> { %>
+                            </tr>
+                            <tr>
+
+                                <td>
+                                    <% if (row.customer[0] && row.customer[0].fullName) { %>
+                                        <label type="text">
+                                            <%= row.customer[0].fullName %>
+                                        </label>
+                                        <% } else { %>
+                                            <label type="text">
+                                                Không có khách hàng
+                                            </label>
+                                            <% } %>
+
+                                </td>
+                                <td>
+
+                                    <label type="text">
+                                        <%= row.bill[0].products.length || "Không có sản phẩm" %>
+                                    </label>
+
+
+
+                                </td>
+
+                                <td>
+                                    <%= moment(row.createAt).format('DD/MM/YYYY HH:MM:SS A') %>
+                                </td>
+                                <td>
+                                    <span style="color: #13aa2c;">
+                                        <%= row.total?.toLocaleString("vi-VN") + "đ" %>
+                                    </span>
+
+                                </td>
+                                <td>
+                                    <span style="color: #dd9e17;">
+                                        <%= row.fee?.toLocaleString("vi-VN") + "đ" %>
+                                    </span>
+
+                                </td>
+                                <td>
+
+                                    <% if (row.paymentMethod===0) { %>
+                                        <label type="text" style="width: 200px;">
+                                            Thanh toán khi nhận hàng
+                                        </label>
+                                        <% } else if (row.paymentMethod===1) { %>
+                                            <label type="text" style="width: 200px;">
+                                                Thanh toán bằng thẻ ngân hàng
+                                            </label>
+                                            <% } else { %>
+                                                <label type="text" style="width: 200px;">
+                                                    Không có khách hàng
+                                                </label>
+                                                <% } %>
+                                </td>
+                                <td>
+
+                                    <% if (row.status===-2) { %>
+                                        <label type="text" style="width: 200px; color: red;">
+                                            Giao hàng thất bại
+                                        </label>
+                                        <% } else if (row.status===-1) { %>
+                                            <label type="text" style="width: 200px; color: orange;">
+                                                Hủy Đơn hàng
+                                            </label>
+                                            <% } else if (row.status===0) { %>
+                                                <label type="text" style="width: 200px; color: rgb(190, 190, 5);">
+                                                    Chờ Xác nhận
+                                                </label>
+                                                <% } else if (row.status===1) { %>
+                                                    <label type="text" style="width: 200px;color: purple;">
+                                                        Đã xác nhận
+                                                    </label>
+                                                    <% } else if (row.status===2) { %>
+                                                        <label type="text" style="width: 200px;color: blue;">
+                                                            Đang giao
+                                                        </label>
+                                                        <% } else if (row.status===3) { %>
+                                                            <label type="text" style="width: 200px;color: #6fc570;">
+                                                                Giao hàng thành công
+                                                            </label>
+                                                            <% } else if (row.status===4) { %>
+                                                                <label type="text"
+                                                                    style="width: 200px;color: rgb(10, 190, 10);">
+                                                                    Thanh toán thành công
+                                                                </label>
+                                                                <% } else { %>
+                                                                    <label type="text" style="width: 200px;">
+                                                                        Không có khách hàng
+                                                                    </label>
+                                                                    <% } %>
+                                </td>
+
+                                <td>
+                                    <a href="/transaction/detail/<%= row._id %>"
+                                        style="background-color: #DDE4F0; padding: 8px; border-radius: 10px; text-decoration: none; color: #5A6ACF; font-weight: bold;">
+                                        Chi tiết
+                                    </a>
+                                </td>
+
+                            </tr>
+                            <% }) %>
+
+                        </table>
+
+
+                        <div
+                            style="display: flex; flex-direction: row; align-items: center;justify-content: space-between;position:absolute ; bottom: 0; width: 96%;">
+                            <p> Số bản ghi: <span style="font-weight: bold;">
+                                    <%= countNowProduct %>/<%= countAllProduct %>
+                                </span></p>
+                            <nav>
+                                <ul class="pagination">
+                                    <% for (let page=1; page <=totalPages; page++) { %>
+                                        <li class="page-item <%= page === currentPage ? 'active' : '' %>">
+                                            <a class="page-link"
+                                                href="?page=<%= page %>&interval=<%= selectedInterval %>">
+                                                <%= page %>
+                                            </a>
+                                        </li>
+                                        <% } %>
+
+                                </ul>
+                            </nav>
+                        </div>
+
+                        <% } else { %>
+                            <div class="no-results-container">
+                                <div class="no-results-icon">
+                                    <img src="/upload/icon_noImage.png" width="100" height="100"
+                                        alt="Không có sản phẩm">
+                                </div>
+                                <div class="no-results-message">
+                                    Không lấy được danh sách sản phẩm
+                                </div>
+                            </div>
+
+                            <% } %>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+    </div>
+    <%- include('../inc/bottom') %>
+        <script>
+            const sortOptionDropdown = document.getElementById('interval');
+            const sortForm = document.getElementById('dropDownForm');
+
+            const selectedOption = localStorage.getItem('selectedOption');
+
+            if (selectedOption) {
+                sortOptionDropdown.value = selectedOption;
+            }
+
+            sortOptionDropdown.addEventListener('change', function () {
+                const newOption = sortOptionDropdown.value;
+                localStorage.setItem('selectedOption', newOption); // Use 'selectedOption' as the key
+                sortForm.submit();
+            });
+
+        </script>

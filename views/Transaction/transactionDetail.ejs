@@ -1,0 +1,250 @@
+<%- include('../inc/top',{title:'Thanh toán'}) %>
+    <link rel="stylesheet" href="../../stylesheets/transactionDetail.css">
+    <div class="ms-5">
+
+        <main>
+
+
+            <div class="analyse">
+                <div class="sales">
+                    <div class="info">
+                        <p>Thông tin</p>
+                    </div>
+                    <div class="status-body">
+                        <div class="info">
+                            <h2 style="color: #001858;">Tên khách hàng:</h2>
+                            <h2>
+                                <%= listDetailPayment.idBill.locationDetail?.fullName %>
+                            </h2>
+                        </div>
+                        <div class="info">
+                            <h2 style="color: #001858;">Địa chỉ: </h2>
+                            <h2>
+                                <%= listDetailPayment.idBill.locationDetail?.location %>
+                            </h2>
+                        </div>
+                        <div class="info">
+                            <h2 style="color: #001858;">Số điện thoại: </h2>
+                            <h2>
+                                <%= listDetailPayment.idBill.locationDetail?.phoneNumber %>
+                            </h2>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="visits">
+                    <div class="status-head">
+                        <div class="info">
+                            <p>Tổng
+                            <p>
+                        </div>
+
+                    </div>
+                    <div class="status-body-2">
+
+                        <div class="info">
+                            <h2 style="color: #001858;">Tổng Bill : </h2>
+                            <h1 style="color: #E7D429;">
+                                <span>
+                                    <%= listDetailPayment.idBill.total?.toLocaleString("vi-VN") + "đ" %>
+                                </span>
+                            </h1>
+                        </div>
+                        <div class="info">
+                            <h2 style="color: #001858;">Tổng giảm giá: </h2>
+                            <h1 style="color: #02EB28;">
+                                <%= listDetailPayment.idBill.discountBill?.toLocaleString("vi-VN") + "đ" %>
+                            </h1>
+                        </div>
+
+                        <div class="info">
+                            <h2 style="color: #001858;">Phương thức thanh toán: </h2>
+                            <h1 style="color: #02EB28;">
+                                <% if (listDetailPayment.paymentMethod===0) { %>
+                                    <label type="text" style="color: #001858;">
+                                        Thanh toán khi nhận hàng
+                                    </label>
+                                    <% } else if (listDetailPayment.paymentMethod===1) { %>
+                                        <label type="text" style="color: #001858;">
+                                            Thanh toán bằng thẻ ngân hàng
+                                        </label>
+                                        <% } else { %>
+                                            <label type="text" style="color: #001858;">
+                                                Không có khách hàng
+                                            </label>
+                                            <% } %>
+                            </h1>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="new-users">
+                <div class="container-fluid " style="width: 98%;display: flex; flex-direction: column">
+                    <div class="row col m-3">
+                        <form action="" class="row col-3 me-2" method="get">
+                            <div
+                                style="background-color: #F0F4F8;border-radius: 25px;align-items: center;display: flex;flex-direction: row;">
+                                <div style="width: 10%;">
+                                    <button type="submit" style="border: none;"><img src="/upload/iconFind.png"
+                                            style="width: 20px;height: 20px;"></button>
+                                </div>
+                                <div style="width: 90%;">
+                                    <input name="filterSearch"
+                                        style="border: none;background-color: #F0F4F8;border-radius: 25px; box-shadow: none;"
+                                        class="form-control" placeholder="Tìm kiếm">
+                                </div>
+                            </div>
+                        </form>
+
+
+                        <div class="row col-3">
+                        </div>
+
+                    </div>
+                    <% if (typeof listDetailPayment !='undefined' ) { %>
+                        <table class="table align-middle" style="border: white; ">
+                            <tr style="background-color: #5f9197;">
+                                <th style="border-radius: 6px 0 0 6px;">Sản phẩm đã mua</th>
+                                <th>Số lượng</th>
+                                <th>Giảm giá</th>
+                                <th>Giá</th>
+                                <th>Thời gian</th>
+                                <th>Phương thức thanh toán</th>
+                                <th>Trạng thái đơn hàng</th>
+                                <th style="border-radius: 0 6px 6px 0;"></th>
+                                <% listDetailPayment.idBill.products.forEach((row)=> { %>
+                            </tr>
+                            <tr>
+                                <td>
+
+                                    <%= row.idProduct.nameProduct %>
+
+                                </td>
+
+                                <td>
+
+                                    <%= row.amount %>
+
+                                </td>
+
+                                <td>
+                                    <span>
+                                        <%= ((row.price * row.discount)/100)?.toLocaleString("vi-VN") + "đ" %>
+                                    </span>
+
+
+                                </td>
+                                <td>
+                                    <span style="color: #02EB28;">
+                                        <%= (row.price - ((row.price * row.discount)/100))?.toLocaleString("vi-VN")
+                                            + "đ" %>
+                                    </span>
+
+
+                                </td>
+                                <td>
+
+                                    <%= moment(listDetailPayment.idBill.purchaseDate).format('DD/MM/YYYY hh:mm:ss a') %>
+
+                                </td>
+
+                                <td>
+                                    <% if (listDetailPayment.paymentMethod===0) { %>
+                                        <label type="text" style="width: 200px;">
+                                            Thanh toán khi nhận hàng
+                                        </label>
+                                        <% } else if (listDetailPayment.paymentMethod===1) { %>
+                                            <label type="text" style="width: 200px;">
+                                                Thanh toán bằng thẻ ngân hàng
+                                            </label>
+                                            <% } else { %>
+                                                <label type="text" style="width: 200px;">
+                                                    Không có khách hàng
+                                                </label>
+                                                <% } %>
+
+                                </td>
+                                <td>
+                                    <% if (listDetailPayment.status===-2) { %>
+                                        <label type="text" style="width: 200px; color: red;">
+                                            Giao hàng thất bại
+                                        </label>
+                                        <% } else if (listDetailPayment.status===-1) { %>
+                                            <label type="text" style="width: 200px; color: orange;">
+                                                Hủy Đơn hàng
+                                            </label>
+                                            <% } else if (listDetailPayment.status===0) { %>
+                                                <label type="text" style="width: 200px; color: rgb(190, 190, 5);">
+                                                    Chờ Xác nhận
+                                                </label>
+                                                <% } else if (listDetailPayment.status===1) { %>
+                                                    <label type="text" style="width: 200px;color: purple;">
+                                                        Đã xác nhận
+                                                    </label>
+                                                    <% } else if (listDetailPayment.status===2) { %>
+                                                        <label type="text" style="width: 200px;color: blue;">
+                                                            Đang giao
+                                                        </label>
+                                                        <% } else if (listDetailPayment.status===3) { %>
+                                                            <label type="text" style="width: 200px;color: #8bf08f;">
+                                                                Giao hàng thành công
+                                                            </label>
+                                                            <% } else if (listDetailPayment.status===4) { %>
+                                                                <label type="text" style="width: 200px;color: green;">
+                                                                    Thanh toán thành công
+                                                                </label>
+                                                                <% } else { %>
+                                                                    <label type="text" style="width: 200px;">
+                                                                        Không có khách hàng
+                                                                    </label>
+                                                                    <% } %>
+
+
+
+                                </td>
+
+
+                            </tr>
+
+                            <% }) %>
+
+                        </table>
+
+
+                        <div
+                            style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; position: absolute; bottom: 0; width: 96%;">
+                            <p> Số bản ghi: <span style="font-weight: bold;">
+                                    <%= countNowProduct %>/<%= countAllProduct %>
+                                </span></p>
+                            <nav>
+                                <ul class="pagination">
+                                    <% for (let page=1; page <=totalPages; page++) { %>
+                                        <li class="page-item <%= page === currentPage ? 'active' : '' %>">
+                                            <a class="page-link" href="?page=<%= page %>">
+                                                <%= page %>
+                                            </a>
+                                        </li>
+                                        <% } %>
+                                </ul>
+                            </nav>
+                        </div>
+
+
+
+                        <% } else { %>
+                            <div class="no-results-message">
+                                <p>Không tìm thấy kết quả</p>
+                            </div>
+                            <% } %>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+    </div>
+    <%- include('../inc/bottom') %>
