@@ -14,6 +14,7 @@ let ProductSchema = new db.mongoose.Schema(
         type:{type:Number, require:false},
         idShop:{type:db.mongoose.Schema.Types.ObjectId,required:false,ref:'ShopModel'},
         idCategoryPr:{type: db.mongoose.Schema.Types.ObjectId,required:true, ref:'CategoryProductModel'},
+        status:{type:Number, require:true},
     },
     {
         collection:'Products'

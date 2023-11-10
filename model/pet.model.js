@@ -17,6 +17,7 @@ let PetSchema = new db.mongoose.Schema(
         ratings:{type:Array, require:false},
         discount:{type:Number, require:false},
         type:{type:Number, require:false},
+        status:{type:Number, require:true},
     },
     {
         collection:'Pets'

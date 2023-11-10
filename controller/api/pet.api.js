@@ -3,81 +3,81 @@ let mdCategory = require("../../model/categoryPet.model").CategoryPetModel;
 const fs = require("fs");
 const { onUploadImages } = require("../../function/uploadImage");
 exports.listpet = async (req, res, next) => {
-  if (req.method !== "GET") {
-    return res
-      .status(400)
-      .json({ success: false, message: "Method not allowed" });
-  }
+    if (req.method !== "GET") {
+        return res
+            .status(400)
+            .json({ success: false, message: "Method not allowed" });
+    }
 
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = 10;
-    const totalCount = await mdPet.PetModel.countDocuments();
-    const totalPage = Math.ceil(totalCount / limit);
-    const startIndex = (page - 1) * limit;
-    const pageRegex = /^[1-9]+$/;
-    if (page <= 0) {
-      return res
-        .status(200)
-        .json({ success: false, data: [], message: "Số trang phải lớn hơn 0" });
-    }
-    if (page > totalPage) {
-      return res
-        .status(200)
-        .json({ success: false, data: [], message: "Số trang không tồn tại!" });
-    }
-    if (!pageRegex.test(page)) {
-      return res.status(200).json({
-        success: false,
-        data: [],
-        message: "Số trang phải là số nguyên!",
-      });
-    }
-    const listpet = await mdPet.PetModel.find()
-      .select("idShop namePet imagesPet type discount rate pricePet")
-      .populate("idShop", "nameShop locationShop avatarShop status")
-      .limit(limit)
-      .skip(startIndex)
-      .exec();
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const totalCount = await mdPet.PetModel.countDocuments();
+        const totalPage = Math.ceil(totalCount / limit);
+        const startIndex = (page - 1) * limit;
+        const pageRegex = /^[1-9]+$/;
+        if (page <= 0) {
+            return res
+                .status(200)
+                .json({ success: false, data: [], message: "Số trang phải lớn hơn 0" });
+        }
+        if (page > totalPage) {
+            return res
+                .status(200)
+                .json({ success: false, data: [], message: "Số trang không tồn tại!" });
+        }
+        if (!pageRegex.test(page)) {
+            return res.status(200).json({
+                success: false,
+                data: [],
+                message: "Số trang phải là số nguyên!",
+            });
+        }
+        const listpet = await mdPet.PetModel.find()
+            .select("idShop namePet imagesPet type discount rate pricePet")
+            .populate("idShop", "nameShop locationShop avatarShop status")
+            .limit(limit)
+            .skip(startIndex)
+            .exec();
 
-    if (listpet.length > 0) {
-      return res.status(200).json({
-        success: true,
-        data: listpet,
-        message: "Lấy danh sách sản phẩm thành công",
-      });
-    } else {
-      return res
-        .status(200)
-        .json({ success: false, data: [], message: "Không có sản phẩm nào" });
+        if (listpet.length > 0) {
+            return res.status(200).json({
+                success: true,
+                data: listpet,
+                message: "Lấy danh sách thú cưng thành công",
+            });
+        } else {
+            return res
+                .status(200)
+                .json({ success: false, data: [], message: "Không có thú cưng nào" });
+        }
+    } catch (error) {
+        return res
+            .status(200)
+            .json({ success: false, data: [], message: error.message });
     }
-  } catch (error) {
-    return res
-      .status(200)
-      .json({ success: false, data: [], message: error.message });
-  }
 };
 
 exports.listPetFromIdShop = async (req, res, next) => {
-  let idShop = req.params.idShop;
-  if (req.method == "GET") {
-    let listPet = await mdPet.PetModel.find({ idShop: idShop }).select(
-      "namePet imagesPet type discount rate pricePet"
-    );
-    if (listPet) {
-      return res.status(200).json({
-        success: true,
-        data: listPet,
-        message: "Lấy danh sách thú cưng theo shop thành công",
-      });
-    } else {
-      return res.status(500).json({
-        success: false,
-        data: [],
-        message: "Không lấy được danh sách thú cưng",
-      });
+    let idShop = req.params.idShop;
+    if (req.method == "GET") {
+        let listPet = await mdPet.PetModel.find({ idShop: idShop }).select(
+            "namePet imagesPet type discount rate pricePet"
+        );
+        if (listPet) {
+            return res.status(200).json({
+                success: true,
+                data: listPet,
+                message: "Lấy danh sách thú cưng theo shop thành công",
+            });
+        } else {
+            return res.status(500).json({
+                success: false,
+                data: [],
+                message: "Không lấy được danh sách thú cưng",
+            });
+        }
     }
-  }
 };
 exports.detailpet = async (req, res, next) => {
     let idPet = req.params.idPet;
@@ -98,26 +98,26 @@ exports.detailpet = async (req, res, next) => {
 };
 
 exports.listCategory = async (req, res, next) => {
-  try {
-    let listCategory = await mdCategory.find();
-    if (listCategory) {
-      return res.status(200).json({
-        success: true,
-        data: listCategory,
-        message: "Lấy danh sách thể loại thành công.",
-      });
-    } else {
-      return res.status(500).json({
-        success: false,
-        data: {},
-        message: "Lấy danh sách thể loại thất bại!",
-      });
+    try {
+        let listCategory = await mdCategory.find();
+        if (listCategory) {
+            return res.status(200).json({
+                success: true,
+                data: listCategory,
+                message: "Lấy danh sách thể loại thành công.",
+            });
+        } else {
+            return res.status(500).json({
+                success: false,
+                data: {},
+                message: "Lấy danh sách thể loại thất bại!",
+            });
+        }
+    } catch (error) {
+        return res
+            .status(500)
+            .json({ success: false, data: {}, message: "Lỗi: " + error.message });
     }
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ success: false, data: {}, message: "Lỗi: " + error.message });
-  }
 };
 
 exports.addpet = async (req, res, next) => {
@@ -151,6 +151,7 @@ exports.addpet = async (req, res, next) => {
         newObj.detailPet = detail;
         newObj.idShop = req.shop._id;
         newObj.type = 0;
+        newObj.status = 0;
         newObj.rate = 0;
         newObj.ratings = [];
         newObj.createdAt = new Date();
@@ -297,6 +298,62 @@ exports.editPet = async (req, res, next) => {
         }
     }
 }
+
+exports.unremovePet = async (req, res, next) => {
+    let { idPet } = req.body;
+
+    if (req.method == 'PUT') {
+        try {
+            let pet = await mdPet.PetModel.findById(idPet);
+            if (!pet) {
+                return res.status(201).json({ success: false, data: {}, message: "Không tìm thấy thú cưng!" });
+            }
+            pet.status = 0;
+            await mdPet.PetModel.findByIdAndUpdate(idPet, pet);
+            return res.status(201).json({ success: true, data: pet, message: "Đăng thú cưng lên gian hàng thành công." });
+        } catch (error) {
+            return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+        }
+    }
+};
+
+exports.removePet = async (req, res, next) => {
+    let { idPet } = req.body;
+
+    if (req.method == 'PUT') {
+        try {
+            let pet = await mdPet.PetModel.findById(idPet);
+            if (!pet) {
+                return res.status(201).json({ success: false, data: {}, message: "Không tìm thấy thú cưng!" });
+            }
+            pet.status = 1;
+            await mdPet.PetModel.findByIdAndUpdate(idPet, pet);
+            return res.status(201).json({ success: true, data: pet, message: "Gỡ thú cưng khỏi gian hàng thành công." });
+        } catch (error) {
+            return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+        }
+    }
+};
+
+exports.updateStatus = async (req, res, next) => {
+
+    try {
+        let pets = await mdPet.PetModel.find();
+        let petsAfter = [];
+        if (!pets) {
+            return res.status(201).json({ success: false, data: {}, message: "Không tìm thấy thú cưng!" });
+        }
+        for (let i = 0; i < pets.length; i++) {
+            const pet = pets[i];
+            pet.status = 0;
+            await mdPet.PetModel.findByIdAndUpdate(pet._id, pet);
+            petsAfter.push(pet);
+        }
+        return res.status(201).json({ success: true, data: petsAfter, message: "Gỡ thú cưng khỏi gian hàng thành công." });
+    } catch (error) {
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+};
 
 exports.deletepet = async (req, res, next) => {
     let idPet = req.params.idPet;
