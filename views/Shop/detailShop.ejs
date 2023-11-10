@@ -1,15 +1,7 @@
-<%- include('../inc/top',{title:'Chi tiết Shop', adminLogin: adminLogin}) %>
+<%- include('../inc/top',{title:'Chi tiết cửa hàng'}) %>
 
     <div class="container mt-2">
-
-        <div class="form-group row m-2">
-            <label for="nameAdmin" class="col-sm-5 col-form-label" style="color: #848485;">Trang này để xem chi tiết
-                Shop </label>
-            <div class="col-sm-5">
-            </div>
-        </div>
         <form action="" method="get">
-
             <div class="form-group row m-3" style="align-items: center;">
                 <label for="username" form="bold" class="col-sm-2 col-form-label">Avatar</label>
                 <div class="col-sm-5">
@@ -25,16 +17,16 @@
             </div>
 
             <div class="form-group row m-3">
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Tên Shop</label>
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Tên cửa hàng</label>
                 <div class="col-sm-3">
                     <label type="text" class="form-control" style="width: 200px;">
                         <%= ObjShop.nameShop %>
                     </label>
                 </div>
 
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Email Shop</label>
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Email cửa hàng</label>
                 <div class="col-sm-3">
-                    <label type="text" style="width: 200px;" class="form-control">
+                    <label type="text" style="width: 250px; overflow: hidden;" class="form-control">
                         <%= ObjShop.email %>
                     </label>
                 </div>
@@ -42,16 +34,16 @@
             </div>
 
             <div class="form-group row m-3">
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Địa chỉ Shop</label>
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Địa chỉ cửa hàng</label>
                 <div class="col-sm-3">
                     <label type="text" class="form-control" style="width: 200px;">
                         <%= ObjShop.locationShop %>
                     </label>
                 </div>
 
-                <label for="username" form="bold" class="col-sm-2 col-form-label">followers</label>
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Followers</label>
                 <div class="col-sm-3">
-                    <label type="text" style="width: 200px;" class="form-control">
+                    <label type="text" style="width: 250px;" class="form-control">
                         <%= ObjShop.followers %>
                     </label>
                 </div>
@@ -61,23 +53,23 @@
                 <label for="username" form="bold" class="col-sm-2 col-form-label">Số điện thoại</label>
                 <div class="col-sm-3">
                     <label type="text" class="form-control" style="width: 200px;">
-                        <%= ObjShop.hotline %>
+                        0<%= ObjShop.hotline %>
                     </label>
                 </div>
 
                 <label for="username" form="bold" class="col-sm-2 col-form-label">Doanh thu</label>
                 <div class="col-sm-3">
-                    <label type="text" style="width: 200px;" class="form-control">
+                    <label type="text" style="width: 250px;" class="form-control">
                         <%= ObjShop.revenue %>
                     </label>
                 </div>
 
             </div>
             <div class="form-group row m-3">
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Trạng thái Shop</label>
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Trạng thái</label>
                 <div class="col-sm-3">
                     <label type="text" class="form-control" style="width: 200px;">
-                        <%= ObjShop.status %>
+                        <%= ObjShop.status = 0 ? 'Đã được duyệt':'Chưa được duyệt' %>
                     </label>
                 </div>
 
@@ -96,9 +88,9 @@
                 <div class="col-sm-3">
                     <a style="background-color: #F582AE;" href="/shop/detailOwner/<%= ObjShop._id %>" class="btn btn-secondary ">Xem chi tiết</a>
                 </div>
-                <label for="username" form="bold" class="col-sm-2 col-form-label">Ngày tạo</label>
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Ngày đăng ký</label>
                 <div class="col-sm-3">
-                    <label type="text" style="width: 200px;" class="form-control">
+                    <label type="text" style="width: 250px;" class="form-control">
                         <%= moment(ObjShop.createdAt).format('DD/MM/YYYY hh:mm:ss a') %>
                     </label>
                 </div>
