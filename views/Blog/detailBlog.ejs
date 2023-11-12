@@ -1,13 +1,5 @@
-<%- include('../inc/top',{title:'Chi tiết bài viết', adminLogin:adminLogin}) %>
+<%- include('../inc/top',{title:'Chi tiết bài viết'}) %>
     <div class="container mt-2">
-
-        <div class="form-group row m-2">
-            <label for="usernameShopUS" class="col-sm-5 col-form-label" style="color: #848485;">
-                Trang này để xem chi tiết bài viết
-            </label>
-            <div class="col-sm-5">
-            </div>
-        </div>
         <form action="" method="get">
             <div class="form-group row m-2" style="align-items: center;">
                 <label for="username" form="bold" class="col-sm-3 col-form-label">Ảnh bài viết</label>
@@ -18,8 +10,7 @@
                             <img src="<%= image %>"
                                 style="width: 15%; height: 100px; border-radius: 8px; box-shadow: 3px 3px #bfb8bb; margin: 5px;">
                             <% imageShow ++; }).join('') %>
-
-                                <% if(objB.imageBlogs.length > 5) { %>
+                                <% if(objB.imageBlogs.length> 5) { %>
                                     <span
                                         style="font-size: 18px; margin-left: 10px; color: #ffffff; background-color: rgb(199, 202, 202);padding: 12px; border-radius: 60px;">
                                         + <%= objB.imageBlogs.length - imageShow %></span>
@@ -29,7 +20,6 @@
                                             <% } %>
                 </div>
             </div>
-
             <div class="row col-12 m-2">
                 <div class="row col-9">
                     <label for="username" form="bold" class="col-sm-3 col-form-label">Nội dung</label>
@@ -39,7 +29,6 @@
                             readonly><%= objB.contentBlog%></textarea>
                     </div>
                 </div>
-
                 <div class="row col-3">
                     <label for="interect" form="bold" class="col-sm-3 col-form-label" style="width: 100px;">Tương
                         tác</label>
@@ -50,12 +39,11 @@
                     </div>
                 </div>
             </div>
-
             <div class="form-group row m-2">
-                <label for="username" form="bold" class="col-sm-3 col-form-label">Ngày đăng bài</label>
+                <label for="username" form="bold" class="col-sm-3 col-form-label">Ngày tạo bài viết</label>
                 <div class="col-sm-4">
                     <label type="text" class="form-control" id="username">
-                        <%= moment(objB.createAt).format('l') %>
+                        <%= moment(objB.createdAt).format('DD/MM/YYYY hh:mm:ss a') %>
                     </label>
                 </div>
                 <div class="row col-3" style="margin-left: 160px;">
@@ -68,7 +56,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="form-group row m-2">
                 <label class="col-sm-3 col-form-label">Chủ bài đăng</label>
                 <div class="col-sm-4">
@@ -85,12 +72,11 @@
                     </div>
                 </div>
             </div>
-            <!-- Số điện thoại -->
             <div class="form-group row m-2">
-                <label for="phone" class="col-sm-3 col-form-label">Email</label>
+                <label for="phone" class="col-sm-3 col-form-label">Vị trí</label>
                 <div class="col-sm-4">
                     <label type="text" class="form-control" id="sdt">
-                        <%= objUserAcc.emailAddress %>
+                        <%= objB.idUser.locationUser || 'Không có dữ liệu' %>
                     </label>
                 </div>
             </div>
@@ -101,6 +87,5 @@
                 </div>
             </div>
         </form>
-
     </div>
     <%- include('../inc/bottom') %>

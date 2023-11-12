@@ -99,21 +99,3 @@ exports.deletepet = async (req, res, next) => {
     res.render('Pet/deletePet', { message: message, Objpet: Objpet, adminLogin: req.session.adLogin });
 }
 
-exports.reasonDeletepPet = async (req, res, next) => {
-    // let message = ""
-    // let idP = req.params.idP;
-    // let Objpet = await mdpet.PetModel.findById(idP);
-    // console.log("idP  " + idP);
-    // if (req.method == 'POST') {
-    //     try {
-    //         await mdpet.PetModel.findByIdAndDelete(idP);
-    //         console.log("xoa thành công");
-    //         return res.redirect('/pet');
-    //     } catch (error) {
-    //         console.log(error.message);
-    //         console.log("falll");
-    //     }
-    // }
-
-    // res.render('pet/deletepet', { message: message, Objpet: Objpet });
-}

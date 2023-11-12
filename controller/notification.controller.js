@@ -27,7 +27,7 @@
         sendFCMNotification(token, role, message);
       });
 
-      res.render('Notification/notification');
+      res.render('Notification/notification', {adminLogin:req.session.adLogin});
     } catch (error) {
       console.error('Error sending notification and saving message:', error);
       res.status(500).send('Internal Server Error');
@@ -78,5 +78,5 @@
   };
   exports.detailUser = async (req, res, next) => {
       
-    res.render('Notification/notification');
+    res.render('Notification/notification',{adminLogin:req.session.adLogin});
   }

@@ -2,7 +2,7 @@ let mdShop = require('../model/shop.model');
 var moment = require('moment')
 const jwt = require('jsonwebtoken')
 const string_word_secret = process.env.TOKEN_SEC_KEY;
-const { decodeFromSha256, decodeFromAscii, encodeToAscii, encodeToSha256 } = require("../function/hashFunction");
+const { decodeFromSha256, decodeFromAscii } = require("../function/hashFunction");
 exports.listShop = async (req, res, next) => {
     const perPage = 7;
     let msg = '';
@@ -16,7 +16,7 @@ exports.listShop = async (req, res, next) => {
                 const searchTerm = req.query.filterSearch.trim();
                 filterSearch = { fullName: new RegExp(searchTerm, 'i') };
             }
-
+            
             if (typeof (req.query.sortOption) != 'undefined') {
                 sortOption = { fullName: req.query.sortOption };
             }

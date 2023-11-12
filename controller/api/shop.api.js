@@ -1,16 +1,20 @@
 let mdShop = require('../../model/shop.model');
 let mdPet = require('../../model/pet.model').PetModel;
 let mdProduct = require('../../model/product.model').ProductModel;
+let mdBill = require('../../model/billProduct.model').billProductModel;
 let mdAppointment = require('../../model/appointment.model').AppointmentModel;
-let fs = require("fs");
-const jwt = require('jsonwebtoken');
-let bcrypt = require("bcrypt");
-const { onUploadImages } = require("../../function/uploadImage");
-const { encodeToSha256, encodeToAscii } = require("../../function/hashFunction");
-let validator = require('email-validator');
-const nodemailer = require("nodemailer");
 const OTPEmailModel = require("../../model/otpemail.model").OTPEmailModel;
+const jwt = require('jsonwebtoken');
+const bcrypt = require("bcrypt");
+const validator = require('email-validator');
+const nodemailer = require("nodemailer");
 const otpGenerator = require("otp-generator");
+const moment = require('moment');
+const { onUploadImages } = require("../../function/uploadImage");
+const { encodeToSha256, encodeToAscii,
+    decodeFromSha256, decodeFromAscii,
+    removeVietnameseTones, encodeName } = require("../../function/hashFunction");
+const string_word_secret = process.env.TOKEN_SEC_KEY;
 
 exports.listShop = async (req, res, next) => {
     let filterSearch = null;
@@ -58,6 +62,361 @@ exports.listProduct = async (req, res, next) => {
             }
             let listPet = await mdProduct.find({ idShop: req.shop._id }).populate('idCategoryPr').sort({ createdAt: -1 });
             return res.status(200).json({ success: true, data: listPet, message: 'Lấy danh sách product thành công' });
+        } catch (error) {
+            return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
+        }
+    }
+}
+
+exports.listBillAll = async (req, res, next) => {
+    let filterSearch = null;
+
+    if (req.method == 'GET') {
+        try {
+            if (typeof (req.query.filterSearch) != 'undefined' && req.query.filterSearch.trim() != '') {
+                const searchTerm = req.query.filterSearch.trim();
+                filterSearch = { fullName: new RegExp(searchTerm, 'i') };
+            }
+            let listBill = await mdBill.find({ idShop: req.shop._id })
+                // .select(['_id', 'total', 'purchaseDate', ''])
+                .populate({
+                    path: 'products',
+                    populate: {
+                        path: 'idProduct',
+                        // select: ['nameProduct', 'arrProduct', '']
+                    },
+                })
+                .populate({
+                    path: 'idUser',
+                    select: ['fullName', 'avatarUser', 'locationUser']
+                })
+                .sort({ createdAt: -1 });
+            if (listBill && listBill.length > 0) {
+                for (let i = 0; i < listBill.length; i++) {
+                    const bill = listBill[i].toObject();
+
+                    if (bill.deliveryStatus != undefined) {
+                        switch (String(bill.deliveryStatus)) {
+                            case "-2":
+                                bill.colorStatus = "#FD3F3F";
+                                bill.nameStatus = "Giao thất bại";
+                                break;
+                            case "-1":
+                                bill.colorStatus = "#FD3F3F";
+                                bill.nameStatus = "Đơn bị hủy";
+                                break;
+                            case "0":
+                                bill.colorStatus = "#B59800";
+                                bill.nameStatus = "Chờ xác nhận";
+                                break;
+                            case "1":
+                                bill.colorStatus = "#001858";
+                                bill.nameStatus = "Đã xác nhận";
+                                break;
+                            case "2":
+                                bill.colorStatus = "#001858";
+                                bill.nameStatus = "Đang giao";
+                                break;
+                            case "3":
+                                bill.colorStatus = "#009A62";
+                                bill.nameStatus = "Đã giao hàng";
+                                break;
+                            case "4":
+                                bill.colorStatus = "#009A62";
+                                bill.nameStatus = "Đã nhận hàng";
+                                break;
+                            default:
+                                break;
+                        }
+                        listBill.splice(i, 1, bill);
+                    }
+                }
+            }
+            return res.status(200).json({ success: true, data: listBill, message: 'Lấy danh sách product thành công' });
+        } catch (error) {
+            return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
+        }
+    }
+}
+
+exports.listProcessBill = async (req, res, next) => {
+    let filterSearch = null;
+
+    if (req.method == 'GET') {
+        try {
+            if (typeof (req.query.filterSearch) != 'undefined' && req.query.filterSearch.trim() != '') {
+                const searchTerm = req.query.filterSearch.trim();
+                filterSearch = { fullName: new RegExp(searchTerm, 'i') };
+            }
+            let listBill = await mdBill.find({ idShop: req.shop._id, deliveryStatus: {$lte: 1, $gte: 0} })
+                // .select(['_id', 'total', 'purchaseDate', ''])
+                .populate({
+                    path: 'products',
+                    populate: {
+                        path: 'idProduct',
+                        // select: ['nameProduct', 'arrProduct', '']
+                    },
+                })
+                .populate({
+                    path: 'idUser',
+                    select: ['fullName', 'avatarUser', 'locationUser']
+                })
+                .sort({ createdAt: -1 });
+            if (listBill && listBill.length > 0) {
+                for (let i = 0; i < listBill.length; i++) {
+                    const bill = listBill[i].toObject();
+
+                    if (bill.deliveryStatus != undefined) {
+                        switch (String(bill.deliveryStatus)) {
+                            case "-2":
+                                bill.colorStatus = "#FD3F3F";
+                                bill.nameStatus = "Giao thất bại";
+                                break;
+                            case "-1":
+                                bill.colorStatus = "#FD3F3F";
+                                bill.nameStatus = "Đơn bị hủy";
+                                break;
+                            case "0":
+                                bill.colorStatus = "#B59800";
+                                bill.nameStatus = "Chờ xác nhận";
+                                break;
+                            case "1":
+                                bill.colorStatus = "#001858";
+                                bill.nameStatus = "Đã xác nhận";
+                                break;
+                            case "2":
+                                bill.colorStatus = "#001858";
+                                bill.nameStatus = "Đang giao";
+                                break;
+                            case "3":
+                                bill.colorStatus = "#009A62";
+                                bill.nameStatus = "Đã giao hàng";
+                                break;
+                            case "4":
+                                bill.colorStatus = "#009A62";
+                                bill.nameStatus = "Đã nhận hàng";
+                                break;
+                            default:
+                                break;
+                        }
+                        listBill.splice(i, 1, bill);
+                    }
+                }
+            }
+            return res.status(200).json({ success: true, data: listBill, message: 'Lấy danh sách product thành công' });
+        } catch (error) {
+            return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
+        }
+    }
+}
+
+exports.listDeliveringBill = async (req, res, next) => {
+    let filterSearch = null;
+
+    if (req.method == 'GET') {
+        try {
+            if (typeof (req.query.filterSearch) != 'undefined' && req.query.filterSearch.trim() != '') {
+                const searchTerm = req.query.filterSearch.trim();
+                filterSearch = { fullName: new RegExp(searchTerm, 'i') };
+            }
+            let listBill = await mdBill.find({ idShop: req.shop._id, deliveryStatus: 2 })
+                // .select(['_id', 'total', 'purchaseDate', ''])
+                .populate({
+                    path: 'products',
+                    populate: {
+                        path: 'idProduct',
+                        // select: ['nameProduct', 'arrProduct', '']
+                    },
+                })
+                .populate({
+                    path: 'idUser',
+                    select: ['fullName', 'avatarUser', 'locationUser']
+                })
+                .sort({ createdAt: -1 });
+            if (listBill && listBill.length > 0) {
+                for (let i = 0; i < listBill.length; i++) {
+                    const bill = listBill[i].toObject();
+
+                    if (bill.deliveryStatus != undefined) {
+                        switch (String(bill.deliveryStatus)) {
+                            case "-2":
+                                bill.colorStatus = "#FD3F3F";
+                                bill.nameStatus = "Giao thất bại";
+                                break;
+                            case "-1":
+                                bill.colorStatus = "#FD3F3F";
+                                bill.nameStatus = "Đơn bị hủy";
+                                break;
+                            case "0":
+                                bill.colorStatus = "#B59800";
+                                bill.nameStatus = "Chờ xác nhận";
+                                break;
+                            case "1":
+                                bill.colorStatus = "#001858";
+                                bill.nameStatus = "Đã xác nhận";
+                                break;
+                            case "2":
+                                bill.colorStatus = "#001858";
+                                bill.nameStatus = "Đang giao";
+                                break;
+                            case "3":
+                                bill.colorStatus = "#009A62";
+                                bill.nameStatus = "Đã giao hàng";
+                                break;
+                            case "4":
+                                bill.colorStatus = "#009A62";
+                                bill.nameStatus = "Đã nhận hàng";
+                                break;
+                            default:
+                                break;
+                        }
+                        listBill.splice(i, 1, bill);
+                    }
+                }
+            }
+            return res.status(200).json({ success: true, data: listBill, message: 'Lấy danh sách product thành công' });
+        } catch (error) {
+            return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
+        }
+    }
+}
+
+exports.listDeliveredBill = async (req, res, next) => {
+    let filterSearch = null;
+
+    if (req.method == 'GET') {
+        try {
+            if (typeof (req.query.filterSearch) != 'undefined' && req.query.filterSearch.trim() != '') {
+                const searchTerm = req.query.filterSearch.trim();
+                filterSearch = { fullName: new RegExp(searchTerm, 'i') };
+            }
+            let listBill = await mdBill.find({ idShop: req.shop._id, deliveryStatus: 3 })
+                // .select(['_id', 'total', 'purchaseDate', ''])
+                .populate({
+                    path: 'products',
+                    populate: {
+                        path: 'idProduct',
+                        // select: ['nameProduct', 'arrProduct', '']
+                    },
+                })
+                .populate({
+                    path: 'idUser',
+                    select: ['fullName', 'avatarUser', 'locationUser']
+                })
+                .sort({ createdAt: -1 });
+            if (listBill && listBill.length > 0) {
+                for (let i = 0; i < listBill.length; i++) {
+                    const bill = listBill[i].toObject();
+
+                    if (bill.deliveryStatus != undefined) {
+                        switch (String(bill.deliveryStatus)) {
+                            case "-2":
+                                bill.colorStatus = "#FD3F3F";
+                                bill.nameStatus = "Giao thất bại";
+                                break;
+                            case "-1":
+                                bill.colorStatus = "#FD3F3F";
+                                bill.nameStatus = "Đơn bị hủy";
+                                break;
+                            case "0":
+                                bill.colorStatus = "#B59800";
+                                bill.nameStatus = "Chờ xác nhận";
+                                break;
+                            case "1":
+                                bill.colorStatus = "#001858";
+                                bill.nameStatus = "Đã xác nhận";
+                                break;
+                            case "2":
+                                bill.colorStatus = "#001858";
+                                bill.nameStatus = "Đang giao";
+                                break;
+                            case "3":
+                                bill.colorStatus = "#009A62";
+                                bill.nameStatus = "Đã giao hàng";
+                                break;
+                            case "4":
+                                bill.colorStatus = "#009A62";
+                                bill.nameStatus = "Đã nhận hàng";
+                                break;
+                            default:
+                                break;
+                        }
+                        listBill.splice(i, 1, bill);
+                    }
+                }
+            }
+            return res.status(200).json({ success: true, data: listBill, message: 'Lấy danh sách product thành công' });
+        } catch (error) {
+            return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
+        }
+    }
+}
+
+exports.listEvaluatedBill = async (req, res, next) => {
+    let filterSearch = null;
+
+    if (req.method == 'GET') {
+        try {
+            if (typeof (req.query.filterSearch) != 'undefined' && req.query.filterSearch.trim() != '') {
+                const searchTerm = req.query.filterSearch.trim();
+                filterSearch = { fullName: new RegExp(searchTerm, 'i') };
+            }
+            let listBill = await mdBill.find({ idShop: req.shop._id, deliveryStatus: 4 })
+                // .select(['_id', 'total', 'purchaseDate', ''])
+                .populate({
+                    path: 'products',
+                    populate: {
+                        path: 'idProduct',
+                        // select: ['nameProduct', 'arrProduct', '']
+                    },
+                })
+                .populate({
+                    path: 'idUser',
+                    select: ['fullName', 'avatarUser', 'locationUser']
+                })
+                .sort({ createdAt: -1 });
+            if (listBill && listBill.length > 0) {
+                for (let i = 0; i < listBill.length; i++) {
+                    const bill = listBill[i].toObject();
+
+                    if (bill.deliveryStatus != undefined) {
+                        switch (String(bill.deliveryStatus)) {
+                            case "-2":
+                                bill.colorStatus = "#FD3F3F";
+                                bill.nameStatus = "Giao thất bại";
+                                break;
+                            case "-1":
+                                bill.colorStatus = "#FD3F3F";
+                                bill.nameStatus = "Đơn bị hủy";
+                                break;
+                            case "0":
+                                bill.colorStatus = "#B59800";
+                                bill.nameStatus = "Chờ xác nhận";
+                                break;
+                            case "1":
+                                bill.colorStatus = "#001858";
+                                bill.nameStatus = "Đã xác nhận";
+                                break;
+                            case "2":
+                                bill.colorStatus = "#001858";
+                                bill.nameStatus = "Đang giao";
+                                break;
+                            case "3":
+                                bill.colorStatus = "#009A62";
+                                bill.nameStatus = "Đã giao hàng";
+                                break;
+                            case "4":
+                                bill.colorStatus = "#009A62";
+                                bill.nameStatus = "Đã nhận hàng";
+                                break;
+                            default:
+                                break;
+                        }
+                        listBill.splice(i, 1, bill);
+                    }
+                }
+            }
+            return res.status(200).json({ success: true, data: listBill, message: 'Lấy danh sách product thành công' });
         } catch (error) {
             return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
         }
@@ -156,10 +515,56 @@ exports.detailAppointment = async (req, res, next) => {
 
 exports.myShopDetail = async (req, res, next) => {
     try {
-        let ObjShop = await mdShop.ShopModel.findById(req.shop._id);
-        return res.status(200).json({ success: true, data: ObjShop, message: "Lấy dữ liệu chi tiết shop thành công" });
+        let objShop = await mdShop.ShopModel.findById(req.shop._id);
+        return res.status(200).json({ success: true, data: objShop, message: "Lấy dữ liệu chi tiết shop thành công" });
 
     } catch (error) {
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+}
+
+exports.detailOwner = async (req, res, next) => {
+    try {
+        let objShop = await mdShop.ShopModel.findById(req.shop._id);
+        if (!objShop) {
+            return res.status(200).json({ success: false, data: objShop, message: "Không tìm thấy dữ liệu cửa hàng!" });
+        }
+        let objOwner = {};
+
+        const data = jwt.verify(req.shop.ownerIdentity, process.env.TOKEN_SEC_KEY);
+        if (data) {
+            if (data._id == objShop._id) {
+                let encodeOwnerIdentity = data.ownerIdentity;
+                let decodeData = await decodeFromAscii(encodeOwnerIdentity);
+                let decodeObj = { ...JSON.parse(decodeData) };
+                let nameIdentity = decodeFromSha256(decodeObj.nameIdentity);
+                let numberIdentity = decodeFromSha256(decodeObj.numberIdentity);
+                let dateIdentity = decodeFromSha256(decodeObj.dateIdentity);
+                let nameCard = "VU TRONG HOANG LINH";
+                let numberCard = "1234 5678 9101 1278";
+                let nameBank = "MBBank";
+                let expirationDate = "05/25";
+                let createdAt = objShop.createdAt;
+                objOwner = {
+                    nameIdentity: encodeName(removeVietnameseTones(nameIdentity)),
+                    numberIdentity: numberIdentity.substring(0, 2)
+                        + numberIdentity.substring(2, numberIdentity.length - 2)
+                            .replace(/[0-9]/g, '*')
+                        + numberIdentity.substring(numberIdentity.length - 2),
+                    dateIdentity: dateIdentity,
+                    nameCard: encodeName(removeVietnameseTones(nameCard)),
+                    numberCard: numberCard.substring(0, numberCard.length - 3)
+                        .replace(/[0-9]/g, '*')
+                        + numberCard.substring(numberCard.length - 3),
+                    nameBank: nameBank,
+                    expirationDate: expirationDate,
+                    createdAt: moment(createdAt).format("DD/MM/YYYY HH:mm A")
+                };
+            }
+        }
+        return res.status(200).json({ success: true, data: objOwner, message: "Lấy dữ liệu chi tiết shop thành công" });
+    } catch (error) {
+        console.log(error.message);
         return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
     }
 }
@@ -178,12 +583,33 @@ exports.detailShop = async (req, res, next) => {
 
 exports.checkPhoneNumber = async (req, res, next) => {
     try {
-        console.log(req.body.hotline);
         let objU = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
+        if (req.method == "POST") {
+            if (!objU) {
+                return res.status(201).json({ success: true, data: objU, message: "Số điện thoại chưa được đăng ký." });
+            } else {
+                return res.status(201).json({ success: false, data: objU, message: "Số điện thoại đã được đăng ký." });
+            }
+        }
+        if (req.method == "PUT") {
+            if (!objU) {
+                return res.status(201).json({ success: false, data: objU, message: "Số điện thoại chưa được đăng ký." });
+            } else {
+                return res.status(201).json({ success: true, data: objU, message: "Số điện thoại đã được đăng ký." });
+            }
+        }
+    } catch (error) {
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+}
+
+exports.checkEmail = async (req, res, next) => {
+    try {
+        let objU = await mdShop.ShopModel.findOne({ email: req.body.email });
         if (!objU) {
-            return res.status(201).json({ success: true, data: objU, message: "Số điện thoại chưa được đăng ký." });
+            return res.status(201).json({ success: false, data: objU, message: "Email chưa được đăng ký." });
         } else {
-            return res.status(201).json({ success: false, data: objU, message: "Số điện thoại đã được đăng ký." });
+            return res.status(201).json({ success: true, data: objU, message: "Email đã được đăng ký." });
         }
     } catch (error) {
         return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
@@ -443,6 +869,31 @@ exports.updatePassword = async (req, res, next) => {
     }
 };
 
+exports.changePassword = async (req, res, next) => {
+    if (req.method == "PUT") {
+        var body = req.body;
+        if (body.typeUpdate && body.valueUpdate && body.newPassword) {
+            try {
+                let shop = {};
+                if (body.typeUpdate == 'email') {
+                    shop = await mdShop.ShopModel.findOne({ email: body.valueUpdate });
+                } else {
+                    shop = await mdShop.ShopModel.findOne({ hotline: body.valueUpdate });
+                }
+                const salt = await bcrypt.genSalt(10);
+                shop.passWord = await bcrypt.hash(body.newPassword, salt);
+                await mdShop.ShopModel.findByIdAndUpdate(shop._id, shop);
+                return res.status(201).json({ success: true, data: {}, message: "Đổi mật khẩu thành công." });
+            } catch (error) {
+                console.log(error);
+                return res.status(201).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+            }
+        } else {
+            return res.status(500).json({ success: false, data: {}, message: "Đổi mật khẩu thất bại, không nhận được dữ liệu mật khẩu mới! " });
+        }
+    }
+};
+
 exports.updateAvatar = async (req, res, next) => {
     if (req.method == "PUT") {
         try {
@@ -543,6 +994,68 @@ exports.verifyCode = async (req, res, next) => {
     }
 };
 
+exports.sendResetPassword = async (req, res, next) => {
+    if (req.method == "POST") {
+        if (req.body.email != undefined) {
+            var data = await OTPEmailModel.find({ email: req.body.email });
+            var newOTP = otpGenerator.generate(6, {
+                upperCaseAlphabets: false,
+                lowerCaseAlphabets: false,
+                specialChars: false,
+            });
+            await sendEmailResetPassword(req.body.email, newOTP, data, res);
+        }
+    }
+};
+
+exports.verifyResetCode = async (req, res, next) => {
+    if (req.method == "POST") {
+        if (req.body.email != undefined && req.body.otp != undefined) {
+            var data = await OTPEmailModel.find({ email: req.body.email });
+            if (data.length > 0) {
+                if (data[0].code == Number(req.body.otp)) {
+                    var timeBetween =
+                        (new Date().getTime() - new Date(data[0].createAt).getTime()) /
+                        1000;
+                    // console.log(date + "s");
+                    // console.log((date / 60) + "min");
+                    // console.log(new Date() - new Date(data[0].createAt));
+                    if (timeBetween / 60 >= 5) {
+                        return res.status(201).json({
+                            success: false,
+                            data: {},
+                            message: "Mã xác minh quá hạn!",
+                        });
+                    } else {
+                        await OTPEmailModel.findByIdAndDelete(data[0]._id);
+                        return res.status(201).json({
+                            success: true,
+                            data: {},
+                            message: "Xác minh thành công!",
+                        });
+                    }
+                } else {
+                    return res
+                        .status(500)
+                        .json({ success: false, data: {}, message: "Mã xác minh sai!" });
+                }
+            } else {
+                return res.status(500).json({
+                    success: false,
+                    data: {},
+                    message: "Mã xác minh sai hoặc không tồn tại trong cơ sở dữ liệu",
+                });
+            }
+        } else {
+            return res.status(500).json({
+                success: false,
+                data: {},
+                message: "OTP sai hoặc không tồn tại trong cơ sở dữ liệu",
+            });
+        }
+    }
+};
+
 async function sendEmailOTP(email, otp, data, res) {
     var transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
@@ -562,10 +1075,10 @@ async function sendEmailOTP(email, otp, data, res) {
         <div style="padding: 7px; background-color: #003375; border-radius: 7px;">
             <div style="padding: 10px; background-color: white; border-radius: 7px;">
                 <p>Xin chào!</p>
-                <p>Mã xác thực cho email của bạn là ${otp}.</p>
-                <p>Để bảo mật an toàn, Bạn tuyệt đối không cung cấp mã xác thực này cho bất kỳ ai.</p>
-                <p>Mã xác thực có hiệu lực trong vòng 5 phút. Nếu hết thời gian cho yêu cầu này, Xin vui lòng thực hiện lại yêu cầu để nhận được mã xác thực mới.</p>
-                <p>Nếu bạn không yêu cầu xác thực email nữa, bạn có thể bỏ qua email này.</p>
+                <p>Mã xác minh cho email của bạn là ${otp}.</p>
+                <p>Để bảo mật an toàn, Bạn tuyệt đối không cung cấp mã xác minh này cho bất kỳ ai.</p>
+                <p>Mã xác minh có hiệu lực trong vòng 5 phút. Nếu hết thời gian cho yêu cầu này, Xin vui lòng thực hiện lại yêu cầu để nhận được mã xác minh mới.</p>
+                <p>Nếu bạn không yêu cầu xác minh email nữa, bạn có thể bỏ qua email này.</p>
                 <p>Cảm ơn bạn!</p>
                 <img src="cid:logo1" alt="logo-petworld.png"
                     width="200" height="auto" />
@@ -578,11 +1091,99 @@ async function sendEmailOTP(email, otp, data, res) {
             address: "petworld.server.email@gmail.com",
         },
         to: email,
-        subject: "Xác thực email của bạn cho PetworldSeller",
+        subject: "xác minh email của bạn cho PetworldSeller",
         text:
-            "Xin chào! Mã xác thực cho email của bạn là " +
+            "Xin chào! Mã xác minh cho email của bạn là " +
             otp +
-            ". Để bảo mật an toàn, Bạn tuyệt đối không cung cấp mã xác thực này cho bất kỳ ai.",
+            ". Để bảo mật an toàn, Bạn tuyệt đối không cung cấp mã xác minh này cho bất kỳ ai.",
+        html: content,
+        attachments: [
+            {
+                filename: "logo.jpg",
+                path: `public/upload/logo-darktheme.png`,
+                cid: "logo1",
+            },
+        ],
+    };
+    transporter.sendMail(mainOptions, async function (err, info) {
+        if (err) {
+            console.log(err);
+            return res
+                .status(500)
+                .json({ success: false, data: {}, message: "Gửi mã xác minh thất bại!" });
+        } else {
+            console.log("Message sent: " + info.response);
+            if (data.length > 0) {
+                await OTPEmailModel.findByIdAndUpdate(data[0]._id, {
+                    _id: data[0]._id,
+                    email: data[0].email,
+                    code: otp,
+                    typeUser: 1,
+                    createAt: new Date(),
+                });
+                return res.status(201).json({
+                    success: true,
+                    data: {},
+                    message: "Gửi mã xác minh thành công.",
+                });
+            } else {
+                let newOTPEmail = new OTPEmailModel();
+                newOTPEmail.email = email;
+                newOTPEmail.code = otp;
+                newOTPEmail.typeUser = 1;
+                newOTPEmail.createAt = new Date();
+
+                await newOTPEmail.save();
+                return res.status(201).json({
+                    success: true,
+                    data: {},
+                    message: "Gửi mã xác minh thành công.",
+                });
+            }
+        }
+    });
+}
+
+async function sendEmailResetPassword(email, otp, data, res) {
+    var transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
+        auth: {
+            user: "petworld.server.email@gmail.com",
+            pass: "rrcn tlju vwab vgts",
+            // pass: 'Lorem1000.-.. --- .-. . -- .---- ----- ----- -----'
+        },
+        tls: {
+            rejectUnauthorized: false,
+        },
+    });
+    var content = "";
+    content += `
+        <div style="padding: 7px; background-color: #003375; border-radius: 7px;">
+            <div style="padding: 10px; background-color: white; border-radius: 7px;">
+                <p>Xin chào!</p>
+                <p>Mã xác minh cho email của bạn là ${otp}.</p>
+                <p>Để bảo mật an toàn, Bạn tuyệt đối không cung cấp mã xác minh này cho bất kỳ ai.</p>
+                <p>Mã xác minh có hiệu lực trong vòng 5 phút. Nếu hết thời gian cho yêu cầu này, Xin vui lòng thực hiện lại yêu cầu để nhận được mã xác minh mới.</p>
+                <p>Nếu bạn không yêu cầu xác minh email nữa, bạn có thể bỏ qua email này.</p>
+                <p>Cảm ơn bạn!</p>
+                <img src="cid:logo1" alt="logo-petworld.png"
+                    width="200" height="auto" />
+            </div>
+        </div>
+    `;
+    var mainOptions = {
+        from: {
+            name: "noreply@petworld-server.serverapp.com",
+            address: "petworld.server.email@gmail.com",
+        },
+        to: email,
+        subject: "Đặt lại mật khẩu của bạn cho PetworldSeller",
+        text:
+            "Xin chào! Mã xác minh cho email của bạn là " +
+            otp +
+            ". Để bảo mật an toàn, Bạn tuyệt đối không cung cấp mã xác minh này cho bất kỳ ai.",
         html: content,
         attachments: [
             {
