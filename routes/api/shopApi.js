@@ -20,13 +20,14 @@ router.get('/list/bill/processing', mdJWT.api_shop_auth, ShopApiCtrl.listProcess
 router.get('/list/bill/delivering', mdJWT.api_shop_auth, ShopApiCtrl.listDeliveringBill);
 router.get('/list/bill/delivered', mdJWT.api_shop_auth, ShopApiCtrl.listDeliveredBill);
 router.get('/list/bill/evaluated', mdJWT.api_shop_auth, ShopApiCtrl.listEvaluatedBill);
+router.post('/bill/confirm', mdJWT.api_shop_auth, ShopApiCtrl.confirmBill);
 router.get('/list/appointment', mdJWT.api_shop_auth, ShopApiCtrl.listAppointment);
 router.get('/appointment/detail/:idAppt', mdJWT.api_shop_auth, ShopApiCtrl.detailAppointment);
+
 router.post('/checkPhoneNumber', ShopApiCtrl.checkPhoneNumber);
 router.put('/checkPhoneNumber', ShopApiCtrl.checkPhoneNumber);
 router.put('/checkEmail', ShopApiCtrl.checkEmail);
 router.get('/autoLogin', mdJWT.api_shop_auth, ShopApiCtrl.checkStatus);
-
 router.post('/register', uploader.any(), ShopApiCtrl.registerShop);
 router.post('/login', ShopApiCtrl.loginShop);
 router.get('/regex', ShopApiCtrl.getShop);
