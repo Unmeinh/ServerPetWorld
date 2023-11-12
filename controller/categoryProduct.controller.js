@@ -39,20 +39,14 @@ exports.listCategoryProduct = async (req, res, next) => {
                 msg: msg,
                 currentPage: currentPage,
                 totalPages: totalPages,
-                moment: moment
-
+                moment: moment,
+                adminLogin: req.session.adLogin
             });
         } catch (error) {
             msg = '' + error.message;
             console.log('Không lấy được danh sách thể loại sản phẩm: ' + msg);
         }
     }
-
-    // If no search results are found, render a message
-    res.render('CategoryProduct/listCategoryProduct', {
-        msg: 'Không tìm thấy kết quả phù hợp',
-        moment: moment
-    });
 }
 // exports.detailCategoryProduct = async (req, res, next) => {
 //     // let msg='';
@@ -88,16 +82,9 @@ exports.addCategoryProduct = async (req, res, next) => {
         } catch (error) {
             msg = error.message
             console.log("Lỗi: " + msg);
-            // if (error.message.match(new RegExp('Path `nameCategory` is required'))) {
-            //     msg = 'Vui lòng không bỏ trống tên thể loại sản phẩm!';
-            // } else if (error.message.match(new RegExp('Path `nameIcon` is required'))) {
-            //     msg = 'Vui lòng không bỏ trống tên icon!';
-            // } else {
-            //     msg = error.message;
-            // }
         }
     }
-    res.render('CategoryProduct/addCategoryProduct', { msg: msg });
+    res.render('CategoryProduct/addCategoryProduct', { msg: msg,adminLogin: req.session.adLogin });
 }
 exports.editCategoryProduct = async (req, res, next) => {
     let msg = '';
@@ -130,7 +117,7 @@ exports.editCategoryProduct = async (req, res, next) => {
            
         }
     }
-    res.render('CategoryProduct/editCategoryProduct', { Objdata: Objdata ,msg:msg});
+    res.render('CategoryProduct/editCategoryProduct', { Objdata: Objdata ,msg:msg, adminLogin: req.session.adLogin});
 };
 
 
@@ -150,5 +137,5 @@ exports.deleteCategoryProduct = async (req, res, next) => {
         }
     }
 
-    res.render('CategoryProduct/deleteCategoryProduct', { message: message, Objdata: Objdata });
+    res.render('CategoryProduct/deleteCategoryProduct', { message: message, Objdata: Objdata, adminLogin: req.session.adLogin });
 }

@@ -12,9 +12,6 @@ router.get('/',checkLogin.check_request_login, BlogCtrl.listAllBlog);
 
 router.get('/detail/:idBlog',checkLogin.check_request_login, BlogCtrl.detailBlog);
 
-router.get('/add',checkLogin.check_request_login, BlogCtrl.addBlog);
-router.post('/add',uploader.single('imageBlogs'), BlogCtrl.addBlog);
-
 // router.put('/edit/:idBlog', BlogCtrl.editBlog);
 router.get('/delete/:idBlog',checkLogin.check_request_login,BlogCtrl.deleteBlog);
 router.post('/delete/:idBlog',BlogCtrl.deleteBlog);

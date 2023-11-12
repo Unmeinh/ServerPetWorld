@@ -18,6 +18,12 @@ router.post('/insert', mdJWT.api_shop_auth, uploader.any(), PetApiCtrl.addpet);
 
 router.put('/update', mdJWT.api_shop_auth, uploader.any(), PetApiCtrl.editPet);
 
+router.put('/unremove',mdJWT.api_shop_auth, PetApiCtrl.unremovePet);
+
+router.put('/remove',mdJWT.api_shop_auth, PetApiCtrl.removePet);
+
+router.get('/updateStatus',mdJWT.api_shop_auth, PetApiCtrl.updateStatus);
+
 router.delete('/delete/:idPet', mdJWT.api_shop_auth, PetApiCtrl.deletepet);
 
 module.exports = router;
