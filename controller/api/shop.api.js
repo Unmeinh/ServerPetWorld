@@ -77,60 +77,13 @@ exports.listBillAll = async (req, res, next) => {
                 const searchTerm = req.query.filterSearch.trim();
                 filterSearch = { fullName: new RegExp(searchTerm, 'i') };
             }
-            let listBill = await mdBill.find({ idShop: req.shop._id })
-                // .select(['_id', 'total', 'purchaseDate', ''])
-                .populate({
-                    path: 'products',
-                    populate: {
-                        path: 'idProduct',
-                        // select: ['nameProduct', 'arrProduct', '']
-                    },
-                })
-                .populate({
-                    path: 'idUser',
-                    select: ['fullName', 'avatarUser', 'locationUser']
-                })
-                .sort({ createdAt: -1 });
+            let listBill = await getListBill(req.shop._id, {
+                $gte: -5,
+                $lte: 5,
+            })
             if (listBill && listBill.length > 0) {
-                for (let i = 0; i < listBill.length; i++) {
-                    const bill = listBill[i].toObject();
-
-                    if (bill.deliveryStatus != undefined) {
-                        switch (String(bill.deliveryStatus)) {
-                            case "-2":
-                                bill.colorStatus = "#FD3F3F";
-                                bill.nameStatus = "Giao thất bại";
-                                break;
-                            case "-1":
-                                bill.colorStatus = "#FD3F3F";
-                                bill.nameStatus = "Đơn bị hủy";
-                                break;
-                            case "0":
-                                bill.colorStatus = "#B59800";
-                                bill.nameStatus = "Chờ xác nhận";
-                                break;
-                            case "1":
-                                bill.colorStatus = "#001858";
-                                bill.nameStatus = "Đã xác nhận";
-                                break;
-                            case "2":
-                                bill.colorStatus = "#001858";
-                                bill.nameStatus = "Đang giao";
-                                break;
-                            case "3":
-                                bill.colorStatus = "#009A62";
-                                bill.nameStatus = "Đã giao hàng";
-                                break;
-                            case "4":
-                                bill.colorStatus = "#009A62";
-                                bill.nameStatus = "Đã nhận hàng";
-                                break;
-                            default:
-                                break;
-                        }
-                        listBill.splice(i, 1, bill);
-                    }
-                }
+                let list = getListBillWithStatus(listBill);
+                listBill = [...list];
             }
             return res.status(200).json({ success: true, data: listBill, message: 'Lấy danh sách product thành công' });
         } catch (error) {
@@ -148,60 +101,13 @@ exports.listProcessBill = async (req, res, next) => {
                 const searchTerm = req.query.filterSearch.trim();
                 filterSearch = { fullName: new RegExp(searchTerm, 'i') };
             }
-            let listBill = await mdBill.find({ idShop: req.shop._id, deliveryStatus: {$lte: 1, $gte: 0} })
-                // .select(['_id', 'total', 'purchaseDate', ''])
-                .populate({
-                    path: 'products',
-                    populate: {
-                        path: 'idProduct',
-                        // select: ['nameProduct', 'arrProduct', '']
-                    },
-                })
-                .populate({
-                    path: 'idUser',
-                    select: ['fullName', 'avatarUser', 'locationUser']
-                })
-                .sort({ createdAt: -1 });
+            let listBill = await getListBill(req.shop._id, {
+                $gte: 0,
+                $lte: 1,
+            })
             if (listBill && listBill.length > 0) {
-                for (let i = 0; i < listBill.length; i++) {
-                    const bill = listBill[i].toObject();
-
-                    if (bill.deliveryStatus != undefined) {
-                        switch (String(bill.deliveryStatus)) {
-                            case "-2":
-                                bill.colorStatus = "#FD3F3F";
-                                bill.nameStatus = "Giao thất bại";
-                                break;
-                            case "-1":
-                                bill.colorStatus = "#FD3F3F";
-                                bill.nameStatus = "Đơn bị hủy";
-                                break;
-                            case "0":
-                                bill.colorStatus = "#B59800";
-                                bill.nameStatus = "Chờ xác nhận";
-                                break;
-                            case "1":
-                                bill.colorStatus = "#001858";
-                                bill.nameStatus = "Đã xác nhận";
-                                break;
-                            case "2":
-                                bill.colorStatus = "#001858";
-                                bill.nameStatus = "Đang giao";
-                                break;
-                            case "3":
-                                bill.colorStatus = "#009A62";
-                                bill.nameStatus = "Đã giao hàng";
-                                break;
-                            case "4":
-                                bill.colorStatus = "#009A62";
-                                bill.nameStatus = "Đã nhận hàng";
-                                break;
-                            default:
-                                break;
-                        }
-                        listBill.splice(i, 1, bill);
-                    }
-                }
+                let list = getListBillWithStatus(listBill);
+                listBill = [...list];
             }
             return res.status(200).json({ success: true, data: listBill, message: 'Lấy danh sách product thành công' });
         } catch (error) {
@@ -219,60 +125,10 @@ exports.listDeliveringBill = async (req, res, next) => {
                 const searchTerm = req.query.filterSearch.trim();
                 filterSearch = { fullName: new RegExp(searchTerm, 'i') };
             }
-            let listBill = await mdBill.find({ idShop: req.shop._id, deliveryStatus: 2 })
-                // .select(['_id', 'total', 'purchaseDate', ''])
-                .populate({
-                    path: 'products',
-                    populate: {
-                        path: 'idProduct',
-                        // select: ['nameProduct', 'arrProduct', '']
-                    },
-                })
-                .populate({
-                    path: 'idUser',
-                    select: ['fullName', 'avatarUser', 'locationUser']
-                })
-                .sort({ createdAt: -1 });
+            let listBill = await getListBill(req.shop._id, 2)
             if (listBill && listBill.length > 0) {
-                for (let i = 0; i < listBill.length; i++) {
-                    const bill = listBill[i].toObject();
-
-                    if (bill.deliveryStatus != undefined) {
-                        switch (String(bill.deliveryStatus)) {
-                            case "-2":
-                                bill.colorStatus = "#FD3F3F";
-                                bill.nameStatus = "Giao thất bại";
-                                break;
-                            case "-1":
-                                bill.colorStatus = "#FD3F3F";
-                                bill.nameStatus = "Đơn bị hủy";
-                                break;
-                            case "0":
-                                bill.colorStatus = "#B59800";
-                                bill.nameStatus = "Chờ xác nhận";
-                                break;
-                            case "1":
-                                bill.colorStatus = "#001858";
-                                bill.nameStatus = "Đã xác nhận";
-                                break;
-                            case "2":
-                                bill.colorStatus = "#001858";
-                                bill.nameStatus = "Đang giao";
-                                break;
-                            case "3":
-                                bill.colorStatus = "#009A62";
-                                bill.nameStatus = "Đã giao hàng";
-                                break;
-                            case "4":
-                                bill.colorStatus = "#009A62";
-                                bill.nameStatus = "Đã nhận hàng";
-                                break;
-                            default:
-                                break;
-                        }
-                        listBill.splice(i, 1, bill);
-                    }
-                }
+                let list = getListBillWithStatus(listBill);
+                listBill = [...list];
             }
             return res.status(200).json({ success: true, data: listBill, message: 'Lấy danh sách product thành công' });
         } catch (error) {
@@ -290,60 +146,10 @@ exports.listDeliveredBill = async (req, res, next) => {
                 const searchTerm = req.query.filterSearch.trim();
                 filterSearch = { fullName: new RegExp(searchTerm, 'i') };
             }
-            let listBill = await mdBill.find({ idShop: req.shop._id, deliveryStatus: 3 })
-                // .select(['_id', 'total', 'purchaseDate', ''])
-                .populate({
-                    path: 'products',
-                    populate: {
-                        path: 'idProduct',
-                        // select: ['nameProduct', 'arrProduct', '']
-                    },
-                })
-                .populate({
-                    path: 'idUser',
-                    select: ['fullName', 'avatarUser', 'locationUser']
-                })
-                .sort({ createdAt: -1 });
+            let listBill = await getListBill(req.shop._id, 3)
             if (listBill && listBill.length > 0) {
-                for (let i = 0; i < listBill.length; i++) {
-                    const bill = listBill[i].toObject();
-
-                    if (bill.deliveryStatus != undefined) {
-                        switch (String(bill.deliveryStatus)) {
-                            case "-2":
-                                bill.colorStatus = "#FD3F3F";
-                                bill.nameStatus = "Giao thất bại";
-                                break;
-                            case "-1":
-                                bill.colorStatus = "#FD3F3F";
-                                bill.nameStatus = "Đơn bị hủy";
-                                break;
-                            case "0":
-                                bill.colorStatus = "#B59800";
-                                bill.nameStatus = "Chờ xác nhận";
-                                break;
-                            case "1":
-                                bill.colorStatus = "#001858";
-                                bill.nameStatus = "Đã xác nhận";
-                                break;
-                            case "2":
-                                bill.colorStatus = "#001858";
-                                bill.nameStatus = "Đang giao";
-                                break;
-                            case "3":
-                                bill.colorStatus = "#009A62";
-                                bill.nameStatus = "Đã giao hàng";
-                                break;
-                            case "4":
-                                bill.colorStatus = "#009A62";
-                                bill.nameStatus = "Đã nhận hàng";
-                                break;
-                            default:
-                                break;
-                        }
-                        listBill.splice(i, 1, bill);
-                    }
-                }
+                let list = getListBillWithStatus(listBill);
+                listBill = [...list];
             }
             return res.status(200).json({ success: true, data: listBill, message: 'Lấy danh sách product thành công' });
         } catch (error) {
@@ -361,64 +167,44 @@ exports.listEvaluatedBill = async (req, res, next) => {
                 const searchTerm = req.query.filterSearch.trim();
                 filterSearch = { fullName: new RegExp(searchTerm, 'i') };
             }
-            let listBill = await mdBill.find({ idShop: req.shop._id, deliveryStatus: 4 })
-                // .select(['_id', 'total', 'purchaseDate', ''])
-                .populate({
-                    path: 'products',
-                    populate: {
-                        path: 'idProduct',
-                        // select: ['nameProduct', 'arrProduct', '']
-                    },
-                })
-                .populate({
-                    path: 'idUser',
-                    select: ['fullName', 'avatarUser', 'locationUser']
-                })
-                .sort({ createdAt: -1 });
+            let listBill = await getListBill(req.shop._id, 4)
             if (listBill && listBill.length > 0) {
-                for (let i = 0; i < listBill.length; i++) {
-                    const bill = listBill[i].toObject();
-
-                    if (bill.deliveryStatus != undefined) {
-                        switch (String(bill.deliveryStatus)) {
-                            case "-2":
-                                bill.colorStatus = "#FD3F3F";
-                                bill.nameStatus = "Giao thất bại";
-                                break;
-                            case "-1":
-                                bill.colorStatus = "#FD3F3F";
-                                bill.nameStatus = "Đơn bị hủy";
-                                break;
-                            case "0":
-                                bill.colorStatus = "#B59800";
-                                bill.nameStatus = "Chờ xác nhận";
-                                break;
-                            case "1":
-                                bill.colorStatus = "#001858";
-                                bill.nameStatus = "Đã xác nhận";
-                                break;
-                            case "2":
-                                bill.colorStatus = "#001858";
-                                bill.nameStatus = "Đang giao";
-                                break;
-                            case "3":
-                                bill.colorStatus = "#009A62";
-                                bill.nameStatus = "Đã giao hàng";
-                                break;
-                            case "4":
-                                bill.colorStatus = "#009A62";
-                                bill.nameStatus = "Đã nhận hàng";
-                                break;
-                            default:
-                                break;
-                        }
-                        listBill.splice(i, 1, bill);
-                    }
-                }
+                let list = getListBillWithStatus(listBill);
+                listBill = [...list];
             }
             return res.status(200).json({ success: true, data: listBill, message: 'Lấy danh sách product thành công' });
         } catch (error) {
             return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
+        }
+    }
+}
+
+exports.confirmBill = async (req, res, next) => {
+    if (req.method == "POST") {
+        let { idBill, isConfirm } = req.body;
+        if (idBill && isConfirm != undefined) {
+            try {
+                let billProduct = await mdBill.findOne({_id: idBill, idShop: req.shop._id});
+                if (!billProduct) {
+                    return res.status(500).json({ success: false, data: {}, message: "Không tìm thấy hóa đơn trong cơ sở dữ liệu! " });
+                }
+                if (isConfirm == 0) {
+                    billProduct.deliveryStatus = 1;
+                    await mdBill.findByIdAndUpdate(billProduct._id, billProduct);
+                    return res.status(201).json({ success: true, data: {}, message: "Xác nhận đơn hàng thành công." });
+                    //Auto find shipper
+                } 
+                if (isConfirm == 1) {
+                    billProduct.deliveryStatus = -1;
+                    await mdBill.findByIdAndUpdate(billProduct._id, billProduct);
+                    return res.status(201).json({ success: true, data: {}, message: "Hủy nhận đơn hàng thành công." });
+                }
+                
+            } catch (error) {
+                return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+            }
+        } else {
+            return res.status(500).json({ success: false, data: {}, message: "Không đọc được dữ liệu tải lên! " });
         }
     }
 }
@@ -1055,6 +841,196 @@ exports.verifyResetCode = async (req, res, next) => {
         }
     }
 };
+
+async function getListBill(idShop, billStatus) {
+    try {
+        let listbillProduct = await mdBill.aggregate([
+            {
+                $unwind: "$products",
+            },
+            {
+                $match: {
+                    idShop: idShop,
+                    deliveryStatus: billStatus,
+                },
+            },
+            {
+                $lookup: {
+                    from: "User",
+                    localField: "idUser",
+                    foreignField: "_id",
+                    as: "userLookup",
+                },
+            },
+            {
+                $lookup: {
+                    from: "UserAccount",
+                    localField: "userLookup.idAccount",
+                    foreignField: "_id",
+                    as: "userAccLookup",
+                },
+            },
+            {
+                $lookup: {
+                    from: "Products",
+                    localField: "products.idProduct",
+                    foreignField: "_id",
+                    as: "productInfo",
+                },
+            },
+            {
+                $lookup: {
+                    from: "Pets",
+                    localField: "products.idProduct",
+                    foreignField: "_id",
+                    as: "petInfo",
+                },
+            },
+            {
+                $unwind: "$userAccLookup",
+            },
+            {
+                $addFields: {
+                    "productInfo.idProduct": "$productInfo",
+                    "productInfo.amount": "$products.amount",
+                    "productInfo.discount": "$products.discount",
+                    "productInfo.price": "$products.price",
+                    "petInfo.idPet": "$petInfo",
+                    "petInfo.amount": "$products.amount",
+                    "petInfo.discount": "$products.discount",
+                    "petInfo.price": "$products.price",
+                    "userLookup.phoneNumber": "$userAccLookup.phoneNumber",
+                    "userLookup.emailAddress": "$userAccLookup.emailAddress",
+                },
+            },
+            {
+                $group: {
+                    _id: "$_id",
+                    locationDetail: { $first: "$locationDetail" },
+                    total: { $first: "$total" },
+                    paymentMethods: { $first: "$paymentMethods" },
+                    purchaseDate: { $first: "$purchaseDate" },
+                    deliveryStatus: { $first: "$deliveryStatus" },
+                    discountBill: { $first: "$discountBill" },
+                    productInfo: { $push: "$productInfo" },
+                    petInfo: { $first: "$petInfo" },
+                    userInfo: { $first: "$userLookup" },
+                },
+            },
+            {
+                $project: {
+                    locationDetail: 1,
+                    total: 1,
+                    paymentMethods: 1,
+                    purchaseDate: 1,
+                    deliveryStatus: 1,
+                    discountBill: 1,
+                    "productInfo.idProduct": 1,
+                    "productInfo.amount": 1,
+                    "productInfo.price": 1,
+                    "productInfo.discount": 1,
+                    "petInfo.idPet": 1,
+                    "petInfo.amount": 1,
+                    "petInfo.discount": 1,
+                    "petInfo.price": 1,
+                    "userInfo.fullName": 1,
+                    "userInfo.avatarUser": 1,
+                    "userInfo.phoneNumber": 1,
+                    "userInfo.emailAddress": 1,
+                },
+            },
+            { $sort: { purchaseDate: -1 } },
+        ]);
+        if (listbillProduct) {
+            return listbillProduct;
+        } else {
+            return false;
+        }
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+
+function getListBillWithStatus(listBill) {
+    for (let i = 0; i < listBill.length; i++) {
+        const bill = listBill[i];
+
+        if (bill.deliveryStatus != undefined) {
+            switch (String(bill.deliveryStatus)) {
+                case "-2":
+                    bill.colorStatus = "#FD3F3F";
+                    bill.nameStatus = "Giao thất bại";
+                    bill.iconStatus = "truck-remove-outline";
+                    bill.descStatus = "Đơn hàng giao thất bại cho khách hàng của bạn.";
+                    break;
+                case "-1":
+                    bill.colorStatus = "#FD3F3F";
+                    bill.nameStatus = "Đơn bị hủy";
+                    bill.iconStatus = "clipboard-remove-outline";
+                    bill.descStatus = "Đơn hàng đã bị hủy.";
+                    break;
+                case "0":
+                    bill.colorStatus = "#B59800";
+                    bill.nameStatus = "Chờ xác nhận";
+                    bill.iconStatus = "timer-sand";
+                    bill.descStatus = "Đơn hàng đã được đặt và đang chờ được bạn xác nhận.";
+                    break;
+                case "1":
+                    bill.colorStatus = "#001858";
+                    bill.nameStatus = "Đã xác nhận";
+                    bill.iconStatus = "timer-sand-complete";
+                    bill.descStatus = "Đơn hàng đã được xác nhận và đang chờ được giao.";
+                    break;
+                case "2":
+                    bill.colorStatus = "#001858";
+                    bill.nameStatus = "Đang giao";
+                    bill.iconStatus = "truck-fast-outline";
+                    bill.descStatus = "Đơn hàng đang được giao đến khách hàng của bạn.";
+                    break;
+                case "3":
+                    bill.colorStatus = "#009A62";
+                    bill.nameStatus = "Đã giao hàng";
+                    bill.iconStatus = "truck-check-outline";
+                    bill.descStatus = "Đơn hàng đã được giao cho khách hàng của bạn.";
+                    break;
+                case "4":
+                    bill.colorStatus = "#009A62";
+                    bill.nameStatus = "Đã nhận hàng";
+                    bill.iconStatus = "account-check-outline";
+                    bill.descStatus = "Khách hàng đã nhận được sản phẩm của bạn.";
+                    break;
+                default:
+                    break;
+            }
+        }
+        if (bill.paymentMethods != undefined) {
+            switch (String(bill.paymentMethods)) {
+                case "0":
+                    bill.paymentMethods = "Thanh toán khi nhận hàng";
+                    break;
+                case "1":
+                    bill.paymentMethods = "Thẻ Visa";
+                    break;
+                default:
+                    break;
+            }
+        }
+        if (bill.productInfo != undefined) {
+            let arrProduct = bill?.productInfo[0];
+            if (arrProduct.length > 0) {
+                let total = 0;
+                for (let i = 0; i < arrProduct.length; i++) {
+                    const element = arrProduct[i];
+                    total += Number(element?.price) * Number(element?.amount);
+                }
+                bill.totalProduct = total;
+            }
+        }
+        listBill.splice(i, 1, bill);
+    }
+    return listBill;
+}
 
 async function sendEmailOTP(email, otp, data, res) {
     var transporter = nodemailer.createTransport({
