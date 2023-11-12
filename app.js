@@ -19,6 +19,8 @@ var shopRouter = require('./routes/shop');
 var billProductRouter = require('./routes/billProduct');
 var transactionRouter = require('./routes/transaction');
 var notificationRouter=require('./routes/notification');
+var transactionSuccessRouter=require('./routes/transactionSuccess');
+var transactionFailureRouter=require('./routes/transactionFailure');
 
 /** Contact with API write in here */
 var userApiRouter = require('./routes/api/userApi');
@@ -72,6 +74,8 @@ app.use('/shop', shopRouter);
 app.use('/bill-product', billProductRouter);
 app.use('/transaction', transactionRouter);
 app.use('/notification',notificationRouter)
+app.use('/transactionSuccess',transactionSuccessRouter)
+app.use('/transactionFailure',transactionFailureRouter)
 //api use in here
 app.use('/api/user', userApiRouter);
 app.use('/api/blog', blogApiRouter);
