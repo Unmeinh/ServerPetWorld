@@ -9,10 +9,3 @@ exports.transactionSuccess = async (req, res, next) => {
            
 }
 
-exports.transactionFailure = async (req, res, next) => {
-
-    return res.render('StatusTransaction/transactionFailure', {
-                
-    });
-           
-}

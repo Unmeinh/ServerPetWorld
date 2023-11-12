@@ -7,7 +7,6 @@ const path = require('path');
 
 // router.use(express.static(path.join(__dirname, 'public')));
 router.get('/', PaymentCtrl.transactionSuccess);
-router.get('/', PaymentCtrl.transactionFailure);
 // router.get('/detail/:idTransaction', PaymentCtrl.detailPayment);
 // router.post('/', PaymentCtrl.listPayment);
 module.exports = router;
