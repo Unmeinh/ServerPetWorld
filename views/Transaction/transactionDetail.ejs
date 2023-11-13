@@ -1,4 +1,4 @@
-<%- include('../inc/top',{title:'Thanh toán'}) %>
+<%- include('../inc/top',{title:'Chi tiết giao dịch'}) %>
     <link rel="stylesheet" href="../../stylesheets/transactionDetail.css">
     <div class="ms-5">
 
@@ -26,7 +26,7 @@
                         <div class="info">
                             <h2 style="color: #001858;">Số điện thoại: </h2>
                             <h2>
-                                <%= listDetailPayment.idBill.locationDetail?.phoneNumber %>
+                                <%= "+" + listDetailPayment.idBill.locationDetail?.phoneNumber %>
                             </h2>
                         </div>
 
@@ -215,7 +215,7 @@
 
 
                         <div
-                            style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; position: absolute; bottom: 0; width: 96%;">
+                            style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; bottom: 0; width: 96%;">
                             <p> Số bản ghi: <span style="font-weight: bold;">
                                     <%= countNowProduct %>/<%= countAllProduct %>
                                 </span></p>
