@@ -21,6 +21,7 @@ var transactionRouter = require('./routes/transaction');
 var notificationRouter=require('./routes/notification');
 
 /** Contact with API write in here */
+var authApiRouter = require('./routes/api/authApi');
 var userApiRouter = require('./routes/api/userApi');
 var blogApiRouter = require('./routes/api/blogApi');
 // var itemCartApiRouter = require('./routes/api/itemCartApi');
@@ -73,6 +74,7 @@ app.use('/bill-product', billProductRouter);
 app.use('/transaction', transactionRouter);
 app.use('/notification',notificationRouter)
 //api use in here
+app.use('/api/', authApiRouter);
 app.use('/api/user', userApiRouter);
 app.use('/api/blog', blogApiRouter);
 // app.use('/api/item-carts', itemCartApiRouter);

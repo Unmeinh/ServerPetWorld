@@ -33,15 +33,15 @@ let billProductSchema = new db.mongoose.Schema(
         discount: { type: Number },
       },
     ],
-    // billDate: {
-    //   createdAt: { type: Date, required: false }, //Ngày tạo bill
-    //   paidAt: { type: Date, required: false }, //Ngày thanh toán đơn
-    //   confirmedAt: { type: Date, required: false }, //Ngày shop duyệt đơn
-    //   deliveringAt: { type: Date, required: false }, //Ngày shipper bắt đầu giao hàng
-    //   deliveredAt: { type: Date, required: false }, //Ngày shipper giao hàng cho khách hàng
-    //   receivedAt: { type: Date, required: false }, //Ngày khách hàng xác nhận đã nhận hàng
-    //   evaluatedAt: { type: Date, required: false }, //Ngày khách hàng đánh giá đơn
-    // }
+    billDate: {
+      paidAt: { type: Date, required: false }, //Ngày thanh toán đơn
+      confirmedAt: { type: Date, required: false }, //Ngày shop duyệt đơn
+      deliveringAt: { type: Date, required: false }, //Ngày shipper bắt đầu giao hàng
+      deliveredAt: { type: Date, required: false }, //Ngày shipper giao hàng cho khách hàng
+      receivedAt: { type: Date, required: false }, //Ngày khách hàng xác nhận đã nhận hàng
+      ratedAt: { type: Date, required: false }, //Ngày khách hàng đánh giá đơn
+      cancelledAt: { type: Date, required: false }, //Ngày shop hủy đơn
+    }
   },
   {
     collection: "billProducts",
