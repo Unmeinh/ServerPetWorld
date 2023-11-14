@@ -282,15 +282,16 @@ exports.confirmBill = async (req, res, next) => {
 
 exports.confirmBillALl = async (req, res, next) => {
     if (req.method == "POST") {
-        let billProduct = await mdBill.find({ idShop: req.shop._id });
-        if (billProduct) {
-            for (let i = 0; i < billProduct.length; i++) {
-                const bill = billProduct[i];
-                bill.deliveryStatus = 0;
-                await mdBill.findByIdAndUpdate(bill._id, bill);
-            }
-        }
-        return res.status(201).json({ data: true })
+        // bỏ cmt đoạn dưới này và call api ở postman để đổi toàn bộ status lại thành 0 để test
+        // let billProduct = await mdBill.find({ idShop: req.shop._id });
+        // if (billProduct) {
+        //     for (let i = 0; i < billProduct.length; i++) {
+        //         const bill = billProduct[i];
+        //         bill.deliveryStatus = 0;
+        //         await mdBill.findByIdAndUpdate(bill._id, bill);
+        //     }
+        // }
+        // return res.status(201).json({ data: true })
         let { isConfirm } = req.body;
         if (isConfirm != undefined) {
             try {
