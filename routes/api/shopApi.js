@@ -20,7 +20,9 @@ router.get('/list/bill/processing', mdJWT.api_shop_auth, ShopApiCtrl.listProcess
 router.get('/list/bill/delivering', mdJWT.api_shop_auth, ShopApiCtrl.listDeliveringBill);
 router.get('/list/bill/delivered', mdJWT.api_shop_auth, ShopApiCtrl.listDeliveredBill);
 router.get('/list/bill/evaluated', mdJWT.api_shop_auth, ShopApiCtrl.listEvaluatedBill);
+router.get('/list/bill/cancelled', mdJWT.api_shop_auth, ShopApiCtrl.listCancelledBill);
 router.post('/bill/confirm', mdJWT.api_shop_auth, ShopApiCtrl.confirmBill);
+router.post('/bill/confirmAll', mdJWT.api_shop_auth, ShopApiCtrl.confirmBillALl);
 router.get('/list/appointment', mdJWT.api_shop_auth, ShopApiCtrl.listAppointment);
 router.get('/appointment/detail/:idAppt', mdJWT.api_shop_auth, ShopApiCtrl.detailAppointment);
 

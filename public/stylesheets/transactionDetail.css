@@ -18,8 +18,8 @@
 
     --card-padding: 3.2rem;
     --padding-1: 1.2rem;
-
-    --box-shadow: 0 2rem 3rem var(--color-light);
+    --box-shadow: 0 0 1rem var(--color-light);
+    --box-shadow1: 0 2rem 3rem var(--color-light);
 }
 
 .dark-mode-variables {
@@ -140,7 +140,7 @@ main .analyse>div {
 }
 
 main .analyse>div:hover {
-    box-shadow: none;
+    box-shadow: var(--box-shadow1);
 }
 
 
