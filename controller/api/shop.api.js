@@ -7,7 +7,7 @@ exports.listShop = async (req, res, next) => {
     try {
         if (req.query.hasOwnProperty('page') && req.query.hasOwnProperty('day')) {
             const page = parseInt(req.query.page) || 1;
-    
+            
 
             // Validate page and days
             if (page <= 0 || isNaN(page) ) {

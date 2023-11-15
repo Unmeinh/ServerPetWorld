@@ -1,20 +1,45 @@
 let mdNoti = require('../../model/notice.model');
 
 exports.listAllNotice = async (req, res, next) => {
-  const {_id}=req.user;
-  try {
-      let listAllNotice = await mdNoti.NoticeModel.find({idUser: _id});
-      if (listAllNotice) {
-          return res.status(200).json({ success: true, data: listAllNotice, message: "Lấy danh sách tất cả Notice thành công" });
-      }
-      else {
-          return res.status(203).json({ success: false, message: "Không có dữ liệu blog" });
-      }
+  const { _id } = req.user;
+  const { status } = req.params;
+  const page = req.query.page ? parseInt(req.query.page) : 1;
+  const limit = req.query.limit ? parseInt(req.query.limit) : 10;
 
+  try {
+    if (page <= 0 || isNaN(page) || limit <= 0 || isNaN(limit)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Số trang và số mục trên mỗi trang không hợp lệ.',
+      });
+    }
+
+    const startIndex = (page - 1) * limit;
+
+    const query = { idUser: _id, status: status };
+
+    const listAllNotice = await mdNoti.NoticeModel
+      .find(query)
+      .skip(startIndex)
+      .limit(limit);
+
+    if (listAllNotice) {
+      return res.status(200).json({
+        success: true,
+        data: listAllNotice,
+        message: "Lấy danh sách tất cả Notice thành công",
+      });
+    } else {
+      return res.status(203).json({
+        success: false,
+        message: "Không có dữ liệu ",
+      });
+    }
   } catch (error) {
-      return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 }
+
 
 function validateNotificationData(notificationData) {
   const message = [];
@@ -30,8 +55,6 @@ function validateNotificationData(notificationData) {
   if (typeof notificationData.status !== 'number' || ![0, 1, 2].includes(notificationData.status)) {
     message.push('Trạng thái không hợp lệ!');
   }
-
-  // Kiểm tra các điều kiện khác cần thiết
 
   return message;
 }
@@ -51,13 +74,10 @@ exports.addNoti = async (req, res, next) => {
         console.log("url:http://localhost:3000/upload/" + req.file.originalname);
         newObj.image = "http://localhost:3000/upload/" + req.file.originalname;
       } else {
-        // Set a default image URL if the user didn't upload an image
         newObj.image = "http://localhost:3000/upload/jiso.png";
       }
       const validationErrors = validateNotificationData(newObj);
-
       if (validationErrors.length > 0) {
-     // Xử lý lỗi nếu có
      return res.status(400).json({ errors: validationErrors });
 }
       try {
@@ -114,9 +134,7 @@ exports.addNoti = async (req, res, next) => {
      
     };
     
-    
-
-
+  
     exports.deleteNotice = async (req, res, next) => {
       let idNotice = req.params.idNotice;
       if (req.method == 'DELETE') {

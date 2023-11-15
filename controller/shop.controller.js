@@ -22,16 +22,6 @@ exports.updateShopStatus = async (req, res, next) => {
 
     res.render('Shop/updateShop', { message: message, ObjShop: ObjShop });
 }
-exports.confirmAll = async (req, res, next) => {
-    let message = "";
-    try {
-        await mdShop.ShopModel.updateMany({ status: 0 }, { status: 1 });
-        message = "Xác nhận tất cả cửa hàng thành công.";
-    } catch (error) {
-        message = "Lỗi xác nhận cửa hàng: " + error.message;
-        console.error(message);
-    }
-    res.redirect('/shop'); 
 
 
 
