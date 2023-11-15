@@ -16,22 +16,28 @@ const { encodeToSha256, encodeToAscii,
     removeVietnameseTones, encodeName } = require("../../function/hashFunction");
 
 exports.listShop = async (req, res, next) => {
-    let filterSearch = null;
+    try {
+        if (req.query.hasOwnProperty('page') && req.query.hasOwnProperty('day')) {
+            const page = parseInt(req.query.page) || 1;
+            
 
-    if (req.method == 'GET') {
-        try {
-            if (typeof (req.query.filterSearch) != 'undefined' && req.query.filterSearch.trim() != '') {
-                const searchTerm = req.query.filterSearch.trim();
-                filterSearch = { fullName: new RegExp(searchTerm, 'i') };
+            // Validate page and days
+            if (page <= 0 || isNaN(page) ) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Số trang và số ngày không hợp lệ.',
+                });
             }
             let listShop = await mdShop.ShopModel.find(filterSearch);
             return res.status(200).json({ success: true, data: listShop, message: 'Lấy danh sách shop thành công' });
-        } catch (error) {
+        }
+    } catch (error) {
             return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
         }
-    }
-
+        
 }
+
+
 
 exports.listPet = async (req, res, next) => {
     let filterSearch = null;

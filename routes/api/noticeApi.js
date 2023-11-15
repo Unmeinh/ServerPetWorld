@@ -3,7 +3,7 @@ var noticeCtrl = require('../../controller/api/notice.api');
 var router = express.Router();
 var mdJWT= require('../../middlewares/api.auth');
 
-router.get('/list/all',mdJWT.api_user_auth, noticeCtrl.listAllNotice);
+router.get('/list/all/:status',mdJWT.api_auth, noticeCtrl.listAllNotice);
 
 router.post('/insert',mdJWT.api_user_auth, noticeCtrl.addNoti);
 
