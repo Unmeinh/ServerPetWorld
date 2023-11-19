@@ -482,7 +482,7 @@ exports.detailShop = async (req, res, next) => {
 
     let idShop = req.params.idShop;
     try {
-        let ObjShop = await mdShop.ShopModel.findById(idShop);
+        let ObjShop = await mdShop.ShopModel.findById({_id: idShop});
         return res.status(200).json({ success: true, data: ObjShop, message: "Lấy dữ liệu chi tiết shop thành công" });
 
     } catch (error) {
