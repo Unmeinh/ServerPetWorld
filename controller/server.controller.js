@@ -1,5 +1,6 @@
 var serverModal = require("../model/server.modal");
-
+const mdProduct = require("../model/product.model");
+const mdPet = require("../model/pet.model");
 // exports.insert = async (req, res) => {
 //   try {
 //     const newServer = new server.serverModal({
@@ -27,18 +28,62 @@ var serverModal = require("../model/server.modal");
 exports.getPaymentMethods = async (req, res) => {
   try {
     const payments = await serverModal.serverModal.findOne({});
-    res
-      .status(200)
-      .json({
-        success: true,
-        data: payments.payments,
-        message: "Lấy phương thức thanh toán thành công",
-      });
+    res.status(200).json({
+      success: true,
+      data: payments.payments,
+      message: "Lấy phương thức thanh toán thành công",
+    });
   } catch (error) {
     res.status(500).json({
-        success: false,
-        data: [],
-        message: "Lấy phương thức thanh toán thất bại",
-      });
+      success: false,
+      data: [],
+      message: "Lấy phương thức thanh toán thất bại",
+    });
+  }
+};
+
+exports.Listbanner = async (req, res, next) => {
+  try {
+    let listProduct = await mdProduct.ProductModel.find()
+      .sort({
+        quantitySold: -1,
+      })
+      .limit(1)
+      .select("nameProduct arrProduct priceProduct quantitySold discount")
+      .populate("idShop", "nameShop locationShop avatarShop status");
+
+    let listPet = await mdPet.PetModel.find()
+      .sort({
+        quantitySold: -1,
+      })
+      .limit(1)
+      .select("namePet imagesPet pricePet quantitySold discount")
+      .populate("idShop", "nameShop locationShop avatarShop status");
+    let discountProduct = await mdProduct.ProductModel.find()
+      .sort({
+        discount: -1,
+      })
+      .limit(1)
+      .select("nameProduct arrProduct priceProduct quantitySold discount")
+      .populate("idShop", "nameShop locationShop avatarShop status");
+    let discountPet = await mdPet.PetModel.find()
+      .sort({
+        discount: -1,
+      })
+      .limit(1)
+      .select("namePet imagesPet pricePet quantitySold discount")
+      .populate("idShop", "nameShop locationShop avatarShop status");
+
+    return res.status(200).json({
+      success: false,
+      data: [...listProduct, ...listPet, ...discountPet, ...discountProduct],
+      message: "Lấy danh sách thành công",
+    });
+  } catch (error) {
+    return res.status(200).json({
+      success: false,
+      data: listProduct,
+      message: "Lấy danh sách thành công",
+    });
   }
 };
