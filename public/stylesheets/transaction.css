@@ -19,7 +19,8 @@
     --card-padding: 3.2rem;
     --padding-1: 1.2rem;
 
-    --box-shadow: 0 2rem 3rem var(--color-light);
+    --box-shadow: 0 0 1rem var(--color-light);
+    --box-shadow1: 0 2rem 3rem var(--color-light);
 }
 
 .dark-mode-variables {
@@ -129,19 +130,22 @@ main .analyse {
 
 main .analyse>div {
     background-color: var(--color-white);
-    width: 600px;
+    width: auto;
+    min-width: 38rem;
     height: 305px;
     border-radius: var(--card-border-radius);
     margin-top: 1rem;
-
     box-shadow: var(--box-shadow);
     cursor: pointer;
-    transition: all 0.3s ease;
-
+    transition: box-shadow 0.3s ease, max-width 0.3s ease;
+    max-width: 100%;
+    /* Set maximum width to 100% */
 }
 
+
+
 main .analyse>div:hover {
-    box-shadow: none;
+    box-shadow: var(--box-shadow1);
 }
 
 main .analyse>div .status-head {

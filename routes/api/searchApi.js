@@ -5,4 +5,5 @@ var router = express.Router();
 
 router.get("/:name", mdJWT.api_user_auth, SearchController.searchApi);
 
+router.get("/shop/:name", mdJWT.api_user_auth, SearchController.searchShop);
 module.exports = router;

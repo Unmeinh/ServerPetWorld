@@ -539,9 +539,9 @@ async function sendEmailOTP(email, otp, data, res) {
       <div style="padding: 7px; background-color: #003375; border-radius: 7px;">
           <div style="padding: 10px; background-color: white; border-radius: 7px;">
               <p>Xin chào!</p>
-              <p>Mã xác thực đặt lại mật khẩu của bạn là ${otp}.</p>
-              <p>Để bảo mật an toàn, Bạn tuyệt đối không cung cấp mã xác thực này cho bất kỳ ai.</p>
-              <p>Mã xác thực có hiệu lực trong vòng 5 phút. Nếu hết thời gian cho yêu cầu này, Xin vui lòng thực hiện lại yêu cầu để nhận được mã xác thực mới.</p>
+              <p>Mã xác minh đặt lại mật khẩu của bạn là ${otp}.</p>
+              <p>Để bảo mật an toàn, Bạn tuyệt đối không cung cấp mã xác minh này cho bất kỳ ai.</p>
+              <p>Mã xác minh có hiệu lực trong vòng 5 phút. Nếu hết thời gian cho yêu cầu này, Xin vui lòng thực hiện lại yêu cầu để nhận được mã xác minh mới.</p>
               <p>Nếu bạn không yêu cầu đặt lại mật khẩu nữa, bạn có thể bỏ qua email này.</p>
               <p>Cảm ơn bạn!</p>
               <img src="cid:logo1" alt="logo-petworld.png"
@@ -557,9 +557,9 @@ async function sendEmailOTP(email, otp, data, res) {
     to: email,
     subject: "Đặt lại mật khẩu của bạn cho Petworld",
     text:
-      "Xin chào! Mã xác thực đặt lại mật khẩu của bạn là " +
+      "Xin chào! Mã xác minh đặt lại mật khẩu của bạn là " +
       otp +
-      ". Để bảo mật an toàn, Bạn tuyệt đối không cung cấp mã xác thực này cho bất kỳ ai.",
+      ". Để bảo mật an toàn, Bạn tuyệt đối không cung cấp mã xác minh này cho bất kỳ ai.",
     html: content,
     attachments: [
       {
