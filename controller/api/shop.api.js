@@ -21,7 +21,7 @@ exports.listShop = async (req, res, next) => {
             const page = parseInt(req.query.page) || 1;
             
 
-            // Validate page and days
+          
             if (page <= 0 || isNaN(page) ) {
                 return res.status(400).json({
                     success: false,
