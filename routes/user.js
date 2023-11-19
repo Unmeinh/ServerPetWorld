@@ -1,5 +1,6 @@
 var express = require('express');
 var UserCtrl = require('../controller/user.controller');
+
 var router = express.Router();
 var checkLogin = require('../middlewares/checkLogin');
 router.get('/',checkLogin.check_request_login, UserCtrl.listUser);

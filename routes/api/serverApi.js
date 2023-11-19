@@ -8,4 +8,7 @@ router.get(
   mdJWT.api_user_auth,
   serverController.getPaymentMethods
 );
+
+router.get("/listBanner", mdJWT.api_user_auth, serverController.Listbanner);
+
 module.exports = router;

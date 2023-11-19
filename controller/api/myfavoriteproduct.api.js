@@ -38,8 +38,6 @@ exports.addFavoriteProducts = async (req, res, next) => {
       newFavorite.idUser = _id;
       listFavorite = await newFavorite.save();
     }
-
-    // Kiểm tra xem idProduct tồn tại trong collection Product
     const productExists = await mdProduct.ProductModel.exists({ _id: idProduct });
     
     if (!productExists) {
@@ -101,17 +99,17 @@ exports.deleteFavoriteProducts = async (req, res, next) => {
 
   if (req.method === 'DELETE') {
     try {
-      // Tìm tài liệu yêu thích dựa trên _id của người dùng
+
       const listFavorite = await mdFavoriteProducts.FavoriteModel.findOne({ idUser: _id });
 
       if (!listFavorite) {
         return res.status(404).json({ success: false, data: {}, message: "Không tìm thấy danh sách yêu thích" });
       }
 
-      // Loại bỏ idProduct ra khỏi danh sách yêu thích (nếu nó tồn tại trong danh sách)
+
       const updatedList = listFavorite.idProduct.filter(productId => productId !== idProduct);
       
-      // Cập nhật danh sách yêu thích mới
+ 
       listFavorite.idProduct = updatedList;
       await listFavorite.save();
 
