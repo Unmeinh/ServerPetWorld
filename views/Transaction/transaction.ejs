@@ -1,4 +1,4 @@
-<%- include('../inc/top',{title:'Thanh toán'}) %>
+<%- include('../inc/top',{title:'Giao dịch'}) %>
     <link rel="stylesheet" href="../../stylesheets/transaction.css">
     <div class="ms-5">
 
@@ -222,7 +222,7 @@
                                             </label>
                                             <% } else { %>
                                                 <label type="text" style="width: 200px;">
-                                                    Không có khách hàng
+                                                    Lỗi không xác định
                                                 </label>
                                                 <% } %>
                                 </td>
@@ -259,7 +259,7 @@
                                                                 </label>
                                                                 <% } else { %>
                                                                     <label type="text" style="width: 200px;">
-                                                                        Không có khách hàng
+                                                                        Lỗi không xác định
                                                                     </label>
                                                                     <% } %>
                                 </td>
@@ -278,7 +278,7 @@
 
 
                         <div
-                            style="display: flex; flex-direction: row; align-items: center;justify-content: space-between;position:absolute ; bottom: 0; width: 96%;">
+                            style="display: flex; flex-direction: row; align-items: center;justify-content: space-between; bottom: 0; width: 96%;position:absolute ; ">
                             <p> Số bản ghi: <span style="font-weight: bold;">
                                     <%= countNowProduct %>/<%= countAllProduct %>
                                 </span></p>
