@@ -237,6 +237,225 @@ exports.listCancelledBill = async (req, res, next) => {
     }
 }
 
+exports.listAppointment = async (req, res, next) => {
+    let listCheck = await mdAppointment.find({ idShop: req.shop._id });
+    for (let i = 0; i < listCheck.length; i++) {
+        const appointment = listCheck[i];
+        if (new Date(appointment.appointmentDate) < new Date() && appointment.status == 0) {
+            appointment.status = 2;
+            await mdAppointment.findByIdAndUpdate(appointment._id, appointment);
+        }
+    }
+    let listAppointment = await mdAppointment.aggregate([
+        {
+            $match: {
+                idShop: req.shop._id
+            }
+        },
+        { $sort: { appointmentDate: -1 } },
+        {
+            $lookup: {
+                from: "Pets",
+                localField: "idPet",
+                foreignField: "_id",
+                as: "iPet"
+            }
+        },
+        {
+            $lookup: {
+                from: "User",
+                localField: "idUser",
+                foreignField: "_id",
+                as: "iUser"
+            }
+        },
+        {
+            $group: {
+                _id: {
+                    year: { $year: "$appointmentDate" },
+                    month: { $month: "$appointmentDate" }
+                },
+                appointments: {
+                    $push: {
+                        _id: "$_id",
+                        idPet: "$iPet",
+                        idUser: "$iUser",
+                        idShop: "$iShop",
+                        amountPet: "$amountPet",
+                        location: "$location",
+                        deposits: "$deposits",
+                        status: "$status",
+                        appointmentDate: "$appointmentDate",
+                        createdAt: "$createdAt"
+                    }
+                }
+            }
+        },
+        { $project: { _id: '$_id', appointments: '$appointments' } },
+        { $sort: { _id: -1 } },
+    ]);
+    if (listAppointment) {
+        return res.status(200).json({ success: true, data: listAppointment, message: 'Lấy danh sách lịch hẹn thành công.' });
+    } else {
+        return res.status(500).json({ success: false, data: [], message: 'Không lấy được danh sách lịch hẹn' });
+    }
+}
+
+exports.detailShop = async (req, res, next) => {
+
+    let idShop = req.params.idShop;
+    try {
+        let ObjShop = await mdShop.ShopModel.findById(idShop);
+        return res.status(200).json({ success: true, data: ObjShop, message: "Lấy dữ liệu chi tiết shop thành công" });
+
+    } catch (error) {
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+}
+
+exports.detailPet = async (req, res, next) => {
+    if (req.method == 'GET') {
+        let pet = await mdPet.findById(req.params.idPet)
+            .populate({
+                path: 'idCategoryP',
+                select: 'nameCategory'
+            });
+        if (pet) {
+            pet = pet.toObject();
+            if (pet.sizePet != undefined) {
+                switch (pet.sizePet) {
+                    case 0:
+                        pet.sizePet = "Nhỏ";
+                        break;
+                    case 1:
+                        pet.sizePet = "Vừa";
+                        break;
+                    case 2:
+                        pet.sizePet = "Lớn";
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            if (pet.status != undefined) {
+                switch (pet.status) {
+                    case 0:
+                        pet.status = "Đang bán";
+                        break;
+                    case 1:
+                        pet.status = "Đang ẩn";
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            return res.status(200).json({ success: true, data: pet, message: 'Lấy thú cưng thành công.' });
+        } else {
+            return res.status(500).json({ success: false, data: {}, message: 'Không lấy được thú cưng' });
+        }
+    }
+}
+
+exports.detailProduct = async (req, res, next) => {
+    if (req.method == 'GET') {
+        let product = await mdProduct.findById(req.params.idProd)
+            .populate({
+                path: 'idCategoryPr',
+                select: 'nameCategory'
+            });
+        if (product) {
+            product = product.toObject();
+            if (product.status != undefined) {
+                switch (product.status) {
+                    case 0:
+                        product.status = "Đang bán";
+                        break;
+                    case 1:
+                        product.status = "Đang ẩn";
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            return res.status(200).json({ success: true, data: product, message: 'Lấy sản phẩm thành công.' });
+        } else {
+            return res.status(500).json({ success: false, data: {}, message: 'Không lấy được sản phẩm' });
+        }
+    }
+}
+
+exports.detailAppointment = async (req, res, next) => {
+    if (req.method == 'GET') {
+        let appointment = await mdAppointment.findById(req.params.idAppt)
+            .populate({
+                path: 'idPet',
+                populate: {
+                    path: 'idCategoryP',
+                    select: 'nameCategory'
+                }
+            })
+            .populate({
+                path: 'idUser',
+                populate: {
+                    path: 'idAccount',
+                    select: ['phoneNumber', 'emailAddress']
+                },
+                select: ['avatarUser', 'fullName', 'locationUser', 'idAccount']
+            });
+        if (appointment) {
+            appointment = appointment.toObject();
+            if (new Date(appointment?.appointmentDate) < new Date() && appointment?.status == 0) {
+                appointment.status = 2;
+                await mdAppointment.findByIdAndUpdate(appointment._id, appointment);
+                appointment.canConfirm = false;
+                appointment.canCancel = false;
+                appointment.nameStatus = "Đã lỡ hẹn";
+                return res.status(200).json({ success: true, data: appointment, message: 'Lấy lịch hẹn thành công.' });
+            }
+            switch (String(appointment.status)) {
+                case "-1":
+                    appointment.canAccept = true;
+                    appointment.canCancel = false;
+                    appointment.canConfirm = false;
+                    appointment.nameStatus = "Chờ xác nhận";
+                    break;
+                case "0":
+                    appointment.canAccept = false;
+                    appointment.canCancel = true;
+                    appointment.canConfirm = true;
+                    appointment.nameStatus = "Đang hẹn";
+                    break;
+                case "1":
+                    appointment.canAccept = false;
+                    appointment.canCancel = false;
+                    appointment.canConfirm = false;
+                    appointment.nameStatus = "Đã hẹn";
+                    break;
+                case "2":
+                    appointment.canAccept = false;
+                    appointment.canCancel = false;
+                    appointment.canConfirm = false;
+                    appointment.nameStatus = "Đã lỡ hẹn";
+                    break;
+                case "3":
+                    appointment.canAccept = false;
+                    appointment.canCancel = false;
+                    appointment.canConfirm = false;
+                    appointment.nameStatus = "Đã hủy hẹn";
+                    break;
+                default:
+                    break;
+            }
+            return res.status(200).json({ success: true, data: appointment, message: 'Lấy lịch hẹn thành công.' });
+        } else {
+            return res.status(500).json({ success: false, data: {}, message: 'Không lấy được lịch hẹn' });
+        }
+    }
+}
+
 exports.confirmBill = async (req, res, next) => {
     if (req.method == "POST") {
         let { idBill, isConfirm } = req.body;
@@ -280,7 +499,7 @@ exports.confirmBill = async (req, res, next) => {
     }
 }
 
-exports.confirmBillALl = async (req, res, next) => {
+exports.confirmBillAll = async (req, res, next) => {
     if (req.method == "POST") {
         // bỏ cmt đoạn dưới này và call api ở postman để đổi toàn bộ status lại thành 0 để test
         // let billProduct = await mdBill.find({ idShop: req.shop._id });
@@ -332,95 +551,104 @@ exports.confirmBillALl = async (req, res, next) => {
     }
 }
 
-exports.listAppointment = async (req, res, next) => {
-    let listCheck = await mdAppointment.find({ idShop: req.shop._id });
-    for (let i = 0; i < listCheck.length; i++) {
-        const appointment = listCheck[i];
-        if (new Date(appointment.appointmentDate) < new Date() && appointment.status == 0) {
-            appointment.status = "2";
-            await mdAppointment.findByIdAndUpdate(appointment._id, appointment);
-        }
-    }
-    let listAppointment = await mdAppointment.aggregate([
-        {
-            $match: {
-                idShop: req.shop._id
-            }
-        },
-        { $sort: { appointmentDate: -1 } },
-        {
-            $lookup: {
-                from: "Pets",
-                localField: "idPet",
-                foreignField: "_id",
-                as: "iPet"
-            }
-        },
-        {
-            $lookup: {
-                from: "User",
-                localField: "idUser",
-                foreignField: "_id",
-                as: "iUser"
-            }
-        },
-        {
-            $lookup: {
-                from: "Shop",
-                localField: "idShop",
-                foreignField: "_id",
-                as: "iShop"
-            }
-        },
-        {
-            $group: {
-                _id: {
-                    year: { $year: "$appointmentDate" },
-                    month: { $month: "$appointmentDate" }
-                },
-                appointments: {
-                    $push: {
-                        _id: "$_id",
-                        idPet: "$iPet",
-                        idUser: "$iUser",
-                        idShop: "$iShop",
-                        amountPet: "$amountPet",
-                        location: "$location",
-                        deposits: "$deposits",
-                        status: "$status",
-                        appointmentDate: "$appointmentDate",
-                        createdAt: "$createdAt"
+exports.updateApm = async (req, res, next) => {
+    try {
+        let { status, idAppt } = req.body;
+        if (req.method == "PUT") {
+            if (status && idAppt) {
+                const objAppt = await mdAppointment.findById(idAppt)
+                .populate({
+                    path: 'idPet',
+                    populate: {
+                        path: 'idCategoryP',
+                        select: 'nameCategory'
                     }
+                })
+                .populate({
+                    path: 'idUser',
+                    populate: {
+                        path: 'idAccount',
+                        select: ['phoneNumber', 'emailAddress']
+                    },
+                    select: ['avatarUser', 'fullName', 'locationUser', 'idAccount']
+                });
+                if (!objAppt) {
+                    return res.status(500).json({ success: false, message: 'Không tìm thấy lịch hẹn.' });
                 }
-            }
-        },
-        { $project: { _id: '$_id', appointments: '$appointments' } },
-        { $sort: { _id: -1 } },
-    ]);
-    if (listAppointment) {
-        return res.status(200).json({ success: true, data: listAppointment, message: 'Lấy danh sách lịch hẹn thành công.' });
-    } else {
-        return res.status(500).json({ success: false, data: [], message: 'Không lấy được danh sách lịch hẹn' });
-    }
-}
 
-exports.detailAppointment = async (req, res, next) => {
-    if (req.method == 'GET') {
-        let appointment = await mdAppointment.findById(req.params.idAppt).populate('idShop').populate('idPet').populate('idUser');
-        if (appointment) {
-            if (appointment != {}) {
-                if (new Date(appointment.appointmentDate) < new Date() && appointment.status == 0) {
-                    appointment.status = 2;
-                    await mdAppointment.findByIdAndUpdate(appointment._id, appointment);
-                    return res.status(200).json({ success: true, data: appointment, message: 'Lấy lịch hẹn thành công.' });
+                if (status == 0 || status == 1 || status == 2 || status == 3) {
+                    let mes = "";
+                    switch (String(status)) {
+                        case "0":
+                            mes = "Nhận lịch hẹn thành công."
+                            break;
+                        case "1":
+                            mes = "Đổi trạng thái thành đã hẹn thành công."
+                            break;
+                        case "2":
+                            mes = "Đổi trạng thái thành lỡ hẹn thành công."
+                            break;
+                        case "3":
+                            if (objAppt.status == -1) {
+                                mes = "Hủy nhận lịch hẹn thành công."
+                            } else {
+                                mes = "Hủy lịch hẹn thành công."
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
+                    objAppt.status = status;
+
+                    await mdAppointment.findByIdAndUpdate(idAppt, objAppt);
+                    let appointment = objAppt.toObject()
+                    switch (String(appointment.status)) {
+                        case "-1":
+                            appointment.canAccept = true;
+                            appointment.canCancel = false;
+                            appointment.canConfirm = false;
+                            appointment.nameStatus = "Chờ xác nhận";
+                            break;
+                        case "0":
+                            appointment.canAccept = false;
+                            appointment.canCancel = true;
+                            appointment.canConfirm = true;
+                            appointment.nameStatus = "Đang hẹn";
+                            break;
+                        case "1":
+                            appointment.canAccept = false;
+                            appointment.canCancel = false;
+                            appointment.canConfirm = false;
+                            appointment.nameStatus = "Đã hẹn";
+                            break;
+                        case "2":
+                            appointment.canAccept = false;
+                            appointment.canCancel = false;
+                            appointment.canConfirm = false;
+                            appointment.nameStatus = "Đã lỡ hẹn";
+                            break;
+                        case "3":
+                            appointment.canAccept = false;
+                            appointment.canCancel = false;
+                            appointment.canConfirm = false;
+                            appointment.nameStatus = "Đã hủy hẹn";
+                            break;
+                        default:
+                            break;
+                    }
+                    return res.status(201).json({ success: true, data: appointment, message: mes });
+                } else {
+                    return res.status(500).json({ success: false, message: 'Trạng thái không hợp lệ.' });
                 }
+            } else {
+                return res.status(500).json({ success: false, data: {}, message: "Không đọc được giữ liệu tải lên!" });
             }
-            return res.status(200).json({ success: true, data: appointment, message: 'Lấy lịch hẹn thành công.' });
-        } else {
-            return res.status(500).json({ success: false, data: {}, message: 'Không lấy được lịch hẹn' });
         }
+    } catch (error) {
+        return res.status(500).json({ success: false, data: {}, message: error.message });
     }
-}
+};
 
 exports.myShopDetail = async (req, res, next) => {
     try {
@@ -528,18 +756,6 @@ exports.checkEmail = async (req, res, next) => {
 exports.checkStatus = async (req, res, next) => {
     try {
         return res.status(200).json({ success: true, data: req.shop.status, message: "Lấy trạng thái thành công." });
-    } catch (error) {
-        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
-    }
-}
-
-exports.getShop = async (req, res, next) => {
-    try {
-        let id = "abc$";
-        let idRex = new RegExp(id);
-        console.log(idRex);
-        let shop = await mdShop.ShopModel.find({ nameShop: idRex })
-        return res.status(200).json({ success: true, data: shop, message: "Lấy trạng thái thành công." });
     } catch (error) {
         return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
     }
@@ -1003,10 +1219,26 @@ async function getListBill(idShop, billStatus) {
             },
             {
                 $lookup: {
+                    from: "CategoryProduct",
+                    localField: "productInfo.idCategoryPr",
+                    foreignField: "_id",
+                    as: "CtgProduct",
+                },
+            },
+            {
+                $lookup: {
                     from: "Pets",
                     localField: "products.idProduct",
                     foreignField: "_id",
                     as: "petInfo",
+                },
+            },
+            {
+                $lookup: {
+                    from: "CategoryPet",
+                    localField: "petInfo.idCategoryP",
+                    foreignField: "_id",
+                    as: "CtgPet",
                 },
             },
             {
@@ -1018,10 +1250,12 @@ async function getListBill(idShop, billStatus) {
                     "productInfo.amount": "$products.amount",
                     "productInfo.discount": "$products.discount",
                     "productInfo.price": "$products.price",
+                    "productInfo.category": "$CtgProduct",
                     "petInfo.idPet": "$petInfo",
                     "petInfo.amount": "$products.amount",
                     "petInfo.discount": "$products.discount",
                     "petInfo.price": "$products.price",
+                    "petInfo.category": "$CtgPet",
                     "userLookup.phoneNumber": "$userAccLookup.phoneNumber",
                     "userLookup.emailAddress": "$userAccLookup.emailAddress",
                 },
@@ -1054,10 +1288,12 @@ async function getListBill(idShop, billStatus) {
                     "productInfo.amount": 1,
                     "productInfo.price": 1,
                     "productInfo.discount": 1,
+                    "productInfo.category": 1,
                     "petInfo.idPet": 1,
                     "petInfo.amount": 1,
                     "petInfo.discount": 1,
                     "petInfo.price": 1,
+                    "petInfo.category": 1,
                     "userInfo.fullName": 1,
                     "userInfo.avatarUser": 1,
                     "userInfo.phoneNumber": 1,
