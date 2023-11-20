@@ -44,8 +44,8 @@ exports.myDetail = async (req, res, next) => {
 exports.autoLogin = async (req, res, next) => {
   try {
     req.account.online = 0;
-    let objU = await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
-    return res.status(200).json({ success: true, data: objU, message: "Đăng nhập thành công." });
+    await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
+    return res.status(200).json({ success: true, data: req.user, message: "Đăng nhập thành công." });
   } catch (error) {
     return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
   }
@@ -320,17 +320,20 @@ exports.deleteUser = async (req, res, next) => {
 
 exports.updatePassword = async (req, res, next) => {
   if (req.method == "PUT") {
-    var body = req.body;
-    if (body.newPassword) {
-      req.account.passWord = body.newPassword;
-      try {
-        await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
-        return res.status(201).json({ success: true, data: {}, message: "Đổi mật khẩu thành công. " });
-      } catch (error) {
-        return res.status(201).json({ success: false, data: {}, message: "Lỗi: " + error.message });
-      }
-    } else {
-      return res.status(500).json({ success: false, data: {}, message: "Đổi mật khẩu thất bại, không nhận được dữ liệu mật khẩu mới! " });
+    let { oldPassword, newPassword } = req.body;
+    if (!oldPassword || !newPassword || !req.body) {
+      return res.status(500).json({ success: false, data: {}, message: "Không đọc được dữ liệu tải lên!" });
+    }
+    const isPasswordMatch = await bcrypt.compare(oldPassword, req.account.passWord);
+    if (!isPasswordMatch) {
+      return res.status(201).json({ success: false, data: {}, message: "Mật khẩu hiện tại nhập sai!" });
+    }
+    req.account.passWord = newPassword;
+    try {
+      await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
+      return res.status(201).json({ success: true, data: {}, message: "Đổi mật khẩu thành công. " });
+    } catch (error) {
+      return res.status(201).json({ success: false, data: {}, message: "Lỗi: " + error.message });
     }
   }
 };
