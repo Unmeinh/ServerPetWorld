@@ -706,6 +706,18 @@ exports.detailOwner = async (req, res, next) => {
     }
 }
 
+exports.detailShop = async (req, res, next) => {
+
+    let idShop = req.params.idShop;
+    try {
+        let ObjShop = await mdShop.ShopModel.findById({_id: idShop});
+        return res.status(200).json({ success: true, data: ObjShop, message: "Lấy dữ liệu chi tiết shop thành công" });
+
+    } catch (error) {
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+}
+
 exports.checkPhoneNumber = async (req, res, next) => {
     try {
         let objU = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
