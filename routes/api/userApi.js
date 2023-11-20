@@ -17,7 +17,7 @@ router.put('/updateUser', mdJWT.api_user_auth, UserApiCtrl.updateUser);
 router.put('/updateAvatar', mdJWT.api_user_auth, uploader.any(), UserApiCtrl.updateAvatar);
 router.put('/updateAccount', mdJWT.api_user_auth, UserApiCtrl.updateAccount);
 router.put('/updatePassword', mdJWT.api_user_auth, UserApiCtrl.updatePassword);
-router.put('/changePassword', mdJWT.api_user_auth, UserApiCtrl.changePassword);
+router.put('/changePassword', UserApiCtrl.changePassword);
 router.delete('/deleteEmail', mdJWT.api_user_auth, UserApiCtrl.deleteEmail);
 router.delete('/delete/:idUser', UserApiCtrl.deleteUser);
 router.post('/sendVerifyEmail', UserApiCtrl.sendVerifyEmail);
