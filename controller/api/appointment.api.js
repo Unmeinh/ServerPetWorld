@@ -6,7 +6,7 @@ exports.listAppointment = async (req, res, next) => {
     for (let i = 0; i < listCheck.length; i++) {
       const appointment = listCheck[i];
       if (new Date(appointment.appointmentDate) < new Date() && appointment.status == 0) {
-        appointment.status = "2";
+        appointment.status = 2;
         await mdAppointment.AppointmentModel.findByIdAndUpdate(appointment._id, appointment);
       }
     }
@@ -76,7 +76,7 @@ exports.listAppointment = async (req, res, next) => {
 
 exports.detailAppointment = async (req, res, next) => {
   if (req.method == 'GET') {
-    let appointment = await mdAppointment.AppointmentModel.findById(req.params.idAppt).populate('idShop').populate('idPet').populate('idUser');
+    let appointment = await mdAppointment.AppointmentModel.findById(req.params.idAppt).populate('idShop').populate('idPet');
     if (appointment) {
       if (appointment != {}) {
         if (new Date(appointment.appointmentDate) < new Date() && appointment.status == 0) {
@@ -100,7 +100,7 @@ exports.addAppointment = async (req, res, next) => {
         let listApm = await mdAppointment.AppointmentModel.find({ idPet: idPet, idUser: req.user._id })
         if (listApm && listApm.length > 0) {
           let last = listApm.length - 1;
-          if (listApm[last].status == "-1" || listApm[last].status == "0") {
+          if (listApm[last].status == -1 || listApm[last].status == 0) {
             return res.status(201).json({ success: false, data: {}, message: "Thú cưng này đang có lịch hẹn!" });
           }
         }
@@ -109,7 +109,7 @@ exports.addAppointment = async (req, res, next) => {
         newObjAppt.amountPet = amountPet;
         newObjAppt.location = location;
         newObjAppt.deposits = deposits;
-        newObjAppt.status = "-1";
+        newObjAppt.status = -1;
         newObjAppt.idPet = idPet;
         newObjAppt.idUser = req.user._id;
         newObjAppt.idShop = idShop;
@@ -137,10 +137,10 @@ exports.editAppointment = async (req, res, next) => {
           return res.status(500).json({ success: false, message: 'Không tìm thấy lịch hẹn.' });
         }
 
-        if (status == "0" || status == "1" || status == "2" || status == "3") {
+        if (status == 0 || status == 1 || status == 2 || status == 3) {
           objAppt.status = status;
           let mes = "";
-          switch (status) {
+          switch (String(status)) {
             case "0":
               mes = "Đổi trạng thái thành đang hẹn thành công."
               break;
