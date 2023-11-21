@@ -2,6 +2,7 @@ var express = require('express');
 var multer = require('multer')
 var uploader = multer({dest:'./tmp'});
 var UserShopCtrl = require('../controller/userShop.controller');
+
 var router = express.Router();
 
 router.get('/', UserShopCtrl.listUserShop);

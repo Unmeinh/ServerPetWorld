@@ -14,7 +14,6 @@ const { onUploadImages } = require("../../function/uploadImage");
 const { encodeToSha256, encodeToAscii,
     decodeFromSha256, decodeFromAscii,
     removeVietnameseTones, encodeName } = require("../../function/hashFunction");
-const string_word_secret = process.env.TOKEN_SEC_KEY;
 
 exports.listShop = async (req, res, next) => {
     let filterSearch = null;
@@ -43,8 +42,19 @@ exports.listPet = async (req, res, next) => {
                 const searchTerm = req.query.filterSearch.trim();
                 filterSearch = { fullName: new RegExp(searchTerm, 'i') };
             }
-            let listPet = await mdPet.find({ idShop: req.shop._id }).populate('idCategoryP').sort({ createdAt: -1 });
-            return res.status(200).json({ success: true, data: listPet, message: 'Lấy danh sách pet thành công' });
+            let listPetShow = await mdPet.find({ idShop: req.shop._id, status: 0 }).populate('idCategoryP').sort({ createdAt: -1 });
+            let listPetHide = await mdPet.find({ idShop: req.shop._id, status: 1 }).populate('idCategoryP').sort({ createdAt: -1 });
+            if (listPetShow && listPetHide) {
+                return res.status(200).json({
+                    success: true, data:
+                    {
+                        dataShow: listPetShow,
+                        dataHide: listPetHide
+                    }, message: 'Lấy dữ liệu thú cưng thành công!'
+                });
+            } else {
+                return res.status(200).json({ success: false, data: [], message: 'Lỗi: Không lấy được dữ liệu thú cưng!' });
+            }
         } catch (error) {
             return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
         }
@@ -60,8 +70,19 @@ exports.listProduct = async (req, res, next) => {
                 const searchTerm = req.query.filterSearch.trim();
                 filterSearch = { fullName: new RegExp(searchTerm, 'i') };
             }
-            let listPet = await mdProduct.find({ idShop: req.shop._id }).populate('idCategoryPr').sort({ createdAt: -1 });
-            return res.status(200).json({ success: true, data: listPet, message: 'Lấy danh sách product thành công' });
+            let listProductShow = await mdProduct.find({ idShop: req.shop._id, status: 0 }).populate('idCategoryPr').sort({ createdAt: -1 });
+            let listProductHide = await mdProduct.find({ idShop: req.shop._id, status: 1 }).populate('idCategoryPr').sort({ createdAt: -1 });
+            if (listProductShow && listProductHide) {
+                return res.status(200).json({
+                    success: true, data:
+                    {
+                        dataShow: listProductShow,
+                        dataHide: listProductHide
+                    }, message: 'Lấy dữ liệu sản phẩm thành công!'
+                });
+            } else {
+                return res.status(200).json({ success: false, data: [], message: 'Lỗi: Không lấy được dữ liệu sản phẩm!' });
+            }
         } catch (error) {
             return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
         }
@@ -82,10 +103,18 @@ exports.listBillAll = async (req, res, next) => {
                 $lte: 5,
             })
             if (listBill && listBill.length > 0) {
-                let list = getListBillWithStatus(listBill);
+                let list = onFinalProcessingListBill(listBill);
                 listBill = [...list];
             }
-            return res.status(200).json({ success: true, data: listBill, message: 'Lấy danh sách product thành công' });
+            let listCanConfirm = await mdBill.find({ idShop: req.shop._id, deliveryStatus: 0 }).count();
+            let listCanCancel = await mdBill.find({ idShop: req.shop._id, deliveryStatus: { $gte: 0, $lte: 1, } }).count();
+            return res.status(200).json({
+                success: true, data: {
+                    listBill,
+                    canConfirmAll: (listCanConfirm) ? true : false,
+                    canCancelAll: (listCanCancel) ? true : false
+                }, message: 'Lấy danh sách đơn hàng thành công'
+            });
         } catch (error) {
             return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
         }
@@ -106,10 +135,18 @@ exports.listProcessBill = async (req, res, next) => {
                 $lte: 1,
             })
             if (listBill && listBill.length > 0) {
-                let list = getListBillWithStatus(listBill);
+                let list = onFinalProcessingListBill(listBill);
                 listBill = [...list];
             }
-            return res.status(200).json({ success: true, data: listBill, message: 'Lấy danh sách product thành công' });
+            let listCanConfirm = await mdBill.find({ idShop: req.shop._id, deliveryStatus: 0 }).count();
+            let listCanCancel = await mdBill.find({ idShop: req.shop._id, deliveryStatus: { $gte: 0, $lte: 1, } }).count();
+            return res.status(200).json({
+                success: true, data: {
+                    listBill,
+                    canConfirmAll: (listCanConfirm) ? true : false,
+                    canCancelAll: (listCanCancel) ? true : false
+                }, message: 'Lấy danh sách đơn hàng thành công'
+            });
         } catch (error) {
             return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
         }
@@ -127,10 +164,10 @@ exports.listDeliveringBill = async (req, res, next) => {
             }
             let listBill = await getListBill(req.shop._id, 2)
             if (listBill && listBill.length > 0) {
-                let list = getListBillWithStatus(listBill);
+                let list = onFinalProcessingListBill(listBill);
                 listBill = [...list];
             }
-            return res.status(200).json({ success: true, data: listBill, message: 'Lấy danh sách product thành công' });
+            return res.status(200).json({ success: true, data: listBill, message: 'Lấy danh sách đơn hàng thành công' });
         } catch (error) {
             return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
         }
@@ -148,10 +185,10 @@ exports.listDeliveredBill = async (req, res, next) => {
             }
             let listBill = await getListBill(req.shop._id, 3)
             if (listBill && listBill.length > 0) {
-                let list = getListBillWithStatus(listBill);
+                let list = onFinalProcessingListBill(listBill);
                 listBill = [...list];
             }
-            return res.status(200).json({ success: true, data: listBill, message: 'Lấy danh sách product thành công' });
+            return res.status(200).json({ success: true, data: listBill, message: 'Lấy danh sách đơn hàng thành công' });
         } catch (error) {
             return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
         }
@@ -167,44 +204,35 @@ exports.listEvaluatedBill = async (req, res, next) => {
                 const searchTerm = req.query.filterSearch.trim();
                 filterSearch = { fullName: new RegExp(searchTerm, 'i') };
             }
-            let listBill = await getListBill(req.shop._id, 4)
+            let listBill = await getListBill(req.shop._id, 5)
             if (listBill && listBill.length > 0) {
-                let list = getListBillWithStatus(listBill);
+                let list = onFinalProcessingListBill(listBill);
                 listBill = [...list];
             }
-            return res.status(200).json({ success: true, data: listBill, message: 'Lấy danh sách product thành công' });
+            return res.status(200).json({ success: true, data: listBill, message: 'Lấy danh sách đơn hàng thành công' });
         } catch (error) {
             return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
         }
     }
 }
 
-exports.confirmBill = async (req, res, next) => {
-    if (req.method == "POST") {
-        let { idBill, isConfirm } = req.body;
-        if (idBill && isConfirm != undefined) {
-            try {
-                let billProduct = await mdBill.findOne({_id: idBill, idShop: req.shop._id});
-                if (!billProduct) {
-                    return res.status(500).json({ success: false, data: {}, message: "Không tìm thấy hóa đơn trong cơ sở dữ liệu! " });
-                }
-                if (isConfirm == 0) {
-                    billProduct.deliveryStatus = 1;
-                    await mdBill.findByIdAndUpdate(billProduct._id, billProduct);
-                    return res.status(201).json({ success: true, data: {}, message: "Xác nhận đơn hàng thành công." });
-                    //Auto find shipper
-                } 
-                if (isConfirm == 1) {
-                    billProduct.deliveryStatus = -1;
-                    await mdBill.findByIdAndUpdate(billProduct._id, billProduct);
-                    return res.status(201).json({ success: true, data: {}, message: "Hủy nhận đơn hàng thành công." });
-                }
-                
-            } catch (error) {
-                return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+exports.listCancelledBill = async (req, res, next) => {
+    let filterSearch = null;
+
+    if (req.method == 'GET') {
+        try {
+            if (typeof (req.query.filterSearch) != 'undefined' && req.query.filterSearch.trim() != '') {
+                const searchTerm = req.query.filterSearch.trim();
+                filterSearch = { fullName: new RegExp(searchTerm, 'i') };
             }
-        } else {
-            return res.status(500).json({ success: false, data: {}, message: "Không đọc được dữ liệu tải lên! " });
+            let listBill = await getListBill(req.shop._id, -1)
+            if (listBill && listBill.length > 0) {
+                let list = onFinalProcessingListBill(listBill);
+                listBill = [...list];
+            }
+            return res.status(200).json({ success: true, data: listBill, message: 'Lấy danh sách đơn hàng thành công' });
+        } catch (error) {
+            return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
         }
     }
 }
@@ -214,7 +242,7 @@ exports.listAppointment = async (req, res, next) => {
     for (let i = 0; i < listCheck.length; i++) {
         const appointment = listCheck[i];
         if (new Date(appointment.appointmentDate) < new Date() && appointment.status == 0) {
-            appointment.status = "2";
+            appointment.status = 2;
             await mdAppointment.findByIdAndUpdate(appointment._id, appointment);
         }
     }
@@ -239,14 +267,6 @@ exports.listAppointment = async (req, res, next) => {
                 localField: "idUser",
                 foreignField: "_id",
                 as: "iUser"
-            }
-        },
-        {
-            $lookup: {
-                from: "Shop",
-                localField: "idShop",
-                foreignField: "_id",
-                as: "iShop"
             }
         },
         {
@@ -281,16 +301,153 @@ exports.listAppointment = async (req, res, next) => {
     }
 }
 
+exports.detailShop = async (req, res, next) => {
+
+    let idShop = req.params.idShop;
+    try {
+        let ObjShop = await mdShop.ShopModel.findById(idShop);
+        return res.status(200).json({ success: true, data: ObjShop, message: "Lấy dữ liệu chi tiết shop thành công" });
+
+    } catch (error) {
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+}
+
+exports.detailPet = async (req, res, next) => {
+    if (req.method == 'GET') {
+        let pet = await mdPet.findById(req.params.idPet)
+            .populate({
+                path: 'idCategoryP',
+                select: 'nameCategory'
+            });
+        if (pet) {
+            pet = pet.toObject();
+            if (pet.sizePet != undefined) {
+                switch (pet.sizePet) {
+                    case 0:
+                        pet.sizePet = "Nhỏ";
+                        break;
+                    case 1:
+                        pet.sizePet = "Vừa";
+                        break;
+                    case 2:
+                        pet.sizePet = "Lớn";
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            if (pet.status != undefined) {
+                switch (pet.status) {
+                    case 0:
+                        pet.status = "Đang bán";
+                        break;
+                    case 1:
+                        pet.status = "Đang ẩn";
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            return res.status(200).json({ success: true, data: pet, message: 'Lấy thú cưng thành công.' });
+        } else {
+            return res.status(500).json({ success: false, data: {}, message: 'Không lấy được thú cưng' });
+        }
+    }
+}
+
+exports.detailProduct = async (req, res, next) => {
+    if (req.method == 'GET') {
+        let product = await mdProduct.findById(req.params.idProd)
+            .populate({
+                path: 'idCategoryPr',
+                select: 'nameCategory'
+            });
+        if (product) {
+            product = product.toObject();
+            if (product.status != undefined) {
+                switch (product.status) {
+                    case 0:
+                        product.status = "Đang bán";
+                        break;
+                    case 1:
+                        product.status = "Đang ẩn";
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            return res.status(200).json({ success: true, data: product, message: 'Lấy sản phẩm thành công.' });
+        } else {
+            return res.status(500).json({ success: false, data: {}, message: 'Không lấy được sản phẩm' });
+        }
+    }
+}
+
 exports.detailAppointment = async (req, res, next) => {
     if (req.method == 'GET') {
-        let appointment = await mdAppointment.findById(req.params.idAppt).populate('idShop').populate('idPet').populate('idUser');
-        if (appointment) {
-            if (appointment != {}) {
-                if (new Date(appointment.appointmentDate) < new Date() && appointment.status == 0) {
-                    appointment.status = 2;
-                    await mdAppointment.findByIdAndUpdate(appointment._id, appointment);
-                    return res.status(200).json({ success: true, data: appointment, message: 'Lấy lịch hẹn thành công.' });
+        let appointment = await mdAppointment.findById(req.params.idAppt)
+            .populate({
+                path: 'idPet',
+                populate: {
+                    path: 'idCategoryP',
+                    select: 'nameCategory'
                 }
+            })
+            .populate({
+                path: 'idUser',
+                populate: {
+                    path: 'idAccount',
+                    select: ['phoneNumber', 'emailAddress']
+                },
+                select: ['avatarUser', 'fullName', 'locationUser', 'idAccount']
+            });
+        if (appointment) {
+            appointment = appointment.toObject();
+            if (new Date(appointment?.appointmentDate) < new Date() && appointment?.status == 0) {
+                appointment.status = 2;
+                await mdAppointment.findByIdAndUpdate(appointment._id, appointment);
+                appointment.canConfirm = false;
+                appointment.canCancel = false;
+                appointment.nameStatus = "Đã lỡ hẹn";
+                return res.status(200).json({ success: true, data: appointment, message: 'Lấy lịch hẹn thành công.' });
+            }
+            switch (String(appointment.status)) {
+                case "-1":
+                    appointment.canAccept = true;
+                    appointment.canCancel = false;
+                    appointment.canConfirm = false;
+                    appointment.nameStatus = "Chờ xác nhận";
+                    break;
+                case "0":
+                    appointment.canAccept = false;
+                    appointment.canCancel = true;
+                    appointment.canConfirm = true;
+                    appointment.nameStatus = "Đang hẹn";
+                    break;
+                case "1":
+                    appointment.canAccept = false;
+                    appointment.canCancel = false;
+                    appointment.canConfirm = false;
+                    appointment.nameStatus = "Đã hẹn";
+                    break;
+                case "2":
+                    appointment.canAccept = false;
+                    appointment.canCancel = false;
+                    appointment.canConfirm = false;
+                    appointment.nameStatus = "Đã lỡ hẹn";
+                    break;
+                case "3":
+                    appointment.canAccept = false;
+                    appointment.canCancel = false;
+                    appointment.canConfirm = false;
+                    appointment.nameStatus = "Đã hủy hẹn";
+                    break;
+                default:
+                    break;
             }
             return res.status(200).json({ success: true, data: appointment, message: 'Lấy lịch hẹn thành công.' });
         } else {
@@ -299,11 +456,258 @@ exports.detailAppointment = async (req, res, next) => {
     }
 }
 
+exports.confirmBill = async (req, res, next) => {
+    if (req.method == "POST") {
+        let { idBill, isConfirm } = req.body;
+        if (idBill && isConfirm != undefined) {
+            try {
+                let billProduct = await mdBill.findOne({ _id: idBill, idShop: req.shop._id });
+                if (!billProduct) {
+                    return res.status(500).json({ success: false, data: {}, message: "Không tìm thấy dữ liệu! " });
+                }
+                if (isConfirm == 0) {
+                    billProduct.deliveryStatus = 1;
+                    billProduct.billDate.confirmedAt = new Date();
+                    await mdBill.findByIdAndUpdate(billProduct._id, billProduct);
+                    let statusBill = {}
+                    statusBill.status = 1;
+                    statusBill.colorStatus = "#001858";
+                    statusBill.nameStatus = "Đã xác nhận";
+                    statusBill.iconStatus = "timer-sand-complete";
+                    statusBill.descStatus = "Đơn hàng đã được xác nhận và đang chờ được giao.";
+                    return res.status(201).json({ success: true, data: statusBill, message: "Xác nhận đơn hàng thành công." });
+                    //Auto find shipper
+                }
+                if (isConfirm == 1) {
+                    billProduct.deliveryStatus = -1;
+                    await mdBill.findByIdAndUpdate(billProduct._id, billProduct);
+                    let statusBill = {}
+                    statusBill.status = -1;
+                    statusBill.colorStatus = "#FD3F3F";
+                    statusBill.nameStatus = "Đơn bị hủy";
+                    statusBill.iconStatus = "clipboard-remove-outline";
+                    statusBill.descStatus = "Đơn hàng đã bị hủy.";
+                    return res.status(201).json({ success: true, data: statusBill, message: "Hủy nhận đơn hàng thành công." });
+                }
+
+            } catch (error) {
+                return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+            }
+        } else {
+            return res.status(500).json({ success: false, data: {}, message: "Không đọc được dữ liệu tải lên! " });
+        }
+    }
+}
+
+exports.confirmBillAll = async (req, res, next) => {
+    if (req.method == "POST") {
+        // bỏ cmt đoạn dưới này và call api ở postman để đổi toàn bộ status lại thành 0 để test
+        // let billProduct = await mdBill.find({ idShop: req.shop._id });
+        // if (billProduct) {
+        //     for (let i = 0; i < billProduct.length; i++) {
+        //         const bill = billProduct[i];
+        //         bill.deliveryStatus = 0;
+        //         await mdBill.findByIdAndUpdate(bill._id, bill);
+        //     }
+        // }
+        // return res.status(201).json({ data: true })
+        let { isConfirm } = req.body;
+        if (isConfirm != undefined) {
+            try {
+                if (isConfirm == 0) {
+                    let billProduct = await mdBill.find({ idShop: req.shop._id, deliveryStatus: 0 });
+                    if (!billProduct) {
+                        return res.status(500).json({ success: false, data: {}, message: "Không tìm thấy dữ liệu! " });
+                    }
+                    for (let i = 0; i < billProduct.length; i++) {
+                        const bill = billProduct[i];
+                        bill.deliveryStatus = 1;
+                        bill.billDate.confirmedAt = new Date();
+                        await mdBill.findByIdAndUpdate(bill._id, bill);
+                    }
+                    return res.status(201).json({ success: true, data: {}, message: "Xác nhận tất cả đơn hàng thành công." });
+                    //Auto find shipper
+                }
+                if (isConfirm == 1) {
+                    let billProduct = await mdBill.find({ idShop: req.shop._id, deliveryStatus: { $gte: 0, $lte: 1, } });
+                    if (!billProduct) {
+                        return res.status(500).json({ success: false, data: {}, message: "Không tìm thấy dữ liệu! " });
+                    }
+                    for (let i = 0; i < billProduct.length; i++) {
+                        const bill = billProduct[i];
+                        bill.deliveryStatus = -1;
+                        bill.billDate.cancelledAt = new Date();
+                        await mdBill.findByIdAndUpdate(bill._id, bill);
+                    }
+                    return res.status(201).json({ success: true, data: {}, message: "Hủy nhận tất cả đơn hàng thành công." });
+                }
+
+            } catch (error) {
+                return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+            }
+        } else {
+            return res.status(500).json({ success: false, data: {}, message: "Không đọc được dữ liệu tải lên! " });
+        }
+    }
+}
+
+exports.updateApm = async (req, res, next) => {
+    try {
+        let { status, idAppt } = req.body;
+        if (req.method == "PUT") {
+            if (status && idAppt) {
+                const objAppt = await mdAppointment.findById(idAppt)
+                    .populate({
+                        path: 'idPet',
+                        populate: {
+                            path: 'idCategoryP',
+                            select: 'nameCategory'
+                        }
+                    })
+                    .populate({
+                        path: 'idUser',
+                        populate: {
+                            path: 'idAccount',
+                            select: ['phoneNumber', 'emailAddress']
+                        },
+                        select: ['avatarUser', 'fullName', 'locationUser', 'idAccount']
+                    });
+                if (!objAppt) {
+                    return res.status(500).json({ success: false, message: 'Không tìm thấy lịch hẹn.' });
+                }
+
+                if (status == 0 || status == 1 || status == 2 || status == 3) {
+                    let mes = "";
+                    switch (String(status)) {
+                        case "0":
+                            mes = "Nhận lịch hẹn thành công."
+                            break;
+                        case "1":
+                            mes = "Đổi trạng thái thành đã hẹn thành công."
+                            break;
+                        case "2":
+                            mes = "Đổi trạng thái thành lỡ hẹn thành công."
+                            break;
+                        case "3":
+                            if (objAppt.status == -1) {
+                                mes = "Hủy nhận lịch hẹn thành công."
+                            } else {
+                                mes = "Hủy lịch hẹn thành công."
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
+                    objAppt.status = status;
+
+                    await mdAppointment.findByIdAndUpdate(idAppt, objAppt);
+                    let appointment = objAppt.toObject()
+                    switch (String(appointment.status)) {
+                        case "-1":
+                            appointment.canAccept = true;
+                            appointment.canCancel = false;
+                            appointment.canConfirm = false;
+                            appointment.nameStatus = "Chờ xác nhận";
+                            break;
+                        case "0":
+                            appointment.canAccept = false;
+                            appointment.canCancel = true;
+                            appointment.canConfirm = true;
+                            appointment.nameStatus = "Đang hẹn";
+                            break;
+                        case "1":
+                            appointment.canAccept = false;
+                            appointment.canCancel = false;
+                            appointment.canConfirm = false;
+                            appointment.nameStatus = "Đã hẹn";
+                            break;
+                        case "2":
+                            appointment.canAccept = false;
+                            appointment.canCancel = false;
+                            appointment.canConfirm = false;
+                            appointment.nameStatus = "Đã lỡ hẹn";
+                            break;
+                        case "3":
+                            appointment.canAccept = false;
+                            appointment.canCancel = false;
+                            appointment.canConfirm = false;
+                            appointment.nameStatus = "Đã hủy hẹn";
+                            break;
+                        default:
+                            break;
+                    }
+                    return res.status(201).json({ success: true, data: appointment, message: mes });
+                } else {
+                    return res.status(500).json({ success: false, message: 'Trạng thái không hợp lệ.' });
+                }
+            } else {
+                return res.status(500).json({ success: false, data: {}, message: "Không đọc được giữ liệu tải lên!" });
+            }
+        }
+    } catch (error) {
+        return res.status(500).json({ success: false, data: {}, message: error.message });
+    }
+};
+
 exports.myShopDetail = async (req, res, next) => {
     try {
-        let objShop = await mdShop.ShopModel.findById(req.shop._id);
-        return res.status(200).json({ success: true, data: objShop, message: "Lấy dữ liệu chi tiết shop thành công" });
+        // let objShop = await mdShop.ShopModel.findById(req.shop._id);
+        const { _id } = req.shop;
+        let listBill = await mdBill.find({ idShop: _id });
+        if (listBill) {
+            req.shop = req?.shop.toObject();
+            req.shop.billCount = listBill.length;
+            const statusArray = [0, 1, 2, 3, 5];
+            try {
+                const pipeline = [
+                    {
+                        $match: {
+                            idShop: _id,
+                            deliveryStatus: { $in: statusArray },
+                        },
+                    },
+                    {
+                        $group: {
+                            _id: "$deliveryStatus",
+                            count: { $sum: 1 },
+                        },
+                    },
+                ];
 
+                const results = await mdBill.aggregate(pipeline);
+
+                const statusCountObject = {};
+
+                for (let i = 0; i < results.length; i++) {
+                    let result = results[i];
+                    if (result._id <= 1) {
+                        if (statusCountObject["0"]) {
+                            statusCountObject["0"] = Number(result.count) + Number(statusCountObject["0"]);
+                        } else {
+                            statusCountObject["0"] = result.count;
+                        }
+                    } else {
+                        if (result._id == 5) {
+                            statusCountObject["3"] = result.count;
+                        } else {
+                            statusCountObject[String(result._id - 1)] = result.count;
+                        }
+                    }
+                }
+                req.shop.objCountBills = statusCountObject;
+                return res.status(200).json({ success: true, data: req.shop, message: "Lấy dữ liệu chi tiết shop thành công" });
+            } catch (error) {
+                console.error(error);
+                return res.status(500).json({
+                    success: false,
+                    data: [],
+                    message: "Lấy danh sách hóa đơn thất bại",
+                });
+            }
+        } else {
+            return res.status(200).json({ success: true, data: req.shop, message: "Lấy dữ liệu chi tiết shop thành công" });
+        }
     } catch (error) {
         return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
     }
@@ -359,7 +763,7 @@ exports.detailShop = async (req, res, next) => {
 
     let idShop = req.params.idShop;
     try {
-        let ObjShop = await mdShop.ShopModel.findById(idShop);
+        let ObjShop = await mdShop.ShopModel.findById({ _id: idShop });
         return res.status(200).json({ success: true, data: ObjShop, message: "Lấy dữ liệu chi tiết shop thành công" });
 
     } catch (error) {
@@ -405,18 +809,6 @@ exports.checkEmail = async (req, res, next) => {
 exports.checkStatus = async (req, res, next) => {
     try {
         return res.status(200).json({ success: true, data: req.shop.status, message: "Lấy trạng thái thành công." });
-    } catch (error) {
-        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
-    }
-}
-
-exports.getShop = async (req, res, next) => {
-    try {
-        let id = "abc$";
-        let idRex = new RegExp(id);
-        console.log(idRex);
-        let shop = await mdShop.ShopModel.find({ nameShop: idRex })
-        return res.status(200).json({ success: true, data: shop, message: "Lấy trạng thái thành công." });
     } catch (error) {
         return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
     }
@@ -880,10 +1272,26 @@ async function getListBill(idShop, billStatus) {
             },
             {
                 $lookup: {
+                    from: "CategoryProduct",
+                    localField: "productInfo.idCategoryPr",
+                    foreignField: "_id",
+                    as: "CtgProduct",
+                },
+            },
+            {
+                $lookup: {
                     from: "Pets",
                     localField: "products.idProduct",
                     foreignField: "_id",
                     as: "petInfo",
+                },
+            },
+            {
+                $lookup: {
+                    from: "CategoryPet",
+                    localField: "petInfo.idCategoryP",
+                    foreignField: "_id",
+                    as: "CtgPet",
                 },
             },
             {
@@ -895,10 +1303,12 @@ async function getListBill(idShop, billStatus) {
                     "productInfo.amount": "$products.amount",
                     "productInfo.discount": "$products.discount",
                     "productInfo.price": "$products.price",
+                    "productInfo.category": "$CtgProduct",
                     "petInfo.idPet": "$petInfo",
                     "petInfo.amount": "$products.amount",
                     "petInfo.discount": "$products.discount",
                     "petInfo.price": "$products.price",
+                    "petInfo.category": "$CtgPet",
                     "userLookup.phoneNumber": "$userAccLookup.phoneNumber",
                     "userLookup.emailAddress": "$userAccLookup.emailAddress",
                 },
@@ -912,6 +1322,7 @@ async function getListBill(idShop, billStatus) {
                     purchaseDate: { $first: "$purchaseDate" },
                     deliveryStatus: { $first: "$deliveryStatus" },
                     discountBill: { $first: "$discountBill" },
+                    billDate: { $first: "$billDate" },
                     productInfo: { $push: "$productInfo" },
                     petInfo: { $first: "$petInfo" },
                     userInfo: { $first: "$userLookup" },
@@ -925,14 +1336,17 @@ async function getListBill(idShop, billStatus) {
                     purchaseDate: 1,
                     deliveryStatus: 1,
                     discountBill: 1,
+                    billDate: 1,
                     "productInfo.idProduct": 1,
                     "productInfo.amount": 1,
                     "productInfo.price": 1,
                     "productInfo.discount": 1,
+                    "productInfo.category": 1,
                     "petInfo.idPet": 1,
                     "petInfo.amount": 1,
                     "petInfo.discount": 1,
                     "petInfo.price": 1,
+                    "petInfo.category": 1,
                     "userInfo.fullName": 1,
                     "userInfo.avatarUser": 1,
                     "userInfo.phoneNumber": 1,
@@ -952,53 +1366,75 @@ async function getListBill(idShop, billStatus) {
     }
 }
 
-function getListBillWithStatus(listBill) {
+function onFinalProcessingListBill(listBill) {
     for (let i = 0; i < listBill.length; i++) {
         const bill = listBill[i];
 
         if (bill.deliveryStatus != undefined) {
             switch (String(bill.deliveryStatus)) {
                 case "-2":
-                    bill.colorStatus = "#FD3F3F";
-                    bill.nameStatus = "Giao thất bại";
-                    bill.iconStatus = "truck-remove-outline";
-                    bill.descStatus = "Đơn hàng giao thất bại cho khách hàng của bạn.";
+                    bill.statusBill = {}
+                    bill.statusBill.status = Number(bill.deliveryStatus);
+                    bill.statusBill.colorStatus = "#FD3F3F";
+                    bill.statusBill.nameStatus = "Giao thất bại";
+                    bill.statusBill.iconStatus = "truck-remove-outline";
+                    bill.statusBill.descStatus = "Đơn hàng giao thất bại cho khách hàng của bạn.";
                     break;
                 case "-1":
-                    bill.colorStatus = "#FD3F3F";
-                    bill.nameStatus = "Đơn bị hủy";
-                    bill.iconStatus = "clipboard-remove-outline";
-                    bill.descStatus = "Đơn hàng đã bị hủy.";
+                    bill.statusBill = {}
+                    bill.statusBill.status = Number(bill.deliveryStatus);
+                    bill.statusBill.colorStatus = "#FD3F3F";
+                    bill.statusBill.nameStatus = "Đơn bị hủy";
+                    bill.statusBill.iconStatus = "clipboard-remove-outline";
+                    bill.statusBill.descStatus = "Đơn hàng đã bị hủy.";
                     break;
                 case "0":
-                    bill.colorStatus = "#B59800";
-                    bill.nameStatus = "Chờ xác nhận";
-                    bill.iconStatus = "timer-sand";
-                    bill.descStatus = "Đơn hàng đã được đặt và đang chờ được bạn xác nhận.";
+                    bill.statusBill = {}
+                    bill.statusBill.status = Number(bill.deliveryStatus);
+                    bill.statusBill.colorStatus = "#B59800";
+                    bill.statusBill.nameStatus = "Chờ xác nhận";
+                    bill.statusBill.iconStatus = "timer-sand";
+                    bill.statusBill.descStatus = "Đơn hàng đã được đặt và đang chờ được bạn xác nhận.";
                     break;
                 case "1":
-                    bill.colorStatus = "#001858";
-                    bill.nameStatus = "Đã xác nhận";
-                    bill.iconStatus = "timer-sand-complete";
-                    bill.descStatus = "Đơn hàng đã được xác nhận và đang chờ được giao.";
+                    bill.statusBill = {}
+                    bill.statusBill.status = Number(bill.deliveryStatus);
+                    bill.statusBill.colorStatus = "#001858";
+                    bill.statusBill.nameStatus = "Đã xác nhận";
+                    bill.statusBill.iconStatus = "timer-sand-complete";
+                    bill.statusBill.descStatus = "Đơn hàng đã được xác nhận và đang chờ được giao.";
                     break;
                 case "2":
-                    bill.colorStatus = "#001858";
-                    bill.nameStatus = "Đang giao";
-                    bill.iconStatus = "truck-fast-outline";
-                    bill.descStatus = "Đơn hàng đang được giao đến khách hàng của bạn.";
+                    bill.statusBill = {}
+                    bill.statusBill.status = Number(bill.deliveryStatus);
+                    bill.statusBill.colorStatus = "#001858";
+                    bill.statusBill.nameStatus = "Đang giao";
+                    bill.statusBill.iconStatus = "truck-fast-outline";
+                    bill.statusBill.descStatus = "Đơn hàng đang được giao đến khách hàng của bạn.";
                     break;
                 case "3":
-                    bill.colorStatus = "#009A62";
-                    bill.nameStatus = "Đã giao hàng";
-                    bill.iconStatus = "truck-check-outline";
-                    bill.descStatus = "Đơn hàng đã được giao cho khách hàng của bạn.";
+                    bill.statusBill = {}
+                    bill.statusBill.status = Number(bill.deliveryStatus);
+                    bill.statusBill.colorStatus = "#009A62";
+                    bill.statusBill.nameStatus = "Đã giao hàng";
+                    bill.statusBill.iconStatus = "truck-check-outline";
+                    bill.statusBill.descStatus = "Đơn hàng đã được giao cho khách hàng của bạn.";
                     break;
                 case "4":
-                    bill.colorStatus = "#009A62";
-                    bill.nameStatus = "Đã nhận hàng";
-                    bill.iconStatus = "account-check-outline";
-                    bill.descStatus = "Khách hàng đã nhận được sản phẩm của bạn.";
+                    bill.statusBill = {}
+                    bill.statusBill.status = Number(bill.deliveryStatus);
+                    bill.statusBill.colorStatus = "#009A62";
+                    bill.statusBill.nameStatus = "Đã nhận hàng";
+                    bill.statusBill.iconStatus = "account-check-outline";
+                    bill.statusBill.descStatus = "Khách hàng đã nhận được sản phẩm của bạn.";
+                    break;
+                case "5":
+                    bill.statusBill = {}
+                    bill.statusBill.status = Number(bill.deliveryStatus);
+                    bill.statusBill.colorStatus = "#001858";
+                    bill.statusBill.nameStatus = "Đã đánh giá";
+                    bill.statusBill.iconStatus = "star-check-outline";
+                    bill.statusBill.descStatus = "Khách hàng đã đánh giá sản phẩm của bạn.";
                     break;
                 default:
                     break;

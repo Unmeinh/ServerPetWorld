@@ -36,6 +36,7 @@ exports.listProduct = async (req, res, next) => {
         {
           $match: {
             purchaseDate: { $gte: startDate },
+            status: 0,
             "products.idProduct": { $in: productIds.map((id) => id._id) },
           },
         },
@@ -137,7 +138,7 @@ exports.listProduct = async (req, res, next) => {
         });
       }
 
-      const listProduct = await mdProduct.ProductModel.find()
+      const listProduct = await mdProduct.ProductModel.find({ status: 0 })
         .select("idShop nameProduct arrProduct type discount rate priceProduct")
         .populate("idShop", "nameShop locationShop avatarShop status")
         .limit(limit)
@@ -170,6 +171,7 @@ exports.listProduct = async (req, res, next) => {
       const productCounts = await mdbillProduct.billProductModel.aggregate([
         {
           $match: {
+            status: 0,
             purchaseDate: { $gte: startDate },
           },
         },
@@ -231,7 +233,8 @@ exports.listProductFromIdShop = async (req, res, next) => {
   if (req.method == "GET") {
     let listProduct = await mdProduct.ProductModel.find({
       idShop: idShop,
-    }).select("type discount priceProduct nameProduct arrProduct");
+      status: 0,
+    }).select("type discount priceProduct nameProduct arrProduct quantitySold");
 
     if (listProduct) {
       return res.status(200).json({
@@ -310,12 +313,18 @@ exports.addProduct = async (req, res, next) => {
     }
 
     let newObj = new mdProduct.ProductModel();
-    let images = await onUploadImages(req.files, 'product')
+    let images = await onUploadImages(req.files, "product");
     if (images != [] && images[0] == false) {
-      if (images[1].message.indexOf('File size too large.') > -1) {
-        return res.status(500).json({ success: false, data: {}, message: "Dung lượng một ảnh tối đa là 10MB!" });
+      if (images[1].message.indexOf("File size too large.") > -1) {
+        return res.status(500).json({
+          success: false,
+          data: {},
+          message: "Dung lượng một ảnh tối đa là 10MB!",
+        });
       } else {
-        return res.status(500).json({ success: false, data: {}, message: images[1].message });
+        return res
+          .status(500)
+          .json({ success: false, data: {}, message: images[1].message });
       }
     }
     newObj.nameProduct = nameProduct;
@@ -335,41 +344,51 @@ exports.addProduct = async (req, res, next) => {
 
     try {
       await newObj.save();
-      return res.status(201).json({ success: true, data: newObj, message: 'Thêm sản phẩm thành công.' });
+      return res.status(201).json({
+        success: true,
+        data: newObj,
+        message: "Thêm sản phẩm thành công.",
+      });
     } catch (error) {
       console.log(error.message);
-      if (error.message.match(new RegExp('.+`nameProduct` is require+.'))) {
-        msg = 'Tên sản phẩm không được trống!';
-      }
-      else if (error.message.match(new RegExp('.+`priceProduct` is require+.'))) {
-        msg = 'Giá sản phẩm không được trống!';
-      }
-      else if (error.message.match(new RegExp('.+priceProduct: Cast to Number failed for value+.'))) {
-        msg = 'Giá sản phẩm phải nhập số!';
-      }
-      else if (newObj.priceProduct <= 0) {
-        msg = 'Giá sản phẩm cần lớn hơn 0!';
-      }
-      else if (error.message.match(new RegExp('.+`amountProduct` is require+.'))) {
-        msg = 'Số lượng sản phẩm không được trống!';
-      }
-      else if (error.message.match(new RegExp('.+amountProduct: Cast to Number failed for value+.'))) {
-        msg = 'Số lượng sản phẩm phải nhập số!';
-      }
-      else if (newObj.amountProduct <= 0) {
-        msg = 'Số lượng sản phẩm cần lớn hơn 0!';
-      }
-      else if (error.message.match(new RegExp('.+`detailProduct` is require+.'))) {
-        msg = 'Chi tiết sản phẩm không được trống!';
-      }
-      else if (error.message.match(new RegExp('.+`quantitySold` is require+.'))) {
-        msg = 'Số lượng bán không được trống!';
-      }
-      else if (isNaN(newObj.amountProduct) || newObj.amountProduct <= 0) {
-        msg = 'Giá sản phẩm phải nhập số!';
+      if (error.message.match(new RegExp(".+`nameProduct` is require+."))) {
+        msg = "Tên sản phẩm không được trống!";
+      } else if (
+        error.message.match(new RegExp(".+`priceProduct` is require+."))
+      ) {
+        msg = "Giá sản phẩm không được trống!";
+      } else if (
+        error.message.match(
+          new RegExp(".+priceProduct: Cast to Number failed for value+.")
+        )
+      ) {
+        msg = "Giá sản phẩm phải nhập số!";
+      } else if (newObj.priceProduct <= 0) {
+        msg = "Giá sản phẩm cần lớn hơn 0!";
+      } else if (
+        error.message.match(new RegExp(".+`amountProduct` is require+."))
+      ) {
+        msg = "Số lượng sản phẩm không được trống!";
+      } else if (
+        error.message.match(
+          new RegExp(".+amountProduct: Cast to Number failed for value+.")
+        )
+      ) {
+        msg = "Số lượng sản phẩm phải nhập số!";
+      } else if (newObj.amountProduct <= 0) {
+        msg = "Số lượng sản phẩm cần lớn hơn 0!";
+      } else if (
+        error.message.match(new RegExp(".+`detailProduct` is require+."))
+      ) {
+        msg = "Chi tiết sản phẩm không được trống!";
+      } else if (
+        error.message.match(new RegExp(".+`quantitySold` is require+."))
+      ) {
+        msg = "Số lượng bán không được trống!";
+      } else if (isNaN(newObj.amountProduct) || newObj.amountProduct <= 0) {
+        msg = "Giá sản phẩm phải nhập số!";
         return res.status(400).json({ success: false, data: {}, message: msg });
-      }
-      else {
+      } else {
         msg = error.message;
       }
       return res.status(500).json({ success: false, data: {}, message: msg });
@@ -378,24 +397,45 @@ exports.addProduct = async (req, res, next) => {
 };
 
 exports.editProduct = async (req, res, next) => {
-  if (req.method == 'PUT') {
-    let { id, nameProduct, price, discount, amount, category, detail } = req.body;
-    if (!id || !nameProduct || !price || !discount
-      || !amount || !category || !detail
+  if (req.method == "PUT") {
+    let { id, nameProduct, price, discount, amount, category, detail } =
+      req.body;
+    if (
+      !id ||
+      !nameProduct ||
+      !price ||
+      !discount ||
+      !amount ||
+      !category ||
+      !detail
     ) {
-      return res.status(500).json({ success: false, data: {}, message: 'Không đọc được dữ liệu tải lên!' });
+      return res.status(500).json({
+        success: false,
+        data: {},
+        message: "Không đọc được dữ liệu tải lên!",
+      });
     }
 
     let objProduct = await mdProduct.ProductModel.findById(id);
     if (!objProduct) {
-      return res.status(500).json({ success: false, data: {}, message: 'Không tìm thấy dữ liệu sản phẩm!' });
+      return res.status(500).json({
+        success: false,
+        data: {},
+        message: "Không tìm thấy dữ liệu sản phẩm!",
+      });
     }
-    let images = await onUploadImages(req.files, 'product')
+    let images = await onUploadImages(req.files, "product");
     if (images != [] && images[0] == false) {
-      if (images[1].message.indexOf('File size too large.') > -1) {
-        return res.status(500).json({ success: false, data: {}, message: "Dung lượng một ảnh tối đa là 10MB!" });
+      if (images[1].message.indexOf("File size too large.") > -1) {
+        return res.status(500).json({
+          success: false,
+          data: {},
+          message: "Dung lượng một ảnh tối đa là 10MB!",
+        });
       } else {
-        return res.status(500).json({ success: false, data: {}, message: images[1].message });
+        return res
+          .status(500)
+          .json({ success: false, data: {}, message: images[1].message });
       }
     }
     objProduct.nameProduct = nameProduct;
@@ -413,28 +453,44 @@ exports.editProduct = async (req, res, next) => {
 
     try {
       await mdProduct.ProductModel.findByIdAndUpdate(id, objProduct);
-      return res.status(201).json({ success: true, data: objProduct, message: 'Cập nhật sản phẩm thành công.' });
+      return res.status(201).json({
+        success: true,
+        data: objProduct,
+        message: "Cập nhật sản phẩm thành công.",
+      });
     } catch (error) {
       console.log(error.message);
-      return res.status(500).json({ success: false, data: {}, message: error.message });
+      return res
+        .status(500)
+        .json({ success: false, data: {}, message: error.message });
     }
   }
-}
+};
 
 exports.unremoveProduct = async (req, res, next) => {
   let { idProduct } = req.body;
 
-  if (req.method == 'PUT') {
+  if (req.method == "PUT") {
     try {
       let product = await mdProduct.ProductModel.findById(idProduct);
       if (!product) {
-        return res.status(201).json({ success: false, data: {}, message: "Không tìm thấy sản phẩm!" });
+        return res.status(201).json({
+          success: false,
+          data: {},
+          message: "Không tìm thấy sản phẩm!",
+        });
       }
       product.status = 0;
       await mdProduct.ProductModel.findByIdAndUpdate(idProduct, product);
-      return res.status(201).json({ success: true, data: product, message: "Đăng sản phẩm lên gian hàng thành công." });
+      return res.status(201).json({
+        success: true,
+        data: product,
+        message: "Đăng sản phẩm lên gian hàng thành công.",
+      });
     } catch (error) {
-      return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+      return res
+        .status(500)
+        .json({ success: false, data: {}, message: "Lỗi: " + error.message });
     }
   }
 };
@@ -442,50 +498,73 @@ exports.unremoveProduct = async (req, res, next) => {
 exports.removeProduct = async (req, res, next) => {
   let { idProduct } = req.body;
 
-  if (req.method == 'PUT') {
+  if (req.method == "PUT") {
     try {
       let product = await mdProduct.ProductModel.findById(idProduct);
       if (!product) {
-        return res.status(201).json({ success: false, data: {}, message: "Không tìm thấy sản phẩm!" });
+        return res.status(201).json({
+          success: false,
+          data: {},
+          message: "Không tìm thấy sản phẩm!",
+        });
       }
       product.status = 1;
       await mdProduct.ProductModel.findByIdAndUpdate(idProduct, product);
-      return res.status(201).json({ success: true, data: product, message: "Gỡ sản phẩm khỏi gian hàng thành công." });
+      return res.status(201).json({
+        success: true,
+        data: product,
+        message: "Gỡ sản phẩm khỏi gian hàng thành công.",
+      });
     } catch (error) {
-      return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+      return res
+        .status(500)
+        .json({ success: false, data: {}, message: "Lỗi: " + error.message });
     }
   }
 };
 
 exports.updateStatus = async (req, res, next) => {
-
   try {
     let products = await mdProduct.ProductModel.find();
     let productsAfter = [];
     if (!products) {
-        return res.status(201).json({ success: false, data: {}, message: "Không tìm thấy thú cưng!" });
+      return res.status(201).json({
+        success: false,
+        data: {},
+        message: "Không tìm thấy thú cưng!",
+      });
     }
     for (let i = 0; i < products.length; i++) {
-        const product = products[i];
-        product.status = 0;
-        await mdProduct.ProductModel.findByIdAndUpdate(product._id, product);
-        productsAfter.push(product);
+      const product = products[i];
+      product.status = 0;
+      await mdProduct.ProductModel.findByIdAndUpdate(product._id, product);
+      productsAfter.push(product);
     }
-    return res.status(201).json({ success: true, data: productsAfter, message: "Gỡ thú cưng khỏi gian hàng thành công." });
-} catch (error) {
-    return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
-}
+    return res.status(201).json({
+      success: true,
+      data: productsAfter,
+      message: "Gỡ thú cưng khỏi gian hàng thành công.",
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, data: {}, message: "Lỗi: " + error.message });
+  }
 };
 
 exports.deleteProduct = async (req, res, next) => {
   let idProduct = req.params.idProduct;
 
-  if (req.method == 'DELETE') {
+  if (req.method == "DELETE") {
     try {
       await mdProduct.ProductModel.findByIdAndDelete(idProduct);
-      return res.status(203).json({ success: true, data: {}, message: "Xóa sản phẩm thành công." });
+      return res
+        .status(203)
+        .json({ success: true, data: {}, message: "Xóa sản phẩm thành công." });
     } catch (error) {
-      return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+      return res
+        .status(500)
+        .json({ success: false, data: {}, message: "Lỗi: " + error.message });
     }
   }
 };

@@ -21,6 +21,7 @@ var transactionRouter = require('./routes/transaction');
 var notificationRouter=require('./routes/notification');
 var transactionSuccessRouter=require('./routes/transactionSuccess');
 /** Contact with API write in here */
+var authApiRouter = require('./routes/api/authApi');
 var userApiRouter = require('./routes/api/userApi');
 var blogApiRouter = require('./routes/api/blogApi');
 // var itemCartApiRouter = require('./routes/api/itemCartApi');
@@ -40,6 +41,7 @@ var appointmentApiRouter = require('./routes/api/appointmentApi');
 var conversationsApiRouter = require('./routes/api/ConversationsApi');
 var boxChatApiRouter = require('./routes/api/boxChatApi');
 var serverApiRouter = require('./routes/api/serverApi');
+var reviewApiRouter = require('./routes/api/reviewApi');
 
 var app = express();
 
@@ -74,6 +76,7 @@ app.use('/transaction', transactionRouter);
 app.use('/notification',notificationRouter)
 app.use('/transactionSuccess',transactionSuccessRouter)
 //api use in here
+app.use('/api/', authApiRouter);
 app.use('/api/user', userApiRouter);
 app.use('/api/blog', blogApiRouter);
 // app.use('/api/item-carts', itemCartApiRouter);
@@ -93,6 +96,7 @@ app.use('/api/appointment',appointmentApiRouter);
 app.use('/api/conversations', conversationsApiRouter);
 app.use('/api/boxChat', boxChatApiRouter);
 app.use('/api/server', serverApiRouter);
+app.use('/api/review', reviewApiRouter);
 
 
 // catch 404 and forward to error handler

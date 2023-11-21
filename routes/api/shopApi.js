@@ -11,8 +11,6 @@ router.get('/', mdJWT.api_user_auth, ShopApiCtrl.listShop);
 router.get('/detail/:idShop', mdJWT.api_user_auth, ShopApiCtrl.detailShop);
 
 //seller
-router.get('/myDetail', mdJWT.api_shop_auth, ShopApiCtrl.myShopDetail);
-router.get('/detailOwner', mdJWT.api_shop_auth, ShopApiCtrl.detailOwner);
 router.get('/list/pet', mdJWT.api_shop_auth, ShopApiCtrl.listPet);
 router.get('/list/product', mdJWT.api_shop_auth, ShopApiCtrl.listProduct);
 router.get('/list/bill/all', mdJWT.api_shop_auth, ShopApiCtrl.listBillAll);
@@ -20,17 +18,23 @@ router.get('/list/bill/processing', mdJWT.api_shop_auth, ShopApiCtrl.listProcess
 router.get('/list/bill/delivering', mdJWT.api_shop_auth, ShopApiCtrl.listDeliveringBill);
 router.get('/list/bill/delivered', mdJWT.api_shop_auth, ShopApiCtrl.listDeliveredBill);
 router.get('/list/bill/evaluated', mdJWT.api_shop_auth, ShopApiCtrl.listEvaluatedBill);
-router.post('/bill/confirm', mdJWT.api_shop_auth, ShopApiCtrl.confirmBill);
+router.get('/list/bill/cancelled', mdJWT.api_shop_auth, ShopApiCtrl.listCancelledBill);
 router.get('/list/appointment', mdJWT.api_shop_auth, ShopApiCtrl.listAppointment);
+router.get('/pet/detail/:idPet', mdJWT.api_shop_auth, ShopApiCtrl.detailPet);
+router.get('/product/detail/:idProd', mdJWT.api_shop_auth, ShopApiCtrl.detailProduct);
 router.get('/appointment/detail/:idAppt', mdJWT.api_shop_auth, ShopApiCtrl.detailAppointment);
+router.post('/bill/confirm', mdJWT.api_shop_auth, ShopApiCtrl.confirmBill);
+router.post('/bill/confirmAll', mdJWT.api_shop_auth, ShopApiCtrl.confirmBillAll);
+router.put('/appointment/update', mdJWT.api_shop_auth, ShopApiCtrl.updateApm);
 
+router.get('/myDetail', mdJWT.api_shop_auth, ShopApiCtrl.myShopDetail);
+router.get('/detailOwner', mdJWT.api_shop_auth, ShopApiCtrl.detailOwner);
 router.post('/checkPhoneNumber', ShopApiCtrl.checkPhoneNumber);
 router.put('/checkPhoneNumber', ShopApiCtrl.checkPhoneNumber);
 router.put('/checkEmail', ShopApiCtrl.checkEmail);
 router.get('/autoLogin', mdJWT.api_shop_auth, ShopApiCtrl.checkStatus);
 router.post('/register', uploader.any(), ShopApiCtrl.registerShop);
 router.post('/login', ShopApiCtrl.loginShop);
-router.get('/regex', ShopApiCtrl.getShop);
 router.post('/sendVerifyCodeEmail', ShopApiCtrl.sendVerifyEmail);
 router.post('/verifyCodeEmail', ShopApiCtrl.verifyCode);
 router.post('/sendResetPasswordEmail', ShopApiCtrl.sendResetPassword);
