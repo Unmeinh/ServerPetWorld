@@ -41,6 +41,7 @@ var appointmentApiRouter = require('./routes/api/appointmentApi');
 var conversationsApiRouter = require('./routes/api/ConversationsApi');
 var boxChatApiRouter = require('./routes/api/boxChatApi');
 var serverApiRouter = require('./routes/api/serverApi');
+var reviewApiRouter = require('./routes/api/reviewApi');
 
 var app = express();
 
@@ -95,6 +96,7 @@ app.use('/api/appointment',appointmentApiRouter);
 app.use('/api/conversations', conversationsApiRouter);
 app.use('/api/boxChat', boxChatApiRouter);
 app.use('/api/server', serverApiRouter);
+app.use('/api/review', reviewApiRouter);
 
 
 // catch 404 and forward to error handler
