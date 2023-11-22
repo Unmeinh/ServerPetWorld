@@ -204,7 +204,7 @@ exports.listEvaluatedBill = async (req, res, next) => {
                 const searchTerm = req.query.filterSearch.trim();
                 filterSearch = { fullName: new RegExp(searchTerm, 'i') };
             }
-            let listBill = await getListBill(req.shop._id, 4)
+            let listBill = await getListBill(req.shop._id, 5)
             if (listBill && listBill.length > 0) {
                 let list = onFinalProcessingListBill(listBill);
                 listBill = [...list];
@@ -557,21 +557,21 @@ exports.updateApm = async (req, res, next) => {
         if (req.method == "PUT") {
             if (status && idAppt) {
                 const objAppt = await mdAppointment.findById(idAppt)
-                .populate({
-                    path: 'idPet',
-                    populate: {
-                        path: 'idCategoryP',
-                        select: 'nameCategory'
-                    }
-                })
-                .populate({
-                    path: 'idUser',
-                    populate: {
-                        path: 'idAccount',
-                        select: ['phoneNumber', 'emailAddress']
-                    },
-                    select: ['avatarUser', 'fullName', 'locationUser', 'idAccount']
-                });
+                    .populate({
+                        path: 'idPet',
+                        populate: {
+                            path: 'idCategoryP',
+                            select: 'nameCategory'
+                        }
+                    })
+                    .populate({
+                        path: 'idUser',
+                        populate: {
+                            path: 'idAccount',
+                            select: ['phoneNumber', 'emailAddress']
+                        },
+                        select: ['avatarUser', 'fullName', 'locationUser', 'idAccount']
+                    });
                 if (!objAppt) {
                     return res.status(500).json({ success: false, message: 'Không tìm thấy lịch hẹn.' });
                 }
@@ -652,9 +652,62 @@ exports.updateApm = async (req, res, next) => {
 
 exports.myShopDetail = async (req, res, next) => {
     try {
-        let objShop = await mdShop.ShopModel.findById(req.shop._id);
-        return res.status(200).json({ success: true, data: objShop, message: "Lấy dữ liệu chi tiết shop thành công" });
+        // let objShop = await mdShop.ShopModel.findById(req.shop._id);
+        const { _id } = req.shop;
+        let listBill = await mdBill.find({ idShop: _id });
+        if (listBill) {
+            req.shop = req?.shop.toObject();
+            req.shop.billCount = listBill.length;
+            const statusArray = [0, 1, 2, 3, 5];
+            try {
+                const pipeline = [
+                    {
+                        $match: {
+                            idShop: _id,
+                            deliveryStatus: { $in: statusArray },
+                        },
+                    },
+                    {
+                        $group: {
+                            _id: "$deliveryStatus",
+                            count: { $sum: 1 },
+                        },
+                    },
+                ];
 
+                const results = await mdBill.aggregate(pipeline);
+
+                const statusCountObject = {};
+
+                for (let i = 0; i < results.length; i++) {
+                    let result = results[i];
+                    if (result._id <= 1) {
+                        if (statusCountObject["0"]) {
+                            statusCountObject["0"] = Number(result.count) + Number(statusCountObject["0"]);
+                        } else {
+                            statusCountObject["0"] = result.count;
+                        }
+                    } else {
+                        if (result._id == 5) {
+                            statusCountObject["3"] = result.count;
+                        } else {
+                            statusCountObject[String(result._id - 1)] = result.count;
+                        }
+                    }
+                }
+                req.shop.objCountBills = statusCountObject;
+                return res.status(200).json({ success: true, data: req.shop, message: "Lấy dữ liệu chi tiết shop thành công" });
+            } catch (error) {
+                console.error(error);
+                return res.status(500).json({
+                    success: false,
+                    data: [],
+                    message: "Lấy danh sách hóa đơn thất bại",
+                });
+            }
+        } else {
+            return res.status(200).json({ success: true, data: req.shop, message: "Lấy dữ liệu chi tiết shop thành công" });
+        }
     } catch (error) {
         return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
     }
@@ -710,7 +763,7 @@ exports.detailShop = async (req, res, next) => {
 
     let idShop = req.params.idShop;
     try {
-        let ObjShop = await mdShop.ShopModel.findById({_id: idShop});
+        let ObjShop = await mdShop.ShopModel.findById({ _id: idShop });
         return res.status(200).json({ success: true, data: ObjShop, message: "Lấy dữ liệu chi tiết shop thành công" });
 
     } catch (error) {
@@ -1374,6 +1427,14 @@ function onFinalProcessingListBill(listBill) {
                     bill.statusBill.nameStatus = "Đã nhận hàng";
                     bill.statusBill.iconStatus = "account-check-outline";
                     bill.statusBill.descStatus = "Khách hàng đã nhận được sản phẩm của bạn.";
+                    break;
+                case "5":
+                    bill.statusBill = {}
+                    bill.statusBill.status = Number(bill.deliveryStatus);
+                    bill.statusBill.colorStatus = "#001858";
+                    bill.statusBill.nameStatus = "Đã đánh giá";
+                    bill.statusBill.iconStatus = "star-check-outline";
+                    bill.statusBill.descStatus = "Khách hàng đã đánh giá sản phẩm của bạn.";
                     break;
                 default:
                     break;
