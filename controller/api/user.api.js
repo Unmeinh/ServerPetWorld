@@ -127,8 +127,8 @@ exports.registerUser = async (req, res, next) => {
       newUser.locationUser = "";
       newUser.locationDelivery = [];
       newUser.blogs = 0;
-      newUser.followers = 0;
-      newUser.followings = 0;
+      newUser.followers = [];
+      newUser.followings = [];
       newUser.myPet = [];
       await newUser.save();
       await newAccount.save();
