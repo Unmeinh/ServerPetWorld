@@ -1,20 +1,29 @@
 var express = require('express');
 var PetApiCtrl = require('../../controller/api/pet.api');
-var mdJWT= require('../../middlewares/api.auth');
+var mdJWT = require('../../middlewares/api.auth');
 var multer = require('multer');
-var uploader = multer({dest:'/tmp'});
+var uploader = multer({ dest: '/tmp' });
 var router = express.Router();
 
-router.get('/list/all',mdJWT.api_user_auth, PetApiCtrl.listpet);
+router.get('/list/all', mdJWT.api_user_auth, PetApiCtrl.listpet);
 
-router.get('/list/shop/:idShop',mdJWT.api_user_auth, PetApiCtrl.listPetFromIdShop);
+router.get('/list/shop/:idShop', mdJWT.api_user_auth, PetApiCtrl.listPetFromIdShop);
 
-router.get('/detail/:idPet',mdJWT.api_user_auth, PetApiCtrl.detailpet);
+router.get('/detail/:idPet', mdJWT.api_user_auth, PetApiCtrl.detailpet);
 
-router.post('/insert',mdJWT.api_user_auth, uploader.any(), PetApiCtrl.addpet);
+//Seller
+router.get('/list/category', mdJWT.api_shop_auth, PetApiCtrl.listCategory);
 
-// router.put('/update/:idPR', uploader.any(), ProducttApiCtrl.editProduct);
+router.post('/insert', mdJWT.api_shop_auth, uploader.any(), PetApiCtrl.addpet);
 
-router.delete('/delete/:idPet',mdJWT.api_user_auth,PetApiCtrl.deletepet);
+router.put('/update', mdJWT.api_shop_auth, uploader.any(), PetApiCtrl.editPet);
+
+router.put('/unremove',mdJWT.api_shop_auth, PetApiCtrl.unremovePet);
+
+router.put('/remove',mdJWT.api_shop_auth, PetApiCtrl.removePet);
+
+router.get('/updateStatus',mdJWT.api_shop_auth, PetApiCtrl.updateStatus);
+
+router.delete('/delete/:idPet', mdJWT.api_shop_auth, PetApiCtrl.deletepet);
 
 module.exports = router;

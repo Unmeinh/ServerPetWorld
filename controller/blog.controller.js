@@ -31,7 +31,7 @@ exports.listAllBlog = async (req, res, next) => {
             let listAllBlog = await mdBlog.BlogModel.find(filterSearch).populate('idUser').sort(sortOption).skip(skipCount).limit(perPage);
             msg = 'Lấy danh sách tất cả blog thành công';
             // console.log(listAllBlog);
-            return res.render('Blog/listBlog', { listAllBlog: listAllBlog, countAllBlog: totalCount, countNowBlog: listAllBlog.length, msg: msg, moment: moment, currentPage: currentPage, totalPage: totalPage });
+            return res.render('Blog/listBlog', { listAllBlog: listAllBlog, countAllBlog: totalCount, countNowBlog: listAllBlog.length, msg: msg, moment: moment, currentPage: currentPage, totalPage: totalPage, adminLogin:req.session.adLogin });
         } catch (error) {
             msg = 'Lỗi: ' + error.message;
             console.log(msg);
@@ -50,44 +50,7 @@ exports.detailBlog = async (req, res, next) => {
     let idAccount = objB.idUser.idAccount
     let objUserAcc = await mdUserAcc.UserAccountModel.findById(idAccount);
     console.log("objAxx "+objUserAcc);
-    res.render('Blog/detailBlog', { objB: objB,objUserAcc:objUserAcc, moment: moment });
-}
-
-exports.addBlog = async (req, res, next) => {
-    let msg='';
-    if (req.method == 'POST') {
-        let newBlog = new mdBlog.BlogModel();
-        newBlog.contentBlog = req.body.contentBlog;
-        newBlog.contentFont = req.body.contentFont;
-
-        fs.renameSync(req.file.path,'./public/upload/'+req.file.originalname);
-        newBlog.imageBlogs = 'http://localhost:3000/upload/'+req.file.originalname;
-        // console.log(req.file);
-        newBlog.aspectRatio = req.body.aspectRatio;
-        newBlog.idUser='64d4e1c79c5e5fb63b6211d3';
-        // newBlog.idUser=req.body.idUser;
-        newBlog.comments=0;
-        newBlog.shares=0;
-        newBlog.createdAt = new Date();
-
-        try {
-
-            await newBlog.save();
-            msg='Thêm bài viết thành công';
-            return res.redirect('/blog');
-        } catch (error) {
-            console.log(error.message);
-
-            if (error.message.match(new RegExp('.+`contentBlog` is require+.'))) {
-                msg = 'Bạn chưa nhập nội dung!';
-            }
-            else {
-                msg = "Đăng bài viết thất bại " + error.message;
-            }
-
-        }
-    }
-    res.render('Blog/addBlog',{msg:msg});
+    res.render('Blog/detailBlog', { objB: objB,objUserAcc:objUserAcc, moment: moment, adminLogin:req.session.adLogin });
 }
 
 exports.deleteBlog = async (req, res, next) => {
@@ -105,7 +68,7 @@ exports.deleteBlog = async (req, res, next) => {
             console.log(msg + error.message);
         }
     }
-    res.render('Blog/deleteBlog', { objB: objB, msg: msg });
+    res.render('Blog/deleteBlog', { objB: objB, msg: msg ,adminLogin:req.session.adLogin});
 }
 
 exports.shareBlog = async (req, res, next) => {
@@ -123,7 +86,7 @@ exports.shareBlog = async (req, res, next) => {
         } else {
             imageUrl = "https://res.cloudinary.com/dcf7f43rh/image/upload/v1695556234/images/logo/s2vq9g9kmy10wxvmeekc.jpg";
         }
-        return res.render('Blog/shareBlog', { blog: blog, contentBlog: blog.contentBlog, imageBlog: imageUrl });
+        return res.render('Blog/shareBlog', { blog: blog, contentBlog: blog.contentBlog, imageBlog: imageUrl ,adminLogin:req.session.adLogin});
     }
     res.render('Blog/shareBlog');
 }

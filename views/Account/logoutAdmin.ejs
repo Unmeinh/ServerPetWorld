@@ -1,0 +1,18 @@
+<%- include('../inc/top',{title:'Đăng xuất hệ thống', adminLogin:adminLogin}) %>
+<div class="container">
+    <% if(msg) { %>
+        <div class="row mb-2">
+            <span class="p-3"
+                style="background-color: rgb(175, 214, 239); border-radius: 10px;color: red;font-weight: bold;">
+                <%= msg %>
+            </span>
+        </div>
+        <% }%>
+    <div class="col-5 m-auto" style="box-shadow: 0 0 1px 1px #9c9999; border-radius: 8px; padding: 20px;">
+        <form action="" method="post">
+            <h4 style="margin: 20px;">Bạn chắc chắn muốn đăng xuất</span>?</h4>
+            <a href="/account/login" class="btn" style="background-color:#d7d2d2 ;font-weight: bold;margin: 20px;">Đăng xuất</a>
+        </form>
+    </div>
+</div>
+<%- include('../inc/bottom') %>

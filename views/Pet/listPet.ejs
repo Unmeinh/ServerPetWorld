@@ -1,5 +1,5 @@
 <%- include('../inc/top',{title:'Quản lý thú cưng'}) %>
-  <div class="container-fluid " style="width: 98%;display: flex; flex-direction: column">
+  <div class="container-fluid" style="width: 98%;display: flex; flex-direction: column">
 
     <div class="row col m-3">
       <form action="" class="row col-3 me-2" method="get">
@@ -19,7 +19,7 @@
 
       <form action="" method="get" id="sortForm" class="row col-4 me-5"
         style="display: flex; flex-direction: row; justify-content: space-between;">
-        <select name="sortOption" id="sortOption" class="row col-10 form-select"
+        <select <%=hidden %> name="sortOption" id="sortOption" class="row col-10 form-select"
           style="background-color: #F0F4F8;border-radius: 20px;border: none;box-shadow: none; width: 80%;">
           <option selected disabled>Sắp xếp tên thú cưng</option>
           <option value="1"><button type="submit">Sắp xếp từ a-z</button></option>
@@ -54,7 +54,11 @@
           <td>
             <div class="box" style="line-height: 8px;margin: 5px;">
               <p>
-                <%= row.namePet%>
+                <% if(row.namePet.length> 40 ){ %>
+                  <%= row.namePet.substring(0,39) %> ...
+                    <% } else { %>
+                      <%= row.namePet %>
+                        <% }%>
               </p>
               <a href="/pet/delete/<%= row._id %>" style="text-decoration: none;color: rgb(171, 169, 169);">
                 Xóa
@@ -62,15 +66,15 @@
 
             </div>
           </td>
-          <td>
-            <%= row.pricePet %>
+          <td style="font-weight: bold; color: rgb(92, 90, 90);">
+            <%= row.pricePet.toLocaleString('vi-VN') %> VNĐ
 
           </td>
           <td>
             <%= row.amountPet %>
           </td>
           <td>
-            <%= moment(row.createdAt).format('DD/MM/  YYYY hh:mm:ss a') %>
+            <%= moment(row.createdAt).format('DD/MM/ YYYY hh:mm:ss a') %>
           </td>
           <td><a href="/pet/detail/<%= row._id%>"
               style="background-color: #F582AE;padding: 8px;border-radius: 10px;text-decoration: none;color: white; font-weight: bold;">Chi
@@ -115,8 +119,11 @@
         </nav>
       </div>
       <% } else { %>
-        <div class="no-results-message">
-          <p>Không tìm thấy kết quả</p>
+        <div class="row m-auto" style="width: 97%;">
+          <span class="p-3"
+            style="background-color: rgb(175, 214, 239); border-radius: 10px;color: red;font-weight: bold;">Không tìm
+            thấy kết quả
+          </span>
         </div>
         <% } %>
 

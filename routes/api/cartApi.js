@@ -10,6 +10,6 @@ router.post('/',mdJWT.api_user_auth, CartApiCtrl.cartUser);
 router.post('/update',mdJWT.api_user_auth, CartApiCtrl.editCart);
 router.post('/updateLocations',mdJWT.api_user_auth, CartApiCtrl.updateLocaions)
 router.post('/addLocations',mdJWT.api_user_auth, CartApiCtrl.addLocations)
-router.put('/editLocations/:id',mdJWT.api_user_auth, CartApiCtrl.editLocationSelect)
-router.put('/editLocation',mdJWT.api_user_auth, CartApiCtrl.editLocation)
+router.post('/editLocations/:id',mdJWT.api_user_auth, CartApiCtrl.editLocationSelect)
+router.post('/editLocation',mdJWT.api_user_auth, CartApiCtrl.editLocation)
 module.exports = router;

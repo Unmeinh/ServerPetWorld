@@ -20,32 +20,49 @@
                     <div class="form-group row p-3">
                         <label for="name" form="bold" class="col-sm-3 me-auto col-form-label">Họ và tên</label>
                         <div class="col-sm-7">
-                            <input type="text" class="form-control" id="fullname" value="<%= objU.fullName% || 'Không có dữ liệu'>" readonly>
+                            <input type="text" class="form-control" id="fullname" value="<%= objU.fullName|| 'Không có dữ liệu' %>" readonly>
                         </div>
                     </div>
                     <div class="form-group row p-3 ">
                         <label for="birthday" class="col-sm-3 me-auto col-form-label">Ngày sinh</label>
                         <div class="col-sm-7">
-                            <input type="text" class="form-control" id="birthday" value="<%= moment(objU.birthday).format('DD/MM/YYYY')  %> || 'Không có dữ liệu'" readonly>
+                            <% if(typeof(objU.birthday)!='undefined') { %>
+                                <input type="text" class="form-control" id="birthday" value="<%= moment(objU.birthday).format('DD/MM/YYYY')%>" readonly>
+                                <% } else { %>
+                                    <span class="form-control">Chưa cập nhật thông tin</span>
+                                    <%} %>
+                            
                         </div>
                     </div>
                     <div class="form-group row p-3 ">
                         <label for="address" class="col-sm-3 me-auto col-form-label">Địa chỉ</label>
                         <div class="col-sm-7">
-                            <input type="text" class="form-control" id="address" value="<%= objU.locationUser %>|| 'Không có dữ liệu'">
+                            <% if(typeof(objU.locationUser)!='undefined' && objU.locationUser.length != 0) { %>
+                                <input type="text" class="form-control" id="address" value="<%= objU.locationUser %>" readonly>
+                                <% } else { %>
+                                    <span class="form-control">Chưa cập nhật thông tin</span>
+                                    <%} %>
                         </div>
                     </div>
                     
                     <div class="form-group row p-3">
                         <label for="email" class="col-sm-3 me-auto col-form-label">Email</label>
                         <div class="col-sm-7">
-                            <input type="email" class="form-control" id="email" value="<%= objU.idAccount.emailAddress %>|| 'Không có dữ liệu'" readonly>
+                            <% if(typeof(objU.idAccount.emailAddress)!='undefined' && objU.idAccount.emailAddress != '') { %>
+                                <input type="email" class="form-control" id="email" value="<%= objU.idAccount.emailAddress %>" readonly>
+                                <% } else { %>
+                                    <span  class="form-control">Chưa cập nhật thông tin</span>
+                                    <%} %>
                         </div>
                     </div>
                     <div class="form-group row p-3">
                         <label for="phone" class="col-sm-3 me-auto col-form-label">Số điện thoại</label>
                         <div class="col-sm-7">
-                            <input type="tel" class="form-control" id="phone" value="<%= objU.idAccount.phoneNumber %>|| 'Không có dữ liệu'" readonly>
+                            <% if(typeof( objU.idAccount.phoneNumber)!='undefined') { %>
+                                <input type="tel" class="form-control" id="phone" value="0<%= objU.idAccount.phoneNumber %>" readonly>
+                                <% } else { %>
+                                    <span>Chưa cập nhật thông tin</span>
+                                    <%} %>
                         </div>
                     </div>
 

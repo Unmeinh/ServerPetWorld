@@ -1,0 +1,132 @@
+<%- include('../inc/top',{title:'Chi tiết hóa đơn sản phẩm'}) %>
+
+    <div class="container mt-2">
+        <form action="/pet" method="get" style="background-color: #f1f4f5; padding: 6px; border-radius: 15px; box-shadow: 5px 5px #c9c7c7;">
+            <div class="form-group row m-3" style="align-items: center;">
+                <label form="bold" class="col-sm-2 col-form-label">Tên khách hàng</label>
+                <label type="text" class="form-control ms-3" style="width: 200px;">
+                    <%= objBP.idUser.fullName %>
+                </label>
+            </div>
+
+            <div class="form-group row m-3">
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Thông tin liên hệ</label>
+                <div class="col-sm-3">
+                    <label type="text" class="form-control" style="width: 200px;">
+                        0<%= objBP.locationDetail.phoneNumber %>
+                    </label>
+                </div>
+
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Địa chỉ nhận hàng</label>
+                <div class="col-sm-4">
+                    <label type="text" style="max-width: 270px;" class="form-control">
+                        <%= objBP.locationDetail.location %>
+                    </label>
+                </div>
+
+            </div>
+            <div class="form-group row m-3">
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Tên cửa hàng</label>
+                <div class="col-sm-3">
+                    <label type="text" class="form-control" style="width: 200px;">
+                        <%= objBP.idShop.nameShop %>
+                    </label>
+                </div>
+
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Địa chỉ cửa hàng</label>
+                <div class="col-sm-3">
+                    <label type="text" style="width: 270px;" class="form-control">
+                        <%= objBP.idShop.locationShop %>
+                    </label>
+                </div>
+
+            </div>
+            <div class="form-group row m-3">
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Giảm giá hóa đơn</label>
+                <div class="col-sm-3">
+                    <label type="text" class="form-control" style="width: 200px;">
+                        <%= objBP.discountBill.toLocaleString('vi-VN') %> VNĐ
+                    </label>
+                </div>
+
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Phí giao hàng</label>
+                <div class="col-sm-3">
+                    <label type="text" style="width: 270px;" class="form-control">
+                        <%= objBP.moneyShip.toLocaleString('vi-VN') %> VNĐ
+                    </label>
+                </div>
+
+            </div>
+            <div class="form-group row m-3">
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Thành tiền</label>
+                <div class="col-sm-3">
+                    <label type="text" class="form-control" style="width: 200px; font-weight: bold; color: rgb(92, 90, 90);">
+                        <%= objBP.total.toLocaleString('vi-VN') %> VNĐ
+                    </label>
+                </div>
+
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Phương thức thanh toán</label>
+                <div class="col-sm-5">
+                    <label type="text" class="form-control" style="width: 270px;">
+                        <%= objBP.paymentMethods %>
+                    </label>
+                </div>
+
+            </div>
+
+            <div class="form-group row m-3">
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Trạng thái giao hàng</label>
+                <div class="col-sm-3">
+                    <label type="text" class="form-control" style="width: 200px;">
+                        <%= objBP.deliveryStatus %>
+                    </label>
+                </div>
+
+                <label for="username" form="bold" class="col-sm-2 col-form-label">Ngày mua hàng</label>
+                <div class="col-sm-3">
+                        <label type="text" class="form-control" style="width: 270px; overflow: hidden;">
+                            <%= moment(objBP.purchaseDate).format('DD/MM/YYYY hh:mm:ss a') %>
+                        </label>
+                </div>
+            </div>
+        </form>
+
+        <table class="table align-middle mt-3" style="border: white; ">
+            <tr style="background-color: #8BD3DD;">
+                <th style="border-radius: 6px 0 0 6px;">Mã sản phẩm</th>
+                <th>Số lượng</th>
+                <th>Giá tiền</th>
+                <th style="border-radius: 0 6px 6px 0;">Giảm giá</th>
+                <% objBP.products.map((row)=> { %>
+            </tr>
+            <tr>
+                <td style="width: 250px; overflow: hidden;">
+                    <div class="box" style="line-height: 8px;margin: 5px;">
+                        <p>
+                            <%= row.idProduct %>
+                        </p>
+                    </div>
+                </td>
+                <td>
+                    <%= row.amount %>
+                </td>
+                <td style="font-weight: bold; color: rgb(92, 90, 90);">
+                    <%= row.price.toLocaleString('vi-VN') %> VNĐ
+                </td>
+
+                <td>
+                    <%= row.discount %>%
+                </td>
+            </tr>
+            <% }) %>
+        </table>
+
+        <div class="form-group row mt-3">
+            <div class="col-sm-10">
+                <a href="/bill-product" style="background-color: #F582AE;" class="btn btn-secondary">Quay
+                    lại</a>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../inc/bottom') %>

@@ -1,19 +1,18 @@
-<%- include('../inc/top',{title:'Xóa shop'}) %>
+<%- include('../inc/top',{title:'Xóa shop thú cưng'}) %>
 <div class="container">
     <% if(message) { %>
         <div class="row mb-2">
-            <span class="p-3"
-                style="background-color: rgb(175, 214, 239); border-radius: 10px;color: red;font-weight: bold;">
+            <span class="p-3 alert alert-warning">
                 <%= message %>
             </span>
         </div>
-        <% }%>
-    <div class="col-5 m-auto" style="box-shadow: 0 0 2px 2px #9c9999; border-radius: 8px; padding: 20px;">
+    <% } %>
+    <div class="col-12 col-md-5 mx-auto" style="box-shadow: 0 0 2px 2px #9c9999; border-radius: 8px; padding: 20px;">
         <form action="" method="post">
-            <h3 style="color: rgb(150, 145, 145); margin-bottom: 20px;">Xóa shop</h3>
+            <h3 class="text-muted" style="margin-bottom: 20px;">Xóa shop</h3>
             <h4 style="margin: 30px;">Bạn muốn xóa shop: <span style="font-weight: bold;"><%= ObjShop.nameShop %></span>?</h4>
-            <button class="btn" style="background-color: #F85555; font-weight: bold;margin: 20px;" type="submit">Xóa ngay</button>
-            <a href="http://localhost:3000/shop" class="btn" style="background-color: rgb(216, 212, 212) ;font-weight: bold;margin: 20px;">Hủy bỏ</a>
+            <button class="btn btn-danger" type="submit">Xóa ngay</button>
+            <a href="/shop" class="btn btn-secondary">Hủy bỏ</a>
         </form>
     </div>
 </div>
