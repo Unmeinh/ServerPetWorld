@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<!-- Created by CodingLab |www.youtube.com/CodingLabYT-->
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="UTF-8" />
+  <!--<title> Drop Down Sidebar Menu | CodingLab </title>-->
+  <link rel="stylesheet" href="../../stylesheets/sidebar.css" />
+  <!-- Boxiocns CDN Link -->
+  <link href="https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="../../bootstrap/css/bootstrap.min.css">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>
+    <%= title %>
+  </title>
+</head>
+
+<body>
+  <div class="sidebar close">
+    <div class="logo-details">
+      <img src="/upload/logoclose.png" width="70" height="70" class="logo_close">
+      <span class="logo_name"><img src="/upload/logopetworld.png" width="150" height="100"></span>
+    </div>
+    <ul class="nav-links">
+      <li>
+        <a href="/accountShipper/listBillProduct" class="color-link" onclick="changeColor(this)">
+          <span class="iconify" data-icon="lets-icons:order"></span>
+          <span class="link_name">Danh sách đơn hàng</span>
+        </a>
+        <ul class="sub-menu blank">
+          <li><a class="link_name" href="/accountShipper/listBillProduct">Danh sách đơn hàng</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="/accountShipper/listbillDelivering" class="color-link" onclick="changeColor(this)">
+          <span class="iconify" data-icon="iconamoon:news-bold"></span>
+          <span class="link_name">Danh sách đơn hàng đang giao</span>
+        </a>
+        <ul class="sub-menu blank">
+          <li><a class="link_name" href="/accountShipper/listbillDelivering">Danh sách đơn hàng đang giao </a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="/accountShipper/listbillDeliveryFall" class="color-link" onclick="changeColor(this)">
+          <span class="iconify" data-icon="icon-park-outline:database-fail"></span>
+          <span class="link_name">Danh sách đơn hàng giao không thành công</span>
+        </a>
+        <ul class="sub-menu blank">
+          <li><a class="link_name" href="/accountShipper/listbillDelivering">Danh sách đơn hàng giao không thành công</a></li>
+        </ul>
+      </li>
+
+      <li>
+        <a href="/accountShipper/successfulDelivery" class="color-link" onclick="changeColor(this)">
+          <span class="iconify" data-icon="fluent-mdl2:product-variant"></span>
+          <span class="link_name">Danh sách đơn hàng giao thành công</span>
+        </a>
+        <ul class="sub-menu blank">
+          <li><a class="link_name" href="/accountShipper/successfulDelivery">Danh sách đơn hàng giao thành công</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="/accountShipper/cancelledDelivery" class="color-link" onclick="changeColor(this)">
+          <span class="iconify" data-icon="icon-park-outline:doc-fail"></span>
+          <span class="link_name">Danh sách đơn hàng bị hủy</span>
+        </a>
+        <ul class="sub-menu blank">
+          <li><a class="link_name" href="/accountShipper/cancelledDelivery">Danh sách đơn hàng bị hủy </a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="/accountShipper/proFileShipper" class="color-link" onclick="changeColor(this)">
+          <span class="iconify" data-icon="pajamas:profile"></span>
+          <span class="link_name">Hồ Sơ</span>
+        </a>
+        <ul class="sub-menu blank">
+          <li><a class="link_name" href="/accountShipper/proFileShipper">Hồ sơ </a></li>
+        </ul>
+      </li>
+      <li>
+        <div class="profile-details">
+          <div class="profile-content">
+            <!--<img src="image/profile.jpg" alt="profileImg">-->
+          </div>
+          <div class="name-job">
+            <div class="profile_name">Đào Minh Hoàn</div>
+            <div class="job">Shipper</div>
+          </div>
+          <i class="bx bx-log-out"></i>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <section class="home-section">
+    <div class="home-content">
+      <i class="bx bx-menu"></i>
+      <span class="text">
+        <%= title %>
+      </span>
+
+    </div>

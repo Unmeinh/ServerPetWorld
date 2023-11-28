@@ -1,0 +1,20 @@
+<%- include('../inc/top',{title:'Xóa Pet'}) %>
+<div class="container">
+    <% if(message) { %>
+        <div class="row mb-2">
+            <span class="p-3"
+                style="background-color: rgb(175, 214, 239); border-radius: 10px;color: red;font-weight: bold;">
+                <%= message %>
+            </span>
+        </div>
+        <% }%>
+    <div class="col-5 m-auto" style="box-shadow: 0 0 2px 2px #9c9999; border-radius: 8px; padding: 20px;">
+        <form action="" method="post">
+            <h3 style="color: rgb(150, 145, 145); margin-bottom: 20px;">Xóa sản phẩm</h3>
+            <h4 style="margin: 30px;">Bạn muốn xóa sản phẩm: <span style="font-weight: bold;"><%= Objpet.namePet %></span> ?</h4>
+            <button class="btn" style="background-color: #F85555; font-weight: bold;margin: 20px;" type="submit">Xóa ngay</button>
+            <a href="http://localhost:3000/Pet" class="btn" style="background-color:#656565 ;font-weight: bold;margin: 20px;">Hủy bỏ</a>
+        </form>
+    </div>
+</div>
+<%- include('../inc/bottom') %>
