@@ -49,38 +49,41 @@ exports.Listbanner = async (req, res, next) => {
         quantitySold: -1,
       })
       .limit(1)
-      .select("nameProduct arrProduct priceProduct quantitySold discount")
+      .select("nameProduct arrProduct priceProduct quantitySold discount type")
       .populate("idShop", "nameShop locationShop avatarShop status");
-
     let listPet = await mdPet.PetModel.find()
       .sort({
         quantitySold: -1,
       })
       .limit(1)
-      .select("namePet imagesPet pricePet quantitySold discount")
+      .select("namePet imagesPet pricePet quantitySold discount type")
       .populate("idShop", "nameShop locationShop avatarShop status");
     let discountProduct = await mdProduct.ProductModel.find()
       .sort({
         discount: -1,
       })
       .limit(1)
-      .select("nameProduct arrProduct priceProduct quantitySold discount")
+      .select("nameProduct arrProduct priceProduct quantitySold discount type")
       .populate("idShop", "nameShop locationShop avatarShop status");
     let discountPet = await mdPet.PetModel.find()
       .sort({
         discount: -1,
       })
       .limit(1)
-      .select("namePet imagesPet pricePet quantitySold discount")
+      .select("namePet imagesPet pricePet quantitySold discount type")
       .populate("idShop", "nameShop locationShop avatarShop status");
-
     return res.status(200).json({
-      success: false,
-      data: [...listProduct, ...listPet, ...discountPet, ...discountProduct],
+      success: true,
+      data: [
+        { distribute: "sold", data: listProduct[0] },
+        { distribute: "sold", data: listPet[0] },
+        { distribute: "discount", data: discountPet[0] },
+        { distribute: "discount", data: discountProduct[0] },
+      ],
       message: "Lấy danh sách thành công",
     });
   } catch (error) {
-    return res.status(200).json({
+    return res.status(500).json({
       success: false,
       data: listProduct,
       message: "Lấy danh sách thành công",
