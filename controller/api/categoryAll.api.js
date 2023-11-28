@@ -118,8 +118,10 @@ exports.listCategorySort = async (req, res, next) => {
           data.sort((a, b) => (a.quantitySold > b.quantitySold ? -1 : 1));
         } else if (sortBy === 'KhuyenMai') {
           data.sort((a, b) => (a.discount > b.discount ? -1 : 1));
-        } else if (sortBy === 'Gia') {
+        } else if (sortBy === 'GiaGiamDan') {
           data.sort((a, b) => (b.priceProduct || b.pricePet) - (a.priceProduct || a.pricePet));
+        }else if (sortBy === 'GiaTangDan') {
+          data.sort((a, b) => (a.priceProduct || a.pricePet) - (b.priceProduct || b.pricePet));
         }
 
         return res.status(200).json({
