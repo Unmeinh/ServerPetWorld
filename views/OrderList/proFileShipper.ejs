@@ -1,0 +1,64 @@
+<%- include('../inc/topshipper',{title:'Hồ sơ'}) %>
+
+    <div class="container mt-2">
+
+        <div class="form-group row m-2">
+            <label for="nameAdmin" class="col-sm-5 col-form-label" style="color: #848485;">Trang này để xem chi tiết tài
+                khoản </label>
+                <div class="col-sm-5">
+        </div>
+    </div>
+    <form action="" method="get">
+        <div class="form-group row m-2" style="align-items: center;">
+            <label for="username" form="bold" class="col-sm-3 col-form-label">Avatar</label>
+        
+        </div>
+
+        <div class="form-group row m-2">
+            <label for="username" form="bold" class="col-sm-3 col-form-label">Tên Shipper</label>
+            <div class="col-sm-4">
+                <label type="text" class="form-control" id="username">
+                    <%= objShipper.fullName  || 'Không có dữ liệu' %>
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group row m-2">
+            <label for="username" form="bold" class="col-sm-3 col-form-label">Tên đăng nhập</label>
+            <div class="col-sm-4">
+                <label type="text" class="form-control" id="username">
+                    <%= objShipper.userName || 'Không có dữ liệu'%>
+                </label>
+            </div>
+        </div>
+        <!-- Địa chỉ -->
+        <div class="form-group row m-2">
+            <label class="col-sm-3 col-form-label">Email</label>
+            <div class="col-sm-4">
+                <label type="text" class="form-control" id="diachi">
+                    <%= objShipper.email || 'Không có dữ liệu'%>
+                </label>
+            </div>
+        </div>
+        <div class="form-group row m-2">
+            <label class="col-sm-3 col-form-label">Địa chỉ</label>
+            <div class="col-sm-4">
+                <label type="text" class="form-control" id="diachi">
+                    <%= objShipper.address || 'Không có dữ liệu'%>
+                </label>
+            </div>
+        </div>
+        <div class="form-group row m-2">
+            <label class="col-sm-3 col-form-label">Số điện thoại</label>
+            <div class="col-sm-4">
+                <label type="text" class="form-control" id="diachi">
+                    <%= objShipper.phoneNumber || 'Không có dữ liệu'%>
+                </label>
+            </div>
+        </div>
+
+    </form>
+
+    </div>
+
+    <%- include('../inc/bottom') %>
