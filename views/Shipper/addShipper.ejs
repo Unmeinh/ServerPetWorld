@@ -1,0 +1,180 @@
+<%- include('../inc/top',{title:'Thêm Shipper mới'}) %>
+    <div class="container mt-2">
+
+        <div class="form-group row m-2">
+            <label for="nameShipper" class="col-sm-5 col-form-label" style="color: #848485;">Tạo một người dùng mới và
+                thêm
+                vào trang mạng này.
+            </label>
+            <div class="col-sm-5">
+            </div>
+        </div>
+        <% if(msg) { %>
+            <div class="row">
+                <span class="p-3"
+                    style="background-color: rgb(175, 214, 239); border-radius: 10px;color: red;font-weight: bold;">
+                    <%= msg %>
+                </span>
+            </div>
+            <% }%>
+
+
+                <form method="post" id="formShipper">
+                    <div class="form-group row  m-2">
+                        <label for="nameShipper" form="bold" class="col-sm-3 col-form-label">Tên Shipper(bắt
+                            buộc)</label>
+                        <div class="col-sm-5">
+                            <input name="fullName" type="text" class="form-control" id="nameShipper" required>
+                        </div>
+                    </div>
+                    <div class="form-group row m-2">
+                        <label for="usernameShipper" class="col-sm-3 col-form-label">Tên đăng nhập</label>
+                        <div class="col-sm-5">
+                            <input name="userName" type="text" class="form-control" id="usernameShipper">
+                        </div>
+                    </div>
+                    <div class="form-group row m-2">
+                        <label for="emailShipper" class="col-sm-3 col-form-label">Email</label>
+                        <div class="col-sm-5">
+                            <input name="email" type="email" class="form-control" id="emailShipper">
+                        </div>
+                    </div>
+                    <div class="form-group row m-2">
+                        <label for="password" class="col-sm-3 col-form-label">Mật khẩu</label>
+                        <div class="col-sm-5">
+                            <input name="passWord" type="password" class="form-control " id="password">
+                        </div>
+                    </div>
+                    <div class="form-group row m-2">
+                        <label for="re-password" class="col-sm-3 col-form-label">Nhập lại mật khẩu</label>
+                        <div class="col-sm-5">
+                            <input name="re_passWord" type="password" class="form-control " id="re-password">
+                        </div>
+                    </div>
+                    <div class="form-group row m-2">
+                        <label for="re-password" class="col-sm-3 col-form-label">Số điện thoại</label>
+                        <div class="col-sm-5">
+                            <input name="phoneNumber" type="number" class="form-control " id="re-password">
+                        </div>
+                    </div>
+                    <div class="form-group row m-2">
+                        <label for="provinceDropdown" class="col-sm-3 col-form-label">Chọn Tỉnh/Thành phố:</label>
+                        <div class="col-sm-5">
+                            <select id="provinceDropdown" class="form-control col-sm-5" name="selectedProvinceCode">
+                                <!-- Tạo dropdown cho tỉnh -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row m-2">
+                        <label for="districtDropdown" class="col-sm-3 col-form-label">Chọn Huyện/Quận:</label>
+                        <divv class="col-sm-5">
+                            <select id="districtDropdown" class="form-control col-sm-5" name="selectedDistrictCode">
+                                <!-- Tạo dropdown cho huyện -->
+                            </select>
+                        </divv>
+                    </div>
+                    <div class="form-group row m-2">
+                        <label for="wardDropdown" class="col-sm-3 col-form-label">Chọn Phường/Xã:</label>
+                        <div class="col-sm-5">
+                            <select id="wardDropdown" class="form-control col-sm-5" name="selectedWardCode">
+                                <!-- Tạo dropdown cho xã/phường -->
+                            </select>
+                        </div>
+                    </div>
+    </div>
+    <div class="form-group row mt-4" style="margin-left: 80px;">
+        <div class="col-sm-10">
+            <button style="background-color: #F582AE;margin-right: 20px;" type="submit" class="btn btn-secondary ">Thêm
+                Shipper mới
+            </button>
+            <a href="/Shipper" style=" background-color: #001858" class="btn btn-secondary">Hủy bỏ</a>
+        </div>
+    </div>
+    </form>
+    </div>
+    <script>
+        let provice = null
+        let district = null
+        let ward = null
+        function updateProvinceDropdown() {
+            const provinceDropdown = document.getElementById('provinceDropdown');
+            const districtDropdown = document.getElementById('districtDropdown');
+            const wardDropdown = document.getElementById('wardDropdown');
+            provinceDropdown.innerHTML = '';
+            districtDropdown.innerHTML = '';
+            wardDropdown.innerHTML = '';
+
+            fetch('https://provinces.open-api.vn/api/p/')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(province => {
+                        const option = document.createElement('option');
+                        option.value = province.name;
+                        option.textContent = province.name;
+                        option.setAttribute("data-att", province.code)
+                        provinceDropdown.appendChild(option);
+                    });
+                    provinceDropdown.addEventListener("change", function () {
+                        // Lấy mục được chọn
+                        var selectedOption = provinceDropdown.options[provinceDropdown.selectedIndex];
+
+                        // Lấy giá trị của thuộc tính "data-custom-attribute"
+                        var attributeValue = selectedOption.getAttribute("data-att");
+
+                        // In giá trị thuộc tính ra console hoặc làm gì đó với nó
+                        provice = attributeValue
+                        updateDistrictDropdown(attributeValue)
+                    });
+                });
+
+        }
+
+        function updateDistrictDropdown(value) {
+            const selectedProvinceCode = document.getElementById('provinceDropdown');
+            const districtDropdown = document.getElementById('districtDropdown');
+            const wardDropdown = document.getElementById('wardDropdown');
+            districtDropdown.innerHTML = '';
+            wardDropdown.innerHTML = '';
+
+            fetch(`https://provinces.open-api.vn/api/p/${value}?depth=2`)
+                .then(response => response.json())
+                .then(data => {
+                    data.districts.forEach(district => {
+                        const option = document.createElement('option');
+                        option.value = district.name;
+                        option.textContent = district.name;
+                        option.setAttribute("data-att", district.code)
+                        districtDropdown.appendChild(option);
+                    });
+                    districtDropdown.addEventListener("change", function () {
+                        // Lấy mục được chọn
+                        var selectedOption = districtDropdown.options[districtDropdown.selectedIndex];
+
+                        // Lấy giá trị của thuộc tính "data-custom-attribute"
+                        var attributeValue = selectedOption.getAttribute("data-att");
+
+                        // In giá trị thuộc tính ra console hoặc làm gì đó với nó
+                        district = attributeValue
+                        updateWardDropdown(attributeValue)
+                    });
+                });
+        }
+
+        function updateWardDropdown(value) {
+            const selectedDistrictCode = document.getElementById('districtDropdown').value;
+            const wardDropdown = document.getElementById('wardDropdown');
+            wardDropdown.innerHTML = '';
+            fetch(`https://provinces.open-api.vn/api/d/${value}?depth=2`)
+                .then(response => response.json())
+                .then(data => {
+                    data.wards.forEach(ward => {
+                        const option = document.createElement('option');
+                        option.value = ward.name;
+                        option.textContent = ward.name;
+                        wardDropdown.appendChild(option);
+                    });
+                });
+        }
+        updateProvinceDropdown();
+    </script>
+    <%- include('../inc/bottom') %>

@@ -301,13 +301,183 @@ exports.listAppointment = async (req, res, next) => {
     }
 }
 
+exports.statisticsChartRevenue = async (req, res, next) => {
+    try {
+        const months = [];
+        const totalBills = [];
+        const endDate = new Date();
+        const last6Month = new Date(endDate.getFullYear(), endDate.getMonth() - 5, 1);
+        let currentDate = new Date(last6Month);
+
+        while (currentDate <= endDate) {
+            let previusDate = currentDate.toISOString();
+            let nowDate = new Date(
+                currentDate.getFullYear(),
+                currentDate.getMonth() + 1,
+                1
+            ).toISOString();
+            let date = currentDate.toLocaleString("vi", {
+                month: "numeric",
+                year: "numeric",
+            });
+            months.push(date.substring(0, 1).toLocaleUpperCase() + date.substring(1));
+            currentDate.setMonth(currentDate.getMonth() + 1);
+
+            let total = await getTotalBill(req.shop._id, previusDate, nowDate);
+            totalBills.push(Number(total) / 1000000);
+        }
+        return res.status(200).json({
+            success: true, data: {
+                date: months,
+                value: totalBills
+            }, message: "Lấy thống kê thành công"
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+}
+
+exports.statisticsChartSold = async (req, res, next) => {
+    try {
+        const months = [];
+        const listTotalProduct = [];
+        const listTotalPet = [];
+        const endDate = new Date();
+        const last6Month = new Date(endDate.getFullYear(), endDate.getMonth() - 5, 1);
+        let currentDate = new Date(last6Month);
+
+        while (currentDate <= endDate) {
+            let previusDate = currentDate.toISOString();
+            let nowDate = new Date(
+                currentDate.getFullYear(),
+                currentDate.getMonth() + 1,
+                1
+            ).toISOString();
+            let date = currentDate.toLocaleString("vi", {
+                month: "numeric",
+                year: "numeric",
+            });
+            months.push(date.substring(0, 1).toLocaleUpperCase() + date.substring(1));
+            currentDate.setMonth(currentDate.getMonth() + 1);
+
+            let result = await getTotalProduct(req.shop._id, previusDate, nowDate);
+            listTotalProduct.push(result?.totalProd);
+            listTotalPet.push(result?.totalPet);
+        }
+        return res.status(200).json({
+            success: true, data: {
+                date: months,
+                pet: listTotalPet,
+                product: listTotalProduct
+            }, message: "Lấy thống kê thành công "
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+}
+
+exports.statisticsYearRevenue = async (req, res, next) => {
+    try {
+        const year = new Date().getFullYear();
+        const totalBills = [];
+        let fullTotal = 0;
+        const endDate = new Date(year, 11, 1);
+        const firstDate = new Date(year - 1, 12, 1);
+        let currentDate = new Date(firstDate);
+
+        while (currentDate <= endDate) {
+            let previusDate = currentDate.toISOString();
+            let nowDate = new Date(
+                currentDate.getFullYear(),
+                currentDate.getMonth() + 1,
+                1
+            ).toISOString();
+            let date = currentDate.toLocaleString("vi", {
+                month: "long",
+            });
+            let total = await getTotalBill(req.shop._id, previusDate, nowDate);
+            fullTotal += total;
+            totalBills.push({
+                date: date.substring(0, 1).toLocaleUpperCase() + date.substring(1),
+                value: (currentDate.getMonth() <= new Date().getMonth()) ? total.toLocaleString('en') + " ₫" : "Chưa có dữ liệu"
+            });
+            currentDate.setMonth(currentDate.getMonth() + 1);
+        }
+        return res.status(200).json({
+            success: true, data: {
+                list: totalBills,
+                total: fullTotal.toLocaleString('en') + " ₫"
+            }, message: "Lấy thống kê thành công"
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+}
+
+exports.statisticsYearSold = async (req, res, next) => {
+    try {
+        const year = new Date().getFullYear();
+        const listTotalProduct = [];
+        const listTotalPet = [];
+        let totalProduct = 0;
+        let totalPet = 0;
+        const endDate = new Date(year, 11, 1);
+        const firstDate = new Date(year - 1, 12, 1);
+        let currentDate = new Date(firstDate);
+
+        while (currentDate <= endDate) {
+            let previusDate = currentDate.toISOString();
+            let nowDate = new Date(
+                currentDate.getFullYear(),
+                currentDate.getMonth() + 1,
+                1
+            ).toISOString();
+            let date = currentDate.toLocaleString("vi", {
+                month: "long",
+            });
+
+            let result = await getTotalProduct(req.shop._id, previusDate, nowDate);
+            listTotalProduct.push({
+                date: date.substring(0, 1).toLocaleUpperCase() + date.substring(1),
+                value: (currentDate.getMonth() <= new Date().getMonth()) ? result?.totalProd : "Chưa có dữ liệu"
+            });
+            listTotalPet.push({
+                date: date.substring(0, 1).toLocaleUpperCase() + date.substring(1),
+                value: (currentDate.getMonth() <= new Date().getMonth()) ? result?.totalPet : "Chưa có dữ liệu"
+            });
+            totalPet += result?.totalPet;
+            totalProduct += result?.totalProd;
+
+            currentDate.setMonth(currentDate.getMonth() + 1);
+        }
+        return res.status(200).json({
+            success: true, data: {
+                pet: {
+                    list: listTotalPet,
+                    total: totalPet
+                },
+                product: {
+                    list: listTotalProduct,
+                    total: totalProduct
+                }
+            }, message: "Lấy thống kê thành công "
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+
+}
+
 exports.detailShop = async (req, res, next) => {
 
     let idShop = req.params.idShop;
     try {
         let ObjShop = await mdShop.ShopModel.findById(idShop);
         return res.status(200).json({ success: true, data: ObjShop, message: "Lấy dữ liệu chi tiết shop thành công" });
-
     } catch (error) {
         return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
     }
@@ -773,20 +943,25 @@ exports.detailShop = async (req, res, next) => {
 
 exports.checkPhoneNumber = async (req, res, next) => {
     try {
-        let objU = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
+        let objHL = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
+        let objUN = await mdShop.ShopModel.findOne({ userName: req.body.userName });
         if (req.method == "POST") {
-            if (!objU) {
-                return res.status(201).json({ success: true, data: objU, message: "Số điện thoại chưa được đăng ký." });
-            } else {
-                return res.status(201).json({ success: false, data: objU, message: "Số điện thoại đã được đăng ký." });
+            if (objHL) {
+                return res.status(201).json({ success: false, data: objHL, message: "Số điện thoại đã được sử dụng." });
             }
+            if (objUN) {
+                return res.status(201).json({ success: false, data: objHL, message: "Tên đăng nhập đã được sử dụng." });
+            }
+            return res.status(201).json({ success: true, data: objHL, message: "Số điện thoại chưa được sử dụng." });
         }
         if (req.method == "PUT") {
-            if (!objU) {
-                return res.status(201).json({ success: false, data: objU, message: "Số điện thoại chưa được đăng ký." });
-            } else {
-                return res.status(201).json({ success: true, data: objU, message: "Số điện thoại đã được đăng ký." });
+            if (objHL) {
+                return res.status(201).json({ success: false, data: objHL, message: "Số điện thoại đã được sử dụng." });
             }
+            if (objUN) {
+                return res.status(201).json({ success: false, data: objHL, message: "Tên đăng nhập đã được sử dụng." });
+            }
+            return res.status(201).json({ success: true, data: objHL, message: "Số điện thoại chưa được sử dụng." });
         }
     } catch (error) {
         return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
@@ -806,9 +981,9 @@ exports.checkEmail = async (req, res, next) => {
     }
 }
 
-exports.checkStatus = async (req, res, next) => {
+exports.autoLogin = async (req, res, next) => {
     try {
-        return res.status(200).json({ success: true, data: req.shop.status, message: "Lấy trạng thái thành công." });
+        return res.status(200).json({ success: true, data: req.shop.status, message: "Đăng nhập thành công." });
     } catch (error) {
         return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
     }
@@ -816,7 +991,6 @@ exports.checkStatus = async (req, res, next) => {
 
 exports.registerShop = async (req, res, next) => {
     if (req.method == 'POST') {
-        console.log(req.body);
         let newShop = new mdShop.ShopModel();
         newShop.nameShop = req.body.nameShop;
         newShop.email = req.body.email;
@@ -828,6 +1002,7 @@ exports.registerShop = async (req, res, next) => {
         newShop.status = 0;
         newShop.followers = 0;
         newShop.revenue = 0;
+        newShop.online = 1;
         newShop.hotline = req.body.hotline;
         newShop.createdAt = new Date();
         await newShop.generateAuthToken(newShop);
@@ -850,7 +1025,7 @@ exports.registerShop = async (req, res, next) => {
 
         try {
             await newShop.save();
-            return res.status(201).json({ success: true, data: newShop, message: 'Thêm shop thanh công' });
+            return res.status(201).json({ success: true, data: {}, message: 'Thêm shop thanh công' });
         } catch (error) {
             console.log(error);
             return res.status(500).json({ success: false, data: {}, message: JSON.stringify(error.message) });
@@ -1131,11 +1306,11 @@ exports.verifyCode = async (req, res, next) => {
             if (data.length > 0) {
                 if (data[0].code == Number(req.body.otp)) {
                     var timeBetween =
-                        (new Date().getTime() - new Date(data[0].createAt).getTime()) /
+                        (new Date().getTime() - new Date(data[0].createdAt).getTime()) /
                         1000;
                     // console.log(date + "s");
                     // console.log((date / 60) + "min");
-                    // console.log(new Date() - new Date(data[0].createAt));
+                    // console.log(new Date() - new Date(data[0].createdAt));
                     if (timeBetween / 60 >= 5) {
                         return res.status(201).json({
                             success: false,
@@ -1193,11 +1368,11 @@ exports.verifyResetCode = async (req, res, next) => {
             if (data.length > 0) {
                 if (data[0].code == Number(req.body.otp)) {
                     var timeBetween =
-                        (new Date().getTime() - new Date(data[0].createAt).getTime()) /
+                        (new Date().getTime() - new Date(data[0].createdAt).getTime()) /
                         1000;
                     // console.log(date + "s");
                     // console.log((date / 60) + "min");
-                    // console.log(new Date() - new Date(data[0].createAt));
+                    // console.log(new Date() - new Date(data[0].createdAt));
                     if (timeBetween / 60 >= 5) {
                         return res.status(201).json({
                             success: false,
@@ -1468,6 +1643,132 @@ function onFinalProcessingListBill(listBill) {
     return listBill;
 }
 
+async function getTotalBill(shopId, previusDate, nowDate) {
+    var match_stage = {
+        $match: {
+            idShop: shopId,
+            purchaseDate: {
+                $gte: new Date(previusDate),
+                $lte: new Date(nowDate),
+            },
+        },
+    };
+    var group_stage = {
+        $group: { _id: null, sum: { $sum: "$total" } },
+    };
+    var project_stage = {
+        $project: { _id: 0, total: "$sum" },
+    };
+
+    var pipeline = [match_stage, group_stage, project_stage];
+    let sumTotal = await mdBill.aggregate(pipeline);
+    if (sumTotal[0] != undefined) {
+        return sumTotal[0].total;
+    } else {
+        return 0;
+    }
+}
+
+async function getTotalProduct(shopId, previusDate, nowDate) {
+    var match_stage = {
+        $match: {
+            idShop: shopId,
+            purchaseDate: {
+                $gte: new Date(previusDate),
+                $lte: new Date(nowDate),
+            },
+        },
+    };
+
+    var lookup_stage = [
+        {
+            $set: {
+                "cloneProducts": "$products"
+            }
+        },
+        {
+            $unwind: "$products",
+        },
+        {
+            $lookup: {
+                from: "Products",
+                localField: "products.idProduct",
+                foreignField: "_id",
+                as: "productInfo",
+            },
+        },
+        {
+            $lookup: {
+                from: "Pets",
+                localField: "products.idProduct",
+                foreignField: "_id",
+                as: "petInfo",
+            },
+        },
+        {
+            $set: {
+                productMap: {
+                    $map: {
+                        input: "$productInfo",
+                        as: "product",
+                        in: {
+                            $mergeObjects: [
+                                "$$product",
+                                {
+                                    $arrayElemAt: [
+                                        {
+                                            $filter: {
+                                                input: "$cloneProducts",
+                                                cond: { $eq: ["$$this._id", "$$product.idProduct"] }
+                                            }
+                                        },
+                                        0
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                }
+            }
+        },
+    ]
+
+    var group_stage = {
+        $group: {
+            _id: null,
+            productCount: { $push: "$productMap" },
+            sumPet: { $sum: { $size: "$petInfo" } },
+        },
+    }
+
+    var project_stage = {
+        $project: { _id: 0, totalPet: "$sumPet", totalProd: "$sumProd", productCount: "$productCount" },
+    };
+
+    var pipeline = [match_stage, ...lookup_stage, group_stage, project_stage];
+    let sumTotal = await mdBill.aggregate(pipeline);
+    let totalProd = 0;
+    if (sumTotal[0] != undefined && sumTotal[0]?.productCount && sumTotal[0]?.productCount.length > 0) {
+        for (let i = 0; i < sumTotal[0]?.productCount.length; i++) {
+            const prCount = sumTotal[0]?.productCount[i];
+            if (prCount[0] != undefined) {
+                totalProd += prCount[0].amount;
+            }
+        }
+    }
+    if (sumTotal[0] != undefined) {
+        return {
+            totalPet: sumTotal[0].totalPet,
+            totalProd: totalProd
+        };
+    } else {
+        return {
+            totalPet: 0,
+            totalProd: 0
+        };
+    }
+}
+
 async function sendEmailOTP(email, otp, data, res) {
     var transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
@@ -1503,7 +1804,7 @@ async function sendEmailOTP(email, otp, data, res) {
             address: "petworld.server.email@gmail.com",
         },
         to: email,
-        subject: "xác minh email của bạn cho PetworldSeller",
+        subject: "Xác minh email của bạn cho PetworldSeller",
         text:
             "Xin chào! Mã xác minh cho email của bạn là " +
             otp +
@@ -1531,7 +1832,7 @@ async function sendEmailOTP(email, otp, data, res) {
                     email: data[0].email,
                     code: otp,
                     typeUser: 1,
-                    createAt: new Date(),
+                    createdAt: new Date(),
                 });
                 return res.status(201).json({
                     success: true,
@@ -1543,7 +1844,7 @@ async function sendEmailOTP(email, otp, data, res) {
                 newOTPEmail.email = email;
                 newOTPEmail.code = otp;
                 newOTPEmail.typeUser = 1;
-                newOTPEmail.createAt = new Date();
+                newOTPEmail.createdAt = new Date();
 
                 await newOTPEmail.save();
                 return res.status(201).json({
@@ -1619,7 +1920,7 @@ async function sendEmailResetPassword(email, otp, data, res) {
                     email: data[0].email,
                     code: otp,
                     typeUser: 1,
-                    createAt: new Date(),
+                    createdAt: new Date(),
                 });
                 return res.status(201).json({
                     success: true,
@@ -1631,7 +1932,7 @@ async function sendEmailResetPassword(email, otp, data, res) {
                 newOTPEmail.email = email;
                 newOTPEmail.code = otp;
                 newOTPEmail.typeUser = 1;
-                newOTPEmail.createAt = new Date();
+                newOTPEmail.createdAt = new Date();
 
                 await newOTPEmail.save();
                 return res.status(201).json({

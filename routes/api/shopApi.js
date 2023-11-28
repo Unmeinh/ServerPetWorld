@@ -11,6 +11,10 @@ router.get('/', mdJWT.api_user_auth, ShopApiCtrl.listShop);
 router.get('/detail/:idShop', mdJWT.api_user_auth, ShopApiCtrl.detailShop);
 
 //seller
+router.get('/statistics/chart/revenue', mdJWT.api_shop_auth, ShopApiCtrl.statisticsChartRevenue);
+router.get('/statistics/chart/sold', mdJWT.api_shop_auth, ShopApiCtrl.statisticsChartSold);
+router.get('/statistics/year/revenue', mdJWT.api_shop_auth, ShopApiCtrl.statisticsYearRevenue);
+router.get('/statistics/year/sold', mdJWT.api_shop_auth, ShopApiCtrl.statisticsYearSold);
 router.get('/list/pet', mdJWT.api_shop_auth, ShopApiCtrl.listPet);
 router.get('/list/product', mdJWT.api_shop_auth, ShopApiCtrl.listProduct);
 router.get('/list/bill/all', mdJWT.api_shop_auth, ShopApiCtrl.listBillAll);
@@ -32,7 +36,7 @@ router.get('/detailOwner', mdJWT.api_shop_auth, ShopApiCtrl.detailOwner);
 router.post('/checkPhoneNumber', ShopApiCtrl.checkPhoneNumber);
 router.put('/checkPhoneNumber', ShopApiCtrl.checkPhoneNumber);
 router.put('/checkEmail', ShopApiCtrl.checkEmail);
-router.get('/autoLogin', mdJWT.api_shop_auth, ShopApiCtrl.checkStatus);
+router.get('/autoLogin', mdJWT.api_shop_auth, ShopApiCtrl.autoLogin);
 router.post('/register', uploader.any(), ShopApiCtrl.registerShop);
 router.post('/login', ShopApiCtrl.loginShop);
 router.post('/sendVerifyCodeEmail', ShopApiCtrl.sendVerifyEmail);
