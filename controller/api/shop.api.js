@@ -438,19 +438,20 @@ exports.statisticsYearSold = async (req, res, next) => {
             let date = currentDate.toLocaleString("vi", {
                 month: "long",
             });
-            currentDate.setMonth(currentDate.getMonth() + 1);
 
             let result = await getTotalProduct(req.shop._id, previusDate, nowDate);
             listTotalProduct.push({
                 date: date.substring(0, 1).toLocaleUpperCase() + date.substring(1),
-                value: result?.totalProd
+                value: (currentDate.getMonth() <= new Date().getMonth()) ? result?.totalProd : "Chưa có dữ liệu"
             });
             listTotalPet.push({
                 date: date.substring(0, 1).toLocaleUpperCase() + date.substring(1),
-                value: result?.totalPet
+                value: (currentDate.getMonth() <= new Date().getMonth()) ? result?.totalPet : "Chưa có dữ liệu"
             });
             totalPet += result?.totalPet;
             totalProduct += result?.totalProd;
+
+            currentDate.setMonth(currentDate.getMonth() + 1);
         }
         return res.status(200).json({
             success: true, data: {
@@ -942,20 +943,25 @@ exports.detailShop = async (req, res, next) => {
 
 exports.checkPhoneNumber = async (req, res, next) => {
     try {
-        let objU = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
+        let objHL = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
+        let objUN = await mdShop.ShopModel.findOne({ userName: req.body.userName });
         if (req.method == "POST") {
-            if (!objU) {
-                return res.status(201).json({ success: true, data: objU, message: "Số điện thoại chưa được đăng ký." });
-            } else {
-                return res.status(201).json({ success: false, data: objU, message: "Số điện thoại đã được đăng ký." });
+            if (objHL) {
+                return res.status(201).json({ success: false, data: objHL, message: "Số điện thoại đã được sử dụng." });
             }
+            if (objUN) {
+                return res.status(201).json({ success: false, data: objHL, message: "Tên đăng nhập đã được sử dụng." });
+            }
+            return res.status(201).json({ success: true, data: objHL, message: "Số điện thoại chưa được sử dụng." });
         }
         if (req.method == "PUT") {
-            if (!objU) {
-                return res.status(201).json({ success: false, data: objU, message: "Số điện thoại chưa được đăng ký." });
-            } else {
-                return res.status(201).json({ success: true, data: objU, message: "Số điện thoại đã được đăng ký." });
+            if (objHL) {
+                return res.status(201).json({ success: false, data: objHL, message: "Số điện thoại đã được sử dụng." });
             }
+            if (objUN) {
+                return res.status(201).json({ success: false, data: objHL, message: "Tên đăng nhập đã được sử dụng." });
+            }
+            return res.status(201).json({ success: true, data: objHL, message: "Số điện thoại chưa được sử dụng." });
         }
     } catch (error) {
         return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
@@ -975,9 +981,9 @@ exports.checkEmail = async (req, res, next) => {
     }
 }
 
-exports.checkStatus = async (req, res, next) => {
+exports.autoLogin = async (req, res, next) => {
     try {
-        return res.status(200).json({ success: true, data: req.shop.status, message: "Lấy trạng thái thành công." });
+        return res.status(200).json({ success: true, data: req.shop.status, message: "Đăng nhập thành công." });
     } catch (error) {
         return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
     }
