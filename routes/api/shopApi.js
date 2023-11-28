@@ -36,7 +36,7 @@ router.get('/detailOwner', mdJWT.api_shop_auth, ShopApiCtrl.detailOwner);
 router.post('/checkPhoneNumber', ShopApiCtrl.checkPhoneNumber);
 router.put('/checkPhoneNumber', ShopApiCtrl.checkPhoneNumber);
 router.put('/checkEmail', ShopApiCtrl.checkEmail);
-router.get('/autoLogin', mdJWT.api_shop_auth, ShopApiCtrl.checkStatus);
+router.get('/autoLogin', mdJWT.api_shop_auth, ShopApiCtrl.autoLogin);
 router.post('/register', uploader.any(), ShopApiCtrl.registerShop);
 router.post('/login', ShopApiCtrl.loginShop);
 router.post('/sendVerifyCodeEmail', ShopApiCtrl.sendVerifyEmail);
