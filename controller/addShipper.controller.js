@@ -1,6 +1,6 @@
 let mdAdmin = require('../model/admin.model');
-let mdShipper = require("../../ServerPetWorld/model/shipper.model");
-let mdbillProduct = require("../../ServerPetWorld/model/billProduct.model");
+let mdShipper = require("../model/shipper.model");
+let mdbillProduct = require("../model/billProduct.model");
 
 exports.listBillProduct = async (req, res, next) => {
   let msg = '';
