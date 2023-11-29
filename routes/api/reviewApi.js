@@ -7,6 +7,6 @@ var router = express.Router();
 
 router.get('/list/product/:idProduct', ReviewApiCtrl.listReviewProduct);
 
-router.post('/insert/:idProduct', mdJWT.api_user_auth,uploader.any(), ReviewApiCtrl.addReview);
+router.post('/insert', mdJWT.api_user_auth,uploader.any(), ReviewApiCtrl.addReview);
 
 module.exports = router;

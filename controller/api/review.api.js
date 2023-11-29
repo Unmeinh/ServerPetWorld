@@ -52,7 +52,7 @@ exports.listReviewProduct = async (req, res, next) => {
       } else {
         return res
           .status(200)
-          .json({ success: true, data: [], message: "Không có đánh giá nào!" });
+          .json({ success: false, data: [], message: "Không có đánh giá nào!" });
       }
     } catch (error) {
       console.error(error);
@@ -65,58 +65,106 @@ exports.listReviewProduct = async (req, res, next) => {
 };
 
 exports.addReview = async (req, res, next) => {
-  let idProduct = req.params.idProduct;
-  console.log(req.body, req.files);
+  let idProduct = req.body.idProduct;
+  console.log(req.body);
+  let error = "";
   if (req.method == "POST") {
     //Validate ratingNumber null
-    if (req.body.ratingNumber == 0) {
-      return res
-        .status(500)
-        .json({ success: false, message: "Bạn chưa có đánh giá sản phẩm" });
-    }
-    let newObj = new mdReview.ReviewModel();
-    newObj.idProduct = idProduct;
-    newObj.idUser = req.user._id;
-    /** Image review */
-    let images = await onUploadImages(req.files, "review");
-    if (images != [] && images[0] == false) {
-      if (images[1].message.indexOf("File size too large.") > -1) {
-        return res.status(500).json({
-          success: false,
-          data: {},
-          message: "Dung lượng một ảnh tối đa là 10MB!",
-        });
-      } else {
-        return res
-          .status(500)
-          .json({ success: false, data: {}, message: images[1].message });
-      }
-    }
-    newObj.imageReview = [...images];
-
-    newObj.contentReview = req.body.contentReview;
-    newObj.ratingNumber = req.body.ratingNumber;
-    newObj.createdAt = new Date();
 
     try {
-      await newObj.save();
+      if (Array.isArray(idProduct)) {
+        if (Array.isArray(idProduct)) {
+          await Promise.all(
+            idProduct.map(async (item) => {
+              let newObj = new mdReview.ReviewModel();
+              newObj.idProduct = item;
+              newObj.idUser = req.user._id;
 
-      let findProduct = await mdProduct.ProductModel.find({ _id: idProduct });
-      console.log("tìm ra: " + findProduct);
-      if (findProduct.length > 0) {
-        let objProduct = findProduct[0];
-        objProduct.ratings.push(newObj);
+              let images = await onUploadImages(req.files, "review");
+              if (images.length > 0 && images[0] === false) {
+                if (images[1].message.indexOf("File size too large.") > -1) {
+                  throw new Error("Dung lượng một ảnh tối đa là 10MB!");
+                }
+              }
+              newObj.imageReview = [...images];
 
-        await mdProduct.ProductModel.findByIdAndUpdate(idProduct, objProduct);
+              newObj.contentReview = req.body.contentReview;
+              newObj.ratingNumber = req.body.ratingNumber;
+              newObj.createdAt = new Date();
+              await newObj.save();
+              await Promise.all(item);
+              console.log(item);
+            })
+          );
+
+          return res.status(201).json({
+            success: true,
+            message: "Bạn đã đánh giá thành công",
+          });
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "idProduct phải là một mảng",
+          });
+        }
+      } else {
+        if (req.body.ratingNumber == 0) {
+          return res
+            .status(500)
+            .json({ success: false, message: "Bạn chưa có đánh giá sản phẩm" });
+        }
+        let newObj = new mdReview.ReviewModel();
+        newObj.idProduct = idProduct;
+        newObj.idUser = req.user._id;
+        /** Image review */
+        let images = await onUploadImages(req.files, "review");
+        if (images != [] && images[0] == false) {
+          if (images[1].message.indexOf("File size too large.") > -1) {
+            return res.status(500).json({
+              success: false,
+              data: {},
+              message: "Dung lượng một ảnh tối đa là 10MB!",
+            });
+          } else {
+            return res
+              .status(500)
+              .json({ success: false, data: {}, message: images[1].message });
+          }
+        }
+        newObj.imageReview = [...images];
+        newObj.contentReview = req.body.contentReview;
+        newObj.ratingNumber = req.body.ratingNumber;
+        newObj.createdAt = new Date();
+        try {
+          await newObj.save();
+
+          let findProduct = await mdProduct.ProductModel.find({
+            _id: idProduct,
+          });
+          if (findProduct.length > 0) {
+            let objProduct = findProduct[0];
+            objProduct.ratings.push(newObj);
+
+            await mdProduct.ProductModel.findByIdAndUpdate(
+              idProduct,
+              objProduct
+            );
+          }
+
+          return res
+            .status(201)
+            .json({ success: true, message: "Bạn đã đánh giá thành công" });
+        } catch (error) {
+          return res.status(500).json({
+            success: false,
+            message: "Đánh giá thất bại rồi " + error.message,
+          });
+        }
       }
-
-      return res
-        .status(201)
-        .json({ success: true, message: "Bạn đã đánh giá thành công" });
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: "Đánh giá thất bại rồi " + error.message,
+        message: error.message,
       });
     }
   }
