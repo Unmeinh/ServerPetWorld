@@ -66,8 +66,6 @@ exports.listReviewProduct = async (req, res, next) => {
 
 exports.addReview = async (req, res, next) => {
   let idProduct = req.body.idProduct;
-  console.log(req.body);
-  let error = "";
   if (req.method == "POST") {
     //Validate ratingNumber null
 
