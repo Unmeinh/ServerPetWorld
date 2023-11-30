@@ -6,6 +6,7 @@ const OTPEmailModel = require("../../model/otpemail.model").OTPEmailModel;
 const otpGenerator = require("otp-generator");
 let { encodeToSha256 } = require("../../function/hashFunction");
 const { onUploadImages } = require("../../function/uploadImage");
+const { billProductModel } = require("../../model/billProduct.model");
 
 exports.listUser = async (req, res, next) => {
   try {
@@ -29,11 +30,15 @@ exports.listUser = async (req, res, next) => {
 
 exports.myDetail = async (req, res, next) => {
   try {
-    return res.status(200).json({
-      success: true,
-      data: req.user,
-      message: "Lấy dữ liệu của bạn thành công",
-    });
+    const { _id } = req.user;
+    let listBill = await billProductModel.find({ idUser: _id });
+    if (listBill) {
+      req.user =  req.user.toObject();
+      req.user.billCount = listBill.length;
+      return res.status(200).json({ success: true, data: req.user, message: "Lấy dữ liệu của bạn thành công" });
+    } else {
+      return res.status(200).json({ success: true, data: req.user, message: "Lấy dữ liệu của bạn thành công" });
+    }
   } catch (error) {
     return res
       .status(500)

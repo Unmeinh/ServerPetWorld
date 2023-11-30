@@ -943,23 +943,29 @@ exports.detailShop = async (req, res, next) => {
 
 exports.checkPhoneNumber = async (req, res, next) => {
     try {
-        let objHL = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
-        let objUN = await mdShop.ShopModel.findOne({ userName: req.body.userName });
         if (req.method == "POST") {
+            let objHL = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
             if (objHL) {
                 return res.status(201).json({ success: false, data: objHL, message: "Số điện thoại đã được sử dụng." });
             }
-            if (objUN) {
-                return res.status(201).json({ success: false, data: objHL, message: "Tên đăng nhập đã được sử dụng." });
+            if (req.body.userName) {
+                let objUN = await mdShop.ShopModel.findOne({ userName: req.body.userName });
+                if (objUN) {
+                    return res.status(201).json({ success: false, data: objHL, message: "Tên đăng nhập đã được sử dụng." });
+                }
             }
             return res.status(201).json({ success: true, data: objHL, message: "Số điện thoại chưa được sử dụng." });
         }
         if (req.method == "PUT") {
+            let objHL = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
             if (objHL) {
                 return res.status(201).json({ success: false, data: objHL, message: "Số điện thoại đã được sử dụng." });
             }
-            if (objUN) {
-                return res.status(201).json({ success: false, data: objHL, message: "Tên đăng nhập đã được sử dụng." });
+            if (req.body.userName) {
+                let objUN = await mdShop.ShopModel.findOne({ userName: req.body.userName });
+                if (objUN) {
+                    return res.status(201).json({ success: false, data: objHL, message: "Tên đăng nhập đã được sử dụng." });
+                }
             }
             return res.status(201).json({ success: true, data: objHL, message: "Số điện thoại chưa được sử dụng." });
         }
