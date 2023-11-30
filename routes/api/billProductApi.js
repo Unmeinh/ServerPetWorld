@@ -20,5 +20,5 @@ router.get(
 );
 router.get("/getCount", mdJWT.api_user_auth, billProductApiCtrl.getCountBill);
 //router.post('/edit',mdJWT.api_user_auth, billProductApiCtrl.editCart);
-
+router.get("/test", billProductApiCtrl.test);
 module.exports = router;
