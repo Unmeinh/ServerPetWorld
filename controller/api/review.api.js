@@ -50,9 +50,11 @@ exports.listReviewProduct = async (req, res, next) => {
           totalPages: totalPages,
         });
       } else {
-        return res
-          .status(200)
-          .json({ success: false, data: [], message: "Không có đánh giá nào!" });
+        return res.status(200).json({
+          success: false,
+          data: [],
+          message: "Không có đánh giá nào!",
+        });
       }
     } catch (error) {
       console.error(error);
@@ -66,6 +68,7 @@ exports.listReviewProduct = async (req, res, next) => {
 
 exports.addReview = async (req, res, next) => {
   let idProduct = req.body.idProduct;
+  let idBill = req.params.idBill;
   if (req.method == "POST") {
     //Validate ratingNumber null
 
@@ -91,9 +94,11 @@ exports.addReview = async (req, res, next) => {
               newObj.createdAt = new Date();
               await newObj.save();
               await Promise.all(item);
-              console.log(item);
             })
           );
+          await mdBill.billProductModel.findByIdAndUpdate(idBill, {
+            statusReview: true,
+          });
 
           return res.status(201).json({
             success: true,
@@ -133,6 +138,9 @@ exports.addReview = async (req, res, next) => {
         newObj.contentReview = req.body.contentReview;
         newObj.ratingNumber = req.body.ratingNumber;
         newObj.createdAt = new Date();
+        await mdBill.billProductModel.findByIdAndUpdate(idBill, {
+          statusReview: true,
+        });
         try {
           await newObj.save();
 

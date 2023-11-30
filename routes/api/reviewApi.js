@@ -1,12 +1,17 @@
-var express = require('express');
-var ReviewApiCtrl = require('../../controller/api/review.api');
-var mdJWT = require('../../middlewares/api.auth');
-var multer = require('multer')
-var uploader = multer({ dest: './tmp' });
-var router = express.Router();
+let express = require("express");
+let ReviewApiCtrl = require("../../controller/api/review.api");
+let mdJWT = require("../../middlewares/api.auth");
+let multer = require("multer");
+let uploader = multer({ dest: "./tmp" });
+let router = express.Router();
 
-router.get('/list/product/:idProduct', ReviewApiCtrl.listReviewProduct);
+router.get("/list/product/:idProduct", ReviewApiCtrl.listReviewProduct);
 
-router.post('/insert', mdJWT.api_user_auth,uploader.any(), ReviewApiCtrl.addReview);
+router.post(
+  "/insert/:idBill",
+  mdJWT.api_user_auth,
+  uploader.any(),
+  ReviewApiCtrl.addReview
+);
 
 module.exports = router;
