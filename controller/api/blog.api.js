@@ -6,7 +6,7 @@ const { onUploadImages } = require('../../function/uploadImage');
 
 exports.listAllBlog = async (req, res, next) => {
     let list = await mdBlog.BlogModel.find();
-    let page = (req.query?.page == 0) ? 1 : req.query.page;
+    let page = (req.query?.page != undefined && Number(req.query?.page) == 0) ? 1 : Number(req.query.page);
     let limit = 5;
     let startIndex = (page - 1) * limit;
     let endIndex = page * limit;
@@ -20,13 +20,13 @@ exports.listAllBlog = async (req, res, next) => {
     let listBlogLikeAndFollowings = [];
     let listAllBlogRequested = [];
 
-    if (endIndex < list.length) {
-        page = page + 1;
-    }
+    // if (endIndex < list.length) {
+    //     page = page + 1;
+    // }
 
-    if (startIndex > 0) {
-        page = page - 1;
-    }
+    // if (startIndex > 0) {
+    //     page = page - 1;
+    // }
 
     try {
         /**Validate */
@@ -58,13 +58,17 @@ exports.listAllBlog = async (req, res, next) => {
             // ])
 
         } else {
-            if (page <= 0) {
-                return res.status(500).json({ success: false, message: "Số trang phải lớn hơn 0!" });
-            }
             if (isNaN(page)) {
                 return res.status(500).json({ success: false, message: "Số trang phải là số nguyên!" });
             }
-            listAllBlog = await mdBlog.BlogModel.find().populate('idUser').sort({ createdAt: -1 }).limit(limit).skip(startIndex).exec();
+            if (page <= 0) {
+                return res.status(500).json({ success: false, message: "Số trang phải lớn hơn 0!" });
+            }
+            if (req.query?.loadBefore) {
+                listAllBlog = await mdBlog.BlogModel.find().populate('idUser').sort({ createdAt: -1 }).limit(page * limit).skip(0).exec();
+            } else {
+                listAllBlog = await mdBlog.BlogModel.find().populate('idUser').sort({ createdAt: -1 }).limit(limit).skip(startIndex).exec();
+            }
         }
         /** check chung 2 trường hợp có QUERY*/
         if (listAllBlog.length > 0) {
@@ -146,12 +150,13 @@ exports.listAllBlog = async (req, res, next) => {
             let blogs = getListWithFollow(listAllBlog, req.user._id);
             return res.status(200).json({
                 success: true, data: {
-                    list: blogs, isPage: req.query.page
+                    list: blogs,
+                    isPage: req.query.page,
+                    canLoadMore: (page != undefined && Number(page) < Number(totalPage)) ? true : false
                 }, message: "Lấy danh sách bài viết thành công"
             });
-        }
-        else {
-            return res.status(500).json({ success: false, message: "Không có bài viết nào!" });
+        } else {
+            return res.status(200).json({ success: false, message: "Không có bài viết nào!" });
         }
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });

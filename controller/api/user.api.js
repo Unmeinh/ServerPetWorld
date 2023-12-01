@@ -157,10 +157,10 @@ exports.loginUser = async (req, res, next) => {
         req.body.userName,
         req.body.passWord
       );
-      if (!objU) {
+      if (objU?.success != undefined && objU?.success == false) {
         return res
           .status(201)
-          .json({ success: false, message: "Sai thông tin đăng nhập!" });
+          .json({ success: false, message: objU?.mes });
       }
       objU.online = 0;
       await mdUserAccount.findByIdAndUpdate(objU._id, objU);
@@ -446,18 +446,18 @@ exports.verifyResetCode = async (req, res, next) => {
           }
         } else {
           return res
-            .status(500)
+            .status(201)
             .json({ success: false, data: {}, message: "Mã xác minh sai!" });
         }
       } else {
-        return res.status(500).json({
+        return res.status(201).json({
           success: false,
           data: {},
           message: "Mã xác minh sai hoặc không tồn tại trong cơ sở dữ liệu",
         });
       }
     } else {
-      return res.status(500).json({
+      return res.status(201).json({
         success: false,
         data: {},
         message: "OTP sai hoặc không tồn tại trong cơ sở dữ liệu",
