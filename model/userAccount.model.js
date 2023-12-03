@@ -34,11 +34,17 @@ UserAccountSchema.statics.findByCredentials = async (userName, passWord) => {
     const account = await UserAccountModel.findOne({ userName });
 
     if (!account) {
-        throw new Error('Tên đăng nhập không tồn tại!');
+        return {
+            success: false,
+            mes: 'Tên đăng nhập không tồn tại!'
+        };
     }
     const isPasswordMatch = await bcrypt.compare(passWord, account.passWord)
     if (!isPasswordMatch) {
-        throw new Error('Sai mật khẩu!');
+        return {
+            success: false,
+            mes: 'Mật khẩu nhập sai!'
+        };
     }
     return account;
 }

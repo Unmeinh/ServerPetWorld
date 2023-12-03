@@ -1,4 +1,4 @@
-let mdFollow = require('../../model/follows.model').FollowsModel;
+// let mdFollow = require('../../model/follows.model').FollowsModel;
 let mdUser = require('../../model/user.model').UserModel;
 const unidecode = require('unidecode');
 

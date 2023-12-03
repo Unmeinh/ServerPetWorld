@@ -2,6 +2,7 @@ let mdProduct = require("../../model/product.model");
 let mdbillProduct = require("../../model/billProduct.model");
 let mdReview = require("../../model/review.model");
 let mdPet = require("../../model/pet.model");
+let mdFavorite = require("../../model/myfavoriteproduct.model");
 let mdCategory =
   require("../../model/categoryProduct.model").CategoryProductModel;
 const fs = require("fs");
@@ -329,9 +330,12 @@ exports.listProductFromIdShop = async (req, res, next) => {
 
 exports.detailProduct = async (req, res, next) => {
   let idPR = req.params.idPR;
+  let { _id } = req.user;
   let avgProduct = 0;
   let count = 0;
+  let favorite = false;
   try {
+    const myfavorite = await mdFavorite.FavoriteModel.findOne({ idUser: _id });
     const listReview = await mdReview.ReviewModel.find({ idProduct: idPR });
     if (listReview) {
       const sumReview = listReview.reduce(
@@ -355,8 +359,13 @@ exports.detailProduct = async (req, res, next) => {
         status: 0,
       });
       count = countPetShop + countProductShop;
+
+      if (myfavorite.idProduct.includes(ObjProduct._id)) {
+        favorite = true;
+      }
     }
     ObjProduct.idShop.count = count;
+    ObjProduct.favorite = favorite;
 
     await calculateShopAverageRating(ObjProduct.idShop._id)
       .then((avgRating) => {
