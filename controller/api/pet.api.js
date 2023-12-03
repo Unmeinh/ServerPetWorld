@@ -4,6 +4,7 @@ const fs = require("fs");
 const { onUploadImages } = require("../../function/uploadImage");
 let mdProduct = require("../../model/product.model");
 let mdReview = require("../../model/review.model");
+let mdFavorite = require("../../model/myfavoriteproduct.model");
 
 exports.listpet = async (req, res, next) => {
   if (req.method !== "GET") {
@@ -157,9 +158,13 @@ exports.listPetFromIdShop = async (req, res, next) => {
 };
 exports.detailpet = async (req, res, next) => {
   let idPR = req.params.idPet;
+  let { _id } = req.user;
   let avgProduct = 0;
   let count = 0;
+  let favorite = false;
+
   try {
+    const myfavorite = await mdFavorite.FavoriteModel.findOne({ idUser: _id });
     const listReview = await mdReview.ReviewModel.find({ idProduct: idPR });
     if (listReview) {
       const sumReview = listReview.reduce(
@@ -182,10 +187,13 @@ exports.detailpet = async (req, res, next) => {
         idShop: ObjProduct.idShop._id,
         status: 0,
       });
-      console.log(countProductShop, countPetShop);
       count = countPetShop + countProductShop;
+      if (myfavorite.idProduct.includes(ObjProduct._id)) {
+        favorite = true;
+      }
     }
     ObjProduct.idShop.count = count;
+    ObjProduct.favorite = favorite;
 
     await calculateShopAverageRating(ObjProduct.idShop._id)
       .then((avgRating) => {
