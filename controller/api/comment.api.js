@@ -5,7 +5,7 @@ exports.listCommentFromIdBlog = async (req, res, next) => {
     let idBlog = req.params.idBlog;
     try {
         let listCommentByBlog = await mdComment.CommentModel.find({ idBlog: idBlog }).populate('idUser').sort({ createdAt: -1 });
-        if (listCommentByBlog.length > 0) {
+        if (listCommentByBlog) {
             return res.status(200).json({ success: true, data: listCommentByBlog, message: "Lấy danh bình luận theo bài viết thành công" });
         } else {
             return res.status(200).json({ success: false, data: [], message: "Không có dữ liệu bình luận" });
