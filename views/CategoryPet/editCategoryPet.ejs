@@ -1,11 +1,8 @@
-<%- include('../inc/top',{title:'Sửa thể loại sản phẩm'}) %>
-
+<%- include('../inc/top',{title:'Sửa thể loại thú cưng'}) %>
   <div class="container" >
-      
     <div class="form-group row mb-3 mt-3">
-      <label for="username" class="col-sm-5 ">Sửa thể loại sản phẩm và cập nhật vào trang mạng này.</label>
+      <label for="username" class="col-sm-5 ">Sửa thể loại thú cưng và cập nhật vào trang mạng này.</label>
     </div>
-
     <% if(msg) { %>
       <div class="row">
           <span class="p-3"
@@ -17,7 +14,7 @@
 
     <form action="" method="post">
         <div class="form-group row mt-3">
-          <label for="" class="col-sm-3 col-form-label">Tên thể loại sản phẩm</label>
+          <label for="" class="col-sm-3 col-form-label">Tên thể loại thú cưng</label>
           <div class="col-sm-4">
             <input type="text" name="nameCategory" class="form-control " id="tentheloai"  placeholder="Nhập tên thể loại" value="<%= Objdata.nameCategory%>" >
           </div>
@@ -33,11 +30,9 @@
       <div class="form-group row  mt-3">
         <div class="col-sm-10">
           <button style="background-color: #F582AE;"  type="submit"  class="btn btn-secondary ">Sửa thể loại mới </button>
-          <a href="/category-product" class="btn" style="background-color: rgb(216, 212, 212);font-weight: bold;margin: 20px;">Hủy bỏ</a>
+          <a href="/category-pet" class="btn" style="background-color: rgb(216, 212, 212);font-weight: bold;margin: 20px;">Hủy bỏ</a>
         </div>
       </div>
     </form>
-    
   </div>
-  
 <%- include('../inc/bottom') %>
