@@ -360,7 +360,7 @@ exports.detailProduct = async (req, res, next) => {
       });
       count = countPetShop + countProductShop;
 
-      if (myfavorite.idProduct.includes(ObjProduct._id)) {
+      if (myfavorite && myfavorite?.idProduct?.includes(ObjProduct._id)) {
         favorite = true;
       }
     }
