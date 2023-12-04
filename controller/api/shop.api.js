@@ -16,28 +16,22 @@ const { encodeToSha256, encodeToAscii,
     removeVietnameseTones, encodeName } = require("../../function/hashFunction");
 
 exports.listShop = async (req, res, next) => {
-    try {
-        if (req.query.hasOwnProperty('page') && req.query.hasOwnProperty('day')) {
-            const page = parseInt(req.query.page) || 1;
-            
+    let filterSearch = null;
 
-          
-            if (page <= 0 || isNaN(page) ) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Số trang và số ngày không hợp lệ.',
-                });
+    if (req.method == 'GET') {
+        try {
+            if (typeof (req.query.filterSearch) != 'undefined' && req.query.filterSearch.trim() != '') {
+                const searchTerm = req.query.filterSearch.trim();
+                filterSearch = { fullName: new RegExp(searchTerm, 'i') };
             }
             let listShop = await mdShop.ShopModel.find(filterSearch);
             return res.status(200).json({ success: true, data: listShop, message: 'Lấy danh sách shop thành công' });
-        }
-    } catch (error) {
+        } catch (error) {
             return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
         }
-        
+    }
+
 }
-
-
 
 exports.listPet = async (req, res, next) => {
     let filterSearch = null;
@@ -210,7 +204,7 @@ exports.listEvaluatedBill = async (req, res, next) => {
                 const searchTerm = req.query.filterSearch.trim();
                 filterSearch = { fullName: new RegExp(searchTerm, 'i') };
             }
-            let listBill = await getListBill(req.shop._id, 4)
+            let listBill = await getListBill(req.shop._id, 5)
             if (listBill && listBill.length > 0) {
                 let list = onFinalProcessingListBill(listBill);
                 listBill = [...list];
@@ -239,6 +233,395 @@ exports.listCancelledBill = async (req, res, next) => {
             return res.status(200).json({ success: true, data: listBill, message: 'Lấy danh sách đơn hàng thành công' });
         } catch (error) {
             return res.status(500).json({ success: false, data: [], message: 'Lỗi: ' + error.message });
+        }
+    }
+}
+
+exports.listAppointment = async (req, res, next) => {
+    let listCheck = await mdAppointment.find({ idShop: req.shop._id });
+    for (let i = 0; i < listCheck.length; i++) {
+        const appointment = listCheck[i];
+        if (new Date(appointment.appointmentDate) < new Date() && appointment.status == 0) {
+            appointment.status = 2;
+            await mdAppointment.findByIdAndUpdate(appointment._id, appointment);
+        }
+    }
+    let listAppointment = await mdAppointment.aggregate([
+        {
+            $match: {
+                idShop: req.shop._id
+            }
+        },
+        { $sort: { appointmentDate: -1 } },
+        {
+            $lookup: {
+                from: "Pets",
+                localField: "idPet",
+                foreignField: "_id",
+                as: "iPet"
+            }
+        },
+        {
+            $lookup: {
+                from: "User",
+                localField: "idUser",
+                foreignField: "_id",
+                as: "iUser"
+            }
+        },
+        {
+            $group: {
+                _id: {
+                    year: { $year: "$appointmentDate" },
+                    month: { $month: "$appointmentDate" }
+                },
+                appointments: {
+                    $push: {
+                        _id: "$_id",
+                        idPet: "$iPet",
+                        idUser: "$iUser",
+                        idShop: "$iShop",
+                        amountPet: "$amountPet",
+                        location: "$location",
+                        deposits: "$deposits",
+                        status: "$status",
+                        appointmentDate: "$appointmentDate",
+                        createdAt: "$createdAt"
+                    }
+                }
+            }
+        },
+        { $project: { _id: '$_id', appointments: '$appointments' } },
+        { $sort: { _id: -1 } },
+    ]);
+    if (listAppointment) {
+        return res.status(200).json({ success: true, data: listAppointment, message: 'Lấy danh sách lịch hẹn thành công.' });
+    } else {
+        return res.status(500).json({ success: false, data: [], message: 'Không lấy được danh sách lịch hẹn' });
+    }
+}
+
+exports.statisticsChartRevenue = async (req, res, next) => {
+    try {
+        const months = [];
+        const totalBills = [];
+        const endDate = new Date();
+        const last6Month = new Date(endDate.getFullYear(), endDate.getMonth() - 5, 1);
+        let currentDate = new Date(last6Month);
+
+        while (currentDate <= endDate) {
+            let previusDate = currentDate.toISOString();
+            let nowDate = new Date(
+                currentDate.getFullYear(),
+                currentDate.getMonth() + 1,
+                1
+            ).toISOString();
+            let date = currentDate.toLocaleString("vi", {
+                month: "numeric",
+                year: "numeric",
+            });
+            months.push(date.substring(0, 1).toLocaleUpperCase() + date.substring(1));
+            currentDate.setMonth(currentDate.getMonth() + 1);
+
+            let total = await getTotalBill(req.shop._id, previusDate, nowDate);
+            totalBills.push(Number(total) / 1000000);
+        }
+        return res.status(200).json({
+            success: true, data: {
+                date: months,
+                value: totalBills
+            }, message: "Lấy thống kê thành công"
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+}
+
+exports.statisticsChartSold = async (req, res, next) => {
+    try {
+        const months = [];
+        const listTotalProduct = [];
+        const listTotalPet = [];
+        const endDate = new Date();
+        const last6Month = new Date(endDate.getFullYear(), endDate.getMonth() - 5, 1);
+        let currentDate = new Date(last6Month);
+
+        while (currentDate <= endDate) {
+            let previusDate = currentDate.toISOString();
+            let nowDate = new Date(
+                currentDate.getFullYear(),
+                currentDate.getMonth() + 1,
+                1
+            ).toISOString();
+            let date = currentDate.toLocaleString("vi", {
+                month: "numeric",
+                year: "numeric",
+            });
+            months.push(date.substring(0, 1).toLocaleUpperCase() + date.substring(1));
+            currentDate.setMonth(currentDate.getMonth() + 1);
+
+            let result = await getTotalProduct(req.shop._id, previusDate, nowDate);
+            listTotalProduct.push(result?.totalProd);
+            listTotalPet.push(result?.totalPet);
+        }
+        return res.status(200).json({
+            success: true, data: {
+                date: months,
+                pet: listTotalPet,
+                product: listTotalProduct
+            }, message: "Lấy thống kê thành công "
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+}
+
+exports.statisticsYearRevenue = async (req, res, next) => {
+    try {
+        const year = new Date().getFullYear();
+        const totalBills = [];
+        let fullTotal = 0;
+        const endDate = new Date(year, 11, 1);
+        const firstDate = new Date(year - 1, 12, 1);
+        let currentDate = new Date(firstDate);
+
+        while (currentDate <= endDate) {
+            let previusDate = currentDate.toISOString();
+            let nowDate = new Date(
+                currentDate.getFullYear(),
+                currentDate.getMonth() + 1,
+                1
+            ).toISOString();
+            let date = currentDate.toLocaleString("vi", {
+                month: "long",
+            });
+            let total = await getTotalBill(req.shop._id, previusDate, nowDate);
+            fullTotal += total;
+            totalBills.push({
+                date: date.substring(0, 1).toLocaleUpperCase() + date.substring(1),
+                value: (currentDate.getMonth() <= new Date().getMonth()) ? total.toLocaleString('en') + " ₫" : "Chưa có dữ liệu"
+            });
+            currentDate.setMonth(currentDate.getMonth() + 1);
+        }
+        return res.status(200).json({
+            success: true, data: {
+                list: totalBills,
+                total: fullTotal.toLocaleString('en') + " ₫"
+            }, message: "Lấy thống kê thành công"
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+}
+
+exports.statisticsYearSold = async (req, res, next) => {
+    try {
+        const year = new Date().getFullYear();
+        const listTotalProduct = [];
+        const listTotalPet = [];
+        let totalProduct = 0;
+        let totalPet = 0;
+        const endDate = new Date(year, 11, 1);
+        const firstDate = new Date(year - 1, 12, 1);
+        let currentDate = new Date(firstDate);
+
+        while (currentDate <= endDate) {
+            let previusDate = currentDate.toISOString();
+            let nowDate = new Date(
+                currentDate.getFullYear(),
+                currentDate.getMonth() + 1,
+                1
+            ).toISOString();
+            let date = currentDate.toLocaleString("vi", {
+                month: "long",
+            });
+
+            let result = await getTotalProduct(req.shop._id, previusDate, nowDate);
+            listTotalProduct.push({
+                date: date.substring(0, 1).toLocaleUpperCase() + date.substring(1),
+                value: (currentDate.getMonth() <= new Date().getMonth()) ? result?.totalProd : "Chưa có dữ liệu"
+            });
+            listTotalPet.push({
+                date: date.substring(0, 1).toLocaleUpperCase() + date.substring(1),
+                value: (currentDate.getMonth() <= new Date().getMonth()) ? result?.totalPet : "Chưa có dữ liệu"
+            });
+            totalPet += result?.totalPet;
+            totalProduct += result?.totalProd;
+
+            currentDate.setMonth(currentDate.getMonth() + 1);
+        }
+        return res.status(200).json({
+            success: true, data: {
+                pet: {
+                    list: listTotalPet,
+                    total: totalPet
+                },
+                product: {
+                    list: listTotalProduct,
+                    total: totalProduct
+                }
+            }, message: "Lấy thống kê thành công "
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+
+}
+
+exports.detailShop = async (req, res, next) => {
+
+    let idShop = req.params.idShop;
+    try {
+        let ObjShop = await mdShop.ShopModel.findById(idShop);
+        return res.status(200).json({ success: true, data: ObjShop, message: "Lấy dữ liệu chi tiết shop thành công" });
+    } catch (error) {
+        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+}
+
+exports.detailPet = async (req, res, next) => {
+    if (req.method == 'GET') {
+        let pet = await mdPet.findById(req.params.idPet)
+            .populate({
+                path: 'idCategoryP',
+                select: 'nameCategory'
+            });
+        if (pet) {
+            pet = pet.toObject();
+            if (pet.sizePet != undefined) {
+                switch (pet.sizePet) {
+                    case 0:
+                        pet.sizePet = "Nhỏ";
+                        break;
+                    case 1:
+                        pet.sizePet = "Vừa";
+                        break;
+                    case 2:
+                        pet.sizePet = "Lớn";
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            if (pet.status != undefined) {
+                switch (pet.status) {
+                    case 0:
+                        pet.status = "Đang bán";
+                        break;
+                    case 1:
+                        pet.status = "Đang ẩn";
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            return res.status(200).json({ success: true, data: pet, message: 'Lấy thú cưng thành công.' });
+        } else {
+            return res.status(500).json({ success: false, data: {}, message: 'Không lấy được thú cưng' });
+        }
+    }
+}
+
+exports.detailProduct = async (req, res, next) => {
+    if (req.method == 'GET') {
+        let product = await mdProduct.findById(req.params.idProd)
+            .populate({
+                path: 'idCategoryPr',
+                select: 'nameCategory'
+            });
+        if (product) {
+            product = product.toObject();
+            if (product.status != undefined) {
+                switch (product.status) {
+                    case 0:
+                        product.status = "Đang bán";
+                        break;
+                    case 1:
+                        product.status = "Đang ẩn";
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            return res.status(200).json({ success: true, data: product, message: 'Lấy sản phẩm thành công.' });
+        } else {
+            return res.status(500).json({ success: false, data: {}, message: 'Không lấy được sản phẩm' });
+        }
+    }
+}
+
+exports.detailAppointment = async (req, res, next) => {
+    if (req.method == 'GET') {
+        let appointment = await mdAppointment.findById(req.params.idAppt)
+            .populate({
+                path: 'idPet',
+                populate: {
+                    path: 'idCategoryP',
+                    select: 'nameCategory'
+                }
+            })
+            .populate({
+                path: 'idUser',
+                populate: {
+                    path: 'idAccount',
+                    select: ['phoneNumber', 'emailAddress']
+                },
+                select: ['avatarUser', 'fullName', 'locationUser', 'idAccount']
+            });
+        if (appointment) {
+            appointment = appointment.toObject();
+            if (new Date(appointment?.appointmentDate) < new Date() && appointment?.status == 0) {
+                appointment.status = 2;
+                await mdAppointment.findByIdAndUpdate(appointment._id, appointment);
+                appointment.canConfirm = false;
+                appointment.canCancel = false;
+                appointment.nameStatus = "Đã lỡ hẹn";
+                return res.status(200).json({ success: true, data: appointment, message: 'Lấy lịch hẹn thành công.' });
+            }
+            switch (String(appointment.status)) {
+                case "-1":
+                    appointment.canAccept = true;
+                    appointment.canCancel = false;
+                    appointment.canConfirm = false;
+                    appointment.nameStatus = "Chờ xác nhận";
+                    break;
+                case "0":
+                    appointment.canAccept = false;
+                    appointment.canCancel = true;
+                    appointment.canConfirm = true;
+                    appointment.nameStatus = "Đang hẹn";
+                    break;
+                case "1":
+                    appointment.canAccept = false;
+                    appointment.canCancel = false;
+                    appointment.canConfirm = false;
+                    appointment.nameStatus = "Đã hẹn";
+                    break;
+                case "2":
+                    appointment.canAccept = false;
+                    appointment.canCancel = false;
+                    appointment.canConfirm = false;
+                    appointment.nameStatus = "Đã lỡ hẹn";
+                    break;
+                case "3":
+                    appointment.canAccept = false;
+                    appointment.canCancel = false;
+                    appointment.canConfirm = false;
+                    appointment.nameStatus = "Đã hủy hẹn";
+                    break;
+                default:
+                    break;
+            }
+            return res.status(200).json({ success: true, data: appointment, message: 'Lấy lịch hẹn thành công.' });
+        } else {
+            return res.status(500).json({ success: false, data: {}, message: 'Không lấy được lịch hẹn' });
         }
     }
 }
@@ -286,7 +669,7 @@ exports.confirmBill = async (req, res, next) => {
     }
 }
 
-exports.confirmBillALl = async (req, res, next) => {
+exports.confirmBillAll = async (req, res, next) => {
     if (req.method == "POST") {
         // bỏ cmt đoạn dưới này và call api ở postman để đổi toàn bộ status lại thành 0 để test
         // let billProduct = await mdBill.find({ idShop: req.shop._id });
@@ -338,101 +721,163 @@ exports.confirmBillALl = async (req, res, next) => {
     }
 }
 
-exports.listAppointment = async (req, res, next) => {
-    let listCheck = await mdAppointment.find({ idShop: req.shop._id });
-    for (let i = 0; i < listCheck.length; i++) {
-        const appointment = listCheck[i];
-        if (new Date(appointment.appointmentDate) < new Date() && appointment.status == 0) {
-            appointment.status = "2";
-            await mdAppointment.findByIdAndUpdate(appointment._id, appointment);
-        }
-    }
-    let listAppointment = await mdAppointment.aggregate([
-        {
-            $match: {
-                idShop: req.shop._id
-            }
-        },
-        { $sort: { appointmentDate: -1 } },
-        {
-            $lookup: {
-                from: "Pets",
-                localField: "idPet",
-                foreignField: "_id",
-                as: "iPet"
-            }
-        },
-        {
-            $lookup: {
-                from: "User",
-                localField: "idUser",
-                foreignField: "_id",
-                as: "iUser"
-            }
-        },
-        {
-            $lookup: {
-                from: "Shop",
-                localField: "idShop",
-                foreignField: "_id",
-                as: "iShop"
-            }
-        },
-        {
-            $group: {
-                _id: {
-                    year: { $year: "$appointmentDate" },
-                    month: { $month: "$appointmentDate" }
-                },
-                appointments: {
-                    $push: {
-                        _id: "$_id",
-                        idPet: "$iPet",
-                        idUser: "$iUser",
-                        idShop: "$iShop",
-                        amountPet: "$amountPet",
-                        location: "$location",
-                        deposits: "$deposits",
-                        status: "$status",
-                        appointmentDate: "$appointmentDate",
-                        createdAt: "$createdAt"
-                    }
+exports.updateApm = async (req, res, next) => {
+    try {
+        let { status, idAppt } = req.body;
+        if (req.method == "PUT") {
+            if (status && idAppt) {
+                const objAppt = await mdAppointment.findById(idAppt)
+                    .populate({
+                        path: 'idPet',
+                        populate: {
+                            path: 'idCategoryP',
+                            select: 'nameCategory'
+                        }
+                    })
+                    .populate({
+                        path: 'idUser',
+                        populate: {
+                            path: 'idAccount',
+                            select: ['phoneNumber', 'emailAddress']
+                        },
+                        select: ['avatarUser', 'fullName', 'locationUser', 'idAccount']
+                    });
+                if (!objAppt) {
+                    return res.status(500).json({ success: false, message: 'Không tìm thấy lịch hẹn.' });
                 }
-            }
-        },
-        { $project: { _id: '$_id', appointments: '$appointments' } },
-        { $sort: { _id: -1 } },
-    ]);
-    if (listAppointment) {
-        return res.status(200).json({ success: true, data: listAppointment, message: 'Lấy danh sách lịch hẹn thành công.' });
-    } else {
-        return res.status(500).json({ success: false, data: [], message: 'Không lấy được danh sách lịch hẹn' });
-    }
-}
 
-exports.detailAppointment = async (req, res, next) => {
-    if (req.method == 'GET') {
-        let appointment = await mdAppointment.findById(req.params.idAppt).populate('idShop').populate('idPet').populate('idUser');
-        if (appointment) {
-            if (appointment != {}) {
-                if (new Date(appointment.appointmentDate) < new Date() && appointment.status == 0) {
-                    appointment.status = 2;
-                    await mdAppointment.findByIdAndUpdate(appointment._id, appointment);
-                    return res.status(200).json({ success: true, data: appointment, message: 'Lấy lịch hẹn thành công.' });
+                if (status == 0 || status == 1 || status == 2 || status == 3) {
+                    let mes = "";
+                    switch (String(status)) {
+                        case "0":
+                            mes = "Nhận lịch hẹn thành công."
+                            break;
+                        case "1":
+                            mes = "Đổi trạng thái thành đã hẹn thành công."
+                            break;
+                        case "2":
+                            mes = "Đổi trạng thái thành lỡ hẹn thành công."
+                            break;
+                        case "3":
+                            if (objAppt.status == -1) {
+                                mes = "Hủy nhận lịch hẹn thành công."
+                            } else {
+                                mes = "Hủy lịch hẹn thành công."
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
+                    objAppt.status = status;
+
+                    await mdAppointment.findByIdAndUpdate(idAppt, objAppt);
+                    let appointment = objAppt.toObject()
+                    switch (String(appointment.status)) {
+                        case "-1":
+                            appointment.canAccept = true;
+                            appointment.canCancel = false;
+                            appointment.canConfirm = false;
+                            appointment.nameStatus = "Chờ xác nhận";
+                            break;
+                        case "0":
+                            appointment.canAccept = false;
+                            appointment.canCancel = true;
+                            appointment.canConfirm = true;
+                            appointment.nameStatus = "Đang hẹn";
+                            break;
+                        case "1":
+                            appointment.canAccept = false;
+                            appointment.canCancel = false;
+                            appointment.canConfirm = false;
+                            appointment.nameStatus = "Đã hẹn";
+                            break;
+                        case "2":
+                            appointment.canAccept = false;
+                            appointment.canCancel = false;
+                            appointment.canConfirm = false;
+                            appointment.nameStatus = "Đã lỡ hẹn";
+                            break;
+                        case "3":
+                            appointment.canAccept = false;
+                            appointment.canCancel = false;
+                            appointment.canConfirm = false;
+                            appointment.nameStatus = "Đã hủy hẹn";
+                            break;
+                        default:
+                            break;
+                    }
+                    return res.status(201).json({ success: true, data: appointment, message: mes });
+                } else {
+                    return res.status(500).json({ success: false, message: 'Trạng thái không hợp lệ.' });
                 }
+            } else {
+                return res.status(500).json({ success: false, data: {}, message: "Không đọc được giữ liệu tải lên!" });
             }
-            return res.status(200).json({ success: true, data: appointment, message: 'Lấy lịch hẹn thành công.' });
-        } else {
-            return res.status(500).json({ success: false, data: {}, message: 'Không lấy được lịch hẹn' });
         }
+    } catch (error) {
+        return res.status(500).json({ success: false, data: {}, message: error.message });
     }
-}
+};
 
 exports.myShopDetail = async (req, res, next) => {
     try {
-        let objShop = await mdShop.ShopModel.findById(req.shop._id);
-        return res.status(200).json({ success: true, data: objShop, message: "Lấy dữ liệu chi tiết shop thành công" });
+        // let objShop = await mdShop.ShopModel.findById(req.shop._id);
+        const { _id } = req.shop;
+        let listBill = await mdBill.find({ idShop: _id });
+        if (listBill) {
+            req.shop = req?.shop.toObject();
+            req.shop.billCount = listBill.length;
+            const statusArray = [0, 1, 2, 3, 5];
+            try {
+                const pipeline = [
+                    {
+                        $match: {
+                            idShop: _id,
+                            deliveryStatus: { $in: statusArray },
+                        },
+                    },
+                    {
+                        $group: {
+                            _id: "$deliveryStatus",
+                            count: { $sum: 1 },
+                        },
+                    },
+                ];
 
+                const results = await mdBill.aggregate(pipeline);
+
+                const statusCountObject = {};
+
+                for (let i = 0; i < results.length; i++) {
+                    let result = results[i];
+                    if (result._id <= 1) {
+                        if (statusCountObject["0"]) {
+                            statusCountObject["0"] = Number(result.count) + Number(statusCountObject["0"]);
+                        } else {
+                            statusCountObject["0"] = result.count;
+                        }
+                    } else {
+                        if (result._id == 5) {
+                            statusCountObject["3"] = result.count;
+                        } else {
+                            statusCountObject[String(result._id - 1)] = result.count;
+                        }
+                    }
+                }
+                req.shop.objCountBills = statusCountObject;
+                return res.status(200).json({ success: true, data: req.shop, message: "Lấy dữ liệu chi tiết shop thành công" });
+            } catch (error) {
+                console.error(error);
+                return res.status(500).json({
+                    success: false,
+                    data: [],
+                    message: "Lấy danh sách hóa đơn thất bại",
+                });
+            }
+        } else {
+            return res.status(200).json({ success: true, data: req.shop, message: "Lấy dữ liệu chi tiết shop thành công" });
+        }
     } catch (error) {
         return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
     }
@@ -488,7 +933,7 @@ exports.detailShop = async (req, res, next) => {
 
     let idShop = req.params.idShop;
     try {
-        let ObjShop = await mdShop.ShopModel.findById(idShop);
+        let ObjShop = await mdShop.ShopModel.findById({ _id: idShop });
         return res.status(200).json({ success: true, data: ObjShop, message: "Lấy dữ liệu chi tiết shop thành công" });
 
     } catch (error) {
@@ -498,20 +943,25 @@ exports.detailShop = async (req, res, next) => {
 
 exports.checkPhoneNumber = async (req, res, next) => {
     try {
-        let objU = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
+        let objHL = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
+        let objUN = await mdShop.ShopModel.findOne({ userName: req.body.userName });
         if (req.method == "POST") {
-            if (!objU) {
-                return res.status(201).json({ success: true, data: objU, message: "Số điện thoại chưa được đăng ký." });
-            } else {
-                return res.status(201).json({ success: false, data: objU, message: "Số điện thoại đã được đăng ký." });
+            if (objHL) {
+                return res.status(201).json({ success: false, data: objHL, message: "Số điện thoại đã được sử dụng." });
             }
+            if (objUN) {
+                return res.status(201).json({ success: false, data: objHL, message: "Tên đăng nhập đã được sử dụng." });
+            }
+            return res.status(201).json({ success: true, data: objHL, message: "Số điện thoại chưa được sử dụng." });
         }
         if (req.method == "PUT") {
-            if (!objU) {
-                return res.status(201).json({ success: false, data: objU, message: "Số điện thoại chưa được đăng ký." });
-            } else {
-                return res.status(201).json({ success: true, data: objU, message: "Số điện thoại đã được đăng ký." });
+            if (objHL) {
+                return res.status(201).json({ success: false, data: objHL, message: "Số điện thoại đã được sử dụng." });
             }
+            if (objUN) {
+                return res.status(201).json({ success: false, data: objHL, message: "Tên đăng nhập đã được sử dụng." });
+            }
+            return res.status(201).json({ success: true, data: objHL, message: "Số điện thoại chưa được sử dụng." });
         }
     } catch (error) {
         return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
@@ -531,21 +981,9 @@ exports.checkEmail = async (req, res, next) => {
     }
 }
 
-exports.checkStatus = async (req, res, next) => {
+exports.autoLogin = async (req, res, next) => {
     try {
-        return res.status(200).json({ success: true, data: req.shop.status, message: "Lấy trạng thái thành công." });
-    } catch (error) {
-        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
-    }
-}
-
-exports.getShop = async (req, res, next) => {
-    try {
-        let id = "abc$";
-        let idRex = new RegExp(id);
-        console.log(idRex);
-        let shop = await mdShop.ShopModel.find({ nameShop: idRex })
-        return res.status(200).json({ success: true, data: shop, message: "Lấy trạng thái thành công." });
+        return res.status(200).json({ success: true, data: req.shop.status, message: "Đăng nhập thành công." });
     } catch (error) {
         return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
     }
@@ -553,7 +991,6 @@ exports.getShop = async (req, res, next) => {
 
 exports.registerShop = async (req, res, next) => {
     if (req.method == 'POST') {
-        console.log(req.body);
         let newShop = new mdShop.ShopModel();
         newShop.nameShop = req.body.nameShop;
         newShop.email = req.body.email;
@@ -565,6 +1002,7 @@ exports.registerShop = async (req, res, next) => {
         newShop.status = 0;
         newShop.followers = 0;
         newShop.revenue = 0;
+        newShop.online = 1;
         newShop.hotline = req.body.hotline;
         newShop.createdAt = new Date();
         await newShop.generateAuthToken(newShop);
@@ -587,7 +1025,7 @@ exports.registerShop = async (req, res, next) => {
 
         try {
             await newShop.save();
-            return res.status(201).json({ success: true, data: newShop, message: 'Thêm shop thanh công' });
+            return res.status(201).json({ success: true, data: {}, message: 'Thêm shop thanh công' });
         } catch (error) {
             console.log(error);
             return res.status(500).json({ success: false, data: {}, message: JSON.stringify(error.message) });
@@ -868,11 +1306,11 @@ exports.verifyCode = async (req, res, next) => {
             if (data.length > 0) {
                 if (data[0].code == Number(req.body.otp)) {
                     var timeBetween =
-                        (new Date().getTime() - new Date(data[0].createAt).getTime()) /
+                        (new Date().getTime() - new Date(data[0].createdAt).getTime()) /
                         1000;
                     // console.log(date + "s");
                     // console.log((date / 60) + "min");
-                    // console.log(new Date() - new Date(data[0].createAt));
+                    // console.log(new Date() - new Date(data[0].createdAt));
                     if (timeBetween / 60 >= 5) {
                         return res.status(201).json({
                             success: false,
@@ -930,11 +1368,11 @@ exports.verifyResetCode = async (req, res, next) => {
             if (data.length > 0) {
                 if (data[0].code == Number(req.body.otp)) {
                     var timeBetween =
-                        (new Date().getTime() - new Date(data[0].createAt).getTime()) /
+                        (new Date().getTime() - new Date(data[0].createdAt).getTime()) /
                         1000;
                     // console.log(date + "s");
                     // console.log((date / 60) + "min");
-                    // console.log(new Date() - new Date(data[0].createAt));
+                    // console.log(new Date() - new Date(data[0].createdAt));
                     if (timeBetween / 60 >= 5) {
                         return res.status(201).json({
                             success: false,
@@ -1009,10 +1447,26 @@ async function getListBill(idShop, billStatus) {
             },
             {
                 $lookup: {
+                    from: "CategoryProduct",
+                    localField: "productInfo.idCategoryPr",
+                    foreignField: "_id",
+                    as: "CtgProduct",
+                },
+            },
+            {
+                $lookup: {
                     from: "Pets",
                     localField: "products.idProduct",
                     foreignField: "_id",
                     as: "petInfo",
+                },
+            },
+            {
+                $lookup: {
+                    from: "CategoryPet",
+                    localField: "petInfo.idCategoryP",
+                    foreignField: "_id",
+                    as: "CtgPet",
                 },
             },
             {
@@ -1024,10 +1478,12 @@ async function getListBill(idShop, billStatus) {
                     "productInfo.amount": "$products.amount",
                     "productInfo.discount": "$products.discount",
                     "productInfo.price": "$products.price",
+                    "productInfo.category": "$CtgProduct",
                     "petInfo.idPet": "$petInfo",
                     "petInfo.amount": "$products.amount",
                     "petInfo.discount": "$products.discount",
                     "petInfo.price": "$products.price",
+                    "petInfo.category": "$CtgPet",
                     "userLookup.phoneNumber": "$userAccLookup.phoneNumber",
                     "userLookup.emailAddress": "$userAccLookup.emailAddress",
                 },
@@ -1060,10 +1516,12 @@ async function getListBill(idShop, billStatus) {
                     "productInfo.amount": 1,
                     "productInfo.price": 1,
                     "productInfo.discount": 1,
+                    "productInfo.category": 1,
                     "petInfo.idPet": 1,
                     "petInfo.amount": 1,
                     "petInfo.discount": 1,
                     "petInfo.price": 1,
+                    "petInfo.category": 1,
                     "userInfo.fullName": 1,
                     "userInfo.avatarUser": 1,
                     "userInfo.phoneNumber": 1,
@@ -1145,6 +1603,14 @@ function onFinalProcessingListBill(listBill) {
                     bill.statusBill.iconStatus = "account-check-outline";
                     bill.statusBill.descStatus = "Khách hàng đã nhận được sản phẩm của bạn.";
                     break;
+                case "5":
+                    bill.statusBill = {}
+                    bill.statusBill.status = Number(bill.deliveryStatus);
+                    bill.statusBill.colorStatus = "#001858";
+                    bill.statusBill.nameStatus = "Đã đánh giá";
+                    bill.statusBill.iconStatus = "star-check-outline";
+                    bill.statusBill.descStatus = "Khách hàng đã đánh giá sản phẩm của bạn.";
+                    break;
                 default:
                     break;
             }
@@ -1175,6 +1641,132 @@ function onFinalProcessingListBill(listBill) {
         listBill.splice(i, 1, bill);
     }
     return listBill;
+}
+
+async function getTotalBill(shopId, previusDate, nowDate) {
+    var match_stage = {
+        $match: {
+            idShop: shopId,
+            purchaseDate: {
+                $gte: new Date(previusDate),
+                $lte: new Date(nowDate),
+            },
+        },
+    };
+    var group_stage = {
+        $group: { _id: null, sum: { $sum: "$total" } },
+    };
+    var project_stage = {
+        $project: { _id: 0, total: "$sum" },
+    };
+
+    var pipeline = [match_stage, group_stage, project_stage];
+    let sumTotal = await mdBill.aggregate(pipeline);
+    if (sumTotal[0] != undefined) {
+        return sumTotal[0].total;
+    } else {
+        return 0;
+    }
+}
+
+async function getTotalProduct(shopId, previusDate, nowDate) {
+    var match_stage = {
+        $match: {
+            idShop: shopId,
+            purchaseDate: {
+                $gte: new Date(previusDate),
+                $lte: new Date(nowDate),
+            },
+        },
+    };
+
+    var lookup_stage = [
+        {
+            $set: {
+                "cloneProducts": "$products"
+            }
+        },
+        {
+            $unwind: "$products",
+        },
+        {
+            $lookup: {
+                from: "Products",
+                localField: "products.idProduct",
+                foreignField: "_id",
+                as: "productInfo",
+            },
+        },
+        {
+            $lookup: {
+                from: "Pets",
+                localField: "products.idProduct",
+                foreignField: "_id",
+                as: "petInfo",
+            },
+        },
+        {
+            $set: {
+                productMap: {
+                    $map: {
+                        input: "$productInfo",
+                        as: "product",
+                        in: {
+                            $mergeObjects: [
+                                "$$product",
+                                {
+                                    $arrayElemAt: [
+                                        {
+                                            $filter: {
+                                                input: "$cloneProducts",
+                                                cond: { $eq: ["$$this._id", "$$product.idProduct"] }
+                                            }
+                                        },
+                                        0
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                }
+            }
+        },
+    ]
+
+    var group_stage = {
+        $group: {
+            _id: null,
+            productCount: { $push: "$productMap" },
+            sumPet: { $sum: { $size: "$petInfo" } },
+        },
+    }
+
+    var project_stage = {
+        $project: { _id: 0, totalPet: "$sumPet", totalProd: "$sumProd", productCount: "$productCount" },
+    };
+
+    var pipeline = [match_stage, ...lookup_stage, group_stage, project_stage];
+    let sumTotal = await mdBill.aggregate(pipeline);
+    let totalProd = 0;
+    if (sumTotal[0] != undefined && sumTotal[0]?.productCount && sumTotal[0]?.productCount.length > 0) {
+        for (let i = 0; i < sumTotal[0]?.productCount.length; i++) {
+            const prCount = sumTotal[0]?.productCount[i];
+            if (prCount[0] != undefined) {
+                totalProd += prCount[0].amount;
+            }
+        }
+    }
+    if (sumTotal[0] != undefined) {
+        return {
+            totalPet: sumTotal[0].totalPet,
+            totalProd: totalProd
+        };
+    } else {
+        return {
+            totalPet: 0,
+            totalProd: 0
+        };
+    }
 }
 
 async function sendEmailOTP(email, otp, data, res) {
@@ -1212,7 +1804,7 @@ async function sendEmailOTP(email, otp, data, res) {
             address: "petworld.server.email@gmail.com",
         },
         to: email,
-        subject: "xác minh email của bạn cho PetworldSeller",
+        subject: "Xác minh email của bạn cho PetworldSeller",
         text:
             "Xin chào! Mã xác minh cho email của bạn là " +
             otp +
@@ -1240,7 +1832,7 @@ async function sendEmailOTP(email, otp, data, res) {
                     email: data[0].email,
                     code: otp,
                     typeUser: 1,
-                    createAt: new Date(),
+                    createdAt: new Date(),
                 });
                 return res.status(201).json({
                     success: true,
@@ -1252,7 +1844,7 @@ async function sendEmailOTP(email, otp, data, res) {
                 newOTPEmail.email = email;
                 newOTPEmail.code = otp;
                 newOTPEmail.typeUser = 1;
-                newOTPEmail.createAt = new Date();
+                newOTPEmail.createdAt = new Date();
 
                 await newOTPEmail.save();
                 return res.status(201).json({
@@ -1328,7 +1920,7 @@ async function sendEmailResetPassword(email, otp, data, res) {
                     email: data[0].email,
                     code: otp,
                     typeUser: 1,
-                    createAt: new Date(),
+                    createdAt: new Date(),
                 });
                 return res.status(201).json({
                     success: true,
@@ -1340,7 +1932,7 @@ async function sendEmailResetPassword(email, otp, data, res) {
                 newOTPEmail.email = email;
                 newOTPEmail.code = otp;
                 newOTPEmail.typeUser = 1;
-                newOTPEmail.createAt = new Date();
+                newOTPEmail.createdAt = new Date();
 
                 await newOTPEmail.save();
                 return res.status(201).json({

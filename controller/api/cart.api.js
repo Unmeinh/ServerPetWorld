@@ -71,17 +71,14 @@ exports.editCart = async (req, res, next) => {
   if (req.method == "POST") {
     try {
       let listCartUser = await mdCart.CartModel.findOne({ idUser: _id });
-      let newCart = [];
       listCartUser.carts.map((itemOld) => {
         data.map((itemNew) => {
           if (itemNew.idProduct._id === itemOld.idProduct.toString()) {
             itemOld.isSelected = itemNew.isSelected;
             itemOld.amount = itemNew.amount;
-            newCart.push(itemOld);
           }
         });
       });
-      listCartUser.carts = newCart;
       await mdCart.CartModel.findByIdAndUpdate(
         { _id: listCartUser._id },
         listCartUser
@@ -133,11 +130,13 @@ exports.addLocations = async (req, res) => {
       if (user) {
         user.locationDelivery = [...user.locationDelivery, req.body];
         await mdUser.UserModel.findByIdAndUpdate({ _id }, user);
-        res.status(201).json({
-          success: true,
-          data: user,
-          message: "Thêm địa chỉ thành công",
-        });
+        res
+          .status(201)
+          .json({
+            success: true,
+            data: user,
+            message: "Thêm địa chỉ thành công",
+          });
       } else {
         res
           .status(500)
@@ -164,11 +163,13 @@ exports.editLocationSelect = async (req, res) => {
             : (item.isSelected = false);
         });
         await mdUser.UserModel.findByIdAndUpdate({ _id }, user);
-        res.status(201).json({
-          success: true,
-          data: user,
-          message: "chỉnh sửa địa chỉ thành công",
-        });
+        res
+          .status(201)
+          .json({
+            success: true,
+            data: user,
+            message: "chỉnh sửa địa chỉ thành công",
+          });
       }
     } else {
       res.status(500).json({ success: false, message: "Lỗi 500" });
@@ -200,11 +201,13 @@ exports.editLocation = async (req, res) => {
         }
       });
       await mdUser.UserModel.findByIdAndUpdate({ _id }, user);
-      res.status(201).json({
-        success: true,
-        data: user,
-        message: "chỉnh sửa địa chỉ thành công",
-      });
+      res
+        .status(201)
+        .json({
+          success: true,
+          data: user,
+          message: "chỉnh sửa địa chỉ thành công",
+        });
     }
   } catch (error) {
     console.log(error.message);

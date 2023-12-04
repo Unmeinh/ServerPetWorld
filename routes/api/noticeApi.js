@@ -7,7 +7,7 @@ router.get('/list/all/:status',mdJWT.api_user_auth, noticeCtrl.listAllNotice);
 
 router.post('/insert',mdJWT.api_user_auth, noticeCtrl.addNoti);
 
-router.put('/update/:idNotice',mdJWT.api_user_auth, noticeCtrl.editNotice);
+router.get('/update',mdJWT.api_user_auth, noticeCtrl.editNotice);
 
 router.delete('/delete/:idNotice',mdJWT.api_user_auth, noticeCtrl.deleteNotice);
 
