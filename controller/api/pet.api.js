@@ -188,8 +188,10 @@ exports.detailpet = async (req, res, next) => {
         status: 0,
       });
       count = countPetShop + countProductShop;
-      if (myfavorite && myfavorite?.idProduct?.includes(ObjProduct._id)) {
-        favorite = true;
+      if (myfavorite) {
+        if (myfavorite.idProduct.includes(ObjProduct._id)) {
+          favorite = true;
+        }
       }
     }
     ObjProduct.idShop.count = count;
