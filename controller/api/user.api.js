@@ -74,12 +74,13 @@ exports.detailUser = async (req, res, next) => {
   try {
     let objU = await mdUser.findById(idUser).populate('idAccount');
     if (objU) {
+      objU = objU.toObject();
       let isFollowed = objU.followers.find((follow) => String(follow.idFollow) == String(req.user._id))
       if (isFollowed) {
         return res.status(200).json({
           success: true,
           data: {
-            ...objU.toObject(),
+            ...objU,
             isFollowed: true
           },
           message: "Lấy dữ liệu của người dùng khác thành công",
@@ -88,7 +89,7 @@ exports.detailUser = async (req, res, next) => {
         return res.status(200).json({
           success: true,
           data: {
-            ...objU.toObject(),
+            ...objU,
             isFollowed: false
           },
           message: "Lấy dữ liệu của người dùng khác thành công",
@@ -116,7 +117,7 @@ exports.registerUser = async (req, res, next) => {
       newAccount.userName = req.body.userName;
       newAccount.phoneNumber = req.body.phoneNumber;
       newAccount.isVerifyPhoneNumber = 0;
-      newAccount.createAt = new Date();
+      newAccount.createdAt = new Date();
       newAccount.online = 1;
       newAccount.status = 0;
       newAccount.emailAddress = "";
@@ -269,9 +270,9 @@ exports.updateAccount = async (req, res, next) => {
             req.account.isVerifyEmail = 1;
             await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
             let encode = encodeToSha256(req.body.valueUpdate);
-            let linkVerify = "https://0732-2402-800-61c4-c98-dcce-9914-21bc-1dd3.ngrok-free.app/account/verifyEmail/" + encode;
+            let linkVerify = "https://server-pet-world.onrender.com/account/verifyEmail/" + encode;
             await sendEmailLink(req.body.valueUpdate, linkVerify, res);
-            return res.status(201).json({ success: true, data: {}, message: "Cập nhật dữ liệu thành công!" });
+            // return res.status(201).json({ success: true, data: {}, message: "Cập nhật dữ liệu thành công!" });
 
           default:
             break;
@@ -288,7 +289,7 @@ exports.updateAccount = async (req, res, next) => {
 exports.deleteEmail = async (req, res, next) => {
   if (req.method == "DELETE") {
     try {
-      req.account.emailAddress = "Chưa thiết lập";
+      req.account.emailAddress = "";
       req.account.isVerifyEmail = 1;
       await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
       return res.status(203).json({
@@ -375,7 +376,7 @@ exports.sendVerifyEmail = async (req, res, next) => {
       if (data.length > 0) {
         if (data[0].isVerifyEmail == 1) {
           let encode = encodeToSha256(req.body.email);
-          let linkVerify = "https://0732-2402-800-61c4-c98-dcce-9914-21bc-1dd3.ngrok-free.app/account/verifyEmail/" + encode;
+          let linkVerify = "https://server-pet-world.onrender.com/account/verifyEmail/" + encode;
           await sendEmailLink(req.body.email, linkVerify, res);
         } else {
           return res
@@ -425,11 +426,11 @@ exports.verifyResetCode = async (req, res, next) => {
       if (data.length > 0) {
         if (data[0].code == Number(req.body.otp)) {
           var timeBetween =
-            (new Date().getTime() - new Date(data[0].createAt).getTime()) /
+            (new Date().getTime() - new Date(data[0].createdAt).getTime()) /
             1000;
           // console.log(date + "s");
           // console.log((date / 60) + "min");
-          // console.log(new Date() - new Date(data[0].createAt));
+          // console.log(new Date() - new Date(data[0].createdAt));
           if (timeBetween / 60 >= 5) {
             return res.status(201).json({
               success: false,
@@ -500,7 +501,7 @@ async function sendEmailLink(email, link, res) {
       address: "petworld.server.email@gmail.com",
     },
     to: email,
-    subject: "Xác minh email của bạn cho Petworld",
+    subject: "Xác minh email của bạn cho OurPet",
     text:
       "Xin chào! Bấm vào link dưới đây để xác minh email của bạn. " +
       link,
@@ -563,7 +564,7 @@ async function sendEmailOTP(email, otp, data, res) {
       address: "petworld.server.email@gmail.com",
     },
     to: email,
-    subject: "Đặt lại mật khẩu của bạn cho Petworld",
+    subject: "Đặt lại mật khẩu của bạn cho OurPet",
     text:
       "Xin chào! Mã xác minh đặt lại mật khẩu của bạn là " +
       otp +
@@ -590,7 +591,7 @@ async function sendEmailOTP(email, otp, data, res) {
           _id: data[0]._id,
           email: data[0].email,
           code: otp,
-          createAt: new Date(),
+          createdAt: new Date(),
         });
         return res.status(200).json({
           success: true,
@@ -601,7 +602,7 @@ async function sendEmailOTP(email, otp, data, res) {
         let newOTPEmail = new OTPEmailModel();
         newOTPEmail.email = email;
         newOTPEmail.code = otp;
-        newOTPEmail.createAt = new Date();
+        newOTPEmail.createdAt = new Date();
 
         await newOTPEmail.save();
         return res.status(200).json({

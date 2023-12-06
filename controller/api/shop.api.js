@@ -1810,7 +1810,7 @@ async function sendEmailOTP(email, otp, data, res) {
             address: "petworld.server.email@gmail.com",
         },
         to: email,
-        subject: "Xác minh email của bạn cho PetworldSeller",
+        subject: "Xác minh email của bạn cho OurPetSeller",
         text:
             "Xin chào! Mã xác minh cho email của bạn là " +
             otp +
@@ -1898,7 +1898,7 @@ async function sendEmailResetPassword(email, otp, data, res) {
             address: "petworld.server.email@gmail.com",
         },
         to: email,
-        subject: "Đặt lại mật khẩu của bạn cho PetworldSeller",
+        subject: "Đặt lại mật khẩu của bạn cho OurPetSeller",
         text:
             "Xin chào! Mã xác minh cho email của bạn là " +
             otp +
