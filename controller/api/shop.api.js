@@ -943,23 +943,29 @@ exports.detailShop = async (req, res, next) => {
 
 exports.checkPhoneNumber = async (req, res, next) => {
     try {
-        let objHL = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
-        let objUN = await mdShop.ShopModel.findOne({ userName: req.body.userName });
         if (req.method == "POST") {
+            let objHL = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
             if (objHL) {
                 return res.status(201).json({ success: false, data: objHL, message: "Số điện thoại đã được sử dụng." });
             }
-            if (objUN) {
-                return res.status(201).json({ success: false, data: objHL, message: "Tên đăng nhập đã được sử dụng." });
+            if (req.body.userName) {
+                let objUN = await mdShop.ShopModel.findOne({ userName: req.body.userName });
+                if (objUN) {
+                    return res.status(201).json({ success: false, data: objHL, message: "Tên đăng nhập đã được sử dụng." });
+                }
             }
             return res.status(201).json({ success: true, data: objHL, message: "Số điện thoại chưa được sử dụng." });
         }
         if (req.method == "PUT") {
+            let objHL = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
             if (objHL) {
                 return res.status(201).json({ success: false, data: objHL, message: "Số điện thoại đã được sử dụng." });
             }
-            if (objUN) {
-                return res.status(201).json({ success: false, data: objHL, message: "Tên đăng nhập đã được sử dụng." });
+            if (req.body.userName) {
+                let objUN = await mdShop.ShopModel.findOne({ userName: req.body.userName });
+                if (objUN) {
+                    return res.status(201).json({ success: false, data: objHL, message: "Tên đăng nhập đã được sử dụng." });
+                }
             }
             return res.status(201).json({ success: true, data: objHL, message: "Số điện thoại chưa được sử dụng." });
         }
@@ -1793,8 +1799,9 @@ async function sendEmailOTP(email, otp, data, res) {
                 <p>Mã xác minh có hiệu lực trong vòng 5 phút. Nếu hết thời gian cho yêu cầu này, Xin vui lòng thực hiện lại yêu cầu để nhận được mã xác minh mới.</p>
                 <p>Nếu bạn không yêu cầu xác minh email nữa, bạn có thể bỏ qua email này.</p>
                 <p>Cảm ơn bạn!</p>
+                <p>OurPetSeller</p>
                 <img src="cid:logo1" alt="logo-petworld.png"
-                    width="200" height="auto" />
+                    width="150" height="auto" />
             </div>
         </div>
     `;
@@ -1804,7 +1811,7 @@ async function sendEmailOTP(email, otp, data, res) {
             address: "petworld.server.email@gmail.com",
         },
         to: email,
-        subject: "Xác minh email của bạn cho PetworldSeller",
+        subject: "Xác minh email của bạn cho OurPetSeller",
         text:
             "Xin chào! Mã xác minh cho email của bạn là " +
             otp +
@@ -1813,7 +1820,7 @@ async function sendEmailOTP(email, otp, data, res) {
         attachments: [
             {
                 filename: "logo.jpg",
-                path: `public/upload/logo-darktheme.png`,
+                path: `public/upload/ourpet_logo.png`,
                 cid: "logo1",
             },
         ],
@@ -1881,8 +1888,9 @@ async function sendEmailResetPassword(email, otp, data, res) {
                 <p>Mã xác minh có hiệu lực trong vòng 5 phút. Nếu hết thời gian cho yêu cầu này, Xin vui lòng thực hiện lại yêu cầu để nhận được mã xác minh mới.</p>
                 <p>Nếu bạn không yêu cầu xác minh email nữa, bạn có thể bỏ qua email này.</p>
                 <p>Cảm ơn bạn!</p>
+                <p>OurPetSeller</p>
                 <img src="cid:logo1" alt="logo-petworld.png"
-                    width="200" height="auto" />
+                    width="150" height="auto" />
             </div>
         </div>
     `;
@@ -1892,7 +1900,7 @@ async function sendEmailResetPassword(email, otp, data, res) {
             address: "petworld.server.email@gmail.com",
         },
         to: email,
-        subject: "Đặt lại mật khẩu của bạn cho PetworldSeller",
+        subject: "Đặt lại mật khẩu của bạn cho OurPetSeller",
         text:
             "Xin chào! Mã xác minh cho email của bạn là " +
             otp +
@@ -1901,7 +1909,7 @@ async function sendEmailResetPassword(email, otp, data, res) {
         attachments: [
             {
                 filename: "logo.jpg",
-                path: `public/upload/logo-darktheme.png`,
+                path: `public/upload/ourpet_logo.png`,
                 cid: "logo1",
             },
         ],
