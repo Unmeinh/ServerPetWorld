@@ -12,44 +12,50 @@
 <body>
     <div class="container-fluid">
         <div class="row col-12">
-            <div class="col-md-4 col-lg-6" style="background-color: #F3D2C1; height: 100%; position: absolute; top: 0;left: 0; text-align: center; padding-top: 220px;">
-                <img src="/upload/ourpet_logo.png" class="img-fluid">
+            <div class="col-md-4 col-lg-6"
+                style="background-color: #F3D2C1; height: 100%; position: absolute; top: 0;left: 0; text-align: center; padding-top: 220px;">
+                <img src="/upload/ourpet_logo.png" width="190" height="190">
             </div>
 
             <div class="col-12 col-md-8 col-lg-6 formlogin" style="height: 100%; position: absolute; top: 0;right: 0;">
                 <div class="h1 m-5">
-                    <h2 style="margin-top: 15%; color: #001858;font-weight: 700; font-size: 95%; font-family: system-ui, Roboto; text-align: center;">
+                    <h2
+                        style="margin-top: 15%; color: #001858;font-weight: 700; font-size: 95%; font-family: system-ui, Roboto; text-align: center;">
                         Xin chào ! Chào mừng trở lại
                     </h2>
                 </div>
                 <form action="" method="post">
                     <% if(msg) { %>
-                        <div class="text-lg-start d-grid mb-2" style="width: 85%;">
+                        <div class="d-grid mb-2 m-auto" style="width: 70%;">
                             <span class="p-3"
                                 style="background-color: rgb(175, 214, 239); border-radius: 10px;color: red;font-weight: bold;">
                                 <%= msg %>
                             </span>
                         </div>
                         <% }%>
-                    <div class="form-outline mb-3 ">
-                        <label class="form-label" style="font-family: system-ui, Roboto;" for="username">Tên đăng nhập</label>
-                        <input type="text" name="userName" id="username" style="box-shadow: none;" class="form-control form-control-lg" />
-                    </div>
+                            <div class="m-auto" style="width: 70%;">
+                                <label class="form-label" style="font-family: system-ui, Roboto;" for="username">Tên
+                                    đăng nhập</label>
+                                <input type="text" name="userName" id="username" style="box-shadow: none;"
+                                    class="form-control form-control-lg" />
+                            </div>
 
-                    <div class="form-outline mb-3">
-                        <label class="form-label" style="font-family: system-ui, Roboto;" for="password">Mật khẩu</label>
-                        <div style="position: relative; display: flex; flex-direction: row; align-items: center ;">
-                            <input type="password" name="passWord" id="password" style="box-shadow: none;" class="form-control form-control-lg" />
-                        </div>
+                            <div class="m-auto pt-3" style="width: 70%;">
+                                <label class="form-label" style="font-family: system-ui, Roboto;" for="password">Mật
+                                    khẩu</label>
+                                <div
+                                    style="position: relative; display: flex; flex-direction: row; align-items: center ;">
+                                    <input type="password" name="passWord" id="password" style="box-shadow: none;"
+                                        class="form-control form-control-lg" />
+                                </div>
+                            </div>
 
-                    </div>
-
-                    <div class="" style="width: 85%;">
-                        <button type="submit" class="btn btn-lg mt-5" style="width: 100%;background-color: #F582AE; color: #ffffff; font-family: system-ui, Roboto; font-weight: bold;">
-                            Đăng nhập
-                        </button>
-
-                    </div>
+                            <div class="m-auto" style="width: 70%;">
+                                <button type="submit" class="btn btn-lg mt-5"
+                                    style="width: 100%;background-color: #F582AE; color: #ffffff; font-family: system-ui, Roboto; font-weight: bold;">
+                                    Đăng nhập
+                                </button>
+                            </div>
                 </form>
             </div>
         </div>
