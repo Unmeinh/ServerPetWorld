@@ -52,7 +52,7 @@ exports.verifyEmail = async (req, res, next) => {
                 .json({ success: false, data: {}, message: "Xác minh email thất bại" });
         }
     }
-    res.render('account/verifyEmail')
+    res.render('Account/verifyEmail')
 }
 
 exports.verifyResult = async (req, res, next) => {
