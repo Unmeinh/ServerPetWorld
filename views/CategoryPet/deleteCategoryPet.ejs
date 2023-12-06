@@ -1,4 +1,4 @@
-<%- include('../inc/top',{title:'Xóa thể loại sản phẩm'}) %>
+<%- include('../inc/top',{title:'Xóa thể loại thú cưng'}) %>
     <div class="container">
         <% if(message) { %>
             <div class="row mb-2">
@@ -10,13 +10,11 @@
             <% }%>
                 <div class="col-5 m-auto card">
                     <form action="" class="card-body" method="post">
-                        <h5 class="card-text  mb-3">Bạn muốn xóa thể loại:
-                            <span style="font-weight: bold;">
+                        <h5 class="card-text  mb-3">Bạn muốn xóa thể loại: <span style="font-weight: bold;">
                                 <%= Objdata.nameCategory %>
-                            </span> ?
-                        </h5>
+                            </span> ?</h5>
                         <button class="btn btn-danger" type="submit">Xóa ngay</button>
-                        <a href="/category-product" class="btn" style="background-color:#d2d2d2 ;">Hủy bỏ</a>
+                        <a href="/category-pet" class="btn" style="background-color:#d2d2d2 ;">Hủy bỏ</a>
                     </form>
                 </div>
     </div>

@@ -18,7 +18,6 @@ exports.listAllNotice = async (req, res, next) => {
 
     const query =
       status == 0 ? { idUser: _id } : { idUser: _id, status: status };
-    console.log(query, status);
     const listAllNotice = await mdNoti.NoticeModel.find(query)
       .sort({ createdAt: -1 })
       .skip(startIndex)
