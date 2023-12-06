@@ -490,6 +490,7 @@ async function sendEmailLink(email, link, res) {
               <p>${link}</p>
               <p>Nếu bạn không yêu cầu xác minh email nữa, bạn có thể bỏ qua email này.</p>
               <p>Cảm ơn bạn!</p>
+              <p>OurPet</p>
               <img src="cid:logo1" alt="logo-petworld.png"
                   width="200" height="auto" />
           </div>
@@ -509,7 +510,7 @@ async function sendEmailLink(email, link, res) {
     attachments: [
       {
         filename: "logo.jpg",
-        path: `public/upload/logo-darktheme.png`,
+        path: `public/upload/ourpet_logo.png`,
         cid: "logo1",
       },
     ],
@@ -553,6 +554,7 @@ async function sendEmailOTP(email, otp, data, res) {
               <p>Mã xác minh có hiệu lực trong vòng 5 phút. Nếu hết thời gian cho yêu cầu này, Xin vui lòng thực hiện lại yêu cầu để nhận được mã xác minh mới.</p>
               <p>Nếu bạn không yêu cầu đặt lại mật khẩu nữa, bạn có thể bỏ qua email này.</p>
               <p>Cảm ơn bạn!</p>
+              <p>OurPet</p>
               <img src="cid:logo1" alt="logo-petworld.png"
                   width="200" height="auto" />
           </div>
@@ -573,7 +575,7 @@ async function sendEmailOTP(email, otp, data, res) {
     attachments: [
       {
         filename: "logo.jpg",
-        path: `public/upload/logo-darktheme.png`,
+        path: `public/upload/ourpet_logo.png`,
         cid: "logo1",
       },
     ],
@@ -593,7 +595,7 @@ async function sendEmailOTP(email, otp, data, res) {
           code: otp,
           createdAt: new Date(),
         });
-        return res.status(200).json({
+        return res.status(201).json({
           success: true,
           data: {},
           message: "Gửi mã xác minh thành công.",
@@ -605,7 +607,7 @@ async function sendEmailOTP(email, otp, data, res) {
         newOTPEmail.createdAt = new Date();
 
         await newOTPEmail.save();
-        return res.status(200).json({
+        return res.status(201).json({
           success: true,
           data: {},
           message: "Gửi mã xác minh thành công.",

@@ -1799,8 +1799,9 @@ async function sendEmailOTP(email, otp, data, res) {
                 <p>Mã xác minh có hiệu lực trong vòng 5 phút. Nếu hết thời gian cho yêu cầu này, Xin vui lòng thực hiện lại yêu cầu để nhận được mã xác minh mới.</p>
                 <p>Nếu bạn không yêu cầu xác minh email nữa, bạn có thể bỏ qua email này.</p>
                 <p>Cảm ơn bạn!</p>
+                <p>OurPetSeller</p>
                 <img src="cid:logo1" alt="logo-petworld.png"
-                    width="200" height="auto" />
+                    width="150" height="auto" />
             </div>
         </div>
     `;
@@ -1819,7 +1820,7 @@ async function sendEmailOTP(email, otp, data, res) {
         attachments: [
             {
                 filename: "logo.jpg",
-                path: `public/upload/logo-darktheme.png`,
+                path: `public/upload/ourpet_logo.png`,
                 cid: "logo1",
             },
         ],
@@ -1887,8 +1888,9 @@ async function sendEmailResetPassword(email, otp, data, res) {
                 <p>Mã xác minh có hiệu lực trong vòng 5 phút. Nếu hết thời gian cho yêu cầu này, Xin vui lòng thực hiện lại yêu cầu để nhận được mã xác minh mới.</p>
                 <p>Nếu bạn không yêu cầu xác minh email nữa, bạn có thể bỏ qua email này.</p>
                 <p>Cảm ơn bạn!</p>
+                <p>OurPetSeller</p>
                 <img src="cid:logo1" alt="logo-petworld.png"
-                    width="200" height="auto" />
+                    width="150" height="auto" />
             </div>
         </div>
     `;
@@ -1907,7 +1909,7 @@ async function sendEmailResetPassword(email, otp, data, res) {
         attachments: [
             {
                 filename: "logo.jpg",
-                path: `public/upload/logo-darktheme.png`,
+                path: `public/upload/ourpet_logo.png`,
                 cid: "logo1",
             },
         ],
