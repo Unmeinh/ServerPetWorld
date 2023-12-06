@@ -57,7 +57,7 @@ exports.verifyEmail = async (req, res, next) => {
 
 exports.verifyResult = async (req, res, next) => {
     let isVerify = req.query.isVerify;
-    res.render('account/verifyResult', { isVerify: isVerify })
+    res.render('Account/verifyResult', { isVerify: isVerify })
 }
 
 exports.profile = async (req, res, next) => {
