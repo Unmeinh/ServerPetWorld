@@ -42,7 +42,7 @@ let billProductSchema = new db.mongoose.Schema(
       ratedAt: { type: Date, required: false }, //Ngày khách hàng đánh giá đơn
       cancelledAt: { type: Date, required: false }, //Ngày shop hủy đơn
     },
-    statusReview: { type: Boolean, required: false, default: false }, //
+    statusReview: { type: Boolean, required: false, default: false }, 
   },
   {
     collection: "billProducts",

@@ -7,6 +7,7 @@ const otpGenerator = require("otp-generator");
 let { encodeToSha256 } = require("../../function/hashFunction");
 const { onUploadImages } = require("../../function/uploadImage");
 const { billProductModel } = require("../../model/billProduct.model");
+const blogModel = require("../../model/blog.model").BlogModel;
 
 exports.listUser = async (req, res, next) => {
   try {
@@ -31,14 +32,19 @@ exports.listUser = async (req, res, next) => {
 exports.myDetail = async (req, res, next) => {
   try {
     const { _id } = req.user;
-    let listBill = await billProductModel.find({ idUser: _id });
-    if (listBill) {
-      req.user =  req.user.toObject();
-      req.user.billCount = listBill.length;
-      return res.status(200).json({ success: true, data: req.user, message: "Lấy dữ liệu của bạn thành công" });
-    } else {
-      return res.status(200).json({ success: true, data: req.user, message: "Lấy dữ liệu của bạn thành công" });
+    let dataCalculator = {};
+    let billCount = [];
+    if (req?.query?.isCalculator && String(req.query.isCalculator) == "true") {
+      dataCalculator = await calculatorUser(_id);
     }
+    if (req?.query?.isReadBill && String(req.query.isReadBill) == "true") {
+      billCount = await billProductModel.find({ idUser: _id }).count();
+    }
+    let user = req.user.toObject();
+    user.billCount = billCount;
+    user.interactCount = (dataCalculator?.interactCount) ? dataCalculator?.interactCount : 0;
+    user.commentCount = (dataCalculator?.cmtCount) ? dataCalculator?.cmtCount : 0;
+    return res.status(200).json({ success: true, data: user, message: "Lấy dữ liệu của bạn thành công" });
   } catch (error) {
     return res
       .status(500)
@@ -74,6 +80,7 @@ exports.detailUser = async (req, res, next) => {
   try {
     let objU = await mdUser.findById(idUser).populate('idAccount');
     if (objU) {
+      let dataCalculator = await calculatorUser(objU._id);
       objU = objU.toObject();
       let isFollowed = objU.followers.find((follow) => String(follow.idFollow) == String(req.user._id))
       if (isFollowed) {
@@ -81,7 +88,9 @@ exports.detailUser = async (req, res, next) => {
           success: true,
           data: {
             ...objU,
-            isFollowed: true
+            isFollowed: true,
+            interactCount: (dataCalculator.interactCount) ? dataCalculator.interactCount : 0,
+            commentCount: (dataCalculator.cmtCount) ? dataCalculator.cmtCount : 0
           },
           message: "Lấy dữ liệu của người dùng khác thành công",
         });
@@ -90,7 +99,9 @@ exports.detailUser = async (req, res, next) => {
           success: true,
           data: {
             ...objU,
-            isFollowed: false
+            isFollowed: false,
+            interactCount: dataCalculator.interactCount,
+            commentCount: dataCalculator.cmtCount
           },
           message: "Lấy dữ liệu của người dùng khác thành công",
         });
@@ -272,7 +283,7 @@ exports.updateAccount = async (req, res, next) => {
             let encode = encodeToSha256(req.body.valueUpdate);
             let linkVerify = "https://server-pet-world.onrender.com/account/verifyEmail/" + encode;
             await sendEmailLink(req.body.valueUpdate, linkVerify, res);
-            // return res.status(201).json({ success: true, data: {}, message: "Cập nhật dữ liệu thành công!" });
+          // return res.status(201).json({ success: true, data: {}, message: "Cập nhật dữ liệu thành công!" });
 
           default:
             break;
@@ -466,6 +477,31 @@ exports.verifyResetCode = async (req, res, next) => {
     }
   }
 };
+
+async function calculatorUser(uID) {
+  let sumTotal = await blogModel.aggregate([
+    {
+      $match: {
+        idUser: uID,
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        sumCmt: { $sum: "$comments" },
+        sumInteract: { $sum: { $size: "$interacts" } }
+      },
+    },
+    {
+      $project: { _id: 0, cmtCount: "$sumCmt", interactCount: "$sumInteract" },
+    }
+  ]);
+  if (sumTotal[0] != undefined) {
+    return sumTotal[0];
+  } else {
+    return 0;
+  }
+}
 
 async function sendEmailLink(email, link, res) {
   var transporter = nodemailer.createTransport({
