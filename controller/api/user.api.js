@@ -32,18 +32,22 @@ exports.listUser = async (req, res, next) => {
 exports.myDetail = async (req, res, next) => {
   try {
     const { _id } = req.user;
-    let dataCalculator = {};
+    let dataBlog = {};
     let billCount = [];
+    let totalPurchased = 0;
     if (req?.query?.isCalculator && String(req.query.isCalculator) == "true") {
-      dataCalculator = await calculatorUser(_id);
+      dataBlog = await calculatorBlog(_id);
     }
     if (req?.query?.isReadBill && String(req.query.isReadBill) == "true") {
-      billCount = await billProductModel.find({ idUser: _id }).count();
+      let dataCalculator = await calculatorBill(_id);
+      billCount = dataCalculator.count;
+      totalPurchased = dataCalculator?.total?.sumTotal + dataCalculator?.total?.sumShip;
     }
     let user = req.user.toObject();
     user.billCount = billCount;
-    user.interactCount = (dataCalculator?.interactCount) ? dataCalculator?.interactCount : 0;
-    user.commentCount = (dataCalculator?.cmtCount) ? dataCalculator?.cmtCount : 0;
+    user.totalPurchased = Number(totalPurchased).toLocaleString('en');
+    user.interactCount = (dataBlog?.interactCount) ? dataBlog?.interactCount : 0;
+    user.commentCount = (dataBlog?.cmtCount) ? dataBlog?.cmtCount : 0;
     return res.status(200).json({ success: true, data: user, message: "Lấy dữ liệu của bạn thành công" });
   } catch (error) {
     return res
@@ -80,7 +84,7 @@ exports.detailUser = async (req, res, next) => {
   try {
     let objU = await mdUser.findById(idUser).populate('idAccount');
     if (objU) {
-      let dataCalculator = await calculatorUser(objU._id);
+      let dataCalculator = await calculatorBlog(objU._id);
       objU = objU.toObject();
       let isFollowed = objU.followers.find((follow) => String(follow.idFollow) == String(req.user._id))
       if (isFollowed) {
@@ -478,7 +482,7 @@ exports.verifyResetCode = async (req, res, next) => {
   }
 };
 
-async function calculatorUser(uID) {
+async function calculatorBlog(uID) {
   let sumTotal = await blogModel.aggregate([
     {
       $match: {
@@ -500,6 +504,45 @@ async function calculatorUser(uID) {
     return sumTotal[0];
   } else {
     return 0;
+  }
+}
+
+async function calculatorBill(uID) {
+  let billCount = await billProductModel.find({ idUser: uID }).count();
+  let totalBills = await billProductModel.aggregate([
+    {
+      $match: {
+        idUser: uID,
+        deliveryStatus: {
+          $gte: 0,
+          $lte: 5,
+        }
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        sumTotal: { $sum: "$total" },
+        sumShip: { $sum: "$moneyShip" },
+      },
+    },
+    {
+      $project: { _id: 0, sumTotal: "$sumTotal", sumShip: "$sumShip" },
+    }
+  ]);
+  if (totalBills[0] != undefined && billCount != undefined) {
+    return {
+      count: billCount,
+      total: totalBills[0]
+    };
+  } else {
+    return {
+      count: 0,
+      total: {
+        sumTotal: 0,
+        sumShip: 0
+      }
+    };
   }
 }
 
