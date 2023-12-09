@@ -33,9 +33,6 @@
     "unidecode": "^0.1.8"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
-  },
-  "engines": {
-    "node": "17.0.1"
+    "nodemon": "^3.0.2"
   }
 }

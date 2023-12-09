@@ -106,18 +106,15 @@
             clientButton.addEventListener('click', async () => {
                 userTypeSpan.textContent = 'Client';
                 role = 'client';
-                console.log('Role after clicking client button:', role);
 
 
                 fetchMessages(role);
                 displayMessages(clientMessages);
-                console.log(clientMessages);
             });
 
             sellerButton.addEventListener('click', async () => {
                 userTypeSpan.textContent = 'Seller';
                 role = 'seller';
-                console.log('Role after clicking seller button:', role);
 
 
                 fetchMessages(role);
@@ -147,7 +144,6 @@
                     });
 
                     if (response.ok) {
-                        console.log('Notification sent successfully');
 
                         const messageContainer = document.getElementById('messageContainer');
                         const messageDiv = document.createElement('div');
@@ -212,7 +208,6 @@
         });
 
         function displayMessages(messages) {
-            console.log(messages)
             const messageContainer = document.getElementById('messageContainer');
             messageContainer.innerHTML = '';
 
@@ -250,7 +245,6 @@
                 if (response.ok) {
                     const messages = await response.json();
                     const messageContainer = document.getElementById('messageContainer');
-                    console.log('Message Object:', messages);
                     messages.forEach((messageObj) => {
 
                         const messageDiv = document.createElement('div');
@@ -274,10 +268,8 @@
                         } else if (messageObj.role === 'seller') {
                             sellerMessages.push(messageObj);
                         }
-                        console.log('Client Messages:', clientMessages);
                     });
 
-                    console.log('Seller Messages:', sellerMessages);
                 } else {
                     console.error('Failed to fetch chat messages');
                 }

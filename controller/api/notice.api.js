@@ -64,7 +64,6 @@ function validateNotificationData(notificationData) {
   return message;
 }
 exports.addNoti = async (req, res, next) => {
-  console.log("token" + req.user._id);
   let msg = "";
 
   let newObj = new mdNoti.NoticeModel();
@@ -101,8 +100,6 @@ exports.addNoti = async (req, res, next) => {
       message: "Thêm thông báo thành công!",
     });
   } catch (error) {
-    console.log(error.message);
-
     msg = error.message;
     return res.status(500).json({ success: false, data: {}, message: msg });
   }
