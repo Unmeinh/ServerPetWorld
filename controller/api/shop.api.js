@@ -822,23 +822,74 @@ exports.confirmBill = async (req, res, next) => {
           billProduct.deliveryStatus = 1;
           billProduct.billDate.confirmedAt = new Date();
           await mdBill.findByIdAndUpdate(billProduct._id, billProduct);
+          const location = billProduct?.locationDetail?.location;
           let statusBill = {};
-          statusBill.status = 1;
-          statusBill.colorStatus = "#001858";
-          statusBill.nameStatus = "Đã xác nhận";
-          statusBill.iconStatus = "timer-sand-complete";
-          statusBill.descStatus =
-            "Đơn hàng đã được xác nhận và đang chờ được giao.";
-          return res.status(201).json({
+          if (location) {
+            statusBill.status = 1;
+            statusBill.colorStatus = "#001858";
+            statusBill.nameStatus = "Đã xác nhận";
+
+            const [detail, ...rest] = location.split(", ");
+            const [status, message, statusCode] = await addBillForShipper(
+              rest.join(", "),
+              billProduct._id
+            );
+            statusBill.iconStatus = "timer-sand-complete";
+            statusBill.descStatus = message;
+            if (status) {
+              if (statusCode === 200) {
+                return res.status(201).json({
+                  success: true,
+                  data: statusBill,
+                  message: "Xác nhận đơn hàng thành công.",
+                });
+              } else {
+                return res.status(201).json({
+                  success: true,
+                  data: statusBill,
+                  message:
+                    "Xác nhận đơn hàng thành công.\nShipper hiện không tồn tại trong khu vực này",
+                });
+              }
+            } else {
+              statusBill.status = -1;
+              statusBill.colorStatus = "#FD3F3F";
+              statusBill.nameStatus = message;
+              statusBill.iconStatus = "clipboard-remove-outline";
+              return res.status(500).json({
+                success: true,
+                data: statusBill,
+                message: "Xác nhận đơn hàng thất bại",
+              });
+            }
+          }
+          return res.status(500).json({
             success: true,
             data: statusBill,
-            message: "Xác nhận đơn hàng thành công.",
+            message: "Xác nhận đơn hàng thất bại",
           });
           //Auto find shipper
         }
         if (isConfirm == 1) {
           billProduct.deliveryStatus = -1;
           await mdBill.findByIdAndUpdate(billProduct._id, billProduct);
+          if (billProduct?.idShipper) {
+            const shipper = await mdShiper
+              .findById(billProduct.idShipper)
+              .lean();
+            if (shipper) {
+              const newListBill = shipper.bills.map((item) => {
+                if (item.idBill.toString() === billProduct._id.toString()) {
+                  return { ...item, status: -1 };
+                } else {
+                  return item;
+                }
+              });
+              shipper.bills = newListBill;
+              console.log(newListBill);
+              await mdShiper.findByIdAndUpdate(shipper._id, shipper);
+            }
+          }
           let statusBill = {};
           statusBill.status = -1;
           statusBill.colorStatus = "#FD3F3F";
@@ -871,14 +922,16 @@ exports.confirmBillAll = async (req, res, next) => {
     // bỏ cmt đoạn dưới này và call api ở postman để đổi toàn bộ status lại thành 0 để test
     // let billProduct = await mdBill.find({ idShop: req.shop._id });
     // if (billProduct) {
-    //     for (let i = 0; i < billProduct.length; i++) {
-    //         const bill = billProduct[i];
-    //         bill.deliveryStatus = 0;
-    //         await mdBill.findByIdAndUpdate(bill._id, bill);
-    //     }
+    //   for (let i = 0; i < billProduct.length; i++) {
+    //     const bill = billProduct[i];
+    //     bill.deliveryStatus = 0;
+    //     await mdBill.findByIdAndUpdate(bill._id, bill);
+    //   }
     // }
-    // return res.status(201).json({ data: true })
+    // return res.status(201).json({ data: true });
     let { isConfirm } = req.body;
+    let statusAddBillForShipper = true;
+    let error = false;
     if (isConfirm != undefined) {
       try {
         if (isConfirm == 0) {
@@ -893,16 +946,40 @@ exports.confirmBillAll = async (req, res, next) => {
               message: "Không tìm thấy dữ liệu! ",
             });
           }
-          for (let i = 0; i < billProduct.length; i++) {
-            const bill = billProduct[i];
-            bill.deliveryStatus = 1;
-            bill.billDate.confirmedAt = new Date();
-            await mdBill.findByIdAndUpdate(bill._id, bill);
+          await Promise.all(
+            billProduct.map(async (bill) => {
+              bill.deliveryStatus = 1;
+              bill.billDate.confirmedAt = new Date();
+              const location = bill?.locationDetail?.location;
+              const [detail, ...rest] = location.split(", ");
+              await mdBill.findByIdAndUpdate(bill._id, bill);
+              const [status, , statusCode] = await addBillForShipper(
+                rest.join(", "),
+                bill._id
+              );
+              if (status && statusCode === 500) {
+                statusAddBillForShipper = false;
+              }
+              if (!status) {
+                error = true;
+              }
+              await Promise.all([bill]);
+            })
+          );
+
+          if (error) {
+            return res.status(500).json({
+              success: false,
+              data: {},
+              message: "Có lỗi sảy ra",
+            });
           }
           return res.status(201).json({
             success: true,
             data: {},
-            message: "Xác nhận tất cả đơn hàng thành công.",
+            message: statusAddBillForShipper
+              ? "Xác nhận tất cả đơn hàng thành công."
+              : "Xác nhận tất cả đơn hàng thành công.\nNhưng có một số đơn hàng không tìm được shipper thích hợp",
           });
           //Auto find shipper
         }
@@ -2364,12 +2441,13 @@ async function sendEmailResetPassword(email, otp, data, res) {
     }
   });
 }
-exports.addBillForShipper = async (req, res) => {
+async function addBillForShipper(location, idBill) {
   try {
     const billData = {
-      idBill: "6537c712230314629ef45e2e",
+      idBill: idBill,
       status: 1,
-      location: "Yên sơn,Tuyên Quang",
+      location: location,
+      discountBillFall: 0,
     };
 
     const conditions = {
@@ -2402,27 +2480,24 @@ exports.addBillForShipper = async (req, res) => {
         bills: {
           idBill: billData.idBill,
           status: billData.status,
+          discountBillFall: billData.discountBillFall,
         },
       },
     };
-
-    if (shipperWithMinBills[0]) {
-      const updateShipper = await mdShiper.findByIdAndUpdate(
+    if (shipperWithMinBills?.length > 0) {
+      const shipper = await mdShiper.findByIdAndUpdate(
         shipperWithMinBills[0]._id,
         update,
-        { new: true }
+        {
+          new: true,
+        }
       );
-      return res.status(200).json({
-        success: true,
-        data: updateShipper,
-        message: "Thêm bill cho shipper thành công",
-      });
+      await mdBill.findByIdAndUpdate(idBill, { idShipper: shipper._id });
+      return [true, "Thêm bill cho shipper thành công", 200];
+    } else {
+      return [true, "Không tìm thấy shipper trong khu vực của bạn", 500];
     }
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      data: {},
-      message: "Thêm bill cho shipper thất bại",
-    });
+    return [false, "Thêm bill cho shipper thất bại", 500];
   }
-};
+}

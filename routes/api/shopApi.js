@@ -113,11 +113,4 @@ router.put("/updatePassword", mdJWT.api_shop_auth, ShopApiCtrl.updatePassword);
 router.put("/changePassword", ShopApiCtrl.changePassword);
 router.delete("/delete/:idShop", mdJWT.api_user_auth, ShopApiCtrl.deleteShop);
 
-//test
-
-router.get(
-  "/addBillForShiper",
-  mdJWT.api_shop_auth,
-  ShopApiCtrl.addBillForShipper
-);
 module.exports = router;

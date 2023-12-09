@@ -43,6 +43,7 @@ let billProductSchema = new db.mongoose.Schema(
       cancelledAt: { type: Date, required: false }, //Ngày shop hủy đơn
     },
     statusReview: { type: Boolean, required: false, default: false }, //
+    idShipper: { type: db.mongoose.Schema.Types.ObjectId, ref: "ShipperModel" },
   },
   {
     collection: "billProducts",
