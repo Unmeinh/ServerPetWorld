@@ -1,13 +1,13 @@
-let mdShipper = require("../model/shipper.model");
-let mdUserAccount = require("../model/userAccount.model").UserAccountModel;
-var bcrypt = require("bcrypt");
-let { decodeFromSha256 } = require("../function/hashFunction");
-let mdbillProduct = require("../model/billProduct.model");
-let mdSever = require("../model/server.modal");
-let mdTransaction = require("../model/transaction.modal");
+let mdShipper = require('../model/shipper.model');
+let mdUserAccount = require('../model/userAccount.model').UserAccountModel;
+var bcrypt = require('bcrypt');
+let {decodeFromSha256} = require('../function/hashFunction');
+let mdbillProduct = require('../model/billProduct.model');
+let mdSever = require('../model/server.modal');
+let mdTransaction = require('../model/transaction.modal');
 exports.login = async (req, res, next) => {
-  let msg = "";
-  if (req.method == "POST") {
+  let msg = '';
+  if (req.method == 'POST') {
     try {
       let objShipper = await mdShipper.ShipperModel.findOne({
         userName: req.body.userName,
@@ -15,39 +15,39 @@ exports.login = async (req, res, next) => {
       if (objShipper != null) {
         let check_pass = await bcrypt.compare(
           req.body.passWord,
-          objShipper.passWord
+          objShipper.passWord,
         );
         if (check_pass) {
           req.session.shipperLogin = objShipper;
           req.session.idShipper = objShipper.id;
-          return res.redirect("/accountShipper/listBillProduct");
+          return res.redirect('/accountShipper/listBillProduct');
         } else {
-          msg = "Thông tin đăng nhập chưa đúng";
-          return res.render("AccountShipper/loginShipper", { msg: msg });
+          msg = 'Thông tin đăng nhập chưa đúng';
+          return res.render('AccountShipper/loginShipper', {msg: msg});
         }
       } else {
-        msg = "Không tồn tại tài khoản này";
+        msg = 'Không tồn tại tài khoản này';
       }
     } catch (error) {
       msg = error.message;
     }
   }
-  res.render("AccountShipper/loginShipper", { msg: msg });
+  res.render('AccountShipper/loginShipper', {msg: msg});
 };
 
 exports.listBillProduct = async (req, res, next) => {
-  let msg = "";
+  let msg = '';
   let perPage = 6;
   let filterSearch = null;
   let currentPage = parseInt(req.query.page) || 1;
 
   try {
-    if (req.method === "GET") {
+    if (req.method === 'GET') {
       let idShipper = getIdShipperFromSession(req);
       let shipper = await mdShipper.ShipperModel.findById(idShipper);
       if (!shipper) {
-        msg = "Không tìm thấy thông tin Shipper.";
-        return res.render("OrderList/listBillProducts", {
+        msg = 'Không tìm thấy thông tin Shipper.';
+        return res.render('OrderList/listBillProducts', {
           listBillProducts: [],
           msg: msg,
           countAllBillProducts: 0,
@@ -60,7 +60,7 @@ exports.listBillProduct = async (req, res, next) => {
       let billProducts = [];
       for (const bill of shipper.bills) {
         let billProduct = await mdbillProduct.billProductModel.findById(
-          bill.idBill
+          bill.idBill,
         );
         if (billProduct && billProduct.deliveryStatus === 1) {
           billProducts.push(billProduct);
@@ -72,7 +72,7 @@ exports.listBillProduct = async (req, res, next) => {
       });
       const totalPage = Math.ceil(totalCount / perPage);
 
-      return res.render("OrderList/listBillProducts", {
+      return res.render('OrderList/listBillProducts', {
         listBillProducts: billProducts,
         countAllBillProducts: totalCount,
         countNowBillProducts: billProducts.length,
@@ -82,9 +82,9 @@ exports.listBillProduct = async (req, res, next) => {
       });
     }
   } catch (error) {
-    msg = "Error: " + error.message;
-    console.log("Error fetching billProduct list: " + error.message);
-    return res.render("OrderList/listBillProducts", {
+    msg = 'Error: ' + error.message;
+    console.log('Error fetching billProduct list: ' + error.message);
+    return res.render('OrderList/listBillProducts', {
       listBillProducts: [],
       msg: msg,
       countAllBillProducts: 0,
@@ -95,7 +95,7 @@ exports.listBillProduct = async (req, res, next) => {
   }
 };
 exports.updateDeliveryStatus = async (req, res, next) => {
-  let msg = "";
+  let msg = '';
   let perPage = 6;
   let filterSearch = null;
   let currentPage = parseInt(req.query.page) || 1;
@@ -108,7 +108,7 @@ exports.updateDeliveryStatus = async (req, res, next) => {
     });
     const totalPage = Math.ceil(totalCount / perPage);
     if (!ObjBillPr) {
-      return res.render("OrderList/listOder", {
+      return res.render('OrderList/listOder', {
         listBillProducts: [],
         countAllBillProducts: totalCount,
         countNowBillProducts: ObjBillPr.length,
@@ -125,7 +125,7 @@ exports.updateDeliveryStatus = async (req, res, next) => {
     });
 
     if (!transactions.length) {
-      return res.render("OrderList/listOder", {
+      return res.render('OrderList/listOder', {
         listBillProducts: [],
         countAllBillProducts: totalCount,
         countNowBillProducts: ObjBillPr.length,
@@ -140,10 +140,10 @@ exports.updateDeliveryStatus = async (req, res, next) => {
     }
 
     const shipper = await mdShipper.ShipperModel.findOne({
-      "bills.idBill": idBill,
+      'bills.idBill': idBill,
     });
     if (!shipper || !shipper.bills) {
-      return res.render("OrderList/listOder", {
+      return res.render('OrderList/listOder', {
         listBillProducts: [],
         countAllBillProducts: totalCount,
         countNowBillProducts: ObjBillPr.length,
@@ -152,14 +152,14 @@ exports.updateDeliveryStatus = async (req, res, next) => {
         totalPage: totalPage,
       });
     }
-    shipper.bills.forEach((bill) => {
+    shipper.bills.forEach(bill => {
       if (bill.idBill.equals(idBill)) {
         bill.status = newDeliveryStatus;
       }
     });
     await shipper.save();
 
-    return res.render("OrderList/listOder", {
+    return res.render('OrderList/listOder', {
       listBillProducts: ObjBillPr,
       countAllBillProducts: totalCount,
       countNowBillProducts: ObjBillPr.length,
@@ -171,13 +171,13 @@ exports.updateDeliveryStatus = async (req, res, next) => {
     return res.status(500).json({
       success: false,
       listBillProducts: [],
-      message: "Lỗi: " + error.message,
+      message: 'Lỗi: ' + error.message,
     });
   }
 };
 
 exports.updateDeliveryStatusSuccset = async (req, res, next) => {
-  let msg = "";
+  let msg = '';
   let perPage = 6;
   let filterSearch = null;
   let currentPage = parseInt(req.query.page) || 1;
@@ -195,7 +195,7 @@ exports.updateDeliveryStatusSuccset = async (req, res, next) => {
       await serverRecord.save();
     }
     if (!ObjBillPr) {
-      return res.render("OrderList/listOder", {
+      return res.render('OrderList/listOder', {
         listBillProducts: [],
         countAllBillProducts: totalCount,
         countNowBillProducts: ObjBillPr.length,
@@ -213,7 +213,7 @@ exports.updateDeliveryStatusSuccset = async (req, res, next) => {
     });
 
     if (!transactions.length) {
-      return res.render("OrderList/listOder", {
+      return res.render('OrderList/listOder', {
         listBillProducts: [],
         countAllBillProducts: totalCount,
         countNowBillProducts: ObjBillPr.length,
@@ -228,10 +228,10 @@ exports.updateDeliveryStatusSuccset = async (req, res, next) => {
     }
 
     const shipper = await mdShipper.ShipperModel.findOne({
-      "bills.idBill": idBill,
+      'bills.idBill': idBill,
     });
     if (!shipper || !shipper.bills) {
-      return res.render("OrderList/listOder", {
+      return res.render('OrderList/listOder', {
         listBillProducts: [],
         countAllBillProducts: totalCount,
         countNowBillProducts: ObjBillPr.length,
@@ -240,14 +240,14 @@ exports.updateDeliveryStatusSuccset = async (req, res, next) => {
         totalPage: totalPage,
       });
     }
-    shipper.bills.forEach((bill) => {
+    shipper.bills.forEach(bill => {
       if (bill.idBill.equals(idBill)) {
         bill.status = newDeliveryStatus;
       }
     });
     await shipper.save();
 
-    return res.render("OrderList/listOder", {
+    return res.render('OrderList/listOder', {
       listBillProducts: ObjBillPr,
       countAllBillProducts: totalCount,
       countNowBillProducts: ObjBillPr.length,
@@ -259,12 +259,12 @@ exports.updateDeliveryStatusSuccset = async (req, res, next) => {
     return res.status(500).json({
       success: false,
       listBillProducts: [],
-      message: "Lỗi: " + error.message,
+      message: 'Lỗi: ' + error.message,
     });
   }
 };
 exports.updateDeliveryStatusFall = async (req, res, next) => {
-  let msg = "";
+  let msg = '';
   let perPage = 6;
   let discountBillFall = 0;
 
@@ -279,7 +279,7 @@ exports.updateDeliveryStatusFall = async (req, res, next) => {
     });
     const totalPage = Math.ceil(totalCount / perPage);
     if (!ObjBillPr) {
-      return res.render("OrderList/listOder", {
+      return res.render('OrderList/listOder', {
         listBillProducts: [],
         countAllBillProducts: totalCount,
         countNowBillProducts: ObjBillPr.length,
@@ -295,7 +295,7 @@ exports.updateDeliveryStatusFall = async (req, res, next) => {
     });
 
     if (!transactions.length) {
-      return res.render("OrderList/listOder", {
+      return res.render('OrderList/listOder', {
         listBillProducts: [],
         countAllBillProducts: totalCount,
         countNowBillProducts: ObjBillPr.length,
@@ -310,10 +310,10 @@ exports.updateDeliveryStatusFall = async (req, res, next) => {
     }
 
     const shipper = await mdShipper.ShipperModel.findOne({
-      "bills.idBill": idBill,
+      'bills.idBill': idBill,
     });
     if (!shipper || !shipper.bills) {
-      return res.render("OrderList/listOder", {
+      return res.render('OrderList/listOder', {
         listBillProducts: [],
         countAllBillProducts: totalCount,
         countNowBillProducts: ObjBillPr.length,
@@ -322,7 +322,7 @@ exports.updateDeliveryStatusFall = async (req, res, next) => {
         totalPage: totalPage,
       });
     }
-    shipper.bills.forEach((bill) => {
+    shipper.bills.forEach(bill => {
       if (bill.idBill.equals(idBill)) {
         if (bill.discountBillFall) {
           discountBillFall = bill.discountBillFall;
@@ -360,7 +360,7 @@ exports.updateDeliveryStatusFall = async (req, res, next) => {
         await serverRecord.save();
       }
     }
-    return res.render("OrderList/listOder", {
+    return res.render('OrderList/listOder', {
       listBillProducts: ObjBillPr,
       countAllBillProducts: totalCount,
       countNowBillProducts: ObjBillPr.length,
@@ -372,12 +372,12 @@ exports.updateDeliveryStatusFall = async (req, res, next) => {
     return res.status(500).json({
       success: false,
       listBillProducts: [],
-      message: "Lỗi: " + error.message,
+      message: 'Lỗi: ' + error.message,
     });
   }
 };
 exports.updateDeliveryStatusCancel = async (req, res, next) => {
-  let msg = "";
+  let msg = '';
   let perPage = 6;
   let filterSearch = null;
   let currentPage = parseInt(req.query.page) || 1;
@@ -390,7 +390,7 @@ exports.updateDeliveryStatusCancel = async (req, res, next) => {
     });
     const totalPage = Math.ceil(totalCount / perPage);
     if (!ObjBillPr) {
-      return res.render("OrderList/listOder", {
+      return res.render('OrderList/listOder', {
         listBillProducts: [],
         countAllBillProducts: totalCount,
         countNowBillProducts: ObjBillPr.length,
@@ -406,7 +406,7 @@ exports.updateDeliveryStatusCancel = async (req, res, next) => {
     });
 
     if (!transactions.length) {
-      return res.render("OrderList/listOder", {
+      return res.render('OrderList/listOder', {
         listBillProducts: [],
         countAllBillProducts: totalCount,
         countNowBillProducts: ObjBillPr.length,
@@ -421,10 +421,10 @@ exports.updateDeliveryStatusCancel = async (req, res, next) => {
     }
 
     const shipper = await mdShipper.ShipperModel.findOne({
-      "bills.idBill": idBill,
+      'bills.idBill': idBill,
     });
     if (!shipper || !shipper.bills) {
-      return res.render("OrderList/listOder", {
+      return res.render('OrderList/listOder', {
         listBillProducts: [],
         countAllBillProducts: totalCount,
         countNowBillProducts: ObjBillPr.length,
@@ -433,14 +433,14 @@ exports.updateDeliveryStatusCancel = async (req, res, next) => {
         totalPage: totalPage,
       });
     }
-    shipper.bills.forEach((bill) => {
+    shipper.bills.forEach(bill => {
       if (bill.idBill.equals(idBill)) {
         bill.status = newDeliveryStatus;
       }
     });
     await shipper.save();
 
-    return res.render("OrderList/listOder", {
+    return res.render('OrderList/listOder', {
       listBillProducts: ObjBillPr,
       countAllBillProducts: totalCount,
       countNowBillProducts: ObjBillPr.length,
@@ -452,7 +452,7 @@ exports.updateDeliveryStatusCancel = async (req, res, next) => {
     return res.status(500).json({
       success: false,
       listBillProducts: [],
-      message: "Lỗi: " + error.message,
+      message: 'Lỗi: ' + error.message,
     });
   }
 };
@@ -462,20 +462,20 @@ exports.listbillDelivering = async (req, res, next) => {
     let idShipper = getIdShipperFromSession(req); // Đoạn này cần logic để lấy idShipper từ session
 
     let listbillProduct = await mdbillProduct.billProductModel
-      .find({ deliveryStatus: 2, idShipper: idShipper }) // Filter theo deliveryStatus và idShipper
-      .populate("products.idProduct");
+      .find({deliveryStatus: 2, idShipper: idShipper}) // Filter theo deliveryStatus và idShipper
+      .populate('products.idProduct');
 
     if (listbillProduct && listbillProduct.length > 0) {
-      return res.render("OrderList/listBillProductsDelivering", {
+      return res.render('OrderList/listBillProductsDelivering', {
         listBillProducts: listbillProduct,
       });
     } else {
-      return res.render("OrderList/listBillProductsDelivering", {
+      return res.render('OrderList/listBillProductsDelivering', {
         listBillProducts: [],
       });
     }
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({success: false, message: error.message});
   }
 };
 
@@ -483,20 +483,20 @@ exports.listbillDeliveryFall = async (req, res, next) => {
   try {
     let idShipper = getIdShipperFromSession(req);
     let listbillProduct = await mdbillProduct.billProductModel
-      .find({ deliveryStatus: -2, idShipper: idShipper })
-      .populate("products.idProduct");
+      .find({deliveryStatus: -2, idShipper: idShipper})
+      .populate('products.idProduct');
 
     if (listbillProduct && listbillProduct.length > 0) {
-      return res.render("OrderList/listBillProductsFall", {
+      return res.render('OrderList/listBillProductsFall', {
         listBillProducts: listbillProduct,
       });
     } else {
-      return res.render("OrderList/listBillProductsFall", {
+      return res.render('OrderList/listBillProductsFall', {
         listBillProducts: [],
       });
     }
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({success: false, message: error.message});
   }
 };
 
@@ -505,20 +505,20 @@ exports.successfulDelivery = async (req, res, next) => {
     let idShipper = getIdShipperFromSession(req);
 
     let listbillProduct = await mdbillProduct.billProductModel
-      .find({ deliveryStatus: 3, idShipper: idShipper })
-      .populate("products.idProduct");
+      .find({deliveryStatus: 3, idShipper: idShipper})
+      .populate('products.idProduct');
 
     if (listbillProduct && listbillProduct.length > 0) {
-      return res.render("OrderList/listBillProductsSucess", {
+      return res.render('OrderList/listBillProductsSucess', {
         listBillProducts: listbillProduct,
       });
     } else {
-      return res.render("OrderList/listBillProductsSucess", {
+      return res.render('OrderList/listBillProductsSucess', {
         listBillProducts: [],
       });
     }
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({success: false, message: error.message});
   }
 };
 exports.cancelledDelivery = async (req, res, next) => {
@@ -526,62 +526,62 @@ exports.cancelledDelivery = async (req, res, next) => {
     let idShipper = getIdShipperFromSession(req);
 
     let listbillProduct = await mdbillProduct.billProductModel
-      .find({ deliveryStatus: -1, idShipper: idShipper })
-      .populate("products.idProduct");
+      .find({deliveryStatus: -1, idShipper: idShipper})
+      .populate('products.idProduct');
 
     if (listbillProduct && listbillProduct.length > 0) {
-      return res.render("OrderList/listBillProductsCancel", {
+      return res.render('OrderList/listBillProductsCancel', {
         listBillProducts: listbillProduct,
       });
     } else {
-      return res.render("OrderList/listBillProductsCancel", {
+      return res.render('OrderList/listBillProductsCancel', {
         listBillProducts: [],
       });
     }
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({success: false, message: error.message});
   }
 };
 
 exports.verifyEmail = async (req, res, next) => {
-  if (req.method == "POST") {
+  if (req.method == 'POST') {
     let decode = decodeFromSha256(req.params.encodeToSha256);
     try {
-      var data = await mdUserAccount.findOne({ emailAddress: decode });
+      var data = await mdUserAccount.findOne({emailAddress: decode});
       if (data != null) {
         data.isVerifyEmail = 0;
         await mdUserAccount.findByIdAndUpdate(data._id, data);
         return res.status(200).json({
           success: true,
           data: {},
-          message: "Xác minh email thành công",
+          message: 'Xác minh email thành công',
         });
       } else {
         return res.status(500).json({
           success: false,
           data: {},
-          message: "Xác minh email thất bại",
+          message: 'Xác minh email thất bại',
         });
       }
     } catch (error) {
       console.log(error);
       return res
         .status(500)
-        .json({ success: false, data: {}, message: "Xác minh email thất bại" });
+        .json({success: false, data: {}, message: 'Xác minh email thất bại'});
     }
   }
-  res.render("Account/verifyEmail");
+  res.render('Account/verifyEmail');
 };
 
 exports.verifyResult = async (req, res, next) => {
   let isVerify = req.query.isVerify;
-  res.render("Account/verifyResult", { isVerify: isVerify });
+  res.render('Account/verifyResult', {isVerify: isVerify});
 };
 exports.detailShipper = async (req, res, next) => {
   let idShipper = getIdShipperFromSession(req);
   let objShipper = await mdShipper.ShipperModel.findById(idShipper);
 
-  res.render("OrderList/proFileShipper", { objShipper: objShipper });
+  res.render('OrderList/proFileShipper', {objShipper: objShipper});
 };
 
 exports.updateShipperInformation = async (req, res, next) => {
@@ -594,11 +594,11 @@ exports.updateShipperInformation = async (req, res, next) => {
     let objShipper = await mdShipper.ShipperModel.findByIdAndUpdate(
       idShipper,
       updatedFields,
-      { new: true }
+      {new: true},
     );
-    res.render("OrderList/proFileShipper", { objShipper: objShipper });
+    res.render('OrderList/proFileShipper', {objShipper: objShipper});
   } catch (error) {
-    res.render("OrderList/updateProFileShipper");
+    res.render('OrderList/updateProFileShipper');
   }
 };
 
@@ -612,7 +612,7 @@ exports.logoutShipper = async (req, res, next) => {
   //     if (err) {
   //       return next(err);
   //     } else {
-  res.redirect("/accountShipper/loginShipper");
+  res.redirect('/accountShipper/loginShipper');
   //   }
   // });
 };
