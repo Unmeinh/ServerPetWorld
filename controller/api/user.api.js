@@ -31,26 +31,23 @@ exports.listUser = async (req, res, next) => {
 exports.myDetail = async (req, res, next) => {
   try {
     const { _id } = req.user;
-    let listBill = await billProductModel.find({ idUser: _id });
-    if (listBill) {
-      req.user = req.user.toObject();
-      req.user.billCount = listBill.length;
-      return res
-        .status(200)
-        .json({
-          success: true,
-          data: req.user,
-          message: "Lấy dữ liệu của bạn thành công",
-        });
-    } else {
-      return res
-        .status(200)
-        .json({
-          success: true,
-          data: req.user,
-          message: "Lấy dữ liệu của bạn thành công",
-        });
+    let dataBlog = {};
+    let billCount = [];
+    let totalPurchased = 0;
+    if (req?.query?.isCalculator && String(req.query.isCalculator) == "true") {
+      dataBlog = await calculatorBlog(_id);
     }
+    if (req?.query?.isReadBill && String(req.query.isReadBill) == "true") {
+      let dataCalculator = await calculatorBill(_id);
+      billCount = dataCalculator.count;
+      totalPurchased = dataCalculator?.total?.sumTotal + dataCalculator?.total?.sumShip;
+    }
+    let user = req.user.toObject();
+    user.billCount = billCount;
+    user.totalPurchased = Number(totalPurchased).toLocaleString('en');
+    user.interactCount = (dataBlog?.interactCount) ? dataBlog?.interactCount : 0;
+    user.commentCount = (dataBlog?.cmtCount) ? dataBlog?.cmtCount : 0;
+    return res.status(200).json({ success: true, data: user, message: "Lấy dữ liệu của bạn thành công" });
   } catch (error) {
     return res
       .status(500)
@@ -120,6 +117,8 @@ exports.detailUser = async (req, res, next) => {
           data: {
             ...objU,
             isFollowed: true,
+            interactCount: (dataCalculator.interactCount) ? dataCalculator.interactCount : 0,
+            commentCount: (dataCalculator.cmtCount) ? dataCalculator.cmtCount : 0
           },
           message: "Lấy dữ liệu của người dùng khác thành công",
         });
@@ -129,6 +128,8 @@ exports.detailUser = async (req, res, next) => {
           data: {
             ...objU,
             isFollowed: false,
+            interactCount: dataCalculator.interactCount,
+            commentCount: dataCalculator.cmtCount
           },
           message: "Lấy dữ liệu của người dùng khác thành công",
         });
