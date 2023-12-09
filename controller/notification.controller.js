@@ -1,6 +1,7 @@
 const admin = require("firebase-admin");
 const axios = require("axios");
-
+const mdNotification = require("../model/notice.model");
+const mdUser = require("../model/user.model").UserModel;
 // ... (khởi tạo Firebase Admin SDK)
 const serviceAccount = require("../petworld-firebase-firebase-adminsdk-jcff6-578705a4ad.json");
 admin.initializeApp({
@@ -13,7 +14,8 @@ exports.notificationSc = async (req, res, next) => {
   const role = req.body.role;
   const messagesRef = db.ref(`chat_messages/${role}`);
   const message = req.body.message;
-
+  const title =
+    role === "client" ? "Thông báo từ OurPet" : "Thông báo từ OurPetSeller";
   try {
     const newMessageRef = messagesRef.push();
     await newMessageRef.set({
@@ -27,6 +29,22 @@ exports.notificationSc = async (req, res, next) => {
       sendFCMNotification(token, role, message);
     });
 
+    const getListUser = await mdUser.find();
+    if (getListUser) {
+      await Promise.all(
+        getListUser.map(async (user) => {
+          const createNotice = new mdNotification.NoticeModel({
+            detail: message,
+            idUser: user._id,
+            content: title,
+            status: 1,
+            createdAt: new Date(),
+          });
+          await createNotice.save();
+          await Promise.all([user]);
+        })
+      );
+    }
     res.render("Notification/notification", {
       adminLogin: req.session.adLogin,
     });
@@ -38,7 +56,7 @@ exports.notificationSc = async (req, res, next) => {
 
 async function sendFCMNotification(token, role, message) {
   const title =
-    role === "client" ? "Thông báo từ Người mua" : "Thông báo từ Người bán";
+    role === "client" ? "Thông báo từ OurPet" : "Thông báo từ OurPetSeller";
   const fcmData = {
     notification: {
       title: title,
@@ -59,6 +77,7 @@ async function sendFCMNotification(token, role, message) {
       fcmData,
       { headers }
     );
+
     // console.log('FCM Response:', response.status, response.data, token, message,role);
   } catch (error) {
     console.error("Error sending FCM:", error);

@@ -2410,12 +2410,12 @@ exports.addBillForShipper = async (req, res) => {
       const updateShipper = await mdShiper.findByIdAndUpdate(
         shipperWithMinBills[0]._id,
         update,
-        { new: true } // To return the modified document instead of the original
+        { new: true }
       );
       return res.status(200).json({
         success: true,
         data: updateShipper,
-        message: "Thêm bill cho shipper thành congo",
+        message: "Thêm bill cho shipper thành công",
       });
     }
   } catch (error) {
