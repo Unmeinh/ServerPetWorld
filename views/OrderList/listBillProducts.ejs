@@ -1,8 +1,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<%- include('../inc/topshipper', { title: 'Đơn hàng của Shipper' }) %>
+<%- include('../inc/topshipper', { title: 'Danh sách tất cả đơn hàng' }) %>
 <div class="container-fluid " style="width: 98%;">
   <div class="row col m-3">
-    <form action="" class="row col-3 me-2" method="get">
+    <form action="" class="row col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 me-2" method="get">
       <div style="background-color: #F0F4F8; border-radius: 25px; align-items: center; display: flex; flex-direction: row;">
         <div style="width: 10%;">
           <button type="submit" style="border: none;"><img src="/upload/iconFind.png" style="width: 20px; height: 20px;"></button>
@@ -14,7 +14,7 @@
     </form>
 
     <% if (listBillProducts && listBillProducts.length > 0) { %>
-      <form action="" method="get" id="sortForm" class="row col-4 me-5" style="display: flex; flex-direction: row; justify-content: space-between;">
+      <form action="" method="get" id="sortForm" class="row d-none d-sm-block col-md-6 col-lg-4 col-xl-4 me-5" style="display: flex; flex-direction: row; justify-content: space-between;">
         <select name="sortOption" id="sortOption" class="row col-10 form-select" style="background-color: #F0F4F8; border-radius: 20px; border: none; box-shadow: none; width: 80%;">
           <option selected disabled>Sắp xếp theo tên</option>
           <option value="1">Sắp xếp từ a-z</option>
