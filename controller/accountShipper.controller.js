@@ -541,12 +541,12 @@ exports.verifyEmail = async (req, res, next) => {
         .json({ success: false, data: {}, message: "Xác minh email thất bại" });
     }
   }
-  res.render('account/verifyEmail')
+  res.render('Account/verifyEmail')
 }
 
 exports.verifyResult = async (req, res, next) => {
   let isVerify = req.query.isVerify;
-  res.render('account/verifyResult', { isVerify: isVerify })
+  res.render('Account/verifyResult', { isVerify: isVerify })
 }
 exports.detailShipper = async (req, res, next) => {
   let idShipper = getIdShipperFromSession(req);
@@ -557,22 +557,33 @@ exports.detailShipper = async (req, res, next) => {
 
 exports.updateShipperInformation = async (req, res, next) => {
   try {
-  let idShipper = getIdShipperFromSession(req);
-  let updatedFields = {
-    fullName: req.body.fullName,
-    phoneNumber: req.body.phoneNumber
-  };
-  let objShipper = await mdShipper.ShipperModel.findByIdAndUpdate(
-    idShipper,
-    updatedFields,
-    { new: true }
-  );
-  res.render('OrderList/proFileShipper', { objShipper: objShipper });
-   }catch (error) {
+    let idShipper = getIdShipperFromSession(req);
+    let updatedFields = {
+      fullName: req.body.fullName,
+      phoneNumber: req.body.phoneNumber
+    };
+    let objShipper = await mdShipper.ShipperModel.findByIdAndUpdate(
+      idShipper,
+      updatedFields,
+      { new: true }
+    );
+    res.render('OrderList/proFileShipper', { objShipper: objShipper });
+  } catch (error) {
     res.render('OrderList/updateProFileShipper');
   }
 }
 
 function getIdShipperFromSession(req) {
   return req.session.idShipper;
+}
+
+exports.logoutShipper = async (req, res, next) => {
+  // if (req.session != null)
+  //   req.session.destroy((err) => {
+  //     if (err) {
+  //       return next(err);
+  //     } else {
+        res.redirect('/accountShipper/loginShipper');
+    //   }
+    // });
 }
