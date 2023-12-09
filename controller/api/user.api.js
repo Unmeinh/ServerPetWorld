@@ -7,6 +7,7 @@ const otpGenerator = require("otp-generator");
 let { encodeToSha256 } = require("../../function/hashFunction");
 const { onUploadImages } = require("../../function/uploadImage");
 const { billProductModel } = require("../../model/billProduct.model");
+const blogModel = require("../../model/blog.model").BlogModel;
 
 exports.listUser = async (req, res, next) => {
   try {
@@ -107,6 +108,7 @@ exports.detailUser = async (req, res, next) => {
   try {
     let objU = await mdUser.findById(idUser).populate("idAccount");
     if (objU) {
+      let dataCalculator = await calculatorBlog(objU._id);
       objU = objU.toObject();
       let isFollowed = objU.followers.find(
         (follow) => String(follow.idFollow) == String(req.user._id)
@@ -604,6 +606,70 @@ exports.verifyResetCode = async (req, res, next) => {
     }
   }
 };
+
+async function calculatorBlog(uID) {
+  let sumTotal = await blogModel.aggregate([
+    {
+      $match: {
+        idUser: uID,
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        sumCmt: { $sum: "$comments" },
+        sumInteract: { $sum: { $size: "$interacts" } }
+      },
+    },
+    {
+      $project: { _id: 0, cmtCount: "$sumCmt", interactCount: "$sumInteract" },
+    }
+  ]);
+  if (sumTotal[0] != undefined) {
+    return sumTotal[0];
+  } else {
+    return 0;
+  }
+}
+
+async function calculatorBill(uID) {
+  let billCount = await billProductModel.find({ idUser: uID }).count();
+  let totalBills = await billProductModel.aggregate([
+    {
+      $match: {
+        idUser: uID,
+        deliveryStatus: {
+          $gte: 0,
+          $lte: 5,
+        }
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        sumTotal: { $sum: "$total" },
+        sumShip: { $sum: "$moneyShip" },
+      },
+    },
+    {
+      $project: { _id: 0, sumTotal: "$sumTotal", sumShip: "$sumShip" },
+    }
+  ]);
+  if (totalBills[0] != undefined && billCount != undefined) {
+    return {
+      count: billCount,
+      total: totalBills[0]
+    };
+  } else {
+    return {
+      count: 0,
+      total: {
+        sumTotal: 0,
+        sumShip: 0
+      }
+    };
+  }
+}
 
 async function sendEmailLink(email, link, res) {
   var transporter = nodemailer.createTransport({
