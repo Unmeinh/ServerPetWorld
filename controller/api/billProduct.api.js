@@ -9,6 +9,14 @@ let mdCart = require("../../model/cart.model");
 exports.listbillProduct = async (req, res, next) => {
   const { _id } = req.user;
   const index = req.query?.idStatus;
+  const review = req.query?.review;
+  let params = {
+    idUser: _id,
+    deliveryStatus: Number(index),
+  };
+  if (typeof review !== "undefined") {
+    params.statusReview = review === "false" ? false : true;
+  }
   if (typeof index !== "undefined") {
     try {
       let listbillProduct = await mdbillProduct.billProductModel.aggregate([
@@ -16,10 +24,7 @@ exports.listbillProduct = async (req, res, next) => {
           $unwind: "$products",
         },
         {
-          $match: {
-            idUser: _id,
-            deliveryStatus: Number(index),
-          },
+          $match: params,
         },
         {
           $lookup: {
@@ -62,6 +67,7 @@ exports.listbillProduct = async (req, res, next) => {
             idShop: { $first: "$idShop" },
             locationDetail: { $first: "$locationDetail" },
             total: { $first: "$total" },
+            statusReview: { $first: "$statusReview" },
             paymentMethods: { $first: "$paymentMethods" },
             purchaseDate: { $first: "$purchaseDate" },
             deliveryStatus: { $first: "$deliveryStatus" },
@@ -84,6 +90,7 @@ exports.listbillProduct = async (req, res, next) => {
             discountBill: 1,
             moneyShip: 1,
             products: 1,
+            statusReview: 1,
             "productInfo.nameProduct": 1,
             "productInfo.arrProduct": 1,
             "productInfo._id": 1,
@@ -339,7 +346,6 @@ exports.billProductUser = async (req, res) => {
         data: [],
       });
     } catch (error) {
-      console.log(error);
       res.status(500).json({
         success: false,
         message: error.message,
@@ -394,4 +400,13 @@ exports.getCountBill = async (req, res) => {
       message: "Lấy danh sách hóa đơn thất bại",
     });
   }
+};
+
+exports.test = async (req, res) => {
+  await mdbillProduct.billProductModel.updateMany(
+    {},
+    { $set: { statusReview: false } },
+    { multi: true }
+  );
+  res.status(200).json({ done: true });
 };

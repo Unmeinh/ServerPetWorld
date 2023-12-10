@@ -1,16 +1,17 @@
-let mdConvertS = require('../../model/Conversations.model');
-let mdUser = require('../../model/user.model').UserModel;
+let mdConvertS = require("../../model/Conversations.model");
+let mdUser = require("../../model/user.model").UserModel;
 
 exports.convertS = async (req, res, next) => {
   const { _id } = req.user;
   const { idUser, messageText } = req.body;
   try {
-
-    let listConVertS = await mdConvertS.ConversationsModel.findOne({ idUser: _id }).populate('messages.idUser');
+    let listConVertS = await mdConvertS.ConversationsModel.findOne({
+      idUser: _id,
+    }).populate("messages.idUser");
     if (req.method == "POST") {
       if (!listConVertS) {
         let newConvertS = new mdConvertS.ConversationsModel();
-        newConvertS.createdAt = new Date()
+        newConvertS.createdAt = new Date();
         listConVertS = await newConvertS.save();
       }
       const itemmessages = {
@@ -25,7 +26,6 @@ exports.convertS = async (req, res, next) => {
           { _id: listConVertS._id },
           listConVertS
         );
-        console.log("addsdsdsdsdsd" + listConVertS);
         return res.status(200).json({
           success: true,
           data: listConVertS,
@@ -34,8 +34,7 @@ exports.convertS = async (req, res, next) => {
       } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
       }
-    }
-    else if (req.method === "GET") {
+    } else if (req.method === "GET") {
       if (listConVertS) {
         return res.status(200).json({
           success: true,
@@ -50,8 +49,7 @@ exports.convertS = async (req, res, next) => {
         });
       }
     }
-    }
-  catch (error) {
+  } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
 };

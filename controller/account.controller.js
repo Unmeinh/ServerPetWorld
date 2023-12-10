@@ -52,12 +52,12 @@ exports.verifyEmail = async (req, res, next) => {
                 .json({ success: false, data: {}, message: "Xác minh email thất bại" });
         }
     }
-    res.render('account/verifyEmail')
+    res.render('Account/verifyEmail')
 }
 
 exports.verifyResult = async (req, res, next) => {
     let isVerify = req.query.isVerify;
-    res.render('account/verifyResult', { isVerify: isVerify })
+    res.render('Account/verifyResult', { isVerify: isVerify })
 }
 
 exports.profile = async (req, res, next) => {

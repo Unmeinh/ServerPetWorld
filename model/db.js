@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 mongoose.connect(process.env.KEY_MONGGO)
 .then(()=>{
-    console.log('[mongodb] Kết nối với CSDL PetWorld thành công');
+    console.log('[mongodb] Connect to CSDL OurPet successfully!');
 })
 .catch((err)=>{
     console.log(err.message);
-    console.log('[mongodb] Lỗi kết nối CSDL!');
+    console.log('[mongodb] Failed to connect CSDL!');
 })
 module.exports={mongoose};

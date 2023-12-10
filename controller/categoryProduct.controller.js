@@ -30,7 +30,6 @@ exports.listCategoryProduct = async (req, res, next) => {
                 .sort(sortOption)
                 .skip(skipCount)
                 .limit(perPage);
-
             msg = 'Lấy danh sách thể loại sản phẩm thành công';
             return res.render('CategoryProduct/listCategoryProduct', {
                 listCategoryProduct: listCategoryProduct,
@@ -48,29 +47,19 @@ exports.listCategoryProduct = async (req, res, next) => {
         }
     }
 }
-// exports.detailCategoryProduct = async (req, res, next) => {
-//     // let msg='';
-//     // if(req.method=='GET')
-//     // {
 
-//     // }
-//     res.render('CategoryProduct/detailCategoryProduct');
-// }
 exports.addCategoryProduct = async (req, res, next) => {
-
     let msg = '';
     if (req.method == 'POST') {
-        if(req.body.nameCategory.trim()==0)
-        {
-            msg='Vui lòng không để trống tên thể loại!'
+        if (req.body.nameCategory == "") {
+            msg = 'Vui lòng không để trống tên thể loại!'
             return res.render('CategoryProduct/addCategoryProduct', { msg: msg });
         }
-        if(req.body.nameIcon.trim()==0)
-        {
-            msg='Vui lòng không để trống tên icon!'
+        if (req.body.nameIcon == "") {
+            msg = 'Vui lòng không để trống tên icon!'
             return res.render('CategoryProduct/addCategoryProduct', { msg: msg });
         }
-        
+
         let newObj = new mdCategoryProduct.CategoryProductModel();
         newObj.nameCategory = req.body.nameCategory;
         newObj.nameIcon = req.body.nameIcon;
@@ -84,7 +73,7 @@ exports.addCategoryProduct = async (req, res, next) => {
             console.log("Lỗi: " + msg);
         }
     }
-    res.render('CategoryProduct/addCategoryProduct', { msg: msg,adminLogin: req.session.adLogin });
+    res.render('CategoryProduct/addCategoryProduct', { msg: msg, adminLogin: req.session.adLogin });
 }
 exports.editCategoryProduct = async (req, res, next) => {
     let msg = '';
@@ -92,50 +81,41 @@ exports.editCategoryProduct = async (req, res, next) => {
     let Objdata = await mdCategoryProduct.CategoryProductModel.findById(idCat);
 
     if (req.method == 'POST') {
-        
-        if(req.body.nameCategory.trim()==0)
-        {
-            msg='Vui lòng không để trống tên thể loại!'
-            return res.render('CategoryProduct/editCategoryProduct', { Objdata: Objdata ,msg:msg});
+        if (req.body.nameCategory == "") {
+            msg = 'Vui lòng không để trống tên thể loại!'
+            return res.render('CategoryProduct/editCategoryProduct', { Objdata: Objdata, msg: msg });
         }
-        if(req.body.nameIcon.trim()==0)
-        {
-            msg='Vui lòng không để trống tên icon!'
-            return res.render('CategoryProduct/editCategoryProduct', { Objdata: Objdata ,msg:msg});
+        if (req.body.nameIcon == "") {
+            msg = 'Vui lòng không để trống tên icon!'
+            return res.render('CategoryProduct/editCategoryProduct', { Objdata: Objdata, msg: msg });
         }
         let newObj = new mdCategoryProduct.CategoryProductModel();
         newObj.nameCategory = req.body.nameCategory;
         newObj.nameIcon = req.body.nameIcon;
         newObj.createdAt = new Date();
-        newObj._id= idCat;
+        newObj._id = idCat;
         try {
             await mdCategoryProduct.CategoryProductModel.findByIdAndUpdate(idCat, newObj);
             return res.redirect('/category-product');
         } catch (error) {
-            msg=error.message;
+            msg = error.message;
             console.log("Lỗi: " + msg);
-           
         }
     }
-    res.render('CategoryProduct/editCategoryProduct', { Objdata: Objdata ,msg:msg, adminLogin: req.session.adLogin});
+    res.render('CategoryProduct/editCategoryProduct', { Objdata: Objdata, msg: msg, adminLogin: req.session.adLogin });
 };
-
 
 exports.deleteCategoryProduct = async (req, res, next) => {
     let message = ""
     let idCat = req.params.idCat;
     let Objdata = await mdCategoryProduct.CategoryProductModel.findById(idCat);
-    console.log("idcat  " + idCat);
     if (req.method == 'POST') {
         try {
             await mdCategoryProduct.CategoryProductModel.findByIdAndDelete(idCat);
-            console.log("xoa thành công");
             return res.redirect('/category-product');
         } catch (error) {
             console.log(error.message);
-            console.log("falll");
         }
     }
-
     res.render('CategoryProduct/deleteCategoryProduct', { message: message, Objdata: Objdata, adminLogin: req.session.adLogin });
 }

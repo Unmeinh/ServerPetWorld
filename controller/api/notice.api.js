@@ -18,7 +18,6 @@ exports.listAllNotice = async (req, res, next) => {
 
     const query =
       status == 0 ? { idUser: _id } : { idUser: _id, status: status };
-    console.log(query, status);
     const listAllNotice = await mdNoti.NoticeModel.find(query)
       .sort({ createdAt: -1 })
       .skip(startIndex)
@@ -65,7 +64,6 @@ function validateNotificationData(notificationData) {
   return message;
 }
 exports.addNoti = async (req, res, next) => {
-  console.log("token" + req.user._id);
   let msg = "";
 
   let newObj = new mdNoti.NoticeModel();
@@ -102,8 +100,6 @@ exports.addNoti = async (req, res, next) => {
       message: "Thêm thông báo thành công!",
     });
   } catch (error) {
-    console.log(error.message);
-
     msg = error.message;
     return res.status(500).json({ success: false, data: {}, message: msg });
   }
