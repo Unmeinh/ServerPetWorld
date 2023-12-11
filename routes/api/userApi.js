@@ -12,7 +12,7 @@ router.post('/checkPhoneNumber', UserApiCtrl.checkPhoneNumber);
 router.get('/userDetail/:idUser', mdJWT.api_user_auth, UserApiCtrl.detailUser);
 router.post('/register', UserApiCtrl.registerUser);
 router.post('/login', UserApiCtrl.loginUser);
-router.get('/logout', UserApiCtrl.logoutUser);
+router.get('/logout', mdJWT.api_user_auth, UserApiCtrl.logoutUser);
 router.put('/updateUser', mdJWT.api_user_auth, UserApiCtrl.updateUser);
 router.put('/updateAvatar', mdJWT.api_user_auth, uploader.any(), UserApiCtrl.updateAvatar);
 router.put('/updateAccount', mdJWT.api_user_auth, UserApiCtrl.updateAccount);

@@ -1,7 +1,7 @@
 let db = require('./db');
 let NoticeSellerSchema = new db.mongoose.Schema(
     {
-        idUser:{type:db.mongoose.Schema.Types.ObjectId,ref:'UserModel'},
+        idShop:{type:db.mongoose.Schema.Types.ObjectId,ref:'ShopModel'},
         content:{type:String,required:false},
         detail:{type:String,required:false},
         image:{type:Array,required:false},
