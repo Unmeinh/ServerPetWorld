@@ -1,81 +1,82 @@
-let mdbillProduct = require("../../model/billProduct.model");
-let mdTransition = require("../../model/transaction.modal");
-let mdServer = require("../../model/server.modal");
-let mdNoti = require("../../model/notice.model");
-let mdPet = require("../../model/pet.model");
-let mdProduct = require("../../model/product.model");
-let mdShop = require("../../model/shop.model");
-let mdCart = require("../../model/cart.model");
+let mdbillProduct = require('../../model/billProduct.model');
+let mdTransition = require('../../model/transaction.modal');
+let mdServer = require('../../model/server.modal');
+let mdNoti = require('../../model/notice.model');
+let mdPet = require('../../model/pet.model');
+let mdProduct = require('../../model/product.model');
+let mdShop = require('../../model/shop.model');
+let mdCart = require('../../model/cart.model');
+const {sendFCMNotification} = require('../../function/notice');
 exports.listbillProduct = async (req, res, next) => {
-  const { _id } = req.user;
+  const {_id} = req.user;
   const index = req.query?.idStatus;
   const review = req.query?.review;
   let params = {
     idUser: _id,
     deliveryStatus: Number(index),
   };
-  if (typeof review !== "undefined") {
-    params.statusReview = review === "false" ? false : true;
+  if (typeof review !== 'undefined') {
+    params.statusReview = review === 'false' ? false : true;
   }
-  if (typeof index !== "undefined") {
+  if (typeof index !== 'undefined') {
     try {
       let listbillProduct = await mdbillProduct.billProductModel.aggregate([
         {
-          $unwind: "$products",
+          $unwind: '$products',
         },
         {
           $match: params,
         },
         {
           $lookup: {
-            from: "Shop",
-            localField: "idShop",
-            foreignField: "_id",
-            as: "shopInfo",
+            from: 'Shop',
+            localField: 'idShop',
+            foreignField: '_id',
+            as: 'shopInfo',
           },
         },
         {
           $lookup: {
-            from: "Products",
-            localField: "products.idProduct",
-            foreignField: "_id",
-            as: "productInfo",
+            from: 'Products',
+            localField: 'products.idProduct',
+            foreignField: '_id',
+            as: 'productInfo',
           },
         },
         {
           $lookup: {
-            from: "Pets",
-            localField: "products.idProduct",
-            foreignField: "_id",
-            as: "petInfo",
+            from: 'Pets',
+            localField: 'products.idProduct',
+            foreignField: '_id',
+            as: 'petInfo',
           },
         },
         {
           $addFields: {
-            "productInfo.amount": "$products.amount",
-            "productInfo.discount": "$products.discount",
-            "productInfo.price": "$products.price",
-            "petInfo.amount": "$products.amount",
-            "petInfo.discount": "$products.discount",
-            "petInfo.price": "$products.price",
+            'productInfo.amount': '$products.amount',
+            'productInfo.discount': '$products.discount',
+            'productInfo.price': '$products.price',
+            'petInfo.amount': '$products.amount',
+            'petInfo.discount': '$products.discount',
+            'petInfo.price': '$products.price',
           },
         },
         {
           $group: {
-            _id: "$_id",
-            idUser: { $first: "$idUser" },
-            idShop: { $first: "$idShop" },
-            locationDetail: { $first: "$locationDetail" },
-            total: { $first: "$total" },
-            statusReview: { $first: "$statusReview" },
-            paymentMethods: { $first: "$paymentMethods" },
-            purchaseDate: { $first: "$purchaseDate" },
-            deliveryStatus: { $first: "$deliveryStatus" },
-            discountBill: { $first: "$discountBill" },
-            moneyShip: { $first: "$moneyShip" },
-            productInfo: { $push: "$productInfo" },
-            petInfo: { $first: "$petInfo" },
-            shopInfo: { $first: "$shopInfo" },
+            _id: '$_id',
+            idUser: {$first: '$idUser'},
+            idShop: {$first: '$idShop'},
+            locationDetail: {$first: '$locationDetail'},
+            total: {$first: '$total'},
+            statusReview: {$first: '$statusReview'},
+            paymentMethods: {$first: '$paymentMethods'},
+            purchaseDate: {$first: '$purchaseDate'},
+            deliveryStatus: {$first: '$deliveryStatus'},
+            discountBill: {$first: '$discountBill'},
+            moneyShip: {$first: '$moneyShip'},
+            productInfo: {$push: '$productInfo'},
+            petInfo: {$first: '$petInfo'},
+            shopInfo: {$first: '$shopInfo'},
           },
         },
         {
@@ -91,21 +92,21 @@ exports.listbillProduct = async (req, res, next) => {
             moneyShip: 1,
             products: 1,
             statusReview: 1,
-            "productInfo.nameProduct": 1,
-            "productInfo.arrProduct": 1,
-            "productInfo._id": 1,
-            "petInfo.namePet": 1,
-            "petInfo.imagesPet": 1,
-            "petInfo._id": 1,
-            "productInfo.amount": 1,
-            "productInfo.price": 1,
-            "petInfo.amount": 1,
-            "productInfo.discount": 1,
-            "petInfo.discount": 1,
-            "petInfo.price": 1,
-            "shopInfo.nameShop": 1,
-            "shopInfo.avatarShop": 1,
-            "shopInfo._id": 1,
+            'productInfo.nameProduct': 1,
+            'productInfo.arrProduct': 1,
+            'productInfo._id': 1,
+            'petInfo.namePet': 1,
+            'petInfo.imagesPet': 1,
+            'petInfo._id': 1,
+            'productInfo.amount': 1,
+            'productInfo.price': 1,
+            'petInfo.amount': 1,
+            'productInfo.discount': 1,
+            'petInfo.discount': 1,
+            'petInfo.price': 1,
+            'shopInfo.nameShop': 1,
+            'shopInfo.avatarShop': 1,
+            'shopInfo._id': 1,
           },
         },
       ]);
@@ -113,22 +114,22 @@ exports.listbillProduct = async (req, res, next) => {
         return res.status(200).json({
           success: true,
           data: listbillProduct,
-          message: "Lấy danh sách hóa đơn thành công",
+          message: 'Lấy danh sách hóa đơn thành công',
         });
       } else {
         return res.status(203).json({
           success: false,
           data: [],
-          message: "Không có dữ hóa đơn",
+          message: 'Không có dữ hóa đơn',
         });
       }
     } catch (error) {
-      return res.status(500).json({ success: false, message: error.message });
+      return res.status(500).json({success: false, message: error.message});
     }
   } else {
     return res
       .status(500)
-      .json({ success: false, message: "idStatus is require" });
+      .json({success: false, message: 'idStatus is require'});
   }
 };
 
@@ -139,12 +140,12 @@ exports.detailBillProduct = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       data: ObjBillPr,
-      message: "Lấy dữ liệu chi tiết hóa đơn thành công",
+      message: 'Lấy dữ liệu chi tiết hóa đơn thành công',
     });
   } catch (error) {
     return res
       .status(500)
-      .json({ success: false, data: {}, message: "Lỗi: " + error.message });
+      .json({success: false, data: {}, message: 'Lỗi: ' + error.message});
   }
 };
 exports.editbillProduct = async (req, res, next) => {
@@ -186,68 +187,72 @@ exports.editbillProduct = async (req, res, next) => {
 };
 exports.cancelBill = async (req, res) => {
   const idBill = req.params.id;
-  const { _id } = req.user;
+  const {_id, tokenDevice} = req.user;
   try {
     const updatedBill = await mdbillProduct.billProductModel.findByIdAndUpdate(
       idBill,
-      { $set: { deliveryStatus: -1 } }
+      {$set: {deliveryStatus: -1}},
     );
     if (!updatedBill) {
       res.status(500).json({
         success: false,
-        message: "Lỗi không xác định vui lòng thử lại",
+        message: 'Lỗi không xác định vui lòng thử lại',
       });
     }
     const transition = await mdTransition.TransactionModal.findOneAndUpdate(
-      { idBill: idBill },
-      { $set: { status: -1 } }
+      {idBill: idBill},
+      {$set: {status: -1}},
     );
     if (!transition) {
       res.status(500).json({
         success: false,
-        message: "Lỗi không xác định vui lòng thử lại",
+        message: 'Lỗi không xác định vui lòng thử lại',
       });
     }
-    const createNotice = new mdNoti.NoticeModel({
-      detail: `Bạn vừa hủy đơn hàng trị giá ${updatedBill?.total?.toLocaleString(
-        "vi-VN"
-      )}đ thành công ${
-        updatedBill?.paymentMethods == 1
-          ? "Số tiền sẽ của bạn sẽ được hoản trả trong 24h tới"
-          : ""
-      }`,
-      idUser: _id,
-      content: "Bạn vừa huỷ đơn hàng thành công !",
-      status: 0,
-      createdAt: new Date(),
-    });
+
     const server = await mdServer.serverModal.findOne({});
     server.totalOrderFailed = server.totalOrderFailed + 1;
-    await createNotice.save();
     await server.save();
-    res.status(200).json({ success: true, message: "Hủy đơn hàng thành công" });
+
+    await sendFCMNotification(
+      tokenDevice,
+      'Bạn vừa huỷ đơn hàng thành công!',
+      `Bạn vừa hủy đơn hàng trị giá ${updatedBill?.total?.toLocaleString(
+        'vi-VN',
+      )}đ thành công ${
+        updatedBill?.paymentMethods == 1
+          ? 'Số tiền sẽ của bạn sẽ được hoản trả trong 24h tới'
+          : ''
+      }`,
+      'CLIENT',
+      null,
+      _id,
+    );
+    res.status(200).json({success: true, message: 'Hủy đơn hàng thành công'});
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.log(error);
+    res.status(500).json({success: false, message: error.message});
   }
 };
 
 exports.billProductUser = async (req, res) => {
-  const { _id } = req.user;
-  const { products, locationDetail, paymentMethods, detailCard } = req.body;
-  if (req.method === "POST") {
+  const {_id, tokenDevice} = req.user;
+  const {products, locationDetail, paymentMethods, detailCard} = req.body;
+  let totalBill = 0;
+  if (req.method === 'POST') {
     try {
       const productPromises = [];
       const errorMessages = [];
       await Promise.all(
-        products?.map(async (item) => {
-          const itemPromises = item.items?.map(async (subItem) => {
+        products?.map(async item => {
+          const itemPromises = item.items?.map(async subItem => {
             const product = await mdProduct.ProductModel.findById(
-              subItem.idProduct
+              subItem.idProduct,
             );
             if (product) {
               if (product.amountProduct < subItem.amount) {
                 errorMessages.push(
-                  `${product.nameProduct} số lượng sản phẩm không đủ`
+                  `${product.nameProduct} số lượng sản phẩm không đủ`,
                 );
               }
               const discoutProduct =
@@ -279,19 +284,19 @@ exports.billProductUser = async (req, res) => {
           await Promise.all(itemPromises);
 
           productPromises.push(item);
-        })
+        }),
       );
       if (errorMessages.length > 0) {
         return res.status(400).json({
           success: false,
-          message: errorMessages.join(", "),
+          message: errorMessages.join(', '),
         });
       }
       await Promise.all(
-        productPromises.map(async (item) => {
+        productPromises.map(async item => {
           const newbillProduct = new mdbillProduct.billProductModel({
             idUser: _id,
-            locationDetail: locationDetail ?? "",
+            locationDetail: locationDetail ?? '',
             total: item.total,
             deliveryStatus: 0,
             discountBill: item.discount,
@@ -302,7 +307,7 @@ exports.billProductUser = async (req, res) => {
             detailCard: paymentMethods == 1 ? detailCard : null,
             purchaseDate: new Date(),
           });
-
+          totalBill += item.total;
           const server = await mdServer.serverModal.findOne({});
           const createTransition = new mdTransition.TransactionModal({
             fee: (newbillProduct.total / 100) * server.fee,
@@ -319,12 +324,12 @@ exports.billProductUser = async (req, res) => {
             await newbillProduct.save(),
             await createTransition.save(),
             await mdServer.serverModal.findByIdAndUpdate(
-              { _id: server._id },
-              server
+              {_id: server._id},
+              server,
             ),
-            newbillProduct.products.map(async (item) => {
+            newbillProduct.products.map(async item => {
               const product = await mdProduct.ProductModel.findById(
-                item?.idProduct
+                item?.idProduct,
               );
               if (product) {
                 product.quantitySold += item.amount;
@@ -335,14 +340,25 @@ exports.billProductUser = async (req, res) => {
               }
             }),
           ]);
-        })
+        }),
       );
-      const cartUser = await mdCart.CartModel.findOne({ idUser: _id });
-      cartUser.carts = cartUser.carts.find((item) => item.isSelected === false);
+      const cartUser = await mdCart.CartModel.findOne({idUser: _id});
+      cartUser.carts = cartUser.carts.find(item => item.isSelected === false);
       await cartUser.save();
+
+      await sendFCMNotification(
+        tokenDevice,
+        'Bạn vừa đặt đơn hàng thành công!',
+        `Bạn vừa đặt đơn hàng trị giá ${totalBill.toLocaleString(
+          'vi-VN',
+        )}đ thành công`,
+        'CLIENT',
+        null,
+        _id,
+      );
       res.status(201).json({
         success: true,
-        message: "Tạo hóa đơn thành công!",
+        message: 'Tạo hóa đơn thành công!',
         data: [],
       });
     } catch (error) {
@@ -355,27 +371,27 @@ exports.billProductUser = async (req, res) => {
   } else {
     res.status(500).json({
       success: false,
-      message: "Tạo hóa đơn thất bại!",
+      message: 'Tạo hóa đơn thất bại!',
       data: [],
     });
   }
 };
 
 exports.getCountBill = async (req, res) => {
-  const { _id } = req.user;
+  const {_id} = req.user;
   const statusArray = [0, 1, 2, 3];
   try {
     const pipeline = [
       {
         $match: {
           idUser: _id,
-          deliveryStatus: { $in: statusArray },
+          deliveryStatus: {$in: statusArray},
         },
       },
       {
         $group: {
-          _id: "$deliveryStatus",
-          count: { $sum: 1 },
+          _id: '$deliveryStatus',
+          count: {$sum: 1},
         },
       },
     ];
@@ -384,20 +400,20 @@ exports.getCountBill = async (req, res) => {
 
     const statusCountObject = {};
 
-    results.forEach((result) => {
+    results.forEach(result => {
       statusCountObject[result._id] = result.count;
     });
     return res.status(200).json({
       success: true,
       data: statusCountObject,
-      message: "Lấy danh sách hóa đơn thành công",
+      message: 'Lấy danh sách hóa đơn thành công',
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
       success: false,
       data: [],
-      message: "Lấy danh sách hóa đơn thất bại",
+      message: 'Lấy danh sách hóa đơn thất bại',
     });
   }
 };
@@ -405,8 +421,8 @@ exports.getCountBill = async (req, res) => {
 exports.test = async (req, res) => {
   await mdbillProduct.billProductModel.updateMany(
     {},
-    { $set: { statusReview: false } },
-    { multi: true }
+    {$set: {statusReview: false}},
+    {multi: true},
   );
-  res.status(200).json({ done: true });
+  res.status(200).json({done: true});
 };
