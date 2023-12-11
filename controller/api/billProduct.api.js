@@ -218,9 +218,9 @@ exports.cancelBill = async (req, res) => {
     await sendFCMNotification(
       tokenDevice,
       'Bạn vừa huỷ đơn hàng thành công!',
-      `Bạn vừa hủy đơn hàng trị giá ${updatedBill?.total?.toLocaleString(
-        'vi-VN',
-      )}đ thành công ${
+      `Bạn vừa hủy đơn hàng trị giá ${(
+        updatedBill?.total + updatedBill?.moneyShip
+      ).toLocaleString('vi-VN')}đ thành công ${
         updatedBill?.paymentMethods == 1
           ? 'Số tiền sẽ của bạn sẽ được hoản trả trong 24h tới'
           : ''
