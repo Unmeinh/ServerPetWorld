@@ -1,87 +1,92 @@
 <%- include('../inc/topshipper', { title: 'Đơn hàng đang giao' }) %>
-<div class="container-fluid " style="width: 98%;">
-  <div class="row col m-3">
-    <form action="" class="row col-sm-8 col-md-6 col-lg-4 col-xl-3 me-2" method="get">
-      <div style="background-color: #F0F4F8; border-radius: 25px; align-items: center; display: flex; flex-direction: row;">
-        <div style="width: 10%;">
-          <button type="submit" style="border: none;"><img src="/upload/iconFind.png" style="width: 20px; height: 20px;"></button>
+  <div class="container-fluid " style="width: 98%;">
+    <div class="row col m-3">
+      <form action="" class="row col-sm-8 col-md-6 col-lg-4 col-xl-3 me-2" method="get">
+        <div
+          style="background-color: #F0F4F8; border-radius: 25px; align-items: center; display: flex; flex-direction: row;">
+          <div style="width: 10%;">
+            <button type="submit" style="border: none;"><img src="/upload/iconFind.png"
+                style="width: 20px; height: 20px;"></button>
+          </div>
+          <div style="width: 90%;">
+            <input name="filterSearch"
+              style="border: none; background-color: #F0F4F8; border-radius: 25px; box-shadow: none;"
+              class="form-control" placeholder="Tìm kiếm">
+          </div>
         </div>
-        <div style="width: 90%;">
-          <input name="filterSearch" style="border: none; background-color: #F0F4F8; border-radius: 25px; box-shadow: none;" class="form-control" placeholder="Tìm kiếm">
-        </div>
-      </div>
-    </form>
-
-    <% if (listBillProducts && listBillProducts.length > 0) { %>
-      <form action="" method="get" id="sortForm" class="row col-4 me-5" style="display: flex; flex-direction: row; justify-content: space-between;">
-        <select name="sortOption" id="sortOption" class="row col-10 form-select" style="background-color: #F0F4F8; border-radius: 20px; border: none; box-shadow: none; width: 80%;">
-          <option selected disabled>Sắp xếp theo tên</option>
-          <option value="1">Sắp xếp từ a-z</option>
-          <option value="-1">Sắp xếp từ z-a</option>
-        </select>
       </form>
-      
-    <% } else { %>
-    <div class="row col-4 me-5"></div>
-    <% } %>
+
+      <% if (listBillProducts && listBillProducts.length> 0) { %>
+        <form action="" method="get" id="sortForm" class="row col-4 me-5"
+          style="display: flex; flex-direction: row; justify-content: space-between;">
+          <select name="sortOption" id="sortOption" class="row col-10 form-select"
+            style="background-color: #F0F4F8; border-radius: 20px; border: none; box-shadow: none; width: 80%;">
+            <option selected disabled>Sắp xếp theo tên</option>
+            <option value="1">Sắp xếp từ a-z</option>
+            <option value="-1">Sắp xếp từ z-a</option>
+          </select>
+        </form>
+
+        <% } else { %>
+          <div class="row col-4 me-5"></div>
+          <% } %>
+    </div>
+
+    <% if (listBillProducts && listBillProducts.length> 0) { %>
+      <table class="table table-curved align-middle" style="border: white;">
+        <tr style="background: #8BD3DD;">
+          <th style="border-radius: 6px 0 0 6px;">Địa chỉ</th>
+          <th>Tổng tiền</th>
+          <th>Tiền Ship</th>
+          <th>Ngày tạo</th>
+          <th></th>
+          <th style="border-radius: 0 6px 6px 0;"></th>
+        </tr>
+
+        <% listBillProducts.forEach((row)=> { %>
+          <tr>
+            <td>
+              <%= row.locationDetail.location || 'Không có dữ liệu' %>
+            </td>
+            <td>
+              <%= row.total || 'Không có dữ liệu' %> VND
+            </td>
+            <td>
+              <%= row.moneyShip || 'Không có dữ liệu' %> VND
+            </td>
+            <td>
+              <%= row.purchaseDate ? new Date(row.purchaseDate).toLocaleString('en-US') : 'Không có dữ liệu' %>
+            </td>
+            <td>
+              <a href="/accountShipper/updateDeliveryStatusSuccset/<%= row._id%>"
+                style="background-color: #F582AE; padding: 8px; border-radius: 10px; text-decoration: none; color: white; font-weight: bold;">Giao
+                hàng thành công </a>
+            </td>
+            <td>
+              <a href="/accountShipper/updateDeliveryStatusFall/<%= row._id%>"
+                style="background-color: rgb(220, 155, 182); padding: 8px; border-radius: 10px; text-decoration: none; color: white; font-weight: bold;">Giao
+                hàng thất bại</a>
+            </td>
+          </tr>
+          <% }) %>
+      </table>
+      <% } else { %>
+        <div class="no-results-message" style="text-align: center;">
+          <p style="color: #F582AE; font-size: 24px; margin-top: 150px; ">Không có dữ liệu</p>
+          <img
+            src="https://png.pngtree.com/png-clipart/20190924/original/pngtree-empty-box-icon-for-your-project-png-image_4820798.jpg"
+            alt="No data" style="width: 150px; height: 150px;" />
+        </div>
+        <% } %>
   </div>
 
-  <% if (listBillProducts && listBillProducts.length > 0) { %>
-  <table class="table table-curved align-middle" style="border: white;">
-    <tr style="background: #8BD3DD;">
-      <th style="border-radius: 6px 0 0 6px;">Địa chỉ</th>
-      <th>Tổng tiền</th>
-      <th>Tiền Ship</th>
-      <th>Ngày tạo</th>
-      <th></th>
-      <th style="border-radius: 0 6px 6px 0;"></th>
-    </tr>
 
-    <% listBillProducts.forEach((row) => { %>
-    <tr>
-      <td style="display: flex; flex-direction: row;">
-        <div class="box" style="line-height: 8px; margin: 5px;">
-          <p>
-            <%= row.locationDetail.location || 'Không có dữ liệu' %>
-          </p>
-          <!-- <a href="/Shipper/delete/<%= row._id %>" style="text-decoration: none; color: rgb(171, 169, 169);">
-            Xóa</a> -->
-        </div>
-      </td>
-      <td>
-        <%= row.total || 'Không có dữ liệu' %> VND
-      </td>
+  <script>
+    const sortOptionDropdown = document.getElementById('sortOption');
+    const sortForm = document.getElementById('sortForm');
 
-      <td>
-        <%= row.moneyShip || 'Không có dữ liệu' %> VND
-      </td>
-      <td>
-        <%= row.purchaseDate ? new Date(row.purchaseDate).toLocaleString('en-US') : 'Không có dữ liệu' %>
-      </td>   
-      <td>
-        <a href="/accountShipper/updateDeliveryStatusSuccset/<%= row._id%>" style="background-color: #F582AE; padding: 8px; border-radius: 10px; text-decoration: none; color: white; font-weight: bold;">Giao hàng thành công </a>
-      </td>
-      <td>
-        <a href="/accountShipper/updateDeliveryStatusFall/<%= row._id%>" style="background-color: #F582AE; padding: 8px; border-radius: 10px; text-decoration: none; color: white; font-weight: bold;">Giao hàng thất bại</a>
-      </td>
-    </tr>
-    <% }) %>
-  </table>
-  <% }  else { %>
-    <div class="no-results-message" style="text-align: center;">
-      <p style="color: #F582AE; font-size: 24px; margin-top: 150px; ">Không có dữ liệu</p>
-      <img src="https://png.pngtree.com/png-clipart/20190924/original/pngtree-empty-box-icon-for-your-project-png-image_4820798.jpg" alt="No data" style="width: 150px; height: 150px;" />
-    </div>
-    <% } %>
-</div>
-
-
-<script>
-  const sortOptionDropdown = document.getElementById('sortOption');
-  const sortForm = document.getElementById('sortForm');
-
-  sortOptionDropdown.addEventListener('change', function () {
-    sortForm.submit();
-  });
-</script>
-<%- include('../inc/bottom') %>
+    sortOptionDropdown.addEventListener('change', function () {
+      sortForm.submit();
+    });
+  </script>
+  <%- include('../inc/bottom') %>
