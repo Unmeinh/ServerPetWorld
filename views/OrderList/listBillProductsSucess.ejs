@@ -13,7 +13,7 @@
     </form>
 
     <% if (listBillProducts && listBillProducts.length > 0) { %>
-      <form action="" method="get" id="sortForm" class="row col-4 me-5" style="display: flex; flex-direction: row; justify-content: space-between;">
+      <form action="" method="get" id="sortForm" class="row col-4 col-8 me-5" style="display: flex; flex-direction: row; justify-content: space-between;">
         <select name="sortOption" id="sortOption" class="row col-10 form-select" style="background-color: #F0F4F8; border-radius: 20px; border: none; box-shadow: none; width: 80%;">
           <option selected disabled>Sắp xếp theo tên</option>
           <option value="1">Sắp xếp từ a-z</option>
@@ -32,26 +32,17 @@
       <th style="border-radius: 6px 0 0 6px;">Địa chỉ</th>
       <th>Tổng tiền</th>
       <th>Tiền Ship</th>
-      <th>Ngày tạo</th>
-      <th></th>
-      <th style="border-radius: 0 6px 6px 0;"></th>
+      <th style="border-radius: 0 6px 6px 0;">Ngày tạo</th>
     </tr>
 
     <% listBillProducts.forEach((row) => { %>
     <tr>
-      <td style="display: flex; flex-direction: row;">
-        <div class="box" style="line-height: 8px; margin: 5px;">
-          <p>
-            <%= row.locationDetail.location || 'Không có dữ liệu' %>
-          </p>
-          <!-- <a href="/Shipper/delete/<%= row._id %>" style="text-decoration: none; color: rgb(171, 169, 169);">
-            Xóa</a> -->
-        </div>
+      <td>
+          <%= row.locationDetail.location || 'Không có dữ liệu' %>
       </td>
       <td>
         <%= row.total || 'Không có dữ liệu' %> VND
       </td>
-
       <td>
         <%= row.moneyShip || 'Không có dữ liệu' %> VND
       </td>
