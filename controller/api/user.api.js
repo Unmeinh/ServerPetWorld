@@ -7,10 +7,11 @@ const otpGenerator = require("otp-generator");
 let { encodeToSha256 } = require("../../function/hashFunction");
 const { onUploadImages } = require("../../function/uploadImage");
 const { billProductModel } = require("../../model/billProduct.model");
+const blogModel = require("../../model/blog.model").BlogModel;
 
 exports.listUser = async (req, res, next) => {
   try {
-    let listUser = await mdUser.find().populate('idAccount');
+    let listUser = await mdUser.find().populate("idAccount");
 
     if (listUser) {
       return res.status(200).json({
@@ -31,14 +32,23 @@ exports.listUser = async (req, res, next) => {
 exports.myDetail = async (req, res, next) => {
   try {
     const { _id } = req.user;
-    let listBill = await billProductModel.find({ idUser: _id });
-    if (listBill) {
-      req.user =  req.user.toObject();
-      req.user.billCount = listBill.length;
-      return res.status(200).json({ success: true, data: req.user, message: "Lấy dữ liệu của bạn thành công" });
-    } else {
-      return res.status(200).json({ success: true, data: req.user, message: "Lấy dữ liệu của bạn thành công" });
+    let dataBlog = {};
+    let billCount = [];
+    let totalPurchased = 0;
+    if (req?.query?.isCalculator && String(req.query.isCalculator) == "true") {
+      dataBlog = await calculatorBlog(_id);
     }
+    if (req?.query?.isReadBill && String(req.query.isReadBill) == "true") {
+      let dataCalculator = await calculatorBill(_id);
+      billCount = dataCalculator.count;
+      totalPurchased = dataCalculator?.total?.sumTotal + dataCalculator?.total?.sumShip;
+    }
+    let user = req.user.toObject();
+    user.billCount = billCount;
+    user.totalPurchased = Number(totalPurchased).toLocaleString('en');
+    user.interactCount = (dataBlog?.interactCount) ? dataBlog?.interactCount : 0;
+    user.commentCount = (dataBlog?.cmtCount) ? dataBlog?.cmtCount : 0;
+    return res.status(200).json({ success: true, data: user, message: "Lấy dữ liệu của bạn thành công" });
   } catch (error) {
     return res
       .status(500)
@@ -50,38 +60,67 @@ exports.autoLogin = async (req, res, next) => {
   try {
     req.account.online = 0;
     await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
-    return res.status(200).json({ success: true, data: req.user, message: "Đăng nhập thành công." });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        data: req.user,
+        message: "Đăng nhập thành công.",
+      });
   } catch (error) {
-    return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    return res
+      .status(500)
+      .json({ success: false, data: {}, message: "Lỗi: " + error.message });
   }
 };
 
 exports.checkPhoneNumber = async (req, res, next) => {
   try {
-    let objU = await mdUserAccount.findOne({ phoneNumber: req.body.phoneNumber });
+    let objU = await mdUserAccount.findOne({
+      phoneNumber: req.body.phoneNumber,
+    });
     if (!objU) {
-      return res.status(201).json({ success: true, data: objU, message: "Số điện thoại chưa được đăng ký." });
+      return res
+        .status(201)
+        .json({
+          success: true,
+          data: objU,
+          message: "Số điện thoại chưa được đăng ký.",
+        });
     } else {
-      return res.status(201).json({ success: false, data: objU, message: "Số điện thoại đã được đăng ký." });
+      return res
+        .status(201)
+        .json({
+          success: false,
+          data: objU,
+          message: "Số điện thoại đã được đăng ký.",
+        });
     }
   } catch (error) {
-    return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    return res
+      .status(500)
+      .json({ success: false, data: {}, message: "Lỗi: " + error.message });
   }
 };
 
 exports.detailUser = async (req, res, next) => {
   let idUser = req.params.idUser;
   try {
-    let objU = await mdUser.findById(idUser).populate('idAccount');
+    let objU = await mdUser.findById(idUser).populate("idAccount");
     if (objU) {
+      let dataCalculator = await calculatorBlog(objU._id);
       objU = objU.toObject();
-      let isFollowed = objU.followers.find((follow) => String(follow.idFollow) == String(req.user._id))
+      let isFollowed = objU.followers.find(
+        (follow) => String(follow.idFollow) == String(req.user._id)
+      );
       if (isFollowed) {
         return res.status(200).json({
           success: true,
           data: {
             ...objU,
-            isFollowed: true
+            isFollowed: true,
+            interactCount: (dataCalculator.interactCount) ? dataCalculator.interactCount : 0,
+            commentCount: (dataCalculator.cmtCount) ? dataCalculator.cmtCount : 0
           },
           message: "Lấy dữ liệu của người dùng khác thành công",
         });
@@ -90,7 +129,9 @@ exports.detailUser = async (req, res, next) => {
           success: true,
           data: {
             ...objU,
-            isFollowed: false
+            isFollowed: false,
+            interactCount: dataCalculator.interactCount,
+            commentCount: dataCalculator.cmtCount
           },
           message: "Lấy dữ liệu của người dùng khác thành công",
         });
@@ -98,7 +139,11 @@ exports.detailUser = async (req, res, next) => {
     } else {
       return res
         .status(500)
-        .json({ success: false, data: {}, message: "Không tải được dữ liệu người dùng!" });
+        .json({
+          success: false,
+          data: {},
+          message: "Không tải được dữ liệu người dùng!",
+        });
     }
   } catch (error) {
     return res
@@ -155,17 +200,20 @@ exports.loginUser = async (req, res, next) => {
   if (req.method == "POST") {
     try {
       let objU = await mdUserAccount.findByCredentials(
-        req.body.userName,
-        req.body.passWord
+        req?.body?.userName,
+        req?.body?.passWord
       );
       if (objU?.success != undefined && objU?.success == false) {
-        return res
-          .status(201)
-          .json({ success: false, message: objU?.mes });
+        return res.status(201).json({ success: false, message: objU?.mes });
       }
       objU.online = 0;
       await mdUserAccount.findByIdAndUpdate(objU._id, objU);
-      console.log("token: " + objU.token,);
+      let user = await mdUser.findById(objU.idUser);
+      if (user) {
+        user = user.toObject();
+        user.tokenDevice = req?.body?.tokenDevice;
+        await mdUser.findByIdAndUpdate(objU.idUser, user);
+      }
       return res.status(201).json({
         success: true,
         data: {},
@@ -186,13 +234,13 @@ exports.loginUser = async (req, res, next) => {
 
 exports.logoutUser = async (req, res, next) => {
   try {
-    console.log(req.user);
-
-    req.user.token = null; //xóa token
+    req.user.tokenDevice = "";
+    req.account.online = 1;
     await req.user.save();
+    await req.account.save();
     return res
       .status(200)
-      .json({ success: true, data: {}, message: "Đăng xuất thành công" });
+      .json({ success: true, data: {}, message: "Đăng xuất thành công." });
   } catch (error) {
     console.log(error);
     res.status(500).send(error.message);
@@ -228,12 +276,26 @@ exports.updateUser = async (req, res, next) => {
           default:
             break;
         }
-        return res.status(201).json({ success: true, data: {}, message: "Cập nhật dữ liệu thành công " });
+        return res
+          .status(201)
+          .json({
+            success: true,
+            data: {},
+            message: "Cập nhật dữ liệu thành công ",
+          });
       } catch (error) {
-        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+        return res
+          .status(500)
+          .json({ success: false, data: {}, message: "Lỗi: " + error.message });
       }
     } else {
-      return res.status(500).json({ success: false, data: {}, message: "Không đọc được dữ liệu tải lên! " });
+      return res
+        .status(500)
+        .json({
+          success: false,
+          data: {},
+          message: "Không đọc được dữ liệu tải lên! ",
+        });
     }
   }
 };
@@ -244,13 +306,23 @@ exports.updateAvatar = async (req, res, next) => {
       let result = await onUploadImages(req.files, "user");
       if (result != []) {
         req.user.avatarUser = result[0];
-        await mdUser.findByIdAndUpdate(req.user._id, req.user)
-        return res.status(201).json({ success: true, data: {}, message: "Cập nhật ảnh đại diện thành công." });
+        await mdUser.findByIdAndUpdate(req.user._id, req.user);
+        return res
+          .status(201)
+          .json({
+            success: true,
+            data: {},
+            message: "Cập nhật ảnh đại diện thành công.",
+          });
       } else {
-        return res.status(201).json({ success: false, data: {}, message: "Không có ảnh tải lên!" });
+        return res
+          .status(201)
+          .json({ success: false, data: {}, message: "Không có ảnh tải lên!" });
       }
     } catch (error) {
-      return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+      return res
+        .status(500)
+        .json({ success: false, data: {}, message: "Lỗi: " + error.message });
     }
   }
 };
@@ -264,24 +336,40 @@ exports.updateAccount = async (req, res, next) => {
             req.account.phoneNumber = req.body.valueUpdate;
             req.account.isVerifyPhoneNumber = 0;
             await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
-            return res.status(201).json({ success: true, data: {}, message: "Cập nhật dữ liệu thành công!" });
+            return res
+              .status(201)
+              .json({
+                success: true,
+                data: {},
+                message: "Cập nhật dữ liệu thành công!",
+              });
           case "emailAddress":
             req.account.emailAddress = req.body.valueUpdate;
             req.account.isVerifyEmail = 1;
             await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
             let encode = encodeToSha256(req.body.valueUpdate);
-            let linkVerify = "https://server-pet-world.onrender.com/account/verifyEmail/" + encode;
+            let linkVerify =
+              "https://server-pet-world.onrender.com/account/verifyEmail/" +
+              encode;
             await sendEmailLink(req.body.valueUpdate, linkVerify, res);
-            // return res.status(201).json({ success: true, data: {}, message: "Cập nhật dữ liệu thành công!" });
+          // return res.status(201).json({ success: true, data: {}, message: "Cập nhật dữ liệu thành công!" });
 
           default:
             break;
         }
       } catch (error) {
-        return res.status(500).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+        return res
+          .status(500)
+          .json({ success: false, data: {}, message: "Lỗi: " + error.message });
       }
     } else {
-      return res.status(500).json({ success: false, data: {}, message: "Không đọc được dữ liệu tải lên! " });
+      return res
+        .status(500)
+        .json({
+          success: false,
+          data: {},
+          message: "Không đọc được dữ liệu tải lên! ",
+        });
     }
   }
 };
@@ -328,18 +416,41 @@ exports.updatePassword = async (req, res, next) => {
   if (req.method == "PUT") {
     let { oldPassword, newPassword } = req.body;
     if (!oldPassword || !newPassword || !req.body) {
-      return res.status(500).json({ success: false, data: {}, message: "Không đọc được dữ liệu tải lên!" });
+      return res
+        .status(500)
+        .json({
+          success: false,
+          data: {},
+          message: "Không đọc được dữ liệu tải lên!",
+        });
     }
-    const isPasswordMatch = await bcrypt.compare(oldPassword, req.account.passWord);
+    const isPasswordMatch = await bcrypt.compare(
+      oldPassword,
+      req.account.passWord
+    );
     if (!isPasswordMatch) {
-      return res.status(201).json({ success: false, data: {}, message: "Mật khẩu hiện tại nhập sai!" });
+      return res
+        .status(201)
+        .json({
+          success: false,
+          data: {},
+          message: "Mật khẩu hiện tại nhập sai!",
+        });
     }
     req.account.passWord = newPassword;
     try {
       await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
-      return res.status(201).json({ success: true, data: {}, message: "Đổi mật khẩu thành công. " });
+      return res
+        .status(201)
+        .json({
+          success: true,
+          data: {},
+          message: "Đổi mật khẩu thành công. ",
+        });
     } catch (error) {
-      return res.status(201).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+      return res
+        .status(201)
+        .json({ success: false, data: {}, message: "Lỗi: " + error.message });
     }
   }
 };
@@ -350,21 +461,40 @@ exports.changePassword = async (req, res, next) => {
     if (body.typeUpdate && body.valueUpdate && body.newPassword) {
       try {
         let account = {};
-        if (body.typeUpdate == 'email') {
-          account = await mdUserAccount.findOne({ emailAddress: body.valueUpdate });
+        if (body.typeUpdate == "email") {
+          account = await mdUserAccount.findOne({
+            emailAddress: body.valueUpdate,
+          });
         } else {
-          account = await mdUserAccount.findOne({ phoneNumber: body.valueUpdate });
+          account = await mdUserAccount.findOne({
+            phoneNumber: body.valueUpdate,
+          });
         }
         const salt = await bcrypt.genSalt(10);
         account.passWord = await bcrypt.hash(body.newPassword, salt);
         await mdUserAccount.findByIdAndUpdate(account._id, account);
-        return res.status(201).json({ success: true, data: {}, message: "Đổi mật khẩu thành công." });
+        return res
+          .status(201)
+          .json({
+            success: true,
+            data: {},
+            message: "Đổi mật khẩu thành công.",
+          });
       } catch (error) {
         console.log(error);
-        return res.status(201).json({ success: false, data: {}, message: "Lỗi: " + error.message });
+        return res
+          .status(201)
+          .json({ success: false, data: {}, message: "Lỗi: " + error.message });
       }
     } else {
-      return res.status(500).json({ success: false, data: {}, message: "Đổi mật khẩu thất bại, không nhận được dữ liệu mật khẩu mới! " });
+      return res
+        .status(500)
+        .json({
+          success: false,
+          data: {},
+          message:
+            "Đổi mật khẩu thất bại, không nhận được dữ liệu mật khẩu mới! ",
+        });
     }
   }
 };
@@ -376,17 +506,27 @@ exports.sendVerifyEmail = async (req, res, next) => {
       if (data.length > 0) {
         if (data[0].isVerifyEmail == 1) {
           let encode = encodeToSha256(req.body.email);
-          let linkVerify = "https://server-pet-world.onrender.com/account/verifyEmail/" + encode;
+          let linkVerify =
+            "https://server-pet-world.onrender.com/account/verifyEmail/" +
+            encode;
           await sendEmailLink(req.body.email, linkVerify, res);
         } else {
           return res
             .status(201)
-            .json({ success: false, data: {}, message: "Email của bạn đã được xác minh!" });
+            .json({
+              success: false,
+              data: {},
+              message: "Email của bạn đã được xác minh!",
+            });
         }
       } else {
         return res
           .status(201)
-          .json({ success: false, data: {}, message: "Không tìm thấy tài khoản có email trên!" });
+          .json({
+            success: false,
+            data: {},
+            message: "Không tìm thấy tài khoản có email trên!",
+          });
       }
     }
   }
@@ -408,12 +548,20 @@ exports.sendResetPassword = async (req, res, next) => {
         } else {
           return res
             .status(201)
-            .json({ success: false, data: {}, message: "Email của bạn chưa được xác minh!" });
+            .json({
+              success: false,
+              data: {},
+              message: "Email của bạn chưa được xác minh!",
+            });
         }
       } else {
         return res
           .status(500)
-          .json({ success: false, data: {}, message: "Không tìm thấy tài khoản có email trên!" });
+          .json({
+            success: false,
+            data: {},
+            message: "Không tìm thấy tài khoản có email trên!",
+          });
       }
     }
   }
@@ -467,6 +615,70 @@ exports.verifyResetCode = async (req, res, next) => {
   }
 };
 
+async function calculatorBlog(uID) {
+  let sumTotal = await blogModel.aggregate([
+    {
+      $match: {
+        idUser: uID,
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        sumCmt: { $sum: "$comments" },
+        sumInteract: { $sum: { $size: "$interacts" } }
+      },
+    },
+    {
+      $project: { _id: 0, cmtCount: "$sumCmt", interactCount: "$sumInteract" },
+    }
+  ]);
+  if (sumTotal[0] != undefined) {
+    return sumTotal[0];
+  } else {
+    return 0;
+  }
+}
+
+async function calculatorBill(uID) {
+  let billCount = await billProductModel.find({ idUser: uID }).count();
+  let totalBills = await billProductModel.aggregate([
+    {
+      $match: {
+        idUser: uID,
+        deliveryStatus: {
+          $gte: 0,
+          $lte: 5,
+        }
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        sumTotal: { $sum: "$total" },
+        sumShip: { $sum: "$moneyShip" },
+      },
+    },
+    {
+      $project: { _id: 0, sumTotal: "$sumTotal", sumShip: "$sumShip" },
+    }
+  ]);
+  if (totalBills[0] != undefined && billCount != undefined) {
+    return {
+      count: billCount,
+      total: totalBills[0]
+    };
+  } else {
+    return {
+      count: 0,
+      total: {
+        sumTotal: 0,
+        sumShip: 0
+      }
+    };
+  }
+}
+
 async function sendEmailLink(email, link, res) {
   var transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
@@ -503,9 +715,7 @@ async function sendEmailLink(email, link, res) {
     },
     to: email,
     subject: "Xác minh email của bạn cho OurPet",
-    text:
-      "Xin chào! Bấm vào link dưới đây để xác minh email của bạn. " +
-      link,
+    text: "Xin chào! Bấm vào link dưới đây để xác minh email của bạn. " + link,
     html: content,
     attachments: [
       {
@@ -517,15 +727,21 @@ async function sendEmailLink(email, link, res) {
   };
   transporter.sendMail(mainOptions, async function (err, info) {
     if (err) {
-      console.log(err);
       return res
         .status(500)
-        .json({ success: false, data: {}, message: "Link xác minh email gửi thất bại!" });
+        .json({
+          success: false,
+          data: {},
+          message: "Link xác minh email gửi thất bại!",
+        });
     } else {
-      console.log("Message sent: " + info.response);
       return res
         .status(201)
-        .json({ success: true, data: {}, message: "Link xác minh email đã được gửi." });
+        .json({
+          success: true,
+          data: {},
+          message: "Link xác minh email đã được gửi.",
+        });
     }
   });
 }
@@ -582,12 +798,14 @@ async function sendEmailOTP(email, otp, data, res) {
   };
   transporter.sendMail(mainOptions, async function (err, info) {
     if (err) {
-      console.log(err);
       return res
         .status(500)
-        .json({ success: false, data: {}, message: "Gửi mã xác minh thất bại!" });
+        .json({
+          success: false,
+          data: {},
+          message: "Gửi mã xác minh thất bại!",
+        });
     } else {
-      console.log("Message sent: " + info.response);
       if (data.length > 0) {
         await OTPEmailModel.findByIdAndUpdate(data[0]._id, {
           _id: data[0]._id,

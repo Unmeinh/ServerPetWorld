@@ -35,6 +35,7 @@ var shopApiRouter = require('./routes/api/shopApi');
 var catAllApiRouter = require('./routes/api/categoryAll');
 var petApiRouter = require('./routes/api/petApi');
 var noticeApiRouter= require('./routes/api/noticeApi');
+var noticeSellerApiRouter= require('./routes/api/noticeSellerApi');
 var commentApiRouter= require('./routes/api/commentApi');
 var favoriteProductsApiRouter=require('./routes/api/myFavoriteProductApi');
 var billProductApiRouter = require('./routes/api/billProductApi');
@@ -97,7 +98,8 @@ app.use('/api/product', productApiRouter);
 app.use('/api/shop', shopApiRouter);
 app.use('/api/category', catAllApiRouter);
 app.use('/api/pet', petApiRouter);
-app.use('/api/notice',noticeApiRouter)
+app.use('/api/notice',noticeApiRouter);
+app.use('/api/noticeSeller',noticeSellerApiRouter)
 app.use('/api/comment',commentApiRouter)
 app.use('/api/bill-product', billProductApiRouter);
 app.use('/api/favorite',favoriteProductsApiRouter);
