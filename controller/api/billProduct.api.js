@@ -221,7 +221,7 @@ exports.cancelBill = async (req, res) => {
       `Bạn vừa hủy đơn hàng trị giá ${(
         updatedBill?.total + updatedBill?.moneyShip
       ).toLocaleString('vi-VN')}đ thành công ${
-        updatedBill?.paymentMethods == 1
+        updatedBill?.paymentMethods !== 0
           ? 'Số tiền sẽ của bạn sẽ được hoản trả trong 24h tới'
           : ''
       }`,
