@@ -31,22 +31,24 @@ const sendFCMNotification = async (
       const newNotice = new mdNoticeSeller.NoticeSellerModel(params);
       await newNotice.save();
     }
-    const fcmData = {
-      notification: {
-        title: title,
-        body: message,
-      },
-      to: token,
-    };
+    if (token) {
+      const fcmData = {
+        notification: {
+          title: title,
+          body: message,
+        },
+        to: token,
+      };
 
-    const headers = {
-      Authorization: key,
-      'Content-Type': 'application/json',
-    };
+      const headers = {
+        Authorization: key,
+        'Content-Type': 'application/json',
+      };
 
-    await axios.post('https://fcm.googleapis.com/fcm/send', fcmData, {
-      headers,
-    });
+      await axios.post('https://fcm.googleapis.com/fcm/send', fcmData, {
+        headers,
+      });
+    }
     return true;
   } catch (error) {
     console.error('Error sending FCM:', error);
