@@ -47,14 +47,8 @@
 
     <% listBillProducts.forEach((row) => { %>
     <tr>
-      <td style="display: flex; flex-direction: row;">
-        <div class="box" style="line-height: 8px; margin: 5px;">
-          <p>
-            <%= row.locationDetail.location || 'Không có dữ liệu' %>
-          </p>
-          <!-- <a href="/Shipper/delete/<%= row._id %>" style="text-decoration: none; color: rgb(171, 169, 169);">
-            Xóa</a> -->
-        </div>
+      <td>
+          <%= row.locationDetail.location || 'Không có dữ liệu' %>
       </td>
       <td>
         <%= row.total || 'Không có dữ liệu' %> VND
