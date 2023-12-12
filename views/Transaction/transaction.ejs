@@ -218,13 +218,17 @@
                                         </label>
                                         <% } else if (row.paymentMethod===1) { %>
                                             <label type="text" style="width: 200px;">
-                                                Thanh toán bằng thẻ ngân hàng
+                                                Thanh toán bằng thẻ Momo
                                             </label>
-                                            <% } else { %>
+                                            <% } else if (row.paymentMethod===2) { %>
                                                 <label type="text" style="width: 200px;">
-                                                    Lỗi không xác định
+                                                    Thanh toán bằng thẻ ZaloPay
                                                 </label>
-                                                <% } %>
+                                                <% } else { %>
+                                                    <label type="text" style="width: 200px;">
+                                                        Lỗi không xác định
+                                                    </label>
+                                                    <% } %>
                                 </td>
                                 <td>
 
