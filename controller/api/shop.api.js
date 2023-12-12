@@ -1451,6 +1451,7 @@ exports.loginShop = async (req, res, next) => {
           .json({ success: false, message: "Sai thông tin đăng nhập!" });
       }
       objS.online = 0;
+      objS.tokenDevice = req?.body?.tokenDevice;
       await mdShop.ShopModel.findByIdAndUpdate(objS._id, objS);
       return res.status(201).json({
         success: true,
@@ -1467,6 +1468,20 @@ exports.loginShop = async (req, res, next) => {
         message: error.message,
       });
     }
+  }
+};
+
+exports.logoutShop = async (req, res, next) => {
+  try {
+    req.shop.tokenDevice = "";
+    req.shop.online = 1;
+    await req.shop.save();
+    return res
+      .status(200)
+      .json({ success: true, data: {}, message: "Đăng xuất thành công." });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error.message);
   }
 };
 
@@ -2371,10 +2386,10 @@ async function sendEmailResetPassword(email, otp, data, res) {
         <div style="padding: 7px; background-color: #003375; border-radius: 7px;">
             <div style="padding: 10px; background-color: white; border-radius: 7px;">
                 <p>Xin chào!</p>
-                <p>Mã xác minh cho email của bạn là ${otp}.</p>
+                <p>Mã xác minh đặt lại mật khẩu của bạn là ${otp}.</p>
                 <p>Để bảo mật an toàn, Bạn tuyệt đối không cung cấp mã xác minh này cho bất kỳ ai.</p>
                 <p>Mã xác minh có hiệu lực trong vòng 5 phút. Nếu hết thời gian cho yêu cầu này, Xin vui lòng thực hiện lại yêu cầu để nhận được mã xác minh mới.</p>
-                <p>Nếu bạn không yêu cầu xác minh email nữa, bạn có thể bỏ qua email này.</p>
+                <p>Nếu bạn không yêu cầu đặt lại mật khẩu nữa, bạn có thể bỏ qua email này.</p>
                 <p>Cảm ơn bạn!</p>
                 <p>OurPetSeller</p>
                 <img src="cid:logo1" alt="logo-petworld.png"
@@ -2390,7 +2405,7 @@ async function sendEmailResetPassword(email, otp, data, res) {
     to: email,
     subject: "Đặt lại mật khẩu của bạn cho OurPetSeller",
     text:
-      "Xin chào! Mã xác minh cho email của bạn là " +
+      "Xin chào! Mã xác minh đặt lại mật khẩu của bạn là " +
       otp +
       ". Để bảo mật an toàn, Bạn tuyệt đối không cung cấp mã xác minh này cho bất kỳ ai.",
     html: content,
