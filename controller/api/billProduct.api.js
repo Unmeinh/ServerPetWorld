@@ -237,7 +237,7 @@ exports.cancelBill = async (req, res) => {
 
 exports.billProductUser = async (req, res) => {
   const {_id, tokenDevice} = req.user;
-  const {products, locationDetail, paymentMethods, detailCard} = req.body;
+  const {products, locationDetail, paymentMethod, detailCard} = req.body;
   let totalBill = 0;
   if (req.method === 'POST') {
     try {
@@ -303,8 +303,8 @@ exports.billProductUser = async (req, res) => {
             moneyShip: item.moneyShip,
             products: item.items,
             idShop: item.idShop,
-            paymentMethods: paymentMethods ?? 0,
-            detailCard: paymentMethods !== 0 ? detailCard : null,
+            paymentMethods: paymentMethod ?? 0,
+            detailCard: paymentMethod !== 0 ? detailCard : null,
             purchaseDate: new Date(),
           });
           totalBill += item.total + item.moneyShip;
@@ -314,7 +314,7 @@ exports.billProductUser = async (req, res) => {
             idBill: newbillProduct._id,
             idShop: newbillProduct.idShop,
             idCustommer: _id,
-            paymentMethod: paymentMethods ?? 0,
+            paymentMethod: paymentMethod ?? 0,
             status: newbillProduct.deliveryStatus,
             total:
               newbillProduct.total - (newbillProduct.total / 100) * server.fee,
