@@ -68,7 +68,7 @@
         <%= row.userName || 'Không có dữ liệu' %>
       </td>
       <td>
-        <%= row.address || 'Không có dữ liệu' %>
+        <%= row.address2+", "+row.address || 'Không có dữ liệu' %>
       </td>
       <td>
         <a href="/shipper/detail/<%= row._id%>" style="background-color: #F582AE; padding: 8px; border-radius: 10px; text-decoration: none; color: white; font-weight: bold;">Xem Chi tiết</a>

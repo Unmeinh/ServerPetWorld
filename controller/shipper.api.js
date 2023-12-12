@@ -46,7 +46,8 @@ exports.listShipper = async (req, res, next) => {
               countNowShipper: listShipper.length,
               msg: msg,
               currentPage: currentPage,
-              totalPage: totalPage
+              totalPage: totalPage,
+              adminLogin: req.session.adLogin,
           });
       }
   } catch (error) {
@@ -77,6 +78,13 @@ exports.addShipper = async (req, res, next) => {
     }
     try {
       let newObj = new mdShipper.ShipperModel();
+      if (req.file) {
+        newObj.avatarShipper = req.file.path;
+      } else {
+        msg = "Ảnh đại diện không được tải lên";
+        return res.render('Shipper/addShipper', { msg: msg });
+      }
+      console.log(req.file.path);
       newObj.fullName = req.body.fullName;
       newObj.userName = req.body.userName;
       newObj.phoneNumber = req.body.phoneNumber;
@@ -84,7 +92,8 @@ exports.addShipper = async (req, res, next) => {
       const province = req.body.selectedProvinceCode;
       const district = req.body.selectedDistrictCode; 
       const ward = req.body.selectedWardCode; 
-      newObj.address = `${province}, ${district}, ${ward}`;
+      newObj.address = `${ward}, ${district}, ${province}`;
+      newObj.address2 = req.body.address2; 
       newObj.createdAt = new Date();
       let salt = await bcrypt.genSalt(10);
       newObj.passWord = await bcrypt.hash(req.body.passWord, salt);
@@ -114,7 +123,8 @@ exports.addShipper = async (req, res, next) => {
     }
   }
 
-  res.render('Shipper/addShipper', { msg: msg });
+  res.render('Shipper/addShipper', { msg: msg,adminLogin: req.session.adLogin,
+ });
 }
 
 exports.updateShipperStatus = async (req, res, next) => {
@@ -159,8 +169,17 @@ exports.deleteShipper = async (req, res, next) => {
             console.log(error.message);
         }
     }
-    res.render('Shipper/deleteShipper', { msg: msg, objShipper: objShipper });
+    res.render('Shipper/deleteShipper', { msg: msg, objShipper: objShipper,adminLogin: req.session.adLogin,
+    });
 
 }
+exports.detailShipper = async (req, res, next) => {
+
+    let idShipper = req.params.idShipper;
+    let objShipper = await mdShipper.ShipperModel.findById(idShipper);
+  
+    res.render('Shipper/detailShipper', { objShipper: objShipper,adminLogin: req.session.adLogin,
+    });
+  }
 
 

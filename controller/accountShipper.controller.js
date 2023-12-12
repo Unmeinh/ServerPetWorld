@@ -111,33 +111,12 @@ exports.updateDeliveryStatus = async (req, res, next) => {
     ObjBillPr.deliveryStatus = newDeliveryStatus;
     await ObjBillPr.save();
     const transactions = await mdTransaction.TransactionModal.find({ idBill: idBill });
-
-    if (!transactions.length) {
-      return res.render('OrderList/listOder', {
-        listBillProducts: [],
-        countAllBillProducts: totalCount,
-        countNowBillProducts: ObjBillPr.length,
-        msg: msg,
-        currentPage: currentPage,
-        totalPage: totalPage
-      });
-    }
     for (const transaction of transactions) {
       transaction.status = newDeliveryStatus;
       await transaction.save();
     }
 
     const shipper = await mdShipper.ShipperModel.findOne({ "bills.idBill": idBill });
-    if (!shipper || !shipper.bills) {
-      return res.render('OrderList/listOder', {
-        listBillProducts: [],
-        countAllBillProducts: totalCount,
-        countNowBillProducts: ObjBillPr.length,
-        msg: msg,
-        currentPage: currentPage,
-        totalPage: totalPage
-      });
-    }
     shipper.bills.forEach((bill) => {
       if (bill.idBill.equals(idBill)) {
         bill.status = newDeliveryStatus;
@@ -145,15 +124,15 @@ exports.updateDeliveryStatus = async (req, res, next) => {
     });
     await shipper.save();
 
-    return res.render('OrderList/listOder', {
-      listBillProducts: ObjBillPr,
-      countAllBillProducts: totalCount,
-      countNowBillProducts: ObjBillPr.length,
-      msg: msg,
-      currentPage: currentPage,
-      totalPage: totalPage
-    });
-
+    // return res.render('OrderList/listOder', {
+    //   listBillProducts: ObjBillPr,
+    //   countAllBillProducts: totalCount,
+    //   countNowBillProducts: ObjBillPr.length,
+    //   msg: msg,
+    //   currentPage: currentPage,
+    //   totalPage: totalPage
+    // });
+    return res.redirect("/accountShipper/listBillProduct")
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -178,16 +157,6 @@ exports.updateDeliveryStatusSuccset = async (req, res, next) => {
     if (serverRecord) {
       serverRecord.totalOrderWasSuccessful += 1;
       await serverRecord.save();
-    }
-    if (!ObjBillPr) {
-      return res.render('OrderList/listOder', {
-        listBillProducts: [],
-        countAllBillProducts: totalCount,
-        countNowBillProducts: ObjBillPr.length,
-        msg: msg,
-        currentPage: currentPage,
-        totalPage: totalPage
-      });
     }
     ObjBillPr.deliveryStatus = newDeliveryStatus;
     ObjBillPr.billDate.deliveredAt = new Date()
@@ -432,10 +401,10 @@ exports.updateDeliveryStatusCancel = async (req, res, next) => {
 
 exports.listbillDelivering = async (req, res, next) => {
   try {
-    let idShipper = getIdShipperFromSession(req); // Đoạn này cần logic để lấy idShipper từ session
+    let idShipper = getIdShipperFromSession(req);
 
     let listbillProduct = await mdbillProduct.billProductModel
-      .find({ deliveryStatus: 2, "idShipper": idShipper }) // Filter theo deliveryStatus và idShipper
+      .find({ deliveryStatus: 2, "idShipper": idShipper })
       .populate("products.idProduct");
 
     if (listbillProduct && listbillProduct.length > 0) {
@@ -552,24 +521,94 @@ exports.detailShipper = async (req, res, next) => {
   let idShipper = getIdShipperFromSession(req);
   let objShipper = await mdShipper.ShipperModel.findById(idShipper);
 
-  res.render('OrderList/proFileShipper', { objShipper: objShipper });
+  res.render('OrderList/proFileShipper', { objShipper: objShipper, idShipper: idShipper });
 }
+exports.updateShipper = async (req, res, next) => {
+  let msg = '';
+  let updatedShipper, selectedProvince, selectedDistrict, selectedWard;
+  if (req.method == 'GET') {
+    const idShipper = getIdShipperFromSession(req);
+    try {
+      updatedShipper = await mdShipper.ShipperModel.findById(idShipper);
+      if (updatedShipper && updatedShipper.address) {
+        console.log(updatedShipper.address);
+        const addressParts = updatedShipper.address.split(', ');
+        if (addressParts.length >= 3) {
+          selectedProvince = addressParts[2];
+          selectedDistrict = addressParts[1];
+          selectedWard = addressParts[0];
 
-exports.updateShipperInformation = async (req, res, next) => {
-  try {
-    let idShipper = getIdShipperFromSession(req);
-    let updatedFields = {
-      fullName: req.body.fullName,
-      phoneNumber: req.body.phoneNumber
-    };
-    let objShipper = await mdShipper.ShipperModel.findByIdAndUpdate(
-      idShipper,
-      updatedFields,
-      { new: true }
-    );
-    res.render('OrderList/proFileShipper', { objShipper: objShipper });
-  } catch (error) {
-    res.render('OrderList/updateProFileShipper');
+          res.render('OrderList/updateProFileShipper', {
+            updatedShipper: updatedShipper,
+            selectedProvince: selectedProvince,
+            selectedDistrict: selectedDistrict,
+            selectedWard: selectedWard,
+            msg: msg
+          });
+        } else {
+          // Handle the case where addressParts length is less than 3
+        }
+      }
+    } catch (error) {
+      // Handle the error
+    }
+  }
+  if (req.method === 'POST') {
+    const idShipper = getIdShipperFromSession(req);
+    try {
+      updatedShipper = await mdShipper.ShipperModel.findById(idShipper);
+      console.log(updatedShipper.fullName);
+      if (!updatedShipper) {
+        msg = 'Không tìm thấy Shipper để cập nhật!';
+        return res.render('OrderList/updateProFileShipper', {
+          msg: msg, updatedShipper: updatedShipper, selectedProvince: selectedProvince,
+          selectedDistrict: selectedDistrict,
+          selectedWard: selectedWard,
+        });
+      }
+      updatedShipper.phoneNumber = req.body.phoneNumber;
+      updatedShipper.email = req.body.email;
+      updatedShipper.address2 = req.body.address2;
+      selectedProvince = req.body.selectedProvince;
+      selectedDistrict = req.body.selectedDistrict;
+      selectedWard = req.body.selectedWard;
+      const phoneNumberRegex = /^\+?[0-9]{8,}$/; 
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+      if (
+        !phoneNumberRegex.test(updatedShipper.phoneNumber) ||
+        !emailRegex.test(updatedShipper.email) ||
+        !updatedShipper.phoneNumber ||
+        !updatedShipper.email
+      ) {
+        msg = 'Vui lòng cung cấp thông tin hợp lệ cho số điện thoại và email!';
+        return res.render('OrderList/updateProFileShipper', {
+          msg: msg,
+          updatedShipper: updatedShipper,
+          selectedProvince: selectedProvince,
+          selectedDistrict: selectedDistrict,
+          selectedWard: selectedWard,
+        });
+      }
+
+      if (!selectedProvince || !selectedDistrict || !selectedWard) {
+        msg = 'Vui lòng chọn đầy đủ thông tin về địa chỉ!';
+        return res.render('OrderList/updateProFileShipper', {
+          msg: msg, updatedShipper: updatedShipper, selectedProvince: selectedProvince,
+          selectedDistrict: selectedDistrict,
+          selectedWard: selectedWard,
+        });
+      }
+
+      updatedShipper.address = `${selectedWard}, ${selectedDistrict}, ${selectedProvince}`;
+      await updatedShipper.save();
+      msg = 'Cập nhật Shipper thành công!';
+      return res.redirect('/accountShipper/proFileShipper');
+    } catch (error) {
+      console.log(error.message);
+      // Handle specific error cases if needed
+      msg = 'Đã xảy ra lỗi khi cập nhật Shipper!';
+    }
+
   }
 }
 
@@ -583,7 +622,7 @@ exports.logoutShipper = async (req, res, next) => {
   //     if (err) {
   //       return next(err);
   //     } else {
-        res.redirect('/accountShipper/loginShipper');
-    //   }
-    // });
+  res.redirect('/accountShipper/loginShipper');
+  //   }
+  // });
 }

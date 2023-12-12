@@ -299,7 +299,7 @@ exports.addpet = async (req, res, next) => {
       });
     }
     let newObj = new mdPet.PetModel();
-    let images = await onUploadImages(req.files, "pet");
+    let images = await  (req.files, "pet");
     if (images != [] && images[0] == false) {
       if (images[1].message.indexOf("File size too large.") > -1) {
         return res.status(500).json({
