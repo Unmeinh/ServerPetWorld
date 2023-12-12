@@ -17,9 +17,9 @@ const sendFCMNotification = async (
   try {
     const params = {
       idUser: idUser,
-      content: title,
-      detail: message,
-      image: images,
+      content: (title) ? title : '',
+      detail: (message) ? message : '',
+      image: (images) ? images : [],
       status: 1,
       createdAt: new Date(),
     };
@@ -28,6 +28,7 @@ const sendFCMNotification = async (
       await newNotice.save();
     }
     if (role === 'SELLER') {
+      params.idShop = idUser;
       const newNotice = new mdNoticeSeller.NoticeSellerModel(params);
       await newNotice.save();
     }

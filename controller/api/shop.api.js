@@ -20,6 +20,7 @@ const {
   removeVietnameseTones,
   encodeName,
 } = require("../../function/hashFunction");
+const { sendFCMNotification } = require("../../function/notice");
 
 exports.listShop = async (req, res, next) => {
   let filterSearch = null;
@@ -1676,6 +1677,14 @@ exports.updatePassword = async (req, res, next) => {
     }
     req.shop.passWord = newPassword;
     await mdShop.ShopModel.findByIdAndUpdate(req.shop._id, req.shop);
+    await sendFCMNotification(
+      req.shop.tokenDevice,
+      'Đổi mật khẩu thành công!',
+      `Bạn đã đổi mật khẩu vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nĐừng quên mật khẩu nhé, nếu quên thì bạn có thể lấy lại mật khẩu bất cứ lúc nào.`,
+      'SELLER',
+      [],
+      req.shop._id,
+    );
     return res.status(201).json({
       success: true,
       data: {},
@@ -1698,6 +1707,16 @@ exports.changePassword = async (req, res, next) => {
         const salt = await bcrypt.genSalt(10);
         shop.passWord = await bcrypt.hash(body.newPassword, salt);
         await mdShop.ShopModel.findByIdAndUpdate(shop._id, shop);
+        console.log(shop);
+        console.log(shop.tokenDevice);
+        await sendFCMNotification(
+          shop.tokenDevice,
+          'Đổi mật khẩu thành công!',
+          `Mật khẩu tài khoản của bạn đã được đổi vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nĐừng quên mật khẩu nhé, nếu quên thì bạn có thể lấy lại mật khẩu bất cứ lúc nào.`,
+          'SELLER',
+          [],
+          shop._id,
+        );
         return res.status(201).json({
           success: true,
           data: {},
