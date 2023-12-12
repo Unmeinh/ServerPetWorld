@@ -188,6 +188,7 @@ exports.editbillProduct = async (req, res, next) => {
 exports.cancelBill = async (req, res) => {
   const idBill = req.params.id;
   const {_id, tokenDevice} = req.user;
+  console.log(tokenDevice);
   try {
     const updatedBill = await mdbillProduct.billProductModel.findByIdAndUpdate(
       idBill,
@@ -217,9 +218,9 @@ exports.cancelBill = async (req, res) => {
     await sendFCMNotification(
       tokenDevice,
       'Bạn vừa huỷ đơn hàng thành công!',
-      `Bạn vừa hủy đơn hàng trị giá ${updatedBill?.total?.toLocaleString(
-        'vi-VN',
-      )}đ thành công ${
+      `Bạn vừa hủy đơn hàng trị giá ${(
+        updatedBill?.total + updatedBill?.moneyShip
+      ).toLocaleString('vi-VN')}đ thành công ${
         updatedBill?.paymentMethods == 1
           ? 'Số tiền sẽ của bạn sẽ được hoản trả trong 24h tới'
           : ''
@@ -307,7 +308,7 @@ exports.billProductUser = async (req, res) => {
             detailCard: paymentMethods == 1 ? detailCard : null,
             purchaseDate: new Date(),
           });
-          totalBill += item.total;
+          totalBill += item.total + item.moneyShip;
           const server = await mdServer.serverModal.findOne({});
           const createTransition = new mdTransition.TransactionModal({
             fee: (newbillProduct.total / 100) * server.fee,

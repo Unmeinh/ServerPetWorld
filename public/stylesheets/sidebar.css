@@ -16,12 +16,13 @@
   height: 100%;
   width: 270px;
   background: #F3D2C1;
-  z-index: 100;
+  z-index: 150;
   transition: all 0.5s ease;
 }
 
 .sidebar.close {
-  width: 90px;
+  width: 85px;
+  z-index: 100;
 }
 
 .sidebar .logo-details {
@@ -368,7 +369,7 @@
   }
 
   z .sidebar {
-    width: 78px;
+    width: 100px;
   }
 
   .sidebar.close {
