@@ -11,7 +11,13 @@
     <form action="" method="get">
         <div class="form-group row m-2" style="align-items: center;">
             <label for="username" form="bold" class="col-sm-3 col-form-label">Avatar</label>
-        
+            <div class="col-sm-5 ">
+                <% if(typeof(objShipper.avatarShipper )!='undefined') { %>
+                    <img src="<%= objShipper.avatarShipper %>" style="width: 100px;height: 100px;" class="img-fluid">
+                    <% } else { %>
+                        <img src="/upload/avatar_null.png" style="width: 100px;height: 100px;" class="img-fluid">
+                        <%  }%>                      
+            </div>
         </div>
 
         <div class="form-group row m-2">
@@ -44,7 +50,7 @@
             <label class="col-sm-3 col-form-label">Địa chỉ</label>
             <div class="col-sm-4">
                 <label type="text" class="form-control" id="diachi">
-                    <%= objShipper.address || 'Không có dữ liệu'%>
+                    <%= objShipper.address2 +", "+ objShipper.address || 'Không có dữ liệu'%>
                 </label>
             </div>
         </div>
@@ -56,7 +62,11 @@
                 </label>
             </div>
         </div>
-
+        <div class="form-group row  mt-3">
+            <div class="col-sm-10">
+                <a href="/accountShipper/updateProFileShipper/<%=idShipper%>" class="btn" style="background-color: rgb(216, 212, 212);font-weight: bold;margin: 20px;">Sửa hồ sơ</a>
+            </div>
+          </div>
     </form>
 
     </div>
