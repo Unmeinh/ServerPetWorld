@@ -21,6 +21,7 @@ let ShopSchema = new db.mongoose.Schema(
     ownerIdentity: { type: String, required: true },
     token: { type: String, required: true },
     online: { type: Number, required: true },
+    tokenDevice: { type: String, require: false }
   },
   {
     collection: "Shop",
