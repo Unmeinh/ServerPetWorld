@@ -141,6 +141,62 @@ exports.updateDeliveryStatus = async (req, res, next) => {
     });
   }
 };
+exports.updateDeliveryStatus1 = async (req, res, next) => {
+  let msg = '';
+  let perPage = 6;
+  let filterSearch = null;
+  let currentPage = parseInt(req.query.page) || 1;
+  let idBill = req.params.idBill;
+  let newDeliveryStatus = 2;
+  try {
+    let ObjBillPr = await mdbillProduct.billProductModel.findById(idBill);
+    const totalCount = await mdbillProduct.billProductModel.countDocuments({ idBill: idBill });
+    const totalPage = Math.ceil(totalCount / perPage);
+    if (!ObjBillPr) {
+      return res.render('OrderList/listOder', {
+        listBillProducts: [],
+        countAllBillProducts: totalCount,
+        countNowBillProducts: ObjBillPr.length,
+        msg: msg,
+        currentPage: currentPage,
+        totalPage: totalPage
+      });
+    }
+    ObjBillPr.billDate.deliveringAt = new Date()
+    ObjBillPr.deliveryStatus = newDeliveryStatus;
+    await ObjBillPr.save();
+    const transactions = await mdTransaction.TransactionModal.find({ idBill: idBill });
+    for (const transaction of transactions) {
+      transaction.status = newDeliveryStatus;
+      await transaction.save();
+    }
+
+    const shipper = await mdShipper.ShipperModel.findOne({ "bills.idBill": idBill });
+    shipper.bills.forEach((bill) => {
+      if (bill.idBill.equals(idBill)) {
+        bill.status = newDeliveryStatus;
+      }
+    });
+    await shipper.save();
+
+    // return res.render('OrderList/listOder', {
+    //   listBillProducts: ObjBillPr,
+    //   countAllBillProducts: totalCount,
+    //   countNowBillProducts: ObjBillPr.length,
+    //   msg: msg,
+    //   currentPage: currentPage,
+    //   totalPage: totalPage
+    // });
+    return res.redirect("/accountShipper/listbillDeliveryFall")
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      listBillProducts: [],
+      message: "Lỗi: " + error.message,
+    });
+  }
+};
+
 
 exports.updateDeliveryStatusSuccset = async (req, res, next) => {
   let msg = '';
@@ -198,14 +254,16 @@ exports.updateDeliveryStatusSuccset = async (req, res, next) => {
     });
     await shipper.save();
 
-    return res.render('OrderList/listOder', {
-      listBillProducts: ObjBillPr,
-      countAllBillProducts: totalCount,
-      countNowBillProducts: ObjBillPr.length,
-      msg: msg,
-      currentPage: currentPage,
-      totalPage: totalPage
-    });
+    // return res.render('OrderList/listOder', {
+    //   listBillProducts: ObjBillPr,
+    //   countAllBillProducts: totalCount,
+    //   countNowBillProducts: ObjBillPr.length,
+    //   msg: msg,
+    //   currentPage: currentPage,
+    //   totalPage: totalPage
+    // });
+    return res.redirect("/accountShipper/listbillDelivering")
+
 
   } catch (error) {
     return res.status(500).json({
@@ -305,14 +363,15 @@ exports.updateDeliveryStatusFall = async (req, res, next) => {
         await serverRecord.save();
       }
     }
-    return res.render('OrderList/listOder', {
-      listBillProducts: ObjBillPr,
-      countAllBillProducts: totalCount,
-      countNowBillProducts: ObjBillPr.length,
-      msg: msg,
-      currentPage: currentPage,
-      totalPage: totalPage
-    });
+    // return res.render('OrderList/listOder', {
+    //   listBillProducts: ObjBillPr,
+    //   countAllBillProducts: totalCount,
+    //   countNowBillProducts: ObjBillPr.length,
+    //   msg: msg,
+    //   currentPage: currentPage,
+    //   totalPage: totalPage
+    // });
+    return res.redirect("/accountShipper/listbillDelivering")
 
   } catch (error) {
     return res.status(500).json({
