@@ -84,7 +84,6 @@ exports.addShipper = async (req, res, next) => {
         msg = "Ảnh đại diện không được tải lên";
         return res.render('Shipper/addShipper', { msg: msg });
       }
-      console.log(req.file.path);
       newObj.fullName = req.body.fullName;
       newObj.userName = req.body.userName;
       newObj.phoneNumber = req.body.phoneNumber;
@@ -101,7 +100,6 @@ exports.addShipper = async (req, res, next) => {
       msg = 'Thêm Shipper thành công!';
       return res.redirect('/Shipper');
     } catch (error) {
-      console.log(error.message);
       if (error.message.match(new RegExp('.+`userName` is require+.'))) {
         msg = 'Tên đăng nhập đang trống!';
     }
