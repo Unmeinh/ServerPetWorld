@@ -10,6 +10,7 @@ router.post('/verifyEmail/:encodeToSha256', AccountnCtrl.verifyEmail);
 router.get('/verifyResult', AccountnCtrl.verifyResult);
 router.get('/listBillProduct', AccountnCtrl.listBillProduct);
 router.get('/updateDeliveryStatus/:idBill', AccountnCtrl.updateDeliveryStatus);
+router.get('/updateDeliveryStatusBillFall/:idBill', AccountnCtrl.updateDeliveryStatus1);
 router.get('/updateDeliveryStatusSuccset/:idBill', AccountnCtrl.updateDeliveryStatusSuccset);
 router.get('/updateDeliveryStatusFall/:idBill', AccountnCtrl.updateDeliveryStatusFall);
 router.get('/updateDeliveryStatusCancel/:idBill', AccountnCtrl.updateDeliveryStatusCancel);
