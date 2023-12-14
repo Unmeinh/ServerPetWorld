@@ -21,6 +21,7 @@ const {
   encodeName,
 } = require("../../function/hashFunction");
 const { sendFCMNotification } = require("../../function/notice");
+const { serverModal } = require("../../model/server.modal");
 
 exports.listShop = async (req, res, next) => {
   let filterSearch = null;
@@ -153,15 +154,16 @@ exports.listBillAll = async (req, res, next) => {
         $lte: 5,
       });
       if (listBill && listBill.length > 0) {
-        let list = onFinalProcessingListBill(listBill);
+        let list = await onFinalProcessingListBill(listBill);
         listBill = [...list];
       }
       let listCanConfirm = await mdBill
         .find({ idShop: req.shop._id, deliveryStatus: 0 })
         .count();
-      let listCanCancel = await mdBill
-        .find({ idShop: req.shop._id, deliveryStatus: { $gte: 0, $lte: 1 } })
-        .count();
+      let listCanCancel = null
+      // await mdBill
+      //   .find({ idShop: req.shop._id, deliveryStatus: { $gte: 0, $lte: 1 } })
+      //   .count();
       return res.status(200).json({
         success: true,
         data: {
@@ -196,7 +198,7 @@ exports.listProcessBill = async (req, res, next) => {
         $lte: 1,
       });
       if (listBill && listBill.length > 0) {
-        let list = onFinalProcessingListBill(listBill);
+        let list = await onFinalProcessingListBill(listBill);
         listBill = [...list];
       }
       let listCanConfirm = await mdBill
@@ -236,7 +238,7 @@ exports.listDeliveringBill = async (req, res, next) => {
       }
       let listBill = await getListBill(req.shop._id, 2);
       if (listBill && listBill.length > 0) {
-        let list = onFinalProcessingListBill(listBill);
+        let list = await onFinalProcessingListBill(listBill);
         listBill = [...list];
       }
       return res.status(200).json({
@@ -266,7 +268,7 @@ exports.listDeliveredBill = async (req, res, next) => {
       }
       let listBill = await getListBill(req.shop._id, 3);
       if (listBill && listBill.length > 0) {
-        let list = onFinalProcessingListBill(listBill);
+        let list = await onFinalProcessingListBill(listBill);
         listBill = [...list];
       }
       return res.status(200).json({
@@ -296,7 +298,7 @@ exports.listEvaluatedBill = async (req, res, next) => {
       }
       let listBill = await getListBill(req.shop._id, 5);
       if (listBill && listBill.length > 0) {
-        let list = onFinalProcessingListBill(listBill);
+        let list = await onFinalProcessingListBill(listBill);
         listBill = [...list];
       }
       return res.status(200).json({
@@ -326,7 +328,7 @@ exports.listCancelledBill = async (req, res, next) => {
       }
       let listBill = await getListBill(req.shop._id, -1);
       if (listBill && listBill.length > 0) {
-        let list = onFinalProcessingListBill(listBill);
+        let list = await onFinalProcessingListBill(listBill);
         listBill = [...list];
       }
       return res.status(200).json({
@@ -823,51 +825,50 @@ exports.confirmBill = async (req, res, next) => {
           billProduct.deliveryStatus = 1;
           billProduct.billDate.confirmedAt = new Date();
           await mdBill.findByIdAndUpdate(billProduct._id, billProduct);
-          const location = billProduct?.locationDetail?.location;
           let statusBill = {};
+          statusBill.status = 1;
+          statusBill.colorStatus = "#001858";
+          statusBill.nameStatus = "Đã xác nhận";
+          statusBill.iconStatus = "timer-sand-complete";
+          statusBill.descStatus = 'Đơn hàng đã được xác nhận và đang chờ được giao.';
+          //Add shipper
+          const location = billProduct?.locationDetail?.location;
           if (location) {
-            statusBill.status = 1;
-            statusBill.colorStatus = "#001858";
-            statusBill.nameStatus = "Đã xác nhận";
-
             const [detail, ...rest] = location.split(", ");
-            const [status, message, statusCode] = await addBillForShipper(
+            const [status, message, statusCode, nameShipper] = await addBillForShipper(
               rest.join(", "),
               billProduct._id
             );
-            statusBill.iconStatus = "timer-sand-complete";
-            statusBill.descStatus = message;
             if (status) {
               if (statusCode === 200) {
                 return res.status(201).json({
                   success: true,
                   data: statusBill,
-                  message: "Xác nhận đơn hàng thành công.",
+                  message:
+                    "Xác nhận đơn hàng thành công.\nĐơn hàng đã được giao cho người giao hàng cùng khu vực.",
                 });
               } else {
                 return res.status(201).json({
                   success: true,
                   data: statusBill,
                   message:
-                    "Xác nhận đơn hàng thành công.\nShipper hiện không tồn tại trong khu vực này",
+                    "Xác nhận đơn hàng thành công.\nHiện chưa có người giao hàng trong khu vực để nhận giao đơn hàng.",
                 });
               }
             } else {
-              statusBill.status = -1;
-              statusBill.colorStatus = "#FD3F3F";
-              statusBill.nameStatus = message;
-              statusBill.iconStatus = "clipboard-remove-outline";
               return res.status(500).json({
-                success: true,
+                success: false,
                 data: statusBill,
-                message: "Xác nhận đơn hàng thất bại",
+                message:
+                  "Xác nhận đơn hàng thành công.\nCó lỗi xảy ra khi tìm người giao hàng trong khu vực giao hàng.",
               });
             }
           }
-          return res.status(500).json({
-            success: true,
+          return res.status(201).json({
+            success: false,
             data: statusBill,
-            message: "Xác nhận đơn hàng thất bại",
+            message:
+              "Xác nhận đơn hàng thành công.\nCó lỗi xảy ra khi tìm người giao hàng trong khu vực giao hàng.",
           });
           //Auto find shipper
         }
@@ -1022,6 +1023,53 @@ exports.confirmBillAll = async (req, res, next) => {
     }
   }
 };
+
+exports.findShipper = async (req, res, next) => {
+  try {
+    if (req?.body?.location && req.method == "POST") {
+      let location = req?.body?.location.split(", ").reverse();
+      const [status, message, statusCode, nameShipper] = await addBillForShipper(
+        (location.length > 3) ? `${location[2]}, ${location[1]}, ${location[0]}` : "",
+        req?.body?.idBill
+      );
+      if (status) {
+        if (statusCode === 200) {
+          await sendFCMNotification(
+            req.shop.tokenDevice,
+            'Tìm người giao hàng thành công!',
+            `Đơn hàng ${req?.body?.nameBill} đã giao cho ${nameShipper} vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+            'SELLER',
+            [],
+            req.shop._id,
+          );
+          return res.status(201).json({
+            success: true,
+            data: {},
+            message,
+          });
+        } else {
+          return res.status(201).json({
+            success: false,
+            data: {},
+            message
+          });
+        }
+      } else {
+        return res.status(500).json({
+          success: false,
+          data: {},
+          message
+        });
+      }
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      data: {},
+      message: "Lỗi: " + error.message,
+    });
+  }
+}
 
 exports.updateApm = async (req, res, next) => {
   try {
@@ -1707,8 +1755,6 @@ exports.changePassword = async (req, res, next) => {
         const salt = await bcrypt.genSalt(10);
         shop.passWord = await bcrypt.hash(body.newPassword, salt);
         await mdShop.ShopModel.findByIdAndUpdate(shop._id, shop);
-        console.log(shop);
-        console.log(shop.tokenDevice);
         await sendFCMNotification(
           shop.tokenDevice,
           'Đổi mật khẩu thành công!',
@@ -1981,6 +2027,14 @@ async function getListBill(idShop, billStatus) {
         },
       },
       {
+        $lookup: {
+          from: "Shippers",
+          localField: "idShipper",
+          foreignField: "_id",
+          as: "shipperLookup",
+        },
+      },
+      {
         $unwind: "$userAccLookup",
       },
       {
@@ -2012,6 +2066,7 @@ async function getListBill(idShop, billStatus) {
           productInfo: { $push: "$productInfo" },
           petInfo: { $first: "$petInfo" },
           userInfo: { $first: "$userLookup" },
+          shipperInfo: { $first: "$shipperLookup" },
         },
       },
       {
@@ -2023,6 +2078,7 @@ async function getListBill(idShop, billStatus) {
           deliveryStatus: 1,
           discountBill: 1,
           billDate: 1,
+          shipperInfo: 1,
           "productInfo.idProduct": 1,
           "productInfo.amount": 1,
           "productInfo.price": 1,
@@ -2052,7 +2108,12 @@ async function getListBill(idShop, billStatus) {
   }
 }
 
-function onFinalProcessingListBill(listBill) {
+async function onFinalProcessingListBill(listBill) {
+  let listPayment = [];
+  let server = await serverModal.find();
+  if (server && server.length > 0) {
+    listPayment = server[0].payments;
+  }
   for (let i = 0; i < listBill.length; i++) {
     const bill = listBill[i];
 
@@ -2133,18 +2194,18 @@ function onFinalProcessingListBill(listBill) {
           break;
       }
     }
-    if (bill.paymentMethods != undefined) {
-      switch (String(bill.paymentMethods)) {
-        case "0":
-          bill.paymentMethods = "Thanh toán khi nhận hàng";
-          break;
-        case "1":
-          bill.paymentMethods = "Thẻ Visa";
-          break;
-        default:
-          break;
-      }
-    }
+    // if (bill.paymentMethods != undefined) {
+    //   switch (String(bill.paymentMethods)) {
+    //     case "0":
+    //       bill.paymentMethods = "Thanh toán khi nhận hàng";
+    //       break;
+    //     case "1":
+    //       bill.paymentMethods = "Thẻ Visa";
+    //       break;
+    //     default:
+    //       break;
+    //   }
+    // }
     if (bill.productInfo != undefined) {
       let arrProduct = bill?.productInfo[0];
       if (arrProduct.length > 0) {
@@ -2155,6 +2216,9 @@ function onFinalProcessingListBill(listBill) {
         }
         bill.totalProduct = total;
       }
+    }
+    if (listPayment.length > 0 && bill.paymentMethods != undefined) {
+      bill.paymentMethods = listPayment[Number(bill.paymentMethods)].nameMethod;
     }
     listBill.splice(i, 1, bill);
   }
@@ -2475,6 +2539,7 @@ async function sendEmailResetPassword(email, otp, data, res) {
     }
   });
 }
+
 async function addBillForShipper(location, idBill) {
   try {
     const billData = {
@@ -2527,11 +2592,12 @@ async function addBillForShipper(location, idBill) {
         }
       );
       await mdBill.findByIdAndUpdate(idBill, { idShipper: shipper._id });
-      return [true, "Thêm bill cho shipper thành công", 200];
+      return [true, "Tìm người giao hàng thành công.", 200, shipper.fullName];
     } else {
-      return [true, "Không tìm thấy shipper trong khu vực của bạn", 500];
+      return [true, "Tìm người giao hàng thất bại!\nHiện chưa có người giao hàng nào trong khu vực.", 500, ""];
     }
   } catch (error) {
-    return [false, "Thêm bill cho shipper thất bại", 500];
+    console.log(error);
+    return [false, "Có lỗi xảy ra khi tìm người giao hàng.\nVui lòng thử lại sau.", 500, ""];
   }
 }
