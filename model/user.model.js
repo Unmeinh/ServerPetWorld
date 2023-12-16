@@ -9,10 +9,10 @@ let UserSchema = new db.mongoose.Schema(
         locationUser: { type: String, required: false },
         locationDelivery: [
             {
-                fullName: { type: String, required: false},
-                location: { type: String, required: false},
-                phoneNumber: { type: Number, required: false},
-                isSelected: { type: Boolean, required: false}
+                fullName: { type: String, required: false },
+                location: { type: String, required: false },
+                phoneNumber: { type: Number, required: false },
+                isSelected: { type: Boolean, required: false }
             }
         ],
         avatarUser: { type: String, required: false },
@@ -30,6 +30,7 @@ let UserSchema = new db.mongoose.Schema(
             },
         ],
         myPet: { type: Array, required: false },
+        tokenDevice: { type: String, require: false }
     },
     {
         collection: 'User'

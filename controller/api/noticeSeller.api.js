@@ -1,7 +1,7 @@
 let mdNotiSeller = require("../../model/noticeSeller.model");
 const { onUploadImages } = require("../../function/uploadImage");
 exports.listAllNoticeSeller = async (req, res, next) => {
-  const { _id } = req.user;
+  const { _id } = req.shop;
   const { status } = req.params;
   const page = req.query.page ? parseInt(req.query.page) : 1;
   const limit = req.query.limit ? parseInt(req.query.limit) : 10;
@@ -17,7 +17,7 @@ exports.listAllNoticeSeller = async (req, res, next) => {
     const startIndex = (page - 1) * limit;
 
     const query =
-      status == 0 ? { idUser: _id } : { idUser: _id, status: status };
+      status == 0 ? { idShop: _id } : { idShop: _id, status: status };
     console.log(query, status);
     const listAllNotice = await mdNotiSeller.NoticeSellerModel.find(query)
       .sort({ createdAt: -1 })
@@ -65,14 +65,14 @@ function validateNotificationData(notificationData) {
   return message;
 }
 exports.addNotiSeller = async (req, res, next) => {
-  console.log("token" + req.user._id);
+  console.log("token" + req.shop._id);
   let msg = "";
 
   let newObj = new mdNotiSeller.NoticeSellerModel();
   newObj.content = req.body.content;
   newObj.detail = req.body.detail;
   newObj.status = req.body.status;
-  newObj.idUser = req.user._id;
+  newObj.idShop = req.shop._id;
   newObj.createdAt = new Date();
   let images = await onUploadImages(req.files, "notice");
   if (images != [] && images[0] == false) {
@@ -107,13 +107,13 @@ exports.addNotiSeller = async (req, res, next) => {
     msg = error.message;
     return res.status(500).json({ success: false, data: {}, message: msg });
   }
-  //   res.render('UserShop/addUserShop', { msg: msg });
+  //   res.render('ShopShop/addShopShop', { msg: msg });
 };
 
 exports.editNoticeSeller = async (req, res, next) => {
-  const { id } = req.user;
+  const { id } = req.shop;
   const listNotice = await mdNotiSeller.NoticeSellerModel.find({
-    idUser: id,
+    idShop: id,
     status: { $ne: 2 },
   });
   if (listNotice) {

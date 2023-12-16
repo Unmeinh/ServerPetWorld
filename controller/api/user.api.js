@@ -200,14 +200,20 @@ exports.loginUser = async (req, res, next) => {
   if (req.method == "POST") {
     try {
       let objU = await mdUserAccount.findByCredentials(
-        req.body.userName,
-        req.body.passWord
+        req?.body?.userName,
+        req?.body?.passWord
       );
       if (objU?.success != undefined && objU?.success == false) {
         return res.status(201).json({ success: false, message: objU?.mes });
       }
       objU.online = 0;
       await mdUserAccount.findByIdAndUpdate(objU._id, objU);
+      let user = await mdUser.findById(objU.idUser);
+      if (user) {
+        user = user.toObject();
+        user.tokenDevice = req?.body?.tokenDevice;
+        await mdUser.findByIdAndUpdate(objU.idUser, user);
+      }
       return res.status(201).json({
         success: true,
         data: {},
@@ -228,11 +234,13 @@ exports.loginUser = async (req, res, next) => {
 
 exports.logoutUser = async (req, res, next) => {
   try {
-    req.user.token = null; //xóa token
+    req.user.tokenDevice = "";
+    req.account.online = 1;
     await req.user.save();
+    await req.account.save();
     return res
       .status(200)
-      .json({ success: true, data: {}, message: "Đăng xuất thành công" });
+      .json({ success: true, data: {}, message: "Đăng xuất thành công." });
   } catch (error) {
     console.log(error);
     res.status(500).send(error.message);

@@ -42,36 +42,26 @@
       <th>Tổng tiền</th>
       <th>Tiền Ship</th>
       <th>Ngày tạo</th>
-      <th></th>
-      <th></th>
-      <th></th>
-
       <th style="border-radius: 0 6px 6px 0;"></th>
     </tr>
 
     <% listBillProducts.forEach((row) => { %>
     <tr>
-      <td style="display: flex; flex-direction: row;">
-        <div class="box" style="line-height: 8px; margin: 5px;">
-          <p>
-            <%= row.locationDetail.location || 'Không có dữ liệu' %>
-          </p>
-          <!-- <a href="/Shipper/delete/<%= row._id %>" style="text-decoration: none; color: rgb(171, 169, 169);">
-            Xóa</a> -->
-        </div>
+      <td>
+          <%= row.locationDetail.location || 'Không có dữ liệu' %>
       </td>
       <td>
         <%= row.total || 'Không có dữ liệu' %> VND
       </td>
-
       <td>
         <%= row.moneyShip || 'Không có dữ liệu' %> VND
       </td>
       <td>
         <%= row.purchaseDate ? new Date(row.purchaseDate).toLocaleString('en-US') : 'Không có dữ liệu' %>
       </td>
-      <td>
-        <a href="/accountShipper/updateDeliveryStatus/<%= row._id%>" style="background-color: #F582AE; padding: 8px; border-radius: 10px; text-decoration: none; color: white; font-weight: bold;">Giao hàng </a>
+      <td style="width: 10%;">
+        <a href="/accountShipper/updateDeliveryStatus/<%= row._id%>"
+          style="display: block; background-color: #F582AE; padding: 8px; border-radius: 10px; text-decoration: none; color: white; font-weight: bold; text-align: center;">Giao hàng</a>
       </td>
     </tr>
     <% }) %>
@@ -124,8 +114,6 @@
 
   sortOptionDropdown.addEventListener('change', function () {
     sortForm.submit();
-
-    
   });
 </script>
 <%- include('../inc/bottom') %>
