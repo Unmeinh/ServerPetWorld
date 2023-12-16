@@ -38,6 +38,8 @@ router.post("/checkPhoneNumber", ShopApiCtrl.checkPhoneNumber);
 router.put("/checkPhoneNumber", ShopApiCtrl.checkPhoneNumber);
 router.put("/checkEmail", ShopApiCtrl.checkEmail);
 router.get("/autoLogin", mdJWT.api_shop_auth, ShopApiCtrl.autoLogin);
+router.post("/autoLogin", mdJWT.api_shop_auth, ShopApiCtrl.autoLogin);
+router.post('/updateTokenDevice', mdJWT.api_shop_auth, ShopApiCtrl.updateTokenDevice);
 router.post("/register", uploader.any(), ShopApiCtrl.registerShop);
 router.post("/login", ShopApiCtrl.loginShop);
 router.get("/logout", mdJWT.api_shop_auth, ShopApiCtrl.logoutShop);

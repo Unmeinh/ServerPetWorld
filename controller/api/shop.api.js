@@ -834,9 +834,9 @@ exports.confirmBill = async (req, res, next) => {
           //Add shipper
           const location = billProduct?.locationDetail?.location;
           if (location) {
-            const [detail, ...rest] = location.split(", ");
+            let locationArray = location.split(", ").reverse();
             const [status, message, statusCode, nameShipper] = await addBillForShipper(
-              rest.join(", "),
+              (locationArray.length > 3) ? `${locationArray[2]}, ${locationArray[1]}, ${locationArray[0]}` : "",
               billProduct._id
             );
             if (status) {
@@ -952,11 +952,11 @@ exports.confirmBillAll = async (req, res, next) => {
             billProduct.map(async (bill) => {
               bill.deliveryStatus = 1;
               bill.billDate.confirmedAt = new Date();
-              const location = bill?.locationDetail?.location;
-              const [detail, ...rest] = location.split(", ");
               await mdBill.findByIdAndUpdate(bill._id, bill);
-              const [status, , statusCode] = await addBillForShipper(
-                rest.join(", "),
+              const location = bill?.locationDetail?.location;
+              let locationArray = location.split(", ").reverse();
+              const [status, message, statusCode, nameShipper] = await addBillForShipper(
+                (locationArray.length > 3) ? `${locationArray[2]}, ${locationArray[1]}, ${locationArray[0]}` : "",
                 bill._id
               );
               if (status && statusCode === 500) {
@@ -981,7 +981,7 @@ exports.confirmBillAll = async (req, res, next) => {
             data: {},
             message: statusAddBillForShipper
               ? "Xác nhận tất cả đơn hàng thành công."
-              : "Xác nhận tất cả đơn hàng thành công.\nNhưng có một số đơn hàng không tìm được shipper thích hợp",
+              : "Xác nhận tất cả đơn hàng thành công.\nNhưng có một số đơn hàng chưa tìm được người giao hàng trong khu vực!",
           });
           //Auto find shipper
         }
@@ -1419,17 +1419,53 @@ exports.checkEmail = async (req, res, next) => {
 
 exports.autoLogin = async (req, res, next) => {
   try {
-    return res.status(200).json({
-      success: true,
-      data: req.shop.status,
-      message: "Đăng nhập thành công.",
-    });
+    if (req.method == "GET") {
+      return res.status(200).json({
+        success: true,
+        data: {
+          isApproved: req.shop.status
+        },
+        message: "Đăng nhập thành công.",
+      });
+    }
+    if (req.method == "POST") {
+      if (req.body?.tokenDevice) {
+        req.shop.tokenDevice = req.body?.tokenDevice;
+        req.shop.online = 0;
+        req.shop.save();
+        return res.status(201).json({
+          success: true,
+          data: {
+            isApproved: req.shop.status
+          },
+          message: "Đăng nhập thành công.",
+        });
+      }
+    }
   } catch (error) {
     return res
       .status(500)
       .json({ success: false, data: {}, message: "Lỗi: " + error.message });
   }
 };
+
+exports.updateTokenDevice = async (req, res, next) => {
+  try {
+    if (req.body?.tokenDevice) {
+      req.shop.tokenDevice = eq.body?.tokenDevice;
+      req.shop.save();
+      return res.status(201).json({
+        success: true,
+        data: {},
+        message: "Cập nhật thành công.",
+      });
+    }
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, data: {}, message: "Lỗi: " + error.message });
+  }
+}
 
 exports.registerShop = async (req, res, next) => {
   if (req.method == "POST") {
