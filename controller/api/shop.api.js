@@ -1364,30 +1364,19 @@ exports.checkPhoneNumber = async (req, res, next) => {
     }
     if (req.method == "PUT") {
       let objHL = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
-      if (objHL) {
+      if (!objHL) {
         return res.status(201).json({
           success: false,
-          data: objHL,
-          message: "Số điện thoại đã được sử dụng.",
+          data: {},
+          message: "Số điện thoại chưa được đăng ký.",
+        });
+      } else {
+        return res.status(201).json({
+          success: true,
+          data: {},
+          message: "Số điện thoại đã được đăng ký."
         });
       }
-      if (req.body.userName) {
-        let objUN = await mdShop.ShopModel.findOne({
-          userName: req.body.userName,
-        });
-        if (objUN) {
-          return res.status(201).json({
-            success: false,
-            data: objHL,
-            message: "Tên đăng nhập đã được sử dụng.",
-          });
-        }
-      }
-      return res.status(201).json({
-        success: true,
-        data: objHL,
-        message: "Số điện thoại chưa được sử dụng.",
-      });
     }
   } catch (error) {
     return res
@@ -1406,9 +1395,11 @@ exports.checkEmail = async (req, res, next) => {
         message: "Email chưa được đăng ký.",
       });
     } else {
-      return res
-        .status(201)
-        .json({ success: true, data: objU, message: "Email đã được đăng ký." });
+      return res.status(201).json({
+        success: true,
+        data: objU,
+        message: "Email đã được đăng ký."
+      });
     }
   } catch (error) {
     return res
@@ -1759,7 +1750,17 @@ exports.updatePassword = async (req, res, next) => {
         message: "Mật khẩu hiện tại nhập sai!",
       });
     }
-    req.shop.passWord = newPassword;
+    if (String(oldPassword) == String(newPassword)) {
+      return res
+        .status(201)
+        .json({
+          success: false,
+          data: {},
+          message: "Mật khẩu mới không được trùng với mật khẩu hiện tại!",
+        });
+    }
+    const salt = await bcrypt.genSalt(10);
+    req.shop.passWord = await bcrypt.hash(newPassword, salt);
     await mdShop.ShopModel.findByIdAndUpdate(req.shop._id, req.shop);
     await sendFCMNotification(
       req.shop.tokenDevice,
