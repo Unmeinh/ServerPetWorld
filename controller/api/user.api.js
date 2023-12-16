@@ -58,15 +58,31 @@ exports.myDetail = async (req, res, next) => {
 
 exports.autoLogin = async (req, res, next) => {
   try {
-    req.account.online = 0;
-    await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
-    return res
-      .status(200)
-      .json({
+    if (req.method == "GET") {
+      req.account.online = 0;
+      req.account.save();
+      return res.status(200).json({
         success: true,
         data: req.user,
         message: "Đăng nhập thành công.",
       });
+    }
+    if (req.method == "POST") {
+      if (req.body?.tokenDevice) {
+        req.account.online = 0;
+        req.account.save();
+        req.user.tokenDevice = req.body?.tokenDevice;
+        req.user.save();
+
+        return res
+          .status(201)
+          .json({
+            success: true,
+            data: req.user,
+            message: "Đăng nhập thành công.",
+          });
+      }
+    }
   } catch (error) {
     return res
       .status(500)
