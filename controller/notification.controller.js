@@ -23,7 +23,7 @@ exports.notificationSc = async (req, res, next) => {
       timestamp: admin.database.ServerValue.TIMESTAMP,
     });
 
-    const tokensSnapshot = await db.ref("tokens").once("value");
+    const tokensSnapshot = await db.ref("sellerTokens").once("value");
     tokensSnapshot.forEach((childSnapshot) => {
       const token = childSnapshot.val().token;
       sendFCMNotification(token, role, message);
