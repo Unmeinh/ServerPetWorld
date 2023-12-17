@@ -58,15 +58,31 @@ exports.myDetail = async (req, res, next) => {
 
 exports.autoLogin = async (req, res, next) => {
   try {
-    req.account.online = 0;
-    await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
-    return res
-      .status(200)
-      .json({
+    if (req.method == "GET") {
+      req.account.online = 0;
+      req.account.save();
+      return res.status(200).json({
         success: true,
         data: req.user,
         message: "Đăng nhập thành công.",
       });
+    }
+    if (req.method == "POST") {
+      if (req.body?.tokenDevice) {
+        req.account.online = 0;
+        req.account.save();
+        req.user.tokenDevice = req.body?.tokenDevice;
+        req.user.save();
+
+        return res
+          .status(201)
+          .json({
+            success: true,
+            data: req.user,
+            message: "Đăng nhập thành công.",
+          });
+      }
+    }
   } catch (error) {
     return res
       .status(500)
@@ -428,6 +444,7 @@ exports.updatePassword = async (req, res, next) => {
       oldPassword,
       req.account.passWord
     );
+
     if (!isPasswordMatch) {
       return res
         .status(201)
@@ -437,7 +454,19 @@ exports.updatePassword = async (req, res, next) => {
           message: "Mật khẩu hiện tại nhập sai!",
         });
     }
-    req.account.passWord = newPassword;
+    
+    if (String(oldPassword) == String(newPassword)) {
+      return res
+        .status(201)
+        .json({
+          success: false,
+          data: {},
+          message: "Mật khẩu mới không được trùng với mật khẩu hiện tại!",
+        });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    req.account.passWord = await bcrypt.hash(newPassword, salt);
     try {
       await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
       return res
