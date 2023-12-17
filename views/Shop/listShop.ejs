@@ -1,7 +1,7 @@
 <%- include('../inc/top', { title: 'Quản lý shop' }) %>
 <div class="container-fluid" style="width: 98%; display: flex; flex-direction: column;">
     <div class="row m-3">
-        <form action="" class="col-12 col-md-3 me-2" method="get">
+        <form action="" class="row col-3 me-2" method="get">
             <div style="background-color: #F0F4F8; border-radius: 25px; display: flex; align-items: center;">
                 <div style="width: 10%;">
                     <button type="submit" style="border: none;">
@@ -14,16 +14,17 @@
             </div>
         </form>
 
-        <form action="" method="get" id="sortForm" class="col-12 col-md-4 me-5" style="display: flex; justify-content: space-between;">
-            <select name="sortOption" id="sortOption" class="form-select sort-select" style="background-color: #F0F4F8; border-radius: 20px; border: none; box-shadow: none;">
+        <form action="" method="get" id="sortForm" class="row col-4 me-5" style="display: flex; justify-content: space-between;">
+            <select name="sortOption" id="sortOption" class="form-select sort-select  row col-10" style="background-color: #F0F4F8; border-radius: 20px; border: none; box-shadow: none;">
                 <option selected disabled>Sắp xếp tên shop</option>
                 <option value="1">Sắp xếp từ a-z</option>
                 <option value="-1">Sắp xếp từ z-a</option>
             </select>
         </form>
-        <div class="row col-2 ms-3" style="align-items: right;"></div>
+        <div class="row col-3"></div>
+
         <div class="row col-2 ms-1" style="align-items: right;">
-          <a href="http://localhost:3000/shop/confirm"
+          <a href="/shop/confirm"
             style="text-decoration: none; background-color: #F582AE; border-radius: 6px;text-align: center;padding: 7px;">
             <span style="color: white;font-weight: bold;">Duyệt shop</span>
           </a>
