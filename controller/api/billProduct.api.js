@@ -426,3 +426,33 @@ exports.test = async (req, res) => {
   );
   res.status(200).json({done: true});
 };
+
+exports.completedBill = async (req, res) => {
+  const idBill = req.params.id;
+  try {
+    if (idBill) {
+      await Promise.all([
+        await mdbillProduct.billProductModel.findByIdAndUpdate(idBill, {
+          deliveryStatus: 4,
+        }),
+        await mdTransition.TransactionModal.findOneAndUpdate(
+          {idBill: idBill},
+          {
+            status: 4,
+          },
+        ),
+      ]);
+      return res.status(200).json({
+        success: true,
+        data: [],
+        message: 'Đã nhận đơn hàng thành công',
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      data: [],
+      message: 'Lỗi' + error.message,
+    });
+  }
+};
