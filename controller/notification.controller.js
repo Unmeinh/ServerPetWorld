@@ -25,6 +25,7 @@ exports.notificationSc = async (req, res, next) => {
       timestamp: admin.database.ServerValue.TIMESTAMP,
     });
 
+
     const tokensSnapshot = role === "client"
   ? await db.ref("tokens").once("value")
   : await db.ref("sellerTokens").once("value");

@@ -21,12 +21,12 @@ router.get(
 router.get(
   "/delete/:idShop",
   checkLogin.check_request_login,
-  ShopCtrl.deleteShop
+  ShopCtrl.updateHideShopStatus
 );
 router.post(
   "/delete/:idShop",
   checkLogin.check_request_login,
-  ShopCtrl.deleteShop
+  ShopCtrl.updateHideShopStatus
 );
 
 router.get(

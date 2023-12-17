@@ -5,23 +5,6 @@ const string_word_secret = process.env.TOKEN_SEC_KEY;
 const {decodeFromSha256, decodeFromAscii} = require('../function/hashFunction');
 const fs = require('fs');
 
-exports.updateShopStatus = async (req, res, next) => {
-  let message = '';
-  let idShop = req.params.idShop;
-  let ObjShop = await mdShop.ShopModel.findById(idShop);
-  if (req.method == 'POST') {
-    try {
-      await mdShop.ShopModel.findByIdAndUpdate(ObjShop._id, {status: 1});
-      return res.redirect('/shop');
-    } catch (error) {
-      message = error.message;
-      console.log(message);
-    }
-  }
-
-  res.render('Shop/updateShop', {message: message, ObjShop: ObjShop});
-};
-
 exports.listShop = async (req, res, next) => {
   const perPage = 7;
   let msg = '';
@@ -130,6 +113,7 @@ exports.listShopConfirm = async (req, res, next) => {
         currentPage: currentPage,
         totalPages: totalPages,
         moment: moment,
+        adminLogin: req.session.adLogin
       });
     } catch (error) {
       msg = '' + error.message;
@@ -137,7 +121,7 @@ exports.listShopConfirm = async (req, res, next) => {
     }
   }
   // If no search results are found, render a message
-  res.render('Shop/confirmShop', {msg: msg});
+  res.render('Shop/confirmShop', {msg: msg, adminLogin: req.session.adLogin });
 };
 exports.detailShop = async (req, res, next) => {
   let idShop = req.params.idShop;
@@ -145,7 +129,7 @@ exports.detailShop = async (req, res, next) => {
   res.render('Shop/detailShop', {
     ObjShop: ObjShop,
     moment: moment,
-    adminLogin: req.session.adLogin,
+    adminLogin: req.session.adLogin
   });
 };
 
@@ -177,27 +161,44 @@ exports.detailOwner = async (req, res, next) => {
   res.render('Shop/detailOwner', {
     objOwner: objOwner,
     moment: moment,
-    adminLogin: req.session.adLogin,
+    adminLogin: req.session.adLogin
   });
 };
 
-exports.deleteShop = async (req, res, next) => {
+/** Update Confirm shop */
+exports.updateShopStatus = async (req, res, next) => {
   let message = '';
   let idShop = req.params.idShop;
   let ObjShop = await mdShop.ShopModel.findById(idShop);
   if (req.method == 'POST') {
     try {
-      await mdShop.ShopModel.findByIdAndDelete(idShop);
-      return res.redirect('/shop');
+      await mdShop.ShopModel.findByIdAndUpdate(ObjShop._id, {status: 1});
+      return res.redirect('/shop/confirm');
     } catch (error) {
       message = error.message;
       console.log(message);
     }
   }
+  res.render('Shop/updateShop', {message: message, ObjShop: ObjShop, adminLogin: req.session.adLogin});
+};
 
+/** Update hide shop not confirm */
+exports.updateHideShopStatus = async (req, res, next) => {
+  let message = '';
+  let idShop = req.params.idShop;
+  let ObjShop = await mdShop.ShopModel.findById(idShop);
+  if (req.method == 'POST') {
+    try {
+      await mdShop.ShopModel.findByIdAndUpdate(idShop, {status: -1});
+      return res.redirect('/shop/confirm');
+    } catch (error) {
+      message = error.message;
+      console.log(message);
+    }
+  }
   res.render('Shop/deleteShop', {
     message: message,
     ObjShop: ObjShop,
-    adminLogin: req.session.adLogin,
+    adminLogin: req.session.adLogin
   });
 };
