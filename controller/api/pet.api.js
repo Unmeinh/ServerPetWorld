@@ -7,11 +7,11 @@ let mdReview = require('../../model/review.model');
 let mdFavorite = require('../../model/myfavoriteproduct.model');
 
 exports.listpet = async (req, res, next) => {
-  if (req.method !== 'GET') {
-    return res
-      .status(400)
-      .json({success: false, message: 'Method not allowed'});
-  }
+  // if (req.method !== 'GET') {
+  //   return res
+  //     .status(400)
+  //     .json({success: false, message: 'Method not allowed'});
+  // }
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = 10;
@@ -88,7 +88,49 @@ exports.listpet = async (req, res, next) => {
           message: `Không tìm thấy Pet nào trong vòng ${days} ngày, trang ${page}`,
         });
       }
-    } else if (
+    } 
+    else if (
+      req.query.hasOwnProperty('KhuyenMai') &&
+      req.query.KhuyenMai === '' &&
+      req.query.hasOwnProperty('page')
+    ) {
+      const page = parseInt(req.query.page) || 1;
+
+      // Validate page number
+      if (page <= 0 || isNaN(page)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Số trang không hợp lệ.',
+        });
+      }
+
+      const limit = 10;
+      const startIndex = (page - 1) * limit;
+
+      // Retrieve pets sorted by descending price
+      const listPet = await mdPet.PetModel.find({status: 0})
+        .sort({discount: -1}) 
+        .select('idShop namePet imagesPet type discount rate pricePet')
+        .populate('idShop', 'nameShop locationShop avatarShop status')
+        .limit(limit)
+        .skip(startIndex)
+        .exec();
+
+      if (listPet.length > 0) {
+        return res.status(200).json({
+          success: true,
+          data: listPet,
+          message: `Sắp xếp khuyến mãi thú cưng trang ${page}`,
+        });
+      } else {
+        return res.status(200).json({
+          success: false,
+          data: [],
+          message: 'Không có thú cưng nào',
+        });
+      }
+    } 
+    else if (
       req.query.hasOwnProperty('GiaGiamDan') &&
       req.query.GiaGiamDan === '' &&
       req.query.hasOwnProperty('page')
