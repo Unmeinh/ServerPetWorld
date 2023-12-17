@@ -1,30 +1,29 @@
 <%- include('../inc/top',{title:'Quản lý thú cưng'}) %>
   <div class="container-fluid" style="width: 98%;display: flex; flex-direction: column">
-
     <div class="row col m-3">
       <form action="" class="row col-3 me-2" method="get">
         <div
-          style="background-color: #F0F4F8;border-radius: 25px;align-items: center;display: flex;flex-direction: row;">
+          style="background-color: #F0F4F8; border-radius: 25px; align-items: center;display: flex; flex-direction: row;">
           <div style="width: 10%;">
-            <button type="submit" style="border: none;"><img src="/upload/iconFind.png"
-                style="width: 20px;height: 20px;"></button>
+            <button type="submit" style="border: none;">
+              <img src="/upload/iconFind.png" style="width: 20px; height: 20px;">
+              </button>
           </div>
           <div style="width: 90%;">
             <input name="filterSearch"
-              style="border: none;background-color: #F0F4F8;border-radius: 25px; box-shadow: none;" class="form-control"
+              style="border: none; background-color: #F0F4F8; border-radius: 25px; box-shadow: none;" class="form-control"
               placeholder="Tìm kiếm">
           </div>
         </div>
       </form>
-
+      
       <form action="" method="get" id="sortForm" class="row col-4 me-5"
         style="display: flex; flex-direction: row; justify-content: space-between;">
-        <select <%=hidden %> name="sortOption" id="sortOption" class="row col-10 form-select"
+        <select <%= hidden %> name="sortOption" id="sortOption" class="row col-10 form-select"
           style="background-color: #F0F4F8;border-radius: 20px;border: none;box-shadow: none; width: 80%;">
           <option selected disabled>Sắp xếp tên thú cưng</option>
           <option value="1"><button type="submit">Sắp xếp từ a-z</button></option>
           <option value="-1"><button type="submit">Sắp xếp từ z-a</button></option>
-
         </select>
       </form>
 
@@ -41,7 +40,6 @@
 
     <% if (typeof listpet !='undefined' && listpet.length> 0) { %>
       <table class="table align-middle " style="border: white;">
-
         <tr style="background-color: #8BD3DD;">
           <th scope="col" style="border-radius: 6px 0 0 6px;">Tên thú cưng</th>
           <th scope="col">Giá tiền</th>
@@ -126,7 +124,6 @@
           </span>
         </div>
         <% } %>
-
   </div>
   <%- include('../inc/bottom') %>
 
