@@ -54,7 +54,49 @@ exports.listProduct = async (req, res, next) => {
           .status(203)
           .json({success: false, message: 'Không có sản phẩm nào'});
       }
-    } else if (
+    } 
+    else if (
+      req.query.hasOwnProperty('KhuyenMai') &&
+      req.query.KhuyenMai === '' &&
+      req.query.hasOwnProperty('page')
+    ) {
+      const page = parseInt(req.query.page) || 1;
+      if (page <= 0 || isNaN(page)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Số trang không hợp lệ.',
+        });
+      }
+      const limit = 10;
+      const startIndex = (page - 1) * limit;
+      const allProducts = await mdProduct.ProductModel.find({status: 0})
+        .sort({discount: -1}) // Sort by descending price
+        .select('idShop nameProduct arrProduct type discount rate priceProduct')
+        .populate('idShop', 'nameShop locationShop avatarShop status')
+        .exec();
+
+      const totalPages = Math.ceil(allProducts.length / limit);
+
+      if (page > totalPages) {
+        return res
+          .status(203)
+          .json({success: false, message: 'Trang không tồn tại'});
+      }
+      const productsForPage = allProducts.slice(startIndex, startIndex + limit);
+
+      if (productsForPage.length > 0) {
+        return res.status(200).json({
+          success: true,
+          data: productsForPage,
+          message: `Sắp xếp theo khuyến mãi trang ${page}`,
+        });
+      } else {
+        return res
+          .status(203)
+          .json({success: false, message: 'Không có sản phẩm nào'});
+      }
+    }
+    else if (
       req.query.hasOwnProperty('GiaGiamDan') &&
       req.query.GiaGiamDan === '' &&
       req.query.hasOwnProperty('page')
