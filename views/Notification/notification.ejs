@@ -16,7 +16,7 @@
                                 <div class="d-flex bd-highlight" id="clientButton">
                                     <div class="user_info bordered wide d-flex align-items-center hoverable">
                                         <div class="img_cont me-2">
-                                            <img src="../../upload/avatar.jpg" class=" rounded-circle
+                                            <img src="../../upload/ourpet_logo.png" class=" rounded-circle
                                                 user_img">
                                         </div>
                                         <span>Client</span>
@@ -30,7 +30,7 @@
                                 <div class="d-flex bd-highlight" id="sellerButton">
                                     <div class="user_info bordered wide d-flex align-items-center hoverable">
                                         <div class="img_cont me-2">
-                                            <img src="../../upload/avatar.jpg" class="rounded-circle user_img">
+                                            <img src="../../upload/ourpet_logo.png" class="rounded-circle user_img">
                                         </div>
                                         <span>Seller</span>
                                     </div>
@@ -46,7 +46,7 @@
                     <div class="card-header msg_head" style="background-color: #FEC7D7;">
                         <div class="d-flex bd-highlight">
                             <div class="img_cont">
-                                <img src="../../upload/avatar.jpg" class="rounded-circle user_img">
+                                <img src="../../upload/ourpet_logo.png" class="rounded-circle user_img" id="imgClick">
 
                             </div>
                             <div class="user_info">
@@ -95,16 +95,25 @@
     <script>
         const sellerMessages = [];
         const clientMessages = [];
-        let role = 'client';
+        let role = '';
 
         document.addEventListener('DOMContentLoaded', () => {
             const clientButton = document.querySelector('#clientButton');
             const sellerButton = document.querySelector('#sellerButton');
             const userTypeSpan = document.querySelector('#userType');
+            const imgClick = document.querySelector('#imgClick');
 
+            let role = 'client';
+            userTypeSpan.textContent = 'Client';
+            imgClick.src = '../../upload/ourpet_logo.png';
+
+            // Fetch and display client messages by default
+            fetchMessages(role);
+            displayMessages(clientMessages);
 
             clientButton.addEventListener('click', async () => {
                 userTypeSpan.textContent = 'Client';
+                imgClick.src = '../../upload/ourpet_logo.png';
                 role = 'client';
 
 
@@ -114,6 +123,7 @@
 
             sellerButton.addEventListener('click', async () => {
                 userTypeSpan.textContent = 'Seller';
+                imgClick.src = '../../upload/ourpet_logo.png';
                 role = 'seller';
 
 
