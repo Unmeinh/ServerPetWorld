@@ -188,7 +188,6 @@ exports.editbillProduct = async (req, res, next) => {
 exports.cancelBill = async (req, res) => {
   const idBill = req.params.id;
   const {_id, tokenDevice} = req.user;
-  console.log(tokenDevice);
   try {
     const updatedBill = await mdbillProduct.billProductModel.findByIdAndUpdate(
       idBill,
@@ -218,10 +217,10 @@ exports.cancelBill = async (req, res) => {
     await sendFCMNotification(
       tokenDevice,
       'Bạn vừa huỷ đơn hàng thành công!',
-      `Bạn vừa hủy đơn hàng trị giá ${updatedBill?.total?.toLocaleString(
-        'vi-VN',
-      )}đ thành công ${
-        updatedBill?.paymentMethods == 1
+      `Bạn vừa hủy đơn hàng trị giá ${(
+        updatedBill?.total + updatedBill?.moneyShip
+      ).toLocaleString('vi-VN')}đ thành công ${
+        updatedBill?.paymentMethods !== 0
           ? 'Số tiền sẽ của bạn sẽ được hoản trả trong 24h tới'
           : ''
       }`,
@@ -238,7 +237,7 @@ exports.cancelBill = async (req, res) => {
 
 exports.billProductUser = async (req, res) => {
   const {_id, tokenDevice} = req.user;
-  const {products, locationDetail, paymentMethods, detailCard} = req.body;
+  const {products, locationDetail, paymentMethod, detailCard} = req.body;
   let totalBill = 0;
   if (req.method === 'POST') {
     try {
@@ -304,8 +303,8 @@ exports.billProductUser = async (req, res) => {
             moneyShip: item.moneyShip,
             products: item.items,
             idShop: item.idShop,
-            paymentMethods: paymentMethods ?? 0,
-            detailCard: paymentMethods == 1 ? detailCard : null,
+            paymentMethods: paymentMethod ?? 0,
+            detailCard: paymentMethod !== 0 ? detailCard : null,
             purchaseDate: new Date(),
           });
           totalBill += item.total + item.moneyShip;
@@ -315,7 +314,7 @@ exports.billProductUser = async (req, res) => {
             idBill: newbillProduct._id,
             idShop: newbillProduct.idShop,
             idCustommer: _id,
-            paymentMethod: paymentMethods,
+            paymentMethod: paymentMethod ?? 0,
             status: newbillProduct.deliveryStatus,
             total:
               newbillProduct.total - (newbillProduct.total / 100) * server.fee,

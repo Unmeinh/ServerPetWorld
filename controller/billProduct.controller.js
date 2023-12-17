@@ -10,7 +10,7 @@ exports.listBillProduct = async (req, res, next) => {
     const skipCount = (page - 1) * perPage;
 
     let listBillProduct = await mdbillProduct.billProductModel.find().populate("products.idProduct").populate("idUser").sort(sortOption).sort({ createdAt: -1 }).skip(skipCount).limit(perPage);
-
+    
     message = "Lấy danh sách hóa đơn sản phẩm thành công";
     return res.render('BillProduct/listBillProduct', {
         listBillProduct: listBillProduct,

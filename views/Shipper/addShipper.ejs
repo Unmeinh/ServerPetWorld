@@ -17,9 +17,17 @@
                 </span>
             </div>
             <% }%>
+                <form method="post" id="formShipper" enctype="multipart/form-data"  action="">
+                    <div class="form-group row  m-2">
+                        <label for="uploadImage">
+                            <div class="circular-image">
+                                <img src="/upload/avatar_null.png" class="img-fluid" id="preview">
+                                <input type="file" name="image" accept="image/*" onchange="previewImage(event)" id="uploadImage">
+                            </div>
+                        </label>
+                    </div>
+                    
 
-
-                <form method="post" id="formShipper">
                     <div class="form-group row  m-2">
                         <label for="nameShipper" form="bold" class="col-sm-3 col-form-label">Tên Shipper(bắt
                             buộc)</label>
@@ -81,17 +89,45 @@
                             </select>
                         </div>
                     </div>
+                    <div class="form-group row m-2">
+                        <label for="emailShipper" class="col-sm-3 col-form-label">Địa chỉ cụ thể</label>
+                        <div class="col-sm-5">
+                            <input name="address2" type="text" class="form-control" id="address2 ">
+                        </div>
+                    </div>
+                    <div class="form-group row mt-4" style="margin-left: 80px;">
+                        <div class="col-sm-10">
+                            <button style="background-color: #F582AE;margin-right: 20px;" type="submit"
+                                class="btn btn-secondary ">Thêm
+                                Shipper mới
+                            </button>
+                            <a href="/Shipper" style=" background-color: #001858" class="btn btn-secondary">Hủy bỏ</a>
+                        </div>
+                    </div>
+                </form>
     </div>
-    <div class="form-group row mt-4" style="margin-left: 80px;">
-        <div class="col-sm-10">
-            <button style="background-color: #F582AE;margin-right: 20px;" type="submit" class="btn btn-secondary ">Thêm
-                Shipper mới
-            </button>
-            <a href="/Shipper" style=" background-color: #001858" class="btn btn-secondary">Hủy bỏ</a>
-        </div>
-    </div>
-    </form>
-    </div>
+    <style>
+        .circular-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid #ccc;
+}
+
+.circular-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Hide input file button */
+input[type="file"] {
+    display: none;
+}
+
+    </style>
     <script>
         let provice = null
         let district = null
@@ -176,5 +212,16 @@
                 });
         }
         updateProvinceDropdown();
+        function previewImage(event) {
+            const input = event.target;
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('preview').setAttribute('src', e.target.result);
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
     </script>
     <%- include('../inc/bottom') %>

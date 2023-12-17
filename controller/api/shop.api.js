@@ -20,6 +20,8 @@ const {
   removeVietnameseTones,
   encodeName,
 } = require("../../function/hashFunction");
+const { sendFCMNotification } = require("../../function/notice");
+const { serverModal } = require("../../model/server.modal");
 
 exports.listShop = async (req, res, next) => {
   let filterSearch = null;
@@ -152,15 +154,16 @@ exports.listBillAll = async (req, res, next) => {
         $lte: 5,
       });
       if (listBill && listBill.length > 0) {
-        let list = onFinalProcessingListBill(listBill);
+        let list = await onFinalProcessingListBill(listBill);
         listBill = [...list];
       }
       let listCanConfirm = await mdBill
         .find({ idShop: req.shop._id, deliveryStatus: 0 })
         .count();
-      let listCanCancel = await mdBill
-        .find({ idShop: req.shop._id, deliveryStatus: { $gte: 0, $lte: 1 } })
-        .count();
+      let listCanCancel = null
+      // await mdBill
+      //   .find({ idShop: req.shop._id, deliveryStatus: { $gte: 0, $lte: 1 } })
+      //   .count();
       return res.status(200).json({
         success: true,
         data: {
@@ -195,7 +198,7 @@ exports.listProcessBill = async (req, res, next) => {
         $lte: 1,
       });
       if (listBill && listBill.length > 0) {
-        let list = onFinalProcessingListBill(listBill);
+        let list = await onFinalProcessingListBill(listBill);
         listBill = [...list];
       }
       let listCanConfirm = await mdBill
@@ -235,7 +238,7 @@ exports.listDeliveringBill = async (req, res, next) => {
       }
       let listBill = await getListBill(req.shop._id, 2);
       if (listBill && listBill.length > 0) {
-        let list = onFinalProcessingListBill(listBill);
+        let list = await onFinalProcessingListBill(listBill);
         listBill = [...list];
       }
       return res.status(200).json({
@@ -265,7 +268,7 @@ exports.listDeliveredBill = async (req, res, next) => {
       }
       let listBill = await getListBill(req.shop._id, 3);
       if (listBill && listBill.length > 0) {
-        let list = onFinalProcessingListBill(listBill);
+        let list = await onFinalProcessingListBill(listBill);
         listBill = [...list];
       }
       return res.status(200).json({
@@ -295,7 +298,7 @@ exports.listEvaluatedBill = async (req, res, next) => {
       }
       let listBill = await getListBill(req.shop._id, 5);
       if (listBill && listBill.length > 0) {
-        let list = onFinalProcessingListBill(listBill);
+        let list = await onFinalProcessingListBill(listBill);
         listBill = [...list];
       }
       return res.status(200).json({
@@ -325,7 +328,7 @@ exports.listCancelledBill = async (req, res, next) => {
       }
       let listBill = await getListBill(req.shop._id, -1);
       if (listBill && listBill.length > 0) {
-        let list = onFinalProcessingListBill(listBill);
+        let list = await onFinalProcessingListBill(listBill);
         listBill = [...list];
       }
       return res.status(200).json({
@@ -822,51 +825,50 @@ exports.confirmBill = async (req, res, next) => {
           billProduct.deliveryStatus = 1;
           billProduct.billDate.confirmedAt = new Date();
           await mdBill.findByIdAndUpdate(billProduct._id, billProduct);
-          const location = billProduct?.locationDetail?.location;
           let statusBill = {};
+          statusBill.status = 1;
+          statusBill.colorStatus = "#001858";
+          statusBill.nameStatus = "Đã xác nhận";
+          statusBill.iconStatus = "timer-sand-complete";
+          statusBill.descStatus = 'Đơn hàng đã được xác nhận và đang chờ được giao.';
+          //Add shipper
+          const location = billProduct?.locationDetail?.location;
           if (location) {
-            statusBill.status = 1;
-            statusBill.colorStatus = "#001858";
-            statusBill.nameStatus = "Đã xác nhận";
-
-            const [detail, ...rest] = location.split(", ");
-            const [status, message, statusCode] = await addBillForShipper(
-              rest.join(", "),
+            let locationArray = location.split(", ").reverse();
+            const [status, message, statusCode, nameShipper] = await addBillForShipper(
+              (locationArray.length > 3) ? `${locationArray[2]}, ${locationArray[1]}, ${locationArray[0]}` : "",
               billProduct._id
             );
-            statusBill.iconStatus = "timer-sand-complete";
-            statusBill.descStatus = message;
             if (status) {
               if (statusCode === 200) {
                 return res.status(201).json({
                   success: true,
                   data: statusBill,
-                  message: "Xác nhận đơn hàng thành công.",
+                  message:
+                    "Xác nhận đơn hàng thành công.\nĐơn hàng đã được giao cho người giao hàng cùng khu vực.",
                 });
               } else {
                 return res.status(201).json({
                   success: true,
                   data: statusBill,
                   message:
-                    "Xác nhận đơn hàng thành công.\nShipper hiện không tồn tại trong khu vực này",
+                    "Xác nhận đơn hàng thành công.\nHiện chưa có người giao hàng trong khu vực để nhận giao đơn hàng.",
                 });
               }
             } else {
-              statusBill.status = -1;
-              statusBill.colorStatus = "#FD3F3F";
-              statusBill.nameStatus = message;
-              statusBill.iconStatus = "clipboard-remove-outline";
               return res.status(500).json({
-                success: true,
+                success: false,
                 data: statusBill,
-                message: "Xác nhận đơn hàng thất bại",
+                message:
+                  "Xác nhận đơn hàng thành công.\nCó lỗi xảy ra khi tìm người giao hàng trong khu vực giao hàng.",
               });
             }
           }
-          return res.status(500).json({
-            success: true,
+          return res.status(201).json({
+            success: false,
             data: statusBill,
-            message: "Xác nhận đơn hàng thất bại",
+            message:
+              "Xác nhận đơn hàng thành công.\nCó lỗi xảy ra khi tìm người giao hàng trong khu vực giao hàng.",
           });
           //Auto find shipper
         }
@@ -950,11 +952,11 @@ exports.confirmBillAll = async (req, res, next) => {
             billProduct.map(async (bill) => {
               bill.deliveryStatus = 1;
               bill.billDate.confirmedAt = new Date();
-              const location = bill?.locationDetail?.location;
-              const [detail, ...rest] = location.split(", ");
               await mdBill.findByIdAndUpdate(bill._id, bill);
-              const [status, , statusCode] = await addBillForShipper(
-                rest.join(", "),
+              const location = bill?.locationDetail?.location;
+              let locationArray = location.split(", ").reverse();
+              const [status, message, statusCode, nameShipper] = await addBillForShipper(
+                (locationArray.length > 3) ? `${locationArray[2]}, ${locationArray[1]}, ${locationArray[0]}` : "",
                 bill._id
               );
               if (status && statusCode === 500) {
@@ -979,7 +981,7 @@ exports.confirmBillAll = async (req, res, next) => {
             data: {},
             message: statusAddBillForShipper
               ? "Xác nhận tất cả đơn hàng thành công."
-              : "Xác nhận tất cả đơn hàng thành công.\nNhưng có một số đơn hàng không tìm được shipper thích hợp",
+              : "Xác nhận tất cả đơn hàng thành công.\nNhưng có một số đơn hàng chưa tìm được người giao hàng trong khu vực!",
           });
           //Auto find shipper
         }
@@ -1021,6 +1023,53 @@ exports.confirmBillAll = async (req, res, next) => {
     }
   }
 };
+
+exports.findShipper = async (req, res, next) => {
+  try {
+    if (req?.body?.location && req.method == "POST") {
+      let location = req?.body?.location.split(", ").reverse();
+      const [status, message, statusCode, nameShipper] = await addBillForShipper(
+        (location.length > 3) ? `${location[2]}, ${location[1]}, ${location[0]}` : "",
+        req?.body?.idBill
+      );
+      if (status) {
+        if (statusCode === 200) {
+          await sendFCMNotification(
+            req.shop.tokenDevice,
+            'Tìm người giao hàng thành công!',
+            `Đơn hàng ${req?.body?.nameBill} đã giao cho ${nameShipper} vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+            'SELLER',
+            [],
+            req.shop._id,
+          );
+          return res.status(201).json({
+            success: true,
+            data: {},
+            message,
+          });
+        } else {
+          return res.status(201).json({
+            success: false,
+            data: {},
+            message
+          });
+        }
+      } else {
+        return res.status(500).json({
+          success: false,
+          data: {},
+          message
+        });
+      }
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      data: {},
+      message: "Lỗi: " + error.message,
+    });
+  }
+}
 
 exports.updateApm = async (req, res, next) => {
   try {
@@ -1370,17 +1419,53 @@ exports.checkEmail = async (req, res, next) => {
 
 exports.autoLogin = async (req, res, next) => {
   try {
-    return res.status(200).json({
-      success: true,
-      data: req.shop.status,
-      message: "Đăng nhập thành công.",
-    });
+    if (req.method == "GET") {
+      return res.status(200).json({
+        success: true,
+        data: {
+          isApproved: req.shop.status
+        },
+        message: "Đăng nhập thành công.",
+      });
+    }
+    if (req.method == "POST") {
+      if (req.body?.tokenDevice) {
+        req.shop.tokenDevice = req.body?.tokenDevice;
+        req.shop.online = 0;
+        req.shop.save();
+        return res.status(201).json({
+          success: true,
+          data: {
+            isApproved: req.shop.status
+          },
+          message: "Đăng nhập thành công.",
+        });
+      }
+    }
   } catch (error) {
     return res
       .status(500)
       .json({ success: false, data: {}, message: "Lỗi: " + error.message });
   }
 };
+
+exports.updateTokenDevice = async (req, res, next) => {
+  try {
+    if (req.body?.tokenDevice) {
+      req.shop.tokenDevice = eq.body?.tokenDevice;
+      req.shop.save();
+      return res.status(201).json({
+        success: true,
+        data: {},
+        message: "Cập nhật thành công.",
+      });
+    }
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, data: {}, message: "Lỗi: " + error.message });
+  }
+}
 
 exports.registerShop = async (req, res, next) => {
   if (req.method == "POST") {
@@ -1451,6 +1536,7 @@ exports.loginShop = async (req, res, next) => {
           .json({ success: false, message: "Sai thông tin đăng nhập!" });
       }
       objS.online = 0;
+      objS.tokenDevice = req?.body?.tokenDevice;
       await mdShop.ShopModel.findByIdAndUpdate(objS._id, objS);
       return res.status(201).json({
         success: true,
@@ -1467,6 +1553,20 @@ exports.loginShop = async (req, res, next) => {
         message: error.message,
       });
     }
+  }
+};
+
+exports.logoutShop = async (req, res, next) => {
+  try {
+    req.shop.tokenDevice = "";
+    req.shop.online = 1;
+    await req.shop.save();
+    return res
+      .status(200)
+      .json({ success: true, data: {}, message: "Đăng xuất thành công." });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error.message);
   }
 };
 
@@ -1661,6 +1761,14 @@ exports.updatePassword = async (req, res, next) => {
     }
     req.shop.passWord = newPassword;
     await mdShop.ShopModel.findByIdAndUpdate(req.shop._id, req.shop);
+    await sendFCMNotification(
+      req.shop.tokenDevice,
+      'Đổi mật khẩu thành công!',
+      `Bạn đã đổi mật khẩu vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nĐừng quên mật khẩu nhé, nếu quên thì bạn có thể lấy lại mật khẩu bất cứ lúc nào.`,
+      'SELLER',
+      [],
+      req.shop._id,
+    );
     return res.status(201).json({
       success: true,
       data: {},
@@ -1683,6 +1791,14 @@ exports.changePassword = async (req, res, next) => {
         const salt = await bcrypt.genSalt(10);
         shop.passWord = await bcrypt.hash(body.newPassword, salt);
         await mdShop.ShopModel.findByIdAndUpdate(shop._id, shop);
+        await sendFCMNotification(
+          shop.tokenDevice,
+          'Đổi mật khẩu thành công!',
+          `Mật khẩu tài khoản của bạn đã được đổi vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nĐừng quên mật khẩu nhé, nếu quên thì bạn có thể lấy lại mật khẩu bất cứ lúc nào.`,
+          'SELLER',
+          [],
+          shop._id,
+        );
         return res.status(201).json({
           success: true,
           data: {},
@@ -1947,6 +2063,14 @@ async function getListBill(idShop, billStatus) {
         },
       },
       {
+        $lookup: {
+          from: "Shippers",
+          localField: "idShipper",
+          foreignField: "_id",
+          as: "shipperLookup",
+        },
+      },
+      {
         $unwind: "$userAccLookup",
       },
       {
@@ -1978,6 +2102,7 @@ async function getListBill(idShop, billStatus) {
           productInfo: { $push: "$productInfo" },
           petInfo: { $first: "$petInfo" },
           userInfo: { $first: "$userLookup" },
+          shipperInfo: { $first: "$shipperLookup" },
         },
       },
       {
@@ -1989,6 +2114,7 @@ async function getListBill(idShop, billStatus) {
           deliveryStatus: 1,
           discountBill: 1,
           billDate: 1,
+          shipperInfo: 1,
           "productInfo.idProduct": 1,
           "productInfo.amount": 1,
           "productInfo.price": 1,
@@ -2018,7 +2144,12 @@ async function getListBill(idShop, billStatus) {
   }
 }
 
-function onFinalProcessingListBill(listBill) {
+async function onFinalProcessingListBill(listBill) {
+  let listPayment = [];
+  let server = await serverModal.find();
+  if (server && server.length > 0) {
+    listPayment = server[0].payments;
+  }
   for (let i = 0; i < listBill.length; i++) {
     const bill = listBill[i];
 
@@ -2099,18 +2230,18 @@ function onFinalProcessingListBill(listBill) {
           break;
       }
     }
-    if (bill.paymentMethods != undefined) {
-      switch (String(bill.paymentMethods)) {
-        case "0":
-          bill.paymentMethods = "Thanh toán khi nhận hàng";
-          break;
-        case "1":
-          bill.paymentMethods = "Thẻ Visa";
-          break;
-        default:
-          break;
-      }
-    }
+    // if (bill.paymentMethods != undefined) {
+    //   switch (String(bill.paymentMethods)) {
+    //     case "0":
+    //       bill.paymentMethods = "Thanh toán khi nhận hàng";
+    //       break;
+    //     case "1":
+    //       bill.paymentMethods = "Thẻ Visa";
+    //       break;
+    //     default:
+    //       break;
+    //   }
+    // }
     if (bill.productInfo != undefined) {
       let arrProduct = bill?.productInfo[0];
       if (arrProduct.length > 0) {
@@ -2121,6 +2252,9 @@ function onFinalProcessingListBill(listBill) {
         }
         bill.totalProduct = total;
       }
+    }
+    if (listPayment.length > 0 && bill.paymentMethods != undefined) {
+      bill.paymentMethods = listPayment[Number(bill.paymentMethods)].nameMethod;
     }
     listBill.splice(i, 1, bill);
   }
@@ -2371,10 +2505,10 @@ async function sendEmailResetPassword(email, otp, data, res) {
         <div style="padding: 7px; background-color: #003375; border-radius: 7px;">
             <div style="padding: 10px; background-color: white; border-radius: 7px;">
                 <p>Xin chào!</p>
-                <p>Mã xác minh cho email của bạn là ${otp}.</p>
+                <p>Mã xác minh đặt lại mật khẩu của bạn là ${otp}.</p>
                 <p>Để bảo mật an toàn, Bạn tuyệt đối không cung cấp mã xác minh này cho bất kỳ ai.</p>
                 <p>Mã xác minh có hiệu lực trong vòng 5 phút. Nếu hết thời gian cho yêu cầu này, Xin vui lòng thực hiện lại yêu cầu để nhận được mã xác minh mới.</p>
-                <p>Nếu bạn không yêu cầu xác minh email nữa, bạn có thể bỏ qua email này.</p>
+                <p>Nếu bạn không yêu cầu đặt lại mật khẩu nữa, bạn có thể bỏ qua email này.</p>
                 <p>Cảm ơn bạn!</p>
                 <p>OurPetSeller</p>
                 <img src="cid:logo1" alt="logo-petworld.png"
@@ -2390,7 +2524,7 @@ async function sendEmailResetPassword(email, otp, data, res) {
     to: email,
     subject: "Đặt lại mật khẩu của bạn cho OurPetSeller",
     text:
-      "Xin chào! Mã xác minh cho email của bạn là " +
+      "Xin chào! Mã xác minh đặt lại mật khẩu của bạn là " +
       otp +
       ". Để bảo mật an toàn, Bạn tuyệt đối không cung cấp mã xác minh này cho bất kỳ ai.",
     html: content,
@@ -2441,6 +2575,7 @@ async function sendEmailResetPassword(email, otp, data, res) {
     }
   });
 }
+
 async function addBillForShipper(location, idBill) {
   try {
     const billData = {
@@ -2493,11 +2628,12 @@ async function addBillForShipper(location, idBill) {
         }
       );
       await mdBill.findByIdAndUpdate(idBill, { idShipper: shipper._id });
-      return [true, "Thêm bill cho shipper thành công", 200];
+      return [true, "Tìm người giao hàng thành công.", 200, shipper.fullName];
     } else {
-      return [true, "Không tìm thấy shipper trong khu vực của bạn", 500];
+      return [true, "Tìm người giao hàng thất bại!\nHiện chưa có người giao hàng nào trong khu vực.", 500, ""];
     }
   } catch (error) {
-    return [false, "Thêm bill cho shipper thất bại", 500];
+    console.log(error);
+    return [false, "Có lỗi xảy ra khi tìm người giao hàng.\nVui lòng thử lại sau.", 500, ""];
   }
 }
