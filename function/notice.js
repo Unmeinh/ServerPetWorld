@@ -13,6 +13,7 @@ const sendFCMNotification = async (
   role,
   images,
   idUser,
+  status
 ) => {
   try {
     const params = {
@@ -20,7 +21,7 @@ const sendFCMNotification = async (
       content: (title) ? title : '',
       detail: (message) ? message : '',
       image: (images) ? images : [],
-      status: 1,
+      status: (status) ? status : 3,
       createdAt: new Date(),
     };
     if (role === 'CLIENT') {

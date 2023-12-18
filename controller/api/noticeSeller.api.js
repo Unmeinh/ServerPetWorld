@@ -147,3 +147,30 @@ exports.deleteNoticeSeller = async (req, res, next) => {
     }
   }
 };
+
+exports.onReadingNotice = async (req, res, next) => {
+  let idNotice = req.body.idNotice;
+  if (req.method == "POST" && idNotice) {
+    try {
+      let notice = await mdNotiSeller.NoticeSellerModel.findById(idNotice);
+      if (!notice) {
+        return res.status(201).json({
+          success: false,
+          data: {},
+          message: "Không tìm thấy thông báo!",
+        });
+      }
+      notice.status = 2;
+      await notice.save();
+      return res.status(201).json({
+        success: true,
+        data: {},
+        message: "Xem thông báo thành công",
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ success: false, data: {}, message: "Lỗi: " + error.message });
+    }
+  }
+}

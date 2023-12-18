@@ -3,6 +3,8 @@ let mdUser = require("../../model/user.model");
 let fs = require("fs");
 let { decodeFromAscii } = require("../../function/hashFunction");
 const { onUploadImages } = require("../../function/uploadImage");
+const { sendFCMNotification } = require("../../function/notice");
+let moment = require('moment');
 
 exports.listAllBlog = async (req, res, next) => {
   let list = await mdBlog.BlogModel.find();
@@ -408,10 +410,34 @@ exports.addBlog = async (req, res, next) => {
             message: "Đăng bài viết thất bại!",
           });
       }
-      req.user = req.user.toObject();
+      let user = await req.user.populate('followers.idFollow');
+      req.user = user.toObject();
       req.user.blogs = Number(req.user.blogs) + 1;
       await mdUser.UserModel.findByIdAndUpdate(req.user._id, req.user);
       let blog = await getBlogWithFollow(newBlog, req.user._id);
+      await sendFCMNotification(
+        req.user.tokenDevice,
+        'Đăng bài viết thành công!',
+        `Bạn đã đăng thành công một bài viết vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.`,
+        'CLIENT',
+        [],
+        req.user._id,
+        1
+      );
+      if (req.user.followers && req.user.followers.length > 0) {
+        for (let i = 0; i < req.user.followers.length; i++) {
+          const follower = req.user.followers[i];
+          await sendFCMNotification(
+            follower?.idFollow?.tokenDevice,
+            `${req.user.fullName} đã đăng bài viết mới!`,
+            `${req.user.fullName} đã đăng một bài viết mới: ${(newBlog.contentBlog.length > 50) ? newBlog.contentBlog.substring(0, 50) + "..." : newBlog.contentBlog}.\nHãy vào ứng dụng để xem ${req.user.fullName} muốn chia sẻ điều gì ngay thôi nào.`,
+            'CLIENT',
+            [(newBlog.imageBlogs && newBlog.imageBlogs.length > 0) ? newBlog.imageBlogs[0] : req.user.avatarUser],
+            follower?.idFollow?._id,
+            3
+          );
+        }
+      }
       return res
         .status(201)
         .json({
@@ -457,7 +483,7 @@ exports.editBlog = async (req, res, next) => {
             .json({ success: false, data: {}, message: images[1].message });
         }
       }
-      if (JSON.parse(req.body.oldImages) != []) {
+      if (req.body.oldImages && JSON.parse(req.body.oldImages) != []) {
         oldBlog.imageBlogs = [...JSON.parse(req.body.oldImages), ...images];
       } else {
         oldBlog.imageBlogs = [...images];
@@ -469,6 +495,7 @@ exports.editBlog = async (req, res, next) => {
         .status(201)
         .json({ success: true, data: blog, message: "Đã sửa bài viết" });
     } catch (error) {
+      console.log(error);
       let message = "";
       if (error.message.match(new RegExp(".+`contentBlog` is require+."))) {
         message = "Bạn chưa nhập nội dung!";
@@ -526,6 +553,15 @@ exports.interactPost = async (req, res, next) => {
             arr_Interact.push(req.user._id);
           }
           await mdBlog.BlogModel.findByIdAndUpdate(idBlog, objBlog);
+          await sendFCMNotification(
+            objBlog?.idUser?.tokenDevice,
+            `${req.user.fullName} đã thích bài viết của bạn!`,
+            `${req.user.fullName} đã thích bài viết: ${(objBlog.contentBlog.length > 50) ? objBlog.contentBlog.substring(0, 50) + "..." : objBlog.contentBlog}.\nHãy vào ứng dụng để xem số tương tác bài viết của bạn ngay thôi nào.`,
+            'CLIENT',
+            [req?.user?.avatarUser],
+            objBlog?.idUser?._id,
+            3
+          );
         }
 
         return res

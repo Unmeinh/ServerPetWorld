@@ -23,6 +23,7 @@ const {
 const { sendFCMNotification } = require("../../function/notice");
 const { serverModal } = require("../../model/server.modal");
 const { TransactionModal } = require("../../model/transaction.modal");
+const { ReviewModel } = require("../../model/review.model");
 
 exports.listShop = async (req, res, next) => {
   let filterSearch = null;
@@ -267,7 +268,10 @@ exports.listDeliveredBill = async (req, res, next) => {
         const searchTerm = req.query.filterSearch.trim();
         filterSearch = { fullName: new RegExp(searchTerm, "i") };
       }
-      let listBill = await getListBill(req.shop._id, 3);
+      let listBill = await getListBill(req.shop._id, {
+        $gte: 3,
+        $lte: 4
+      });
       if (listBill && listBill.length > 0) {
         let list = await onFinalProcessingListBill(listBill);
         listBill = [...list];
@@ -278,6 +282,7 @@ exports.listDeliveredBill = async (req, res, next) => {
         message: "Lấy danh sách đơn hàng thành công",
       });
     } catch (error) {
+      console.log(error);
       return res
         .status(500)
         .json({ success: false, data: [], message: "Lỗi: " + error.message });
@@ -297,7 +302,7 @@ exports.listEvaluatedBill = async (req, res, next) => {
         const searchTerm = req.query.filterSearch.trim();
         filterSearch = { fullName: new RegExp(searchTerm, "i") };
       }
-      let listBill = await getListBill(req.shop._id, 5);
+      let listBill = await getListBill(req.shop._id, 4);
       if (listBill && listBill.length > 0) {
         let list = await onFinalProcessingListBill(listBill);
         listBill = [...list];
@@ -335,6 +340,62 @@ exports.listCancelledBill = async (req, res, next) => {
       return res.status(200).json({
         success: true,
         data: listBill,
+        message: "Lấy danh sách đơn hàng thành công",
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ success: false, data: [], message: "Lỗi: " + error.message });
+    }
+  }
+};
+
+exports.getReviewBill = async (req, res, next) => {
+  let filterSearch = null;
+
+  if (req.method == "GET" && req.params.idBill) {
+    try {
+      let listReview = await ReviewModel.find({ idBill: req.params.idBill });
+      if (!listReview && listReview.length <= 0) {
+        return res.status(200).json({
+          success: false,
+          data: [],
+          message: "Lấy danh sách đơn hàng thành công",
+        });
+      }
+      let listNew = [];
+      for (let i = 0; i < listReview.length; i++) {
+        let stars = [];
+        const review = listReview[i].toObject();
+        if (review?.ratingNumber) {
+          for (let j = 0; j < 5; j++) {
+            if (j <= review?.ratingNumber) {
+              stars.push({
+                nameIcon: "star",
+                colorIcon: '#E2E53F'
+              })
+            } else {
+              stars.push({
+                nameIcon: "star-outline",
+                colorIcon: '#001858'
+              })
+            }
+          }
+          review.stars = stars;
+        }
+        let product = await mdProduct.findById(review.idProduct);
+        let pet = await mdPet.findById(review.idProduct);
+        if (product) {
+          review.idProduct = product;
+        }
+        if (pet) {
+          review.idProduct = pet;
+        }
+        listNew.push(review);
+      }
+      return res.status(200).json({
+        success: true,
+        data: listNew,
         message: "Lấy danh sách đơn hàng thành công",
       });
     } catch (error) {
@@ -855,6 +916,7 @@ exports.confirmBill = async (req, res, next) => {
                   'SELLER',
                   [],
                   billProduct?.idShop?._id,
+                  3
                 );
                 await sendFCMNotification(
                   billProduct?.idUser?.tokenDevice,
@@ -863,6 +925,7 @@ exports.confirmBill = async (req, res, next) => {
                   'CLIENT',
                   [],
                   billProduct?.idUser?._id,
+                  3
                 );
                 return res.status(201).json({
                   success: true,
@@ -878,6 +941,7 @@ exports.confirmBill = async (req, res, next) => {
                   'SELLER',
                   [],
                   billProduct?.idShop?._id,
+                  3
                 );
                 await sendFCMNotification(
                   billProduct?.idUser?.tokenDevice,
@@ -886,6 +950,7 @@ exports.confirmBill = async (req, res, next) => {
                   'CLIENT',
                   [],
                   billProduct?.idUser?._id,
+                  3
                 );
                 return res.status(201).json({
                   success: true,
@@ -902,6 +967,7 @@ exports.confirmBill = async (req, res, next) => {
                 'SELLER',
                 [],
                 billProduct?.idShop?._id,
+                3
               );
               await sendFCMNotification(
                 billProduct?.idUser?.tokenDevice,
@@ -910,6 +976,7 @@ exports.confirmBill = async (req, res, next) => {
                 'CLIENT',
                 [],
                 billProduct?.idUser?._id,
+                3
               );
               return res.status(500).json({
                 success: false,
@@ -930,6 +997,34 @@ exports.confirmBill = async (req, res, next) => {
         if (isConfirm == 1) {
           billProduct.deliveryStatus = -1;
           await mdBill.findByIdAndUpdate(billProduct._id, billProduct);
+          if (billProduct.products.length > 1) {
+            for (let i = 0; i < billProduct.products.length; i++) {
+              const bill = billProduct.products[i];
+              let product = await mdProduct.findById(bill.idProduct);
+              if (product) {
+                product.quantitySold = Number(product.quantitySold) - (bill.amount);
+                product.amountProduct = Number(product.amountProduct) + (bill.amount);
+                await product.save();
+              }
+            }
+          } else {
+            if (billProduct.products.length > 0) {
+              let first = billProduct.products[0];
+              let product = await mdProduct.findById(first.idProduct);
+              if (product) {
+                product.quantitySold = Number(product.quantitySold) - (first.amount);
+                product.amountProduct = Number(product.amountProduct) + (first.amount);
+                await product.save();
+              } else {
+                let pet = await mdPet.findById(first.idProduct);
+                if (pet) {
+                  pet.quantitySold = Number(pet.quantitySold) - (first.amount);
+                  pet.amountPet = Number(pet.amountPet) + (first.amount);
+                  await pet.save();
+                }
+              }
+            }
+          }
           transaction.status = -1;
           await TransactionModal.findByIdAndUpdate(transaction._id, transaction);
           if (billProduct?.idShipper) {
@@ -962,6 +1057,7 @@ exports.confirmBill = async (req, res, next) => {
             'SELLER',
             [],
             billProduct?.idShop?._id,
+            3
           );
           await sendFCMNotification(
             billProduct?.idUser?.tokenDevice,
@@ -970,6 +1066,7 @@ exports.confirmBill = async (req, res, next) => {
             'CLIENT',
             [],
             billProduct?.idUser?._id,
+            3
           );
           return res.status(201).json({
             success: true,
@@ -1047,6 +1144,7 @@ exports.confirmBillAll = async (req, res, next) => {
                   'SELLER',
                   [],
                   req?.shop?._id,
+                  3
                 );
                 await sendFCMNotification(
                   bill?.idUser?.tokenDevice,
@@ -1055,6 +1153,7 @@ exports.confirmBillAll = async (req, res, next) => {
                   'CLIENT',
                   [],
                   bill?.idUser?._id,
+                  3
                 );
               } else {
                 await sendFCMNotification(
@@ -1064,6 +1163,7 @@ exports.confirmBillAll = async (req, res, next) => {
                   'SELLER',
                   [],
                   req?.shop?._id,
+                  3
                 );
                 await sendFCMNotification(
                   bill?.idUser?.tokenDevice,
@@ -1072,6 +1172,7 @@ exports.confirmBillAll = async (req, res, next) => {
                   'CLIENT',
                   [],
                   bill?.idUser?._id,
+                  3
                 );
               }
               if (!status) {
@@ -1163,6 +1264,7 @@ exports.findShipper = async (req, res, next) => {
             'SELLER',
             [],
             req.shop._id,
+            3
           );
           await sendFCMNotification(
             billProduct?.idUser?.tokenDevice,
@@ -1171,6 +1273,7 @@ exports.findShipper = async (req, res, next) => {
             'CLIENT',
             [],
             billProduct?.idUser?._id,
+            3
           );
           return res.status(201).json({
             success: true,
@@ -1321,7 +1424,7 @@ exports.myShopDetail = async (req, res, next) => {
     if (listBill) {
       req.shop = req?.shop.toObject();
       req.shop.billCount = listBill.length;
-      const statusArray = [0, 1, 2, 3, 5];
+      const statusArray = [0, 1, 2, 3];
       try {
         const pipeline = [
           {
@@ -1352,13 +1455,11 @@ exports.myShopDetail = async (req, res, next) => {
               statusCountObject["0"] = result.count;
             }
           } else {
-            if (result._id == 5) {
-              statusCountObject["3"] = result.count;
-            } else {
-              statusCountObject[String(result._id - 1)] = result.count;
-            }
+            statusCountObject[String(result._id - 1)] = result.count;
           }
         }
+        const countReview = await mdBill.find({ idShop: _id, statusReview: false, deliveryStatus: 4 }).count();
+        statusCountObject['3'] = (countReview) ? countReview : 0;
         req.shop.objCountBills = statusCountObject;
         return res.status(200).json({
           success: true,
@@ -1408,10 +1509,12 @@ exports.detailOwner = async (req, res, next) => {
         let nameIdentity = decodeFromSha256(decodeObj.nameIdentity);
         let numberIdentity = decodeFromSha256(decodeObj.numberIdentity);
         let dateIdentity = decodeFromSha256(decodeObj.dateIdentity);
-        let nameCard = "VU TRONG HOANG LINH";
-        let numberCard = "1234 5678 9101 1278";
-        let nameBank = "MBBank";
-        let expirationDate = "05/25";
+        // let nameCard = "VU TRONG HOANG LINH";
+        // let numberCard = "1234 5678 9101 1278";
+        // let nameBank = "MBBank";
+        // let expirationDate = "05/25";
+        let paymentMethod = decodeObj.paymentMethod;
+        let stkPayment = decodeFromSha256(decodeObj.stkPayment);
         let createdAt = objShop.createdAt;
         objOwner = {
           nameIdentity: encodeName(removeVietnameseTones(nameIdentity)),
@@ -1422,14 +1525,18 @@ exports.detailOwner = async (req, res, next) => {
               .replace(/[0-9]/g, "*") +
             numberIdentity.substring(numberIdentity.length - 2),
           dateIdentity: dateIdentity,
-          nameCard: encodeName(removeVietnameseTones(nameCard)),
-          numberCard:
-            numberCard
-              .substring(0, numberCard.length - 3)
-              .replace(/[0-9]/g, "*") +
-            numberCard.substring(numberCard.length - 3),
-          nameBank: nameBank,
-          expirationDate: expirationDate,
+          // nameCard: encodeName(removeVietnameseTones(nameCard)),
+          // numberCard:
+          //   numberCard
+          //     .substring(0, numberCard.length - 3)
+          //     .replace(/[0-9]/g, "*") +
+          //   numberCard.substring(numberCard.length - 3),
+          // nameBank: nameBank,
+          // expirationDate: expirationDate,
+          paymentMethod: paymentMethod,
+          stkPayment: stkPayment.substring(0, stkPayment.length - 3)
+            .replace(/[0-9]/g, "*") +
+            stkPayment.substring(stkPayment.length - 3),
           createdAt: moment(createdAt).format("DD/MM/YYYY HH:mm A"),
         };
       }
@@ -1466,14 +1573,6 @@ exports.detailShop = async (req, res, next) => {
 exports.checkPhoneNumber = async (req, res, next) => {
   try {
     if (req.method == "POST") {
-      let objHL = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
-      if (objHL) {
-        return res.status(201).json({
-          success: false,
-          data: objHL,
-          message: "Số điện thoại đã được sử dụng.",
-        });
-      }
       if (req.body.userName) {
         let objUN = await mdShop.ShopModel.findOne({
           userName: req.body.userName,
@@ -1485,6 +1584,14 @@ exports.checkPhoneNumber = async (req, res, next) => {
             message: "Tên đăng nhập đã được sử dụng.",
           });
         }
+      }
+      let objHL = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
+      if (objHL) {
+        return res.status(201).json({
+          success: false,
+          data: objHL,
+          message: "Số điện thoại đã được sử dụng.",
+        });
       }
       return res.status(201).json({
         success: true,
@@ -1625,6 +1732,8 @@ exports.registerShop = async (req, res, next) => {
       numberIdentity: encodeToSha256(String(req.body.numberIdentity)),
       dateIdentity: encodeToSha256(String(req.body.dateIdentity)),
       imageIdentity: [encodeToSha256(images[1]), encodeToSha256(images[2])],
+      paymentMethod: req.body.paymentMethod,
+      stkPayment: encodeToSha256(String(req.body.stkPayment))
     });
     await newShop.encodeOwnerIdentity(newShop, encodeToAscii(ownerIdentity));
 
@@ -1899,6 +2008,7 @@ exports.updatePassword = async (req, res, next) => {
       'SELLER',
       [],
       req.shop._id,
+      3
     );
     return res.status(201).json({
       success: true,
@@ -1929,6 +2039,7 @@ exports.changePassword = async (req, res, next) => {
           'SELLER',
           [],
           shop._id,
+          3
         );
         return res.status(201).json({
           success: true,
@@ -2230,6 +2341,7 @@ async function getListBill(idShop, billStatus) {
           deliveryStatus: { $first: "$deliveryStatus" },
           discountBill: { $first: "$discountBill" },
           billDate: { $first: "$billDate" },
+          statusReview: { $first: "$statusReview" },
           productInfo: { $push: "$productInfo" },
           petInfo: { $first: "$petInfo" },
           userInfo: { $first: "$userLookup" },
@@ -2246,6 +2358,7 @@ async function getListBill(idShop, billStatus) {
           discountBill: 1,
           billDate: 1,
           shipperInfo: 1,
+          statusReview: 1,
           "productInfo.idProduct": 1,
           "productInfo.amount": 1,
           "productInfo.price": 1,
@@ -2373,15 +2486,22 @@ async function onFinalProcessingListBill(listBill) {
     //       break;
     //   }
     // }
-    if (bill.productInfo != undefined) {
-      let arrProduct = bill?.productInfo[0];
-      if (arrProduct.length > 0) {
-        let total = 0;
-        for (let i = 0; i < arrProduct.length; i++) {
-          const element = arrProduct[i];
-          total += Number(element?.price) * Number(element?.amount);
+    if (bill.productInfo && typeof (bill.productInfo) == 'object'
+      && Object.keys(bill.productInfo).length > 0 && bill.productInfo[0].length > 0) {
+      try {
+        if (bill.productInfo.length > 0) {
+          let arrProduct = [];
+          let total = 0;
+          for (let i = 0; i < bill.productInfo.length; i++) {
+            const element = bill.productInfo[i][0];
+            total += Number(element?.price) * Number(element?.amount);
+            arrProduct.push(element);
+          }
+          bill.productInfo[0] = arrProduct;
+          bill.totalProduct = total;
         }
-        bill.totalProduct = total;
+      } catch (error) {
+        console.log(error);
       }
     }
     if (listPayment.length > 0 && bill.paymentMethods != undefined) {
@@ -2400,6 +2520,7 @@ async function getTotalBill(shopId, previusDate, nowDate) {
         $gte: new Date(previusDate),
         $lte: new Date(nowDate),
       },
+      deliveryStatus: 4
     },
   };
   var group_stage = {
@@ -2426,6 +2547,7 @@ async function getTotalProduct(shopId, previusDate, nowDate) {
         $gte: new Date(previusDate),
         $lte: new Date(nowDate),
       },
+      deliveryStatus: 4
     },
   };
 

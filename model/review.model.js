@@ -3,6 +3,7 @@ let ReviewSchema = new db.mongoose.Schema(
     {
         idProduct: { type: db.mongoose.Schema.Types.ObjectId, ref: 'ProductModel' },
         idUser: { type: db.mongoose.Schema.Types.ObjectId, ref: 'UserModel' },
+        idBill: { type: db.mongoose.Schema.Types.ObjectId, ref: 'billProductModel' },
         contentReview: { type: String, require: false },
         imageReview: { type: Array, require: false },
         ratingNumber: { type: Number, require: true },
