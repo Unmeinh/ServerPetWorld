@@ -127,7 +127,6 @@ exports.listShopConfirm = async (req, res, next) => {
 exports.detailShop = async (req, res, next) => {
   let idShop = req.params.idShop;
   let ObjShop = await mdShop.ShopModel.findById(idShop);
-  console.log("ObjShop: "+ObjShop);
   res.render('Shop/detailShop', {
     ObjShop: ObjShop,
     moment: moment,
@@ -198,7 +197,6 @@ exports.updateHideShopStatus = async (req, res, next) => {
   let message = '';
   let idShop = req.params.idShop;
   let ObjShop = await mdShop.ShopModel.findById(idShop);
-  console.log("ObjShop: " +ObjShop);
   if (req.method == 'POST') {
     try {
       await mdShop.ShopModel.findByIdAndUpdate(idShop, {status: -1});
