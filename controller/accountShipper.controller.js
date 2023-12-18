@@ -7,7 +7,7 @@ let mdSever = require("../model/server.modal");
 let mdTransaction = require("../model/transaction.modal");
 let mdProduct = require("../model/product.model")
 let mdPet = require("../model/pet.model")
-const { sendFCMNotification } = require('../../function/notice');
+const { sendFCMNotification } = require('../function/notice');
 let moment = require("moment");
 exports.login = async (req, res, next) => {
   let msg = '';
