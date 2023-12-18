@@ -5,8 +5,8 @@ let { decodeFromSha256 } = require('../function/hashFunction');
 let mdbillProduct = require("../model/billProduct.model");
 let mdSever = require("../model/server.modal");
 let mdTransaction = require("../model/transaction.modal");
-let mdProduct = require("../../model/product.model")
-let mdPet = require("../../model/pet.model")
+let mdProduct = require("../model/product.model")
+let mdPet = require("../model/pet.model")
 const { sendFCMNotification } = require('../../function/notice');
 let moment = require("moment");
 exports.login = async (req, res, next) => {
