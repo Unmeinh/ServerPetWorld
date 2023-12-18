@@ -92,25 +92,58 @@ exports.autoLogin = async (req, res, next) => {
 
 exports.checkPhoneNumber = async (req, res, next) => {
   try {
-    let objU = await mdUserAccount.findOne({
-      phoneNumber: req.body.phoneNumber,
-    });
-    if (!objU) {
+    if (req.method == "POST") {
+      if (req.body.userName) {
+        let objUN = await mdUserAccount.findOne({
+          userName: req.body.userName,
+        });
+        if (objUN) {
+          return res
+            .status(201)
+            .json({
+              success: false,
+              data: objUN,
+              message: "Tên đăng nhập đã được sử dụng.",
+            });
+        }
+      }
+      let objU = await mdUserAccount.findOne({
+        phoneNumber: req.body.phoneNumber,
+      });
+      if (objU) {
+        return res
+          .status(201)
+          .json({
+            success: false,
+            data: objU,
+            message: "Số điện thoại đã được sử dụng.",
+          });
+      }
       return res
         .status(201)
         .json({
           success: true,
           data: objU,
+          message: "Số điện thoại chưa được sử dụng.",
+        });
+    }
+    if (req.method == "PUT") {
+      let objU = await mdUserAccount.findOne({
+        phoneNumber: req.body.phoneNumber,
+      });
+      if (!objU) {
+        return res.status(201).json({
+          success: false,
+          data: {},
           message: "Số điện thoại chưa được đăng ký.",
         });
-    } else {
-      return res
-        .status(201)
-        .json({
-          success: false,
-          data: objU,
-          message: "Số điện thoại đã được đăng ký.",
+      } else {
+        return res.status(201).json({
+          success: true,
+          data: {},
+          message: "Số điện thoại đã được đăng ký."
         });
+      }
     }
   } catch (error) {
     return res
@@ -454,7 +487,7 @@ exports.updatePassword = async (req, res, next) => {
           message: "Mật khẩu hiện tại nhập sai!",
         });
     }
-    
+
     if (String(oldPassword) == String(newPassword)) {
       return res
         .status(201)
@@ -675,10 +708,7 @@ async function calculatorBill(uID) {
     {
       $match: {
         idUser: uID,
-        deliveryStatus: {
-          $gte: 0,
-          $lte: 5,
-        }
+        deliveryStatus: 4
       },
     },
     {
