@@ -6,16 +6,8 @@ exports.listpet = async (req, res, next) => {
   const perPage = 7;
   let msg = "";
   let hidden = "";
-  let filterSearch = null;
+  let filterSearch = {status: 0};
   let sortOption = null;
-
-  // Validate
-  // if (page <= 0) {
-  //     return res.render('pet/listpet', {msg: 'Số Page phải lớn hơn 0!'});
-  // }
-  // if (isNaN(page)) {
-  //    return res.render('pet/listpet', {msg: 'Số trang page phải là số nguyên'});
-  // }
 
   if (req.method == "GET") {
     try {
@@ -25,9 +17,9 @@ exports.listpet = async (req, res, next) => {
       ) {
         const searchTerm = req.query.filterSearch.trim();
         filterSearch = {
-          $or: [
+          $and: [
             { namePet: { $regex: searchTerm, $options: "i" } },
-            // { pricePet: { $regex: searchTerm, $options: 'i' } }
+            { status: 0 }
           ],
         };
       }
@@ -38,9 +30,6 @@ exports.listpet = async (req, res, next) => {
 
       const totalCount = await mdpet.PetModel.countDocuments(filterSearch);
       const totalPages = Math.ceil(totalCount / perPage);
-
-      if (page < 1) {
-      }
 
       const skipCount = (page - 1) * perPage;
 
@@ -64,7 +53,7 @@ exports.listpet = async (req, res, next) => {
         totalPages: totalPages,
         moment: moment,
         adminLogin: req.session.adLogin,
-        hidden: hidden,
+        hidden: hidden
       });
     } catch (error) {
       msg = "" + error.message;
@@ -94,16 +83,14 @@ exports.deletepet = async (req, res, next) => {
   let message = "";
   let idP = req.params.idP;
   let Objpet = await mdpet.PetModel.findById(idP);
-
   if (req.method == "POST") {
     try {
-      await mdpet.PetModel.findByIdAndDelete(idP);
+      await mdpet.PetModel.findByIdAndUpdate(idP,{status: 1});
       return res.redirect("/pet");
     } catch (error) {
       console.log(error.message);
     }
   }
-
   res.render("Pet/deletePet", {
     message: message,
     Objpet: Objpet,

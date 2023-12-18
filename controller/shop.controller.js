@@ -176,13 +176,13 @@ exports.updateShopStatus = async (req, res, next) => {
     try {
       await mdShop.ShopModel.findByIdAndUpdate(ObjShop._id, {status: 1});
       // Send notify SUCCESS for shop
-      await sendFCMNotification(
-        ObjShop.tokenDevice,
-        `Admin đã phê duyệt tài khoản shop: ${ObjShop.nameShop}!`,
-        `Bạn đã trở thành shop trong OurrPet Seller`,
-        'SELLER',
-        null,
-        ObjShop._id,
+      await sendFCMNotification (
+          ObjShop.tokenDevice,
+          `Admin đã phê duyệt tài khoản shop: ${ObjShop.nameShop}!`,
+          `Bạn đã trở thành shop trong OurPet Seller`,
+          'SELLER',
+          null,
+          ObjShop._id,
       );
       return res.redirect('/shop/confirm');
     } catch (error) {
@@ -198,17 +198,18 @@ exports.updateHideShopStatus = async (req, res, next) => {
   let message = '';
   let idShop = req.params.idShop;
   let ObjShop = await mdShop.ShopModel.findById(idShop);
+  console.log("ObjShop: " +ObjShop);
   if (req.method == 'POST') {
     try {
       await mdShop.ShopModel.findByIdAndUpdate(idShop, {status: -1});
       // Send notify FAILED for shop
-      await sendFCMNotification(
-        ObjShop.tokenDevice,
-        `Admin đã từ chối tài khoản shop: ${ObjShop.nameShop}!`,
-        `Bạn vẫn chưa phải là shop trong OurrPet Seller`,
-        'SELLER',
-        null,
-        ObjShop._id,
+      await sendFCMNotification (
+          ObjShop.tokenDevice,
+          `Admin đã từ chối tài khoản shop: ${ObjShop.nameShop}!`,
+          `Bạn vẫn chưa phải là shop trong OurPet Seller`,
+          'SELLER',
+          null,
+          ObjShop._id,
       );
       return res.redirect('/shop/confirm');
     } catch (error) {
