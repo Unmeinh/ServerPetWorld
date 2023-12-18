@@ -1,7 +1,7 @@
 let mdShipper = require('../model/shipper.model');
 let mdBillProduct  = require('../model/billProduct.model');
 let bcrypt = require('bcrypt');
-const { onUploadImages } = require("../../ServerPetWorld/function/uploadImage");
+const { onUploadImages } = require("../function/uploadImage");
 
 exports.listShipper = async (req, res, next) => {
   let msg = '';
