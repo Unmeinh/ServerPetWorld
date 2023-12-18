@@ -55,7 +55,7 @@
 
       <li>
         <a href="/blog" class="color-link" onclick="changeColor(this)">
-          <span class="iconify" data-icon="iconamoon:news-bold"></span>
+          <span class="iconify" data-icon="iconamoon:news"></span>
           <span class="link_name">Bài viết</span>
         </a>
         <ul class="sub-menu blank">
@@ -64,7 +64,7 @@
       </li>
       <li>
         <a href="/shipper" class="color-link" onclick="changeColor(this)">
-          <span class="iconify" data-icon="iconamoon:news-bold"></span>
+          <span class="iconify" data-icon="la:shipping-fast"></span>
           <span class="link_name">Shipper</span>
         </a>
         <ul class="sub-menu blank">
@@ -118,7 +118,7 @@
         </ul>
       </li>
       <li>
-        <a href="/transaction?interval=today" class="color-link" onclick="changeColor(this)">
+        <a href="/transaction?interval=today" class="color-link" onclick="changeColor(this); setSortOption('today')">
           <span class="iconify" data-icon="fluent:payment-16-regular"></span>
           <span class="link_name">Giao dịch</span>
         </a>
@@ -126,6 +126,7 @@
           <li><a class="link_name" href="/shop">Giao dịch</a></li>
         </ul>
       </li>
+
       <li>
         <a href="/account/logout" class="color-link" onclick="changeColor(this)">
           <span class="iconify" data-icon="humbleicons:logout"></span>

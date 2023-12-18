@@ -1710,6 +1710,7 @@ exports.registerShop = async (req, res, next) => {
     newShop.revenue = 0;
     newShop.online = 1;
     newShop.hotline = req.body.hotline;
+    newShop.tokenDevice = req.body.tokenDevice;
     newShop.createdAt = new Date();
     await newShop.generateAuthToken(newShop);
     let images = await onUploadImages(req.files, "shop");
