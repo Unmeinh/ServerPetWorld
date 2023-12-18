@@ -99,10 +99,6 @@
                             </div>
                         </form>
 
-
-                        <div class="row col-3">
-                        </div>
-
                     </div>
                     <% if (typeof listDetailPayment !='undefined' ) { %>
                         <table class="table align-middle" style="border: white; ">
@@ -214,23 +210,23 @@
                         </table>
 
 
-                        <div
-                            style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; bottom: 0; width: 96%;">
+                        <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; bottom: 0; width: 96%;">
                             <p> Số bản ghi: <span style="font-weight: bold;">
                                     <%= countNowProduct %>/<%= countAllProduct %>
                                 </span></p>
                             <nav>
                                 <ul class="pagination">
-                                    <% for (let page=1; page <=totalPages; page++) { %>
+                                    <% for (let page = 1; page <= totalPages; page++) { %>
                                         <li class="page-item <%= page === currentPage ? 'active' : '' %>">
                                             <a class="page-link" href="?page=<%= page %>">
                                                 <%= page %>
                                             </a>
                                         </li>
-                                        <% } %>
+                                    <% } %>
                                 </ul>
                             </nav>
                         </div>
+                
 
 
 
