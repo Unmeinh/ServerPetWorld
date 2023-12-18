@@ -205,6 +205,34 @@ exports.cancelBill = async (req, res) => {
         message: 'Lỗi không xác định vui lòng thử lại',
       });
     }
+    if (updatedBill.products.length > 1) {
+      for (let i = 0; i < updatedBill.products.length; i++) {
+        const bill = updatedBill.products[i];
+        let product = await mdProduct.ProductModel.findById(bill.idProduct);
+        if (product) {
+          product.quantitySold = Number(product.quantitySold) - (bill.amount);
+          product.amountProduct = Number(product.amountProduct) + (bill.amount);
+          product.save();
+        }
+      }
+    } else {
+      if (updatedBill.products.length > 0) {
+        let first = updatedBill.products[0];
+        let product = await mdProduct.ProductModel.findById(first.idProduct);
+        if (product) {
+          product.quantitySold = Number(product.quantitySold) - (first.amount);
+          product.amountProduct = Number(product.amountProduct) + (first.amount);
+          product.save();
+        } else {
+          let pet = await mdPet.PetModel.findById(first.idProduct);
+          if (pet) {
+            pet.quantitySold = Number(pet.quantitySold) - (first.amount);
+            pet.amountPet = Number(pet.amountPet) + (first.amount);
+            pet.save();
+          }
+        }
+      }
+    }
     const transition = await mdTransition.TransactionModal.findOneAndUpdate(
       { idBill: idBill },
       { $set: { status: -1 } },
@@ -417,7 +445,7 @@ exports.billProductUser = async (req, res) => {
 };
 
 exports.getCountBill = async (req, res) => {
-  const {_id} = req.user;
+  const { _id } = req.user;
   const statusArray = [0, 2, 3];
   try {
     const pipeline = [
@@ -451,7 +479,7 @@ exports.getCountBill = async (req, res) => {
         statusCountObject[String(result._id - 1)] = result.count;
       }
     }
-    const countReview = await mdbillProduct.billProductModel.find({idUser: _id, statusReview: false, deliveryStatus: 4}).count();
+    const countReview = await mdbillProduct.billProductModel.find({ idUser: _id, statusReview: false, deliveryStatus: 4 }).count();
     statusCountObject['3'] = (countReview) ? countReview : 0;
     return res.status(200).json({
       success: true,
@@ -481,6 +509,7 @@ exports.completedBill = async (req, res) => {
   const idBill = req.params.id;
   try {
     if (idBill) {
+      let bill = await mdbillProduct.billProductModel.findById(idBill).populate('idShop');
       await Promise.all([
         await mdbillProduct.billProductModel.findByIdAndUpdate(idBill, {
           deliveryStatus: 4,
@@ -489,6 +518,12 @@ exports.completedBill = async (req, res) => {
           { idBill: idBill },
           {
             status: 4,
+          },
+        ),
+        await mdShop.ShopModel.findByIdAndUpdate(
+          bill.idShop._id,
+          {
+            revenue: Number(bill.total) + Number(bill.idShop.revenue),
           },
         ),
       ]);
