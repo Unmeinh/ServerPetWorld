@@ -1,7 +1,7 @@
 let db = require('./db');
 let ShipperSchema = new db.mongoose.Schema(
     {
-      avatarShipper:{type:String,required:false},
+      avatarShipper:{type:Array,required:false},
         fullName: { type: String, required: true },
         userName: { type: String, required: true },
         passWord: { type: String, required: true },

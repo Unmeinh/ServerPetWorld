@@ -23,9 +23,9 @@
 
                         <div class="info">
                             <h2>Tổng doanh thu:</h2>
-                            <% if (typeof totalOfTotal3 !=='undefined' ) { %>
+                            <% if (typeof totalOfTotal4 !=='undefined' ) { %>
                                 <h1 style="color: #28D224;">
-                                    <%= totalOfTotal3.toLocaleString("vi-VN") + "đ" %>
+                                    <%= totalOfTotal4.toLocaleString("vi-VN") + "đ" %>
                                 </h1>
                                 <% } else { %>
                                     <h1 style="color: #28D224;">
@@ -37,10 +37,10 @@
                         </div>
                         <div class="info">
                             <h2>Lợi nhuận:</h2>
-                            <% if (typeof totalOfProfit3 !=='undefined' ) { %>
+                            <% if (typeof totalOfFee4 !=='undefined' ) { %>
 
                                 <h1 style="color: #28D224;">
-                                    <%= totalOfProfit3?.toLocaleString("vi-VN")+ "đ" %>
+                                    <%= totalOfFee4?.toLocaleString("vi-VN")+ "đ" %>
                                 </h1>
                                 <% } else { %>
                                     <h1 style="color: #28D224;">
@@ -50,10 +50,10 @@
                         </div>
                         <div class="info">
                             <h2>Tổng doanh thu thực:</h2>
-                            <% if (typeof totalOfTotal4 !=='undefined' ) { %>
+                            <% if (typeof totalOfTotal5 !=='undefined' ) { %>
 
                                 <h1 style="color: #28D224;">
-                                    <%= totalOfTotal4?.toLocaleString("vi-VN")+ "đ" %>
+                                    <%= totalOfTotal5?.toLocaleString("vi-VN")+ "đ" %>
                                 </h1>
                                 <% } else { %>
                                     <h1 style="color: #28D224;">
@@ -64,10 +64,10 @@
                         </div>
                         <div class="info">
                             <h2>Lợi nhuận thực:</h2>
-                            <% if (typeof totalOfProfit4 !=='undefined' ) { %>
+                            <% if (typeof totalOfFee5 !=='undefined' ) { %>
 
                                 <h1 style="color: #28D224;">
-                                    <%= totalOfProfit4?.toLocaleString("vi-VN")+ "đ" %>
+                                    <%= totalOfFee5?.toLocaleString("vi-VN")+ "đ" %>
                                 </h1>
                                 <% } else { %>
                                     <h1 style="color: #28D224;">
@@ -87,7 +87,7 @@
 
                         <div class="info">
                             <h2>Tổng đơn chờ xác nhận : </h2>
-                            <% if (typeof totalOfProfit4 !=='undefined' ) { %>
+                            <% if (typeof totalOfFee5 !=='undefined' ) { %>
 
                                 <h1 style="color: #E7D429;">
                                     <%= totalStatusZero %>
@@ -102,7 +102,7 @@
                         </div>
                         <div class="info">
                             <h2>Tổng đơn đã xác nhận : </h2>
-                            <% if (typeof totalOfProfit4 !=='undefined' ) { %>
+                            <% if (typeof totalOfFee5 !=='undefined' ) { %>
 
                                 <h1 style="color: #02EB28;">
                                     <%= totalStatusOne %>
@@ -116,7 +116,7 @@
                         </div>
                         <div class="info">
                             <h2>Tổng đơn đã hủy bỏ : </h2>
-                            <% if (typeof totalOfProfit4 !=='undefined' ) { %>
+                            <% if (typeof totalOfFee5 !=='undefined' ) { %>
 
                                 <h1 style="color: #F70202;">
                                     <%= totalStatusMinusOne %>
@@ -222,7 +222,7 @@
                                             </label>
                                             <% } else if (row.paymentMethod===2) { %>
                                                 <label type="text" style="width: 200px;">
-                                                    Thanh toán bằng thẻ ZaloPay
+                                                    Thanh toán bằng ZaloPay
                                                 </label>
                                                 <% } else { %>
                                                     <label type="text" style="width: 200px;">
@@ -259,13 +259,18 @@
                                                             <% } else if (row.status===4) { %>
                                                                 <label type="text"
                                                                     style="width: 200px;color: rgb(10, 190, 10);">
-                                                                    Thanh toán thành công
+                                                                    Đã nhận
                                                                 </label>
-                                                                <% } else { %>
-                                                                    <label type="text" style="width: 200px;">
-                                                                        Lỗi không xác định
+                                                                <% } else if (row.status===5) { %>
+                                                                    <label type="text"
+                                                                        style="width: 200px;color: rgb(10, 190, 10);">
+                                                                        Thanh toán thành công
                                                                     </label>
-                                                                    <% } %>
+                                                                    <% } else { %>
+                                                                        <label type="text" style="width: 200px;">
+                                                                            Lỗi không xác định
+                                                                        </label>
+                                                                        <% } %>
                                 </td>
 
                                 <td>
@@ -281,25 +286,23 @@
                         </table>
 
 
-                        <div
-                            style="display: flex; flex-direction: row; align-items: center;justify-content: space-between; bottom: 0; width: 96%;position:absolute ; ">
+                        <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; bottom: 0; width: 96%;">
                             <p> Số bản ghi: <span style="font-weight: bold;">
                                     <%= countNowProduct %>/<%= countAllProduct %>
                                 </span></p>
                             <nav>
                                 <ul class="pagination">
-                                    <% for (let page=1; page <=totalPages; page++) { %>
+                                    <% for (let page = 1; page <= totalPages; page++) { %>
                                         <li class="page-item <%= page === currentPage ? 'active' : '' %>">
-                                            <a class="page-link"
-                                                href="?page=<%= page %>&interval=<%= selectedInterval %>">
+                                            <a class="page-link" href="?page=<%= page %>">
                                                 <%= page %>
                                             </a>
                                         </li>
-                                        <% } %>
-
+                                    <% } %>
                                 </ul>
                             </nav>
                         </div>
+                
 
                         <% } else { %>
                             <div class="no-results-container">
