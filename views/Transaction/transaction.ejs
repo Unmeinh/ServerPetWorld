@@ -264,7 +264,7 @@
                                                                 <% } else if (row.status===5) { %>
                                                                     <label type="text"
                                                                         style="width: 200px;color: rgb(10, 190, 10);">
-                                                                        Thanh toán thành công
+                                                                        Hoàn tất giao dịch
                                                                     </label>
                                                                     <% } else { %>
                                                                         <label type="text" style="width: 200px;">
@@ -325,20 +325,41 @@
 
     </div>
     <%- include('../inc/bottom') %>
+        <!-- Add this function to your existing script -->
         <script>
-            const sortOptionDropdown = document.getElementById('interval');
-            const sortForm = document.getElementById('dropDownForm');
-
-            const selectedOption = localStorage.getItem('selectedOption');
-
-            if (selectedOption) {
-                sortOptionDropdown.value = selectedOption;
+            function setSortOption(option) {
+                const sortOptionDropdown = document.getElementById('interval');
+                sortOptionDropdown.value = option;
+                localStorage.setItem('selectedOption', option);
+                const sortForm = document.getElementById('dropDownForm');
+                sortForm.submit();
             }
 
-            sortOptionDropdown.addEventListener('change', function () {
-                const newOption = sortOptionDropdown.value;
-                localStorage.setItem('selectedOption', newOption); // Use 'selectedOption' as the key
-                sortForm.submit();
-            });
+            document.addEventListener('DOMContentLoaded', () => {
+                const sortOptionDropdown = document.getElementById('interval');
+                const sortForm = document.getElementById('dropDownForm');
 
+                const selectedOption = localStorage.getItem('selectedOption');
+
+                if (selectedOption) {
+                    sortOptionDropdown.value = selectedOption;
+                }
+
+                sortOptionDropdown.addEventListener('change', function () {
+                    const newOption = sortOptionDropdown.value;
+                    localStorage.setItem('selectedOption', newOption); // Use 'selectedOption' as the key
+                    sortForm.submit();
+                });
+            });
         </script>
+
+        <!-- Modify the link for "Giao dịch" -->
+        <li>
+            <a href="javascript:void(0);" class="color-link" onclick="changeColor(this); setSortOption('today')">
+                <span class="iconify" data-icon="fluent:payment-16-regular"></span>
+                <span class="link_name">Giao dịch</span>
+            </a>
+            <ul class="sub-menu blank">
+                <li><a class="link_name" href="/shop">Giao dịch</a></li>
+            </ul>
+        </li>
