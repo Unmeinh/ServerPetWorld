@@ -1,7 +1,9 @@
 const admin = require("firebase-admin");
 const axios = require("axios");
 const mdNotification = require("../model/notice.model");
+const mdNotificationSeller=require("../model/noticeSeller.model");
 const mdUser = require("../model/user.model").UserModel;
+const mdShop = require("../model/shop.model").ShopModel;
 // ... (khởi tạo Firebase Admin SDK)
 const serviceAccount = require("../petworld-firebase-firebase-adminsdk-jcff6-578705a4ad.json");
 admin.initializeApp({
@@ -23,27 +25,50 @@ exports.notificationSc = async (req, res, next) => {
       timestamp: admin.database.ServerValue.TIMESTAMP,
     });
 
-    const tokensSnapshot = await db.ref("tokens").once("value");
-    tokensSnapshot.forEach((childSnapshot) => {
+
+    const tokensSnapshot = role === "client"
+  ? await db.ref("tokens").once("value")
+  : await db.ref("sellerTokens").once("value");
+    tokensSnapshot.forEach((childSnapshot) => { 
       const token = childSnapshot.val().token;
       sendFCMNotification(token, role, message);
     });
 
-    const getListUser = await mdUser.find();
-    if (getListUser) {
-      await Promise.all(
-        getListUser.map(async (user) => {
-          const createNotice = new mdNotification.NoticeModel({
-            detail: message,
-            idUser: user._id,
-            content: title,
-            status: 1,
-            createdAt: new Date(),
-          });
-          await createNotice.save();
-          await Promise.all([user]);
-        })
-      );
+    
+    if(role === "client"){
+      const getListUser = await mdUser.find();
+      if (getListUser) {
+        await Promise.all(
+          getListUser.map(async (user) => {
+            const createNotice = new mdNotification.NoticeModel({
+              detail: message,
+              idUser: user._id,
+              content: title,
+              status: 1,
+              createdAt: new Date(),
+            });
+            await createNotice.save();
+            await Promise.all([user]);
+          })
+        );
+      }
+    }else{
+      const getListShop = await mdShop.find();
+      if (getListShop) {
+        await Promise.all(
+          getListShop.map(async (shop) => {
+            const createNotice = new mdNotificationSeller.NoticeSellerModel({
+              detail: message,
+              idShop: shop._id,
+              content: title,
+              status: 1,
+              createdAt: new Date(),
+            });
+            await createNotice.save();
+            await Promise.all([shop]);
+          })
+        );
+      }
     }
     res.render("Notification/notification", {
       adminLogin: req.session.adLogin,

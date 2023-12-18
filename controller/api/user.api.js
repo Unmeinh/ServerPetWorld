@@ -92,25 +92,58 @@ exports.autoLogin = async (req, res, next) => {
 
 exports.checkPhoneNumber = async (req, res, next) => {
   try {
-    let objU = await mdUserAccount.findOne({
-      phoneNumber: req.body.phoneNumber,
-    });
-    if (!objU) {
+    if (req.method == "POST") {
+      if (req.body.userName) {
+        let objUN = await mdUserAccount.findOne({
+          userName: req.body.userName,
+        });
+        if (objUN) {
+          return res
+            .status(201)
+            .json({
+              success: false,
+              data: objUN,
+              message: "Tên đăng nhập đã được sử dụng.",
+            });
+        }
+      }
+      let objU = await mdUserAccount.findOne({
+        phoneNumber: req.body.phoneNumber,
+      });
+      if (objU) {
+        return res
+          .status(201)
+          .json({
+            success: false,
+            data: objU,
+            message: "Số điện thoại đã được sử dụng.",
+          });
+      }
       return res
         .status(201)
         .json({
           success: true,
           data: objU,
+          message: "Số điện thoại chưa được sử dụng.",
+        });
+    }
+    if (req.method == "PUT") {
+      let objU = await mdUserAccount.findOne({
+        phoneNumber: req.body.phoneNumber,
+      });
+      if (!objU) {
+        return res.status(201).json({
+          success: false,
+          data: {},
           message: "Số điện thoại chưa được đăng ký.",
         });
-    } else {
-      return res
-        .status(201)
-        .json({
-          success: false,
-          data: objU,
-          message: "Số điện thoại đã được đăng ký.",
+      } else {
+        return res.status(201).json({
+          success: true,
+          data: {},
+          message: "Số điện thoại đã được đăng ký."
         });
+      }
     }
   } catch (error) {
     return res
@@ -444,6 +477,7 @@ exports.updatePassword = async (req, res, next) => {
       oldPassword,
       req.account.passWord
     );
+
     if (!isPasswordMatch) {
       return res
         .status(201)
@@ -453,7 +487,19 @@ exports.updatePassword = async (req, res, next) => {
           message: "Mật khẩu hiện tại nhập sai!",
         });
     }
-    req.account.passWord = newPassword;
+
+    if (String(oldPassword) == String(newPassword)) {
+      return res
+        .status(201)
+        .json({
+          success: false,
+          data: {},
+          message: "Mật khẩu mới không được trùng với mật khẩu hiện tại!",
+        });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    req.account.passWord = await bcrypt.hash(newPassword, salt);
     try {
       await mdUserAccount.findByIdAndUpdate(req.account._id, req.account);
       return res
@@ -662,10 +708,7 @@ async function calculatorBill(uID) {
     {
       $match: {
         idUser: uID,
-        deliveryStatus: {
-          $gte: 0,
-          $lte: 5,
-        }
+        deliveryStatus: 4
       },
     },
     {

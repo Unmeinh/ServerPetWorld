@@ -22,6 +22,8 @@ const {
 } = require("../../function/hashFunction");
 const { sendFCMNotification } = require("../../function/notice");
 const { serverModal } = require("../../model/server.modal");
+const { TransactionModal } = require("../../model/transaction.modal");
+const { ReviewModel } = require("../../model/review.model");
 
 exports.listShop = async (req, res, next) => {
   let filterSearch = null;
@@ -266,7 +268,10 @@ exports.listDeliveredBill = async (req, res, next) => {
         const searchTerm = req.query.filterSearch.trim();
         filterSearch = { fullName: new RegExp(searchTerm, "i") };
       }
-      let listBill = await getListBill(req.shop._id, 3);
+      let listBill = await getListBill(req.shop._id, {
+        $gte: 3,
+        $lte: 4
+      });
       if (listBill && listBill.length > 0) {
         let list = await onFinalProcessingListBill(listBill);
         listBill = [...list];
@@ -277,6 +282,7 @@ exports.listDeliveredBill = async (req, res, next) => {
         message: "Lấy danh sách đơn hàng thành công",
       });
     } catch (error) {
+      console.log(error);
       return res
         .status(500)
         .json({ success: false, data: [], message: "Lỗi: " + error.message });
@@ -296,7 +302,7 @@ exports.listEvaluatedBill = async (req, res, next) => {
         const searchTerm = req.query.filterSearch.trim();
         filterSearch = { fullName: new RegExp(searchTerm, "i") };
       }
-      let listBill = await getListBill(req.shop._id, 5);
+      let listBill = await getListBill(req.shop._id, 4);
       if (listBill && listBill.length > 0) {
         let list = await onFinalProcessingListBill(listBill);
         listBill = [...list];
@@ -334,6 +340,62 @@ exports.listCancelledBill = async (req, res, next) => {
       return res.status(200).json({
         success: true,
         data: listBill,
+        message: "Lấy danh sách đơn hàng thành công",
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ success: false, data: [], message: "Lỗi: " + error.message });
+    }
+  }
+};
+
+exports.getReviewBill = async (req, res, next) => {
+  let filterSearch = null;
+
+  if (req.method == "GET" && req.params.idBill) {
+    try {
+      let listReview = await ReviewModel.find({ idBill: req.params.idBill });
+      if (!listReview && listReview.length <= 0) {
+        return res.status(200).json({
+          success: false,
+          data: [],
+          message: "Lấy danh sách đơn hàng thành công",
+        });
+      }
+      let listNew = [];
+      for (let i = 0; i < listReview.length; i++) {
+        let stars = [];
+        const review = listReview[i].toObject();
+        if (review?.ratingNumber) {
+          for (let j = 0; j < 5; j++) {
+            if (j <= review?.ratingNumber) {
+              stars.push({
+                nameIcon: "star",
+                colorIcon: '#E2E53F'
+              })
+            } else {
+              stars.push({
+                nameIcon: "star-outline",
+                colorIcon: '#001858'
+              })
+            }
+          }
+          review.stars = stars;
+        }
+        let product = await mdProduct.findById(review.idProduct);
+        let pet = await mdPet.findById(review.idProduct);
+        if (product) {
+          review.idProduct = product;
+        }
+        if (pet) {
+          review.idProduct = pet;
+        }
+        listNew.push(review);
+      }
+      return res.status(200).json({
+        success: true,
+        data: listNew,
         message: "Lấy danh sách đơn hàng thành công",
       });
     } catch (error) {
@@ -813,8 +875,12 @@ exports.confirmBill = async (req, res, next) => {
         let billProduct = await mdBill.findOne({
           _id: idBill,
           idShop: req.shop._id,
+        }).populate('idUser').populate('idShop');
+        let transaction = await TransactionModal.findOne({
+          idBill: idBill,
+          idShop: req.shop._id,
         });
-        if (!billProduct) {
+        if (!billProduct || !transaction || (!transaction && !billProduct)) {
           return res.status(500).json({
             success: false,
             data: {},
@@ -825,6 +891,8 @@ exports.confirmBill = async (req, res, next) => {
           billProduct.deliveryStatus = 1;
           billProduct.billDate.confirmedAt = new Date();
           await mdBill.findByIdAndUpdate(billProduct._id, billProduct);
+          transaction.status = 1;
+          await TransactionModal.findByIdAndUpdate(transaction._id, transaction);
           let statusBill = {};
           statusBill.status = 1;
           statusBill.colorStatus = "#001858";
@@ -841,6 +909,24 @@ exports.confirmBill = async (req, res, next) => {
             );
             if (status) {
               if (statusCode === 200) {
+                await sendFCMNotification(
+                  billProduct?.idShop?.tokenDevice,
+                  'Xác nhận đơn hàng thành công!',
+                  `Đơn hàng trị giá ${Number(Number(billProduct?.total)).toLocaleString()} ₫ đã được xác nhận.\nĐơn hàng đã được giao cho ${nameShipper} để giao hàng vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+                  'SELLER',
+                  [],
+                  billProduct?.idShop?._id,
+                  3
+                );
+                await sendFCMNotification(
+                  billProduct?.idUser?.tokenDevice,
+                  'Đơn hàng đã được xác nhận!',
+                  `Đơn hàng trị giá ${Number(Number(billProduct?.total) + Number(billProduct?.moneyShip)).toLocaleString()} ₫ đã được xác nhận.\nĐơn hàng đã được giao cho ${nameShipper} để giao hàng vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+                  'CLIENT',
+                  [],
+                  billProduct?.idUser?._id,
+                  3
+                );
                 return res.status(201).json({
                   success: true,
                   data: statusBill,
@@ -848,6 +934,24 @@ exports.confirmBill = async (req, res, next) => {
                     "Xác nhận đơn hàng thành công.\nĐơn hàng đã được giao cho người giao hàng cùng khu vực.",
                 });
               } else {
+                await sendFCMNotification(
+                  billProduct?.idShop?.tokenDevice,
+                  'Xác nhận đơn hàng thành công!',
+                  `Đơn hàng trị giá ${Number(Number(billProduct?.total)).toLocaleString()} ₫ đã được xác nhận.\nHiện tại chưa có người giao hàng nào trong khu vực để nhận giao đơn hàng.\nBạn có thể yêu cầu tìm lại người giao hàng, theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+                  'SELLER',
+                  [],
+                  billProduct?.idShop?._id,
+                  3
+                );
+                await sendFCMNotification(
+                  billProduct?.idUser?.tokenDevice,
+                  'Xác nhận đơn hàng thành công!',
+                  `Đơn hàng trị giá ${Number(Number(billProduct?.total) + Number(billProduct?.moneyShip)).toLocaleString()} ₫ đã được xác nhận.\nHiện tại chưa có người giao hàng nào trong khu vực để nhận giao đơn hàng.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+                  'CLIENT',
+                  [],
+                  billProduct?.idUser?._id,
+                  3
+                );
                 return res.status(201).json({
                   success: true,
                   data: statusBill,
@@ -856,6 +960,24 @@ exports.confirmBill = async (req, res, next) => {
                 });
               }
             } else {
+              await sendFCMNotification(
+                billProduct?.idShop?.tokenDevice,
+                'Xác nhận đơn hàng thành công!',
+                `Đơn hàng trị giá ${Number(Number(billProduct?.total)).toLocaleString()} ₫ đã được xác nhận.\nHiện tại chưa có người giao hàng nào trong khu vực để nhận giao đơn hàng.\nBạn có thể yêu cầu tìm lại người giao hàng, theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+                'SELLER',
+                [],
+                billProduct?.idShop?._id,
+                3
+              );
+              await sendFCMNotification(
+                billProduct?.idUser?.tokenDevice,
+                'Xác nhận đơn hàng thành công!',
+                `Đơn hàng trị giá ${Number(Number(billProduct?.total) + Number(billProduct?.moneyShip)).toLocaleString()} ₫ đã được xác nhận.\nHiện tại chưa có người giao hàng nào trong khu vực để nhận giao đơn hàng.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+                'CLIENT',
+                [],
+                billProduct?.idUser?._id,
+                3
+              );
               return res.status(500).json({
                 success: false,
                 data: statusBill,
@@ -875,6 +997,36 @@ exports.confirmBill = async (req, res, next) => {
         if (isConfirm == 1) {
           billProduct.deliveryStatus = -1;
           await mdBill.findByIdAndUpdate(billProduct._id, billProduct);
+          if (billProduct.products.length > 1) {
+            for (let i = 0; i < billProduct.products.length; i++) {
+              const bill = billProduct.products[i];
+              let product = await mdProduct.findById(bill.idProduct);
+              if (product) {
+                product.quantitySold = Number(product.quantitySold) - (bill.amount);
+                product.amountProduct = Number(product.amountProduct) + (bill.amount);
+                product.save();
+              }
+            }
+          } else {
+            if (billProduct.products.length > 0) {
+              let first = billProduct.products[0];
+              let product = await mdProduct.findById(first.idProduct);
+              if (product) {
+                product.quantitySold = Number(product.quantitySold) - (first.amount);
+                product.amountProduct = Number(product.amountProduct) + (first.amount);
+                product.save();
+              } else {
+                let pet = await mdPet.findById(first.idProduct);
+                if (pet) {
+                  pet.quantitySold = Number(pet.quantitySold) - (first.amount);
+                  pet.amountPet = Number(pet.amountPet) + (first.amount);
+                  pet.save();
+                }
+              }
+            }
+          }
+          transaction.status = -1;
+          await TransactionModal.findByIdAndUpdate(transaction._id, transaction);
           if (billProduct?.idShipper) {
             const shipper = await mdShiper
               .findById(billProduct.idShipper)
@@ -898,6 +1050,24 @@ exports.confirmBill = async (req, res, next) => {
           statusBill.nameStatus = "Đơn bị hủy";
           statusBill.iconStatus = "clipboard-remove-outline";
           statusBill.descStatus = "Đơn hàng đã bị hủy.";
+          await sendFCMNotification(
+            billProduct?.idShop?.tokenDevice,
+            'Đơn hàng đã bị hủy!',
+            `Đơn hàng trị giá ${Number(Number(billProduct?.total)).toLocaleString()} ₫ đã bị hủy.\nBạn có thể xem đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+            'SELLER',
+            [],
+            billProduct?.idShop?._id,
+            3
+          );
+          await sendFCMNotification(
+            billProduct?.idUser?.tokenDevice,
+            'Đơn hàng đã bị hủy!',
+            `Đơn hàng trị giá ${Number(Number(billProduct?.total) + Number(billProduct?.moneyShip)).toLocaleString()} ₫ đã bị cửa hàng hủy.\nBạn có thể xem đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+            'CLIENT',
+            [],
+            billProduct?.idUser?._id,
+            3
+          );
           return res.status(201).json({
             success: true,
             data: statusBill,
@@ -953,6 +1123,12 @@ exports.confirmBillAll = async (req, res, next) => {
               bill.deliveryStatus = 1;
               bill.billDate.confirmedAt = new Date();
               await mdBill.findByIdAndUpdate(bill._id, bill);
+              let transaction = await TransactionModal.findOne({
+                idBill: bill._id,
+                idShop: req.shop._id,
+              });
+              transaction.status = 1;
+              transaction.save();
               const location = bill?.locationDetail?.location;
               let locationArray = location.split(", ").reverse();
               const [status, message, statusCode, nameShipper] = await addBillForShipper(
@@ -961,6 +1137,43 @@ exports.confirmBillAll = async (req, res, next) => {
               );
               if (status && statusCode === 500) {
                 statusAddBillForShipper = false;
+                await sendFCMNotification(
+                  req?.shop?.tokenDevice,
+                  'Xác nhận đơn hàng thành công!',
+                  `Đơn hàng trị giá ${Number(Number(bill?.total)).toLocaleString()} ₫ đã được xác nhận.\nHiện tại chưa có người giao hàng nào trong khu vực để nhận giao đơn hàng.\nBạn có thể yêu cầu tìm lại người giao hàng, theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+                  'SELLER',
+                  [],
+                  req?.shop?._id,
+                  3
+                );
+                await sendFCMNotification(
+                  bill?.idUser?.tokenDevice,
+                  'Xác nhận đơn hàng thành công!',
+                  `Đơn hàng trị giá ${Number(Number(bill?.total) + Number(bill?.moneyShip)).toLocaleString()} ₫ đã được xác nhận.\nHiện tại chưa có người giao hàng nào trong khu vực để nhận giao đơn hàng.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+                  'CLIENT',
+                  [],
+                  bill?.idUser?._id,
+                  3
+                );
+              } else {
+                await sendFCMNotification(
+                  req?.shop?.tokenDevice,
+                  'Xác nhận đơn hàng thành công!',
+                  `Đơn hàng trị giá ${Number(Number(bill?.total)).toLocaleString()} ₫ đã được xác nhận.\nĐơn hàng đã được giao cho ${nameShipper} để giao hàng vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+                  'SELLER',
+                  [],
+                  req?.shop?._id,
+                  3
+                );
+                await sendFCMNotification(
+                  bill?.idUser?.tokenDevice,
+                  'Đơn hàng đã được xác nhận!',
+                  `Đơn hàng trị giá ${Number(Number(bill?.total) + Number(bill?.moneyShip)).toLocaleString()} ₫ đã được xác nhận.\nĐơn hàng đã được giao cho ${nameShipper} để giao hàng vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+                  'CLIENT',
+                  [],
+                  bill?.idUser?._id,
+                  3
+                );
               }
               if (!status) {
                 error = true;
@@ -1002,6 +1215,12 @@ exports.confirmBillAll = async (req, res, next) => {
             bill.deliveryStatus = -1;
             bill.billDate.cancelledAt = new Date();
             await mdBill.findByIdAndUpdate(bill._id, bill);
+            let transaction = await TransactionModal.findOne({
+              idBill: bill._id,
+              idShop: req.shop._id,
+            });
+            transaction.status = -1;
+            transaction.save();
           }
           return res.status(201).json({
             success: true,
@@ -1027,6 +1246,10 @@ exports.confirmBillAll = async (req, res, next) => {
 exports.findShipper = async (req, res, next) => {
   try {
     if (req?.body?.location && req.method == "POST") {
+      let billProduct = await mdBill.findOne({
+        _id: req?.body?.idBill,
+        idShop: req.shop._id,
+      }).populate('idUser');
       let location = req?.body?.location.split(", ").reverse();
       const [status, message, statusCode, nameShipper] = await addBillForShipper(
         (location.length > 3) ? `${location[2]}, ${location[1]}, ${location[0]}` : "",
@@ -1037,10 +1260,20 @@ exports.findShipper = async (req, res, next) => {
           await sendFCMNotification(
             req.shop.tokenDevice,
             'Tìm người giao hàng thành công!',
-            `Đơn hàng ${req?.body?.nameBill} đã giao cho ${nameShipper} vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+            `Đơn hàng trị giá ${Number(Number(billProduct?.total)).toLocaleString()} ₫ đã giao cho ${nameShipper} vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
             'SELLER',
             [],
             req.shop._id,
+            3
+          );
+          await sendFCMNotification(
+            billProduct?.idUser?.tokenDevice,
+            'Đơn hàng đã tìm được người giao hàng!',
+            `Đơn hàng trị giá ${Number(Number(billProduct?.total) + Number(billProduct?.moneyShip)).toLocaleString()} ₫ đã giao cho ${nameShipper} vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+            'CLIENT',
+            [],
+            billProduct?.idUser?._id,
+            3
           );
           return res.status(201).json({
             success: true,
@@ -1191,7 +1424,7 @@ exports.myShopDetail = async (req, res, next) => {
     if (listBill) {
       req.shop = req?.shop.toObject();
       req.shop.billCount = listBill.length;
-      const statusArray = [0, 1, 2, 3, 5];
+      const statusArray = [0, 1, 2, 3];
       try {
         const pipeline = [
           {
@@ -1222,13 +1455,11 @@ exports.myShopDetail = async (req, res, next) => {
               statusCountObject["0"] = result.count;
             }
           } else {
-            if (result._id == 5) {
-              statusCountObject["3"] = result.count;
-            } else {
-              statusCountObject[String(result._id - 1)] = result.count;
-            }
+            statusCountObject[String(result._id - 1)] = result.count;
           }
         }
+        const countReview = await mdBill.find({ idShop: _id, statusReview: false, deliveryStatus: 4 }).count();
+        statusCountObject['3'] = (countReview) ? countReview : 0;
         req.shop.objCountBills = statusCountObject;
         return res.status(200).json({
           success: true,
@@ -1278,10 +1509,12 @@ exports.detailOwner = async (req, res, next) => {
         let nameIdentity = decodeFromSha256(decodeObj.nameIdentity);
         let numberIdentity = decodeFromSha256(decodeObj.numberIdentity);
         let dateIdentity = decodeFromSha256(decodeObj.dateIdentity);
-        let nameCard = "VU TRONG HOANG LINH";
-        let numberCard = "1234 5678 9101 1278";
-        let nameBank = "MBBank";
-        let expirationDate = "05/25";
+        // let nameCard = "VU TRONG HOANG LINH";
+        // let numberCard = "1234 5678 9101 1278";
+        // let nameBank = "MBBank";
+        // let expirationDate = "05/25";
+        let paymentMethod = decodeObj.paymentMethod;
+        let stkPayment = decodeFromSha256(decodeObj.stkPayment);
         let createdAt = objShop.createdAt;
         objOwner = {
           nameIdentity: encodeName(removeVietnameseTones(nameIdentity)),
@@ -1292,14 +1525,18 @@ exports.detailOwner = async (req, res, next) => {
               .replace(/[0-9]/g, "*") +
             numberIdentity.substring(numberIdentity.length - 2),
           dateIdentity: dateIdentity,
-          nameCard: encodeName(removeVietnameseTones(nameCard)),
-          numberCard:
-            numberCard
-              .substring(0, numberCard.length - 3)
-              .replace(/[0-9]/g, "*") +
-            numberCard.substring(numberCard.length - 3),
-          nameBank: nameBank,
-          expirationDate: expirationDate,
+          // nameCard: encodeName(removeVietnameseTones(nameCard)),
+          // numberCard:
+          //   numberCard
+          //     .substring(0, numberCard.length - 3)
+          //     .replace(/[0-9]/g, "*") +
+          //   numberCard.substring(numberCard.length - 3),
+          // nameBank: nameBank,
+          // expirationDate: expirationDate,
+          paymentMethod: paymentMethod,
+          stkPayment: stkPayment.substring(0, stkPayment.length - 3)
+            .replace(/[0-9]/g, "*") +
+            stkPayment.substring(stkPayment.length - 3),
           createdAt: moment(createdAt).format("DD/MM/YYYY HH:mm A"),
         };
       }
@@ -1336,14 +1573,6 @@ exports.detailShop = async (req, res, next) => {
 exports.checkPhoneNumber = async (req, res, next) => {
   try {
     if (req.method == "POST") {
-      let objHL = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
-      if (objHL) {
-        return res.status(201).json({
-          success: false,
-          data: objHL,
-          message: "Số điện thoại đã được sử dụng.",
-        });
-      }
       if (req.body.userName) {
         let objUN = await mdShop.ShopModel.findOne({
           userName: req.body.userName,
@@ -1355,6 +1584,14 @@ exports.checkPhoneNumber = async (req, res, next) => {
             message: "Tên đăng nhập đã được sử dụng.",
           });
         }
+      }
+      let objHL = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
+      if (objHL) {
+        return res.status(201).json({
+          success: false,
+          data: objHL,
+          message: "Số điện thoại đã được sử dụng.",
+        });
       }
       return res.status(201).json({
         success: true,
@@ -1364,30 +1601,19 @@ exports.checkPhoneNumber = async (req, res, next) => {
     }
     if (req.method == "PUT") {
       let objHL = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
-      if (objHL) {
+      if (!objHL) {
         return res.status(201).json({
           success: false,
-          data: objHL,
-          message: "Số điện thoại đã được sử dụng.",
+          data: {},
+          message: "Số điện thoại chưa được đăng ký.",
+        });
+      } else {
+        return res.status(201).json({
+          success: true,
+          data: {},
+          message: "Số điện thoại đã được đăng ký."
         });
       }
-      if (req.body.userName) {
-        let objUN = await mdShop.ShopModel.findOne({
-          userName: req.body.userName,
-        });
-        if (objUN) {
-          return res.status(201).json({
-            success: false,
-            data: objHL,
-            message: "Tên đăng nhập đã được sử dụng.",
-          });
-        }
-      }
-      return res.status(201).json({
-        success: true,
-        data: objHL,
-        message: "Số điện thoại chưa được sử dụng.",
-      });
     }
   } catch (error) {
     return res
@@ -1406,9 +1632,11 @@ exports.checkEmail = async (req, res, next) => {
         message: "Email chưa được đăng ký.",
       });
     } else {
-      return res
-        .status(201)
-        .json({ success: true, data: objU, message: "Email đã được đăng ký." });
+      return res.status(201).json({
+        success: true,
+        data: objU,
+        message: "Email đã được đăng ký."
+      });
     }
   } catch (error) {
     return res
@@ -1504,6 +1732,8 @@ exports.registerShop = async (req, res, next) => {
       numberIdentity: encodeToSha256(String(req.body.numberIdentity)),
       dateIdentity: encodeToSha256(String(req.body.dateIdentity)),
       imageIdentity: [encodeToSha256(images[1]), encodeToSha256(images[2])],
+      paymentMethod: req.body.paymentMethod,
+      stkPayment: encodeToSha256(String(req.body.stkPayment))
     });
     await newShop.encodeOwnerIdentity(newShop, encodeToAscii(ownerIdentity));
 
@@ -1759,7 +1989,17 @@ exports.updatePassword = async (req, res, next) => {
         message: "Mật khẩu hiện tại nhập sai!",
       });
     }
-    req.shop.passWord = newPassword;
+    if (String(oldPassword) == String(newPassword)) {
+      return res
+        .status(201)
+        .json({
+          success: false,
+          data: {},
+          message: "Mật khẩu mới không được trùng với mật khẩu hiện tại!",
+        });
+    }
+    const salt = await bcrypt.genSalt(10);
+    req.shop.passWord = await bcrypt.hash(newPassword, salt);
     await mdShop.ShopModel.findByIdAndUpdate(req.shop._id, req.shop);
     await sendFCMNotification(
       req.shop.tokenDevice,
@@ -1768,6 +2008,7 @@ exports.updatePassword = async (req, res, next) => {
       'SELLER',
       [],
       req.shop._id,
+      3
     );
     return res.status(201).json({
       success: true,
@@ -1798,6 +2039,7 @@ exports.changePassword = async (req, res, next) => {
           'SELLER',
           [],
           shop._id,
+          3
         );
         return res.status(201).json({
           success: true,
@@ -2099,6 +2341,7 @@ async function getListBill(idShop, billStatus) {
           deliveryStatus: { $first: "$deliveryStatus" },
           discountBill: { $first: "$discountBill" },
           billDate: { $first: "$billDate" },
+          statusReview: { $first: "$statusReview" },
           productInfo: { $push: "$productInfo" },
           petInfo: { $first: "$petInfo" },
           userInfo: { $first: "$userLookup" },
@@ -2115,6 +2358,7 @@ async function getListBill(idShop, billStatus) {
           discountBill: 1,
           billDate: 1,
           shipperInfo: 1,
+          statusReview: 1,
           "productInfo.idProduct": 1,
           "productInfo.amount": 1,
           "productInfo.price": 1,
@@ -2242,15 +2486,22 @@ async function onFinalProcessingListBill(listBill) {
     //       break;
     //   }
     // }
-    if (bill.productInfo != undefined) {
-      let arrProduct = bill?.productInfo[0];
-      if (arrProduct.length > 0) {
-        let total = 0;
-        for (let i = 0; i < arrProduct.length; i++) {
-          const element = arrProduct[i];
-          total += Number(element?.price) * Number(element?.amount);
+    if (bill.productInfo && typeof (bill.productInfo) == 'object'
+      && Object.keys(bill.productInfo).length > 0 && bill.productInfo[0].length > 0) {
+      try {
+        if (bill.productInfo.length > 0) {
+          let arrProduct = [];
+          let total = 0;
+          for (let i = 0; i < bill.productInfo.length; i++) {
+            const element = bill.productInfo[i][0];
+            total += Number(element?.price) * Number(element?.amount);
+            arrProduct.push(element);
+          }
+          bill.productInfo[0] = arrProduct;
+          bill.totalProduct = total;
         }
-        bill.totalProduct = total;
+      } catch (error) {
+        console.log(error);
       }
     }
     if (listPayment.length > 0 && bill.paymentMethods != undefined) {
@@ -2269,6 +2520,7 @@ async function getTotalBill(shopId, previusDate, nowDate) {
         $gte: new Date(previusDate),
         $lte: new Date(nowDate),
       },
+      deliveryStatus: 4
     },
   };
   var group_stage = {
@@ -2295,6 +2547,7 @@ async function getTotalProduct(shopId, previusDate, nowDate) {
         $gte: new Date(previusDate),
         $lte: new Date(nowDate),
       },
+      deliveryStatus: 4
     },
   };
 

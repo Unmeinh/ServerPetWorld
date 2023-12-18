@@ -2,17 +2,28 @@
 <div class="container">
     <% if(message) { %>
         <div class="row mb-2">
-            <span class="p-3 alert alert-warning">
+            <span class="p-3" style="background-color: rgb(175, 214, 239); border-radius: 10px;color: red;font-weight: bold;">
                 <%= message %>
             </span>
         </div>
     <% } %>
-    <div class="col-12 col-md-5 mx-auto" style="box-shadow: 0 0 2px 2px #9c9999; border-radius: 8px; padding: 20px;">
-        <form action="" method="post">
-            <h3 class="text-muted" style="margin-bottom: 20px;">Xóa shop</h3>
-            <h4 style="margin: 30px;">Bạn muốn xóa shop: <span style="font-weight: bold;"><%= ObjShop.nameShop %></span>?</h4>
-            <button class="btn btn-danger" type="submit">Xóa ngay</button>
-            <a href="/shop" class="btn btn-secondary">Hủy bỏ</a>
+    <div class="col-5 m-auto card">
+        <form action="" class="card-body" method="post">
+            <h5 class="card-text  mb-3">
+                Bạn có chắc muốn xóa shop
+                <% if( ObjShop.nameShop < 50) { %>
+                    <span style="font-weight: bold">
+                        <%= ObjShop.nameShop %>
+                    </span> ?
+                    <% } else { %>
+                        <span style="font-weight: bold">
+                            <%= ObjShop.nameShop.slice(0,50) %>...
+                        </span> ?
+            </h5>
+            <%}%>
+                </h5>
+                <button class="btn btn-danger" type="submit">Xóa ngay</button>
+                <a href="/shop/confirm" class="btn" style="background-color: #d2d2d2;">Hủy bỏ</a>
         </form>
     </div>
 </div>

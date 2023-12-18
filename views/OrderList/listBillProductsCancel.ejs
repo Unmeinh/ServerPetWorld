@@ -32,7 +32,7 @@
       <th style="border-radius: 6px 0 0 6px;">Địa chỉ</th>
       <th>Tổng tiền</th>
       <th>Tiền Ship</th>
-      <th  style="border-radius: 0 6px 6px 0;">Ngày tạo</th>
+      <th  style="border-radius: 0 6px 6px 0;">Ngày đặt</th>
     </tr>
 
     <% listBillProducts.forEach((row) => { %>
@@ -47,8 +47,12 @@
         <%= row.moneyShip || 'Không có dữ liệu' %> VND
       </td>
       <td>
-        <%= row.purchaseDate ? new Date(row.purchaseDate).toLocaleString('en-US') : 'Không có dữ liệu' %>
-      </td>      
+        <% if (row.purchaseDate) { %>
+          <%= new Date(row.purchaseDate).toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }) %>
+        <% } else { %>
+          Không có dữ liệu
+        <% } %>
+      </td>   
     </tr>
     <% }) %>
   </table>

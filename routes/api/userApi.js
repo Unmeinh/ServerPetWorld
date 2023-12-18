@@ -10,6 +10,7 @@ router.get('/myDetail', mdJWT.api_user_auth, UserApiCtrl.myDetail);
 router.get('/autoLogin', mdJWT.api_user_auth, UserApiCtrl.autoLogin);
 router.post('/autoLogin', mdJWT.api_user_auth, UserApiCtrl.autoLogin);
 router.post('/checkPhoneNumber', UserApiCtrl.checkPhoneNumber);
+router.put('/checkPhoneNumber', UserApiCtrl.checkPhoneNumber);
 router.get('/userDetail/:idUser', mdJWT.api_user_auth, UserApiCtrl.detailUser);
 router.post('/register', UserApiCtrl.registerUser);
 router.post('/login', UserApiCtrl.loginUser);

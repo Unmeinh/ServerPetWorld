@@ -27,6 +27,7 @@ router.get("/list/appointment", mdJWT.api_shop_auth, ShopApiCtrl.listAppointment
 router.get("/pet/detail/:idPet", mdJWT.api_shop_auth, ShopApiCtrl.detailPet);
 router.get("/product/detail/:idProd", mdJWT.api_shop_auth, ShopApiCtrl.detailProduct);
 router.get("/appointment/detail/:idAppt", mdJWT.api_shop_auth, ShopApiCtrl.detailAppointment);
+router.get('/bill/review/:idBill', mdJWT.api_shop_auth, ShopApiCtrl.getReviewBill)
 router.post("/bill/confirm", mdJWT.api_shop_auth, ShopApiCtrl.confirmBill);
 router.post("/bill/confirmAll", mdJWT.api_shop_auth, ShopApiCtrl.confirmBillAll);
 router.post("/bill/findShipper", mdJWT.api_shop_auth, ShopApiCtrl.findShipper);
