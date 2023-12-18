@@ -4,6 +4,7 @@ let fs = require("fs");
 let { decodeFromAscii } = require("../../function/hashFunction");
 const { onUploadImages } = require("../../function/uploadImage");
 const { sendFCMNotification } = require("../../function/notice");
+let moment = require('moment');
 
 exports.listAllBlog = async (req, res, next) => {
   let list = await mdBlog.BlogModel.find();
