@@ -65,77 +65,97 @@ exports.listShipper = async (req, res, next) => {
   }
 };
 exports.addShipper = async (req, res, next) => {
-  let msg = '';
-
-  if (req.method == 'POST') {
-    if (req.body.re_passWord != req.body.passWord) {
-      msg = "Mật khẩu không trùng khớp";
-      return res.render('Shipper/addShipper', { msg: msg });
-    }
-
-    if (req.body.passWord == '') {
-      msg = "Mật khẩu đang trống";
-      return res.render('Shipper/addShipper', { msg: msg });
-    }
-    try {
-      let newObj = new mdShipper.ShipperModel();
-      let images = await onUploadImages(req.files, "blog");
-      if (images != [] && images[0] == false) {
-        if (images[1].message.indexOf("File size too large.") > -1) {
-          return res
-            .status(500)
-            .json({
+    let msg = '';
+    let formData = req.body;
+  
+    if (req.method === 'POST') {
+      if (req.body.re_passWord !== req.body.passWord) {
+        msg = "Mật khẩu không trùng khớp";
+        return res.render('Shipper/addShipper', { msg: msg, formData: formData });
+      }
+  
+      if (req.body.passWord === '') {
+        msg = "Mật khẩu đang trống";
+        return res.render('Shipper/addShipper', { msg: msg, formData: formData });
+      }
+  
+      try {
+        let newObj = new mdShipper.ShipperModel();
+        let images = await onUploadImages(req.files, "blog");
+        
+        if (images != [] && images[0] === false) {
+          if (images[1].message.indexOf("File size too large.") > -1) {
+            return res.status(500).json({
               success: false,
               data: {},
               message: "Dung lượng một ảnh tối đa là 10MB!",
             });
-        } else {
-          return res
-            .status(500)
-            .json({ success: false, data: {}, message: images[1].message });
+          } else {
+            return res.status(500).json({
+              success: false,
+              data: {},
+              message: images[1].message
+            });
+          }
         }
-      }
-      newObj.avatarShipper = [...images];
-      newObj.fullName = req.body.fullName;
-      newObj.userName = req.body.userName;
-      newObj.phoneNumber = req.body.phoneNumber;
-      newObj.email = req.body.email;
-      const province = req.body.selectedProvinceCode;
-      const district = req.body.selectedDistrictCode; 
-      const ward = req.body.selectedWardCode; 
-      newObj.address = `${ward}, ${district}, ${province}`;
-      newObj.address2 = req.body.address2; 
-      newObj.createdAt = new Date();
-      let salt = await bcrypt.genSalt(10);
-      newObj.passWord = await bcrypt.hash(req.body.passWord, salt);
-      await newObj.save();
-      msg = 'Thêm Shipper thành công!';
-      return res.redirect('/Shipper');
-    } catch (error) {
-      if (error.message.match(new RegExp('.+`userName` is require+.'))) {
-        msg = 'Tên đăng nhập đang trống!';
-    }
-    else if (error.message.match(new RegExp('.+`email` is require+.'))) {
-        msg = 'Email đang trống!';
-    }
-    else if (error.message.match(new RegExp('.+`passWord` is require+.'))) {
-        msg = 'Mật khẩu đang trống!';
-    }
-    else if (error.message.match(new RegExp('.+index: userName+.'))) {
-        msg = 'Username đã tồn tại - Nhập lại username!';
-    }
-    else if (error.message.match(new RegExp('.+index: email+.'))) {
-        msg = 'Email đã tồn tại - Nhập lại email!';
-    }
-    else {
+  
+        newObj.avatarShipper = [...images];
+        newObj.fullName = req.body.fullName;
+        newObj.userName = req.body.userName;
+        newObj.phoneNumber = req.body.phoneNumber;
+        newObj.email = req.body.email;
+        const province = req.body.selectedProvinceCode;
+        const district = req.body.selectedDistrictCode; 
+        const ward = req.body.selectedWardCode; 
+        newObj.address = `${ward}, ${district}, ${province}`;
+        newObj.address2 = req.body.address2; 
+        newObj.createdAt = new Date();
+  
+        let salt = await bcrypt.genSalt(10);
+        newObj.passWord = await bcrypt.hash(req.body.passWord, salt);
+  
+        const existingUsername = await mdShipper.ShipperModel.findOne({
+          userName: req.body.userName
+        });
+  
+        if (existingUsername) {
+          msg = 'Tên đăng nhập đã tồn tại - Chọn tên khác!';
+          return res.render('Shipper/addShipper', { msg: msg, formData: formData });
+        }
+        const phoneNumberRegex = /^0\d{9}$/; 
+        if (!phoneNumberRegex.test(req.body.phoneNumber)) {
+          msg = 'Số điện thoại phải có 10 số và bắt đầu bằng số 0!';
+          return res.render('Shipper/addShipper', { msg: msg, formData: formData });
+        }
+        const existingPhone = await mdShipper.ShipperModel.findOne({
+          phoneNumber: req.body.phoneNumber
+        });
+  
+        if (existingPhone) {
+          msg = 'Số điện thoại đã tồn tại - Nhập số khác!';
+          return res.render('Shipper/addShipper', { msg: msg, formData: formData });
+        }
+  
+        await newObj.save();
+        msg = 'Thêm Shipper thành công!';
+        return res.redirect('/Shipper');
+      } catch (error) {
+        if (error.message.match(new RegExp('.+`userName` is require+.'))) {
+          msg = 'Tên đăng nhập đang trống!';
+          return res.render('Shipper/addShipper', { msg: msg, formData: formData });
+        }
+        else if (error.message.match(new RegExp('.+`email` is require+.'))) {
+          msg = 'Email đang trống!';
+          return res.render('Shipper/addShipper', { msg: msg, formData: formData });
+        }
+  
         msg = error.message;
+      }
     }
-    }
+  
+    res.render('Shipper/addShipper', { msg: msg, adminLogin: req.session.adLogin, formData: formData });
   }
-
-  res.render('Shipper/addShipper', { msg: msg,adminLogin: req.session.adLogin,
- });
-}
+  
 
 exports.updateShipperStatus = async (req, res, next) => {
     try {
