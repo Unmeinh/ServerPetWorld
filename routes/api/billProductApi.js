@@ -20,7 +20,7 @@ router.get(
 );
 router.get('/getCount', mdJWT.api_user_auth, billProductApiCtrl.getCountBill);
 
-router.get('/getCount', mdJWT.api_user_auth, billProductApiCtrl.getCountBill);
+// router.get('/getCount', mdJWT.api_user_auth, billProductApiCtrl.getCountBill);
 
 router.get(
   '/comfirmBill/:id',
