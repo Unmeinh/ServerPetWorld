@@ -1,6 +1,7 @@
 let mdShipper = require('../model/shipper.model');
 let mdBillProduct  = require('../model/billProduct.model');
 let bcrypt = require('bcrypt');
+const { onUploadImages } = require("../../ServerPetWorld/function/uploadImage");
 
 exports.listShipper = async (req, res, next) => {
   let msg = '';
@@ -78,12 +79,23 @@ exports.addShipper = async (req, res, next) => {
     }
     try {
       let newObj = new mdShipper.ShipperModel();
-      if (req.file) {
-        newObj.avatarShipper = req.file.path;
-      } else {
-        msg = "Ảnh đại diện không được tải lên";
-        return res.render('Shipper/addShipper', { msg: msg });
+      let images = await onUploadImages(req.files, "blog");
+      if (images != [] && images[0] == false) {
+        if (images[1].message.indexOf("File size too large.") > -1) {
+          return res
+            .status(500)
+            .json({
+              success: false,
+              data: {},
+              message: "Dung lượng một ảnh tối đa là 10MB!",
+            });
+        } else {
+          return res
+            .status(500)
+            .json({ success: false, data: {}, message: images[1].message });
+        }
       }
+      newObj.avatarShipper = [...images];
       newObj.fullName = req.body.fullName;
       newObj.userName = req.body.userName;
       newObj.phoneNumber = req.body.phoneNumber;

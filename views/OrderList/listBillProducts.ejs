@@ -41,7 +41,7 @@
       <th style="border-radius: 6px 0 0 6px;">Địa chỉ</th>
       <th>Tổng tiền</th>
       <th>Tiền Ship</th>
-      <th>Ngày tạo</th>
+      <th>Ngày đặt</th>
       <th style="border-radius: 0 6px 6px 0;"></th>
     </tr>
 
@@ -57,7 +57,11 @@
         <%= row.moneyShip || 'Không có dữ liệu' %> VND
       </td>
       <td>
-        <%= row.purchaseDate ? new Date(row.purchaseDate).toLocaleString('en-US') : 'Không có dữ liệu' %>
+        <% if (row.purchaseDate) { %>
+          <%= new Date(row.purchaseDate).toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }) %>
+        <% } else { %>
+          Không có dữ liệu
+        <% } %>
       </td>
       <td style="width: 10%;">
         <a href="/accountShipper/updateDeliveryStatus/<%= row._id%>"
