@@ -997,6 +997,34 @@ exports.confirmBill = async (req, res, next) => {
         if (isConfirm == 1) {
           billProduct.deliveryStatus = -1;
           await mdBill.findByIdAndUpdate(billProduct._id, billProduct);
+          if (billProduct.products.length > 1) {
+            for (let i = 0; i < billProduct.products.length; i++) {
+              const bill = billProduct.products[i];
+              let product = await mdProduct.findById(bill.idProduct);
+              if (product) {
+                product.quantitySold = Number(product.quantitySold) - (bill.amount);
+                product.amountProduct = Number(product.amountProduct) + (bill.amount);
+                product.save();
+              }
+            }
+          } else {
+            if (billProduct.products.length > 0) {
+              let first = billProduct.products[0];
+              let product = await mdProduct.findById(first.idProduct);
+              if (product) {
+                product.quantitySold = Number(product.quantitySold) - (first.amount);
+                product.amountProduct = Number(product.amountProduct) + (first.amount);
+                product.save();
+              } else {
+                let pet = await mdPet.findById(first.idProduct);
+                if (pet) {
+                  pet.quantitySold = Number(pet.quantitySold) - (first.amount);
+                  pet.amountPet = Number(pet.amountPet) + (first.amount);
+                  pet.save();
+                }
+              }
+            }
+          }
           transaction.status = -1;
           await TransactionModal.findByIdAndUpdate(transaction._id, transaction);
           if (billProduct?.idShipper) {
