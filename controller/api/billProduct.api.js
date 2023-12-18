@@ -437,10 +437,21 @@ exports.getCountBill = async (req, res) => {
     const results = await mdbillProduct.billProductModel.aggregate(pipeline);
 
     const statusCountObject = {};
-
-    results.forEach(result => {
-      statusCountObject[result._id] = result.count;
-    });
+    for (let i = 0; i < results.length; i++) {
+      let result = results[i];
+      if (result._id <= 1) {
+        if (statusCountObject["0"]) {
+          statusCountObject["0"] =
+            Number(result.count) + Number(statusCountObject["0"]);
+        } else {
+          statusCountObject["0"] = result.count;
+        }
+      } else {
+        statusCountObject[String(result._id - 1)] = result.count;
+      }
+    }
+    const countReview = await mdbillProduct.billProductModel.find({idUser: _id, statusReview: false, deliveryStatus: 4}).count();
+    statusCountObject['3'] = (countReview) ? countReview : 0;
     return res.status(200).json({
       success: true,
       data: statusCountObject,
