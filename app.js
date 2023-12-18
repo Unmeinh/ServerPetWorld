@@ -7,11 +7,11 @@ var logger = require('morgan');
 var session = require('express-session');
 
 /** Contact with SERVER write in here */
-var adminRouter= require('./routes/admin');
+var adminRouter = require('./routes/admin');
 var usersRouter = require('./routes/user');
 // var usersShopRouter = require('./routes/userShop');
 var blogsRouter = require('./routes/blog');
-var accountRouter= require('./routes/account');
+var accountRouter = require('./routes/account');
 var productRouter = require('./routes/product');
 var categoryPet = require('./routes/categoryPet');
 var categoryProduct = require('./routes/categoryProduct');
@@ -19,10 +19,10 @@ var petRouter = require('./routes/pet');
 var shopRouter = require('./routes/shop');
 var billProductRouter = require('./routes/billProduct');
 var transactionRouter = require('./routes/transaction');
-var notificationRouter=require('./routes/notification');
-var transactionSuccessRouter=require('./routes/transactionSuccess');
+var notificationRouter = require('./routes/notification');
+var transactionSuccessRouter = require('./routes/transactionSuccess');
 var addShipper = require('./routes/addShipper');
-var accountShipperRouter= require('./routes/accountShipper');
+var accountShipperRouter = require('./routes/accountShipper');
 
 /** Contact with API write in here */
 var authApiRouter = require('./routes/api/authApi');
@@ -34,10 +34,10 @@ var productApiRouter = require('./routes/api/productApi');
 var shopApiRouter = require('./routes/api/shopApi');
 var catAllApiRouter = require('./routes/api/categoryAll');
 var petApiRouter = require('./routes/api/petApi');
-var noticeApiRouter= require('./routes/api/noticeApi');
-var noticeSellerApiRouter= require('./routes/api/noticeSellerApi');
-var commentApiRouter= require('./routes/api/commentApi');
-var favoriteProductsApiRouter=require('./routes/api/myFavoriteProductApi');
+var noticeApiRouter = require('./routes/api/noticeApi');
+var noticeSellerApiRouter = require('./routes/api/noticeSellerApi');
+var commentApiRouter = require('./routes/api/commentApi');
+var favoriteProductsApiRouter = require('./routes/api/myFavoriteProductApi');
 var billProductApiRouter = require('./routes/api/billProductApi');
 var voucherShopApiRouter = require('./routes/api/voucherShopApi');
 var voucherServerApiRouter = require('./routes/api/voucherServerApi');
@@ -48,34 +48,39 @@ var boxChatApiRouter = require('./routes/api/boxChatApi');
 var serverApiRouter = require('./routes/api/serverApi');
 var reviewApiRouter = require('./routes/api/reviewApi');
 var shippertRouter = require('./routes/shipper');
+var mdTransaction = require('./model/transaction.modal').TransactionModal;
+var moment = require('moment');
+//listennr interval transactions
 
 var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
- 
+
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/function', express.static('function'))
+app.use('/function', express.static('function'));
 
-app.use(session({
-  secret: process.env.KEY_LOGIN_ADMIN,
-  resave: false,
-  saveUninitialized: true
-}))
-app.use('/',blogsRouter);
-app.use('/admin',adminRouter);
+app.use(
+  session({
+    secret: process.env.KEY_LOGIN_ADMIN,
+    resave: false,
+    saveUninitialized: true,
+  }),
+);
+app.use('/', blogsRouter);
+app.use('/admin', adminRouter);
 app.use('/user', usersRouter);
 // app.use('/user-shop', usersShopRouter);
 app.use('/shipper', shippertRouter);
 app.use('/addShipper', addShipper);
 
 app.use('/blog', blogsRouter);
-app.use('/account',accountRouter );
+app.use('/account', accountRouter);
 app.use('/product', productRouter);
 app.use('/category-pet', categoryPet);
 app.use('/category-product', categoryProduct);
@@ -83,9 +88,9 @@ app.use('/pet', petRouter);
 app.use('/shop', shopRouter);
 app.use('/bill-product', billProductRouter);
 app.use('/transaction', transactionRouter);
-app.use('/notification',notificationRouter)
-app.use('/transactionSuccess',transactionSuccessRouter)
-app.use('/accountShipper',accountShipperRouter );
+app.use('/notification', notificationRouter);
+app.use('/transactionSuccess', transactionSuccessRouter);
+app.use('/accountShipper', accountShipperRouter);
 
 //api use in here
 app.use('/api/', authApiRouter);
@@ -98,47 +103,80 @@ app.use('/api/product', productApiRouter);
 app.use('/api/shop', shopApiRouter);
 app.use('/api/category', catAllApiRouter);
 app.use('/api/pet', petApiRouter);
-app.use('/api/notice',noticeApiRouter);
-app.use('/api/noticeSeller',noticeSellerApiRouter)
-app.use('/api/comment',commentApiRouter)
+app.use('/api/notice', noticeApiRouter);
+app.use('/api/noticeSeller', noticeSellerApiRouter);
+app.use('/api/comment', commentApiRouter);
 app.use('/api/bill-product', billProductApiRouter);
-app.use('/api/favorite',favoriteProductsApiRouter);
-app.use('/api/voucherShop',voucherShopApiRouter);
-app.use('/api/voucherServer',voucherServerApiRouter);
-app.use('/api/search',searchApiRouter);
-app.use('/api/appointment',appointmentApiRouter);
+app.use('/api/favorite', favoriteProductsApiRouter);
+app.use('/api/voucherShop', voucherShopApiRouter);
+app.use('/api/voucherServer', voucherServerApiRouter);
+app.use('/api/search', searchApiRouter);
+app.use('/api/appointment', appointmentApiRouter);
 app.use('/api/conversations', conversationsApiRouter);
 app.use('/api/boxChat', boxChatApiRouter);
 app.use('/api/server', serverApiRouter);
 app.use('/api/review', reviewApiRouter);
 
-
 // catch 404 and forward to error handler
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
   // render the error page
   res.status(err.status || 500);
-  if(req.originalUrl.indexOf('/api')==0)
-  {
+  if (req.originalUrl.indexOf('/api') == 0) {
     res.json({
-      success:false,
-      msg:err.message,
-      status:err.status
-    })
-  }
-  else{
+      success: false,
+      msg: err.message,
+      status: err.status,
+    });
+  } else {
     res.render('error');
   }
-  
 });
+
+//listenner transaction
+var runner = true;
+
+async function updateBillStatus(transaction) {
+  if (moment().diff(moment(transaction.createAt), 'days') > 7) {
+    transaction.status = 5;
+    await mdTransaction.findByIdAndUpdate(transaction._id, transaction);
+    console.log('==================CHANGE TRANSACTION=======================');
+    console.log(`=============ID:${transaction._id}===================`);
+    console.log('======================================================');
+  }
+}
+
+async function listenForBills() {
+  const transactions = await mdTransaction.find({status: 4});
+
+  if (transactions && transactions.length > 0) {
+    for (const transaction of transactions) {
+      await updateBillStatus(transaction);
+    }
+
+    runner = true;
+  }
+}
+
+const continuousUpdate = async () => {
+  setInterval(async () => {
+    if (runner) {
+      runner = false;
+      await listenForBills();
+    }
+  }, 10000);
+};
+
+// Gọi hàm liên tục
+continuousUpdate();
 
 module.exports = app;

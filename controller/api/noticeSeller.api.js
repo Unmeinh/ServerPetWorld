@@ -161,7 +161,7 @@ exports.onReadingNotice = async (req, res, next) => {
         });
       }
       notice.status = 2;
-      notice.save();
+      await notice.save();
       return res.status(201).json({
         success: true,
         data: {},
