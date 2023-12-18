@@ -339,7 +339,6 @@ exports.detailPayment = async (req, res, next) => {
         }
         listDetailPayment.idBill.products = products;
       }
-      console.log(listDetailPayment.idBill);
       const totalCount = listDetailPayment.idBill.products.length;
       const totalPages = Math.ceil(totalCount / perPage);
 
