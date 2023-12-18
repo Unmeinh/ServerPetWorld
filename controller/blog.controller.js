@@ -46,7 +46,7 @@ exports.listAllBlog = async (req, res, next) => {
         moment: moment,
         currentPage: currentPage,
         totalPage: totalPage,
-        adminLogin: req.session.adLogin,
+        adminLogin: req.session.adLogin
       });
     } catch (error) {
       msg = "Lỗi: " + error.message;

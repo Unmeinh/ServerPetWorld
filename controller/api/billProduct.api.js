@@ -7,6 +7,7 @@ let mdProduct = require('../../model/product.model');
 let mdShop = require('../../model/shop.model');
 let mdCart = require('../../model/cart.model');
 const {sendFCMNotification} = require('../../function/notice');
+const moment = require('moment');
 exports.listbillProduct = async (req, res, next) => {
   const {_id} = req.user;
   const index = req.query?.idStatus;
@@ -51,6 +52,7 @@ exports.listbillProduct = async (req, res, next) => {
             as: 'petInfo',
           },
         },
+
         {
           $addFields: {
             'productInfo.amount': '$products.amount',
@@ -77,6 +79,11 @@ exports.listbillProduct = async (req, res, next) => {
             productInfo: {$push: '$productInfo'},
             petInfo: {$first: '$petInfo'},
             shopInfo: {$first: '$shopInfo'},
+          },
+        },
+        {
+          $sort: {
+            purchaseDate: -1,
           },
         },
         {
@@ -189,10 +196,9 @@ exports.cancelBill = async (req, res) => {
   const idBill = req.params.id;
   const {_id, tokenDevice} = req.user;
   try {
-    const updatedBill = await mdbillProduct.billProductModel.findByIdAndUpdate(
-      idBill,
-      {$set: {deliveryStatus: -1}},
-    );
+    const updatedBill = await mdbillProduct.billProductModel
+      .findByIdAndUpdate(idBill, {$set: {deliveryStatus: -1}})
+      .populate('idShop', 'tokenDevice');
     if (!updatedBill) {
       res.status(500).json({
         success: false,
@@ -228,6 +234,17 @@ exports.cancelBill = async (req, res) => {
       null,
       _id,
     );
+
+    await sendFCMNotification(
+      updatedBill.idShop?.tokenDevice,
+      'Đơn hàng đã bị hủy!',
+      `Đơn hàng trị giá ${(updatedBill?.total).toLocaleString(
+        'vi-VN',
+      )}đ đã bị khách hàng hủy.\nBạn có thể xem đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.,`,
+      'SELLER',
+      [],
+      updatedBill?.idShop?._id,
+    );
     res.status(200).json({success: true, message: 'Hủy đơn hàng thành công'});
   } catch (error) {
     console.log(error);
@@ -236,7 +253,7 @@ exports.cancelBill = async (req, res) => {
 };
 
 exports.billProductUser = async (req, res) => {
-  const {_id, tokenDevice} = req.user;
+  const {_id, tokenDevice, fullName} = req.user;
   const {products, locationDetail, paymentMethod, detailCard} = req.body;
   let totalBill = 0;
   if (req.method === 'POST') {
@@ -279,6 +296,9 @@ exports.billProductUser = async (req, res) => {
                 subItem.price = pet.pricePet;
                 subItem.discount = pet.discount;
               }
+              pet.quantitySold += subItem.amount;
+              pet.amountPet -= subItem.amount;
+              await mdPet.PetModel.findByIdAndUpdate(pet._id, pet);
             }
           });
           await Promise.all(itemPromises);
@@ -320,6 +340,24 @@ exports.billProductUser = async (req, res) => {
               newbillProduct.total - (newbillProduct.total / 100) * server.fee,
           });
           server.totalNumberOfOrdersSold += 1;
+
+          const shop = await mdShop.ShopModel.findById(item.idShop).select(
+            'tokenDevice',
+          );
+          if (shop) {
+            await sendFCMNotification(
+              shop?.tokenDevice,
+              `Khách hàng ${fullName} đã đặt mua đơn hàng của bạn!`,
+              `Khách hàng ${fullName} đã đặt đơn hàng trị giá ${item.total.toLocaleString(
+                'vi-VN',
+              )}đ vào lúc ${moment(new Date()).format(
+                'HH:mm:SS A - DD/MM/YYYY',
+              )}`,
+              'SELLER',
+              null,
+              shop._id,
+            );
+          }
           await Promise.all([
             await newbillProduct.save(),
             await createTransition.save(),
@@ -351,7 +389,7 @@ exports.billProductUser = async (req, res) => {
         'Bạn vừa đặt đơn hàng thành công!',
         `Bạn vừa đặt đơn hàng trị giá ${totalBill.toLocaleString(
           'vi-VN',
-        )}đ thành công`,
+        )}đ thành công!`,
         'CLIENT',
         null,
         _id,
@@ -425,4 +463,34 @@ exports.test = async (req, res) => {
     {multi: true},
   );
   res.status(200).json({done: true});
+};
+
+exports.completedBill = async (req, res) => {
+  const idBill = req.params.id;
+  try {
+    if (idBill) {
+      await Promise.all([
+        await mdbillProduct.billProductModel.findByIdAndUpdate(idBill, {
+          deliveryStatus: 4,
+        }),
+        await mdTransition.TransactionModal.findOneAndUpdate(
+          {idBill: idBill},
+          {
+            status: 4,
+          },
+        ),
+      ]);
+      return res.status(200).json({
+        success: true,
+        data: [],
+        message: 'Đã nhận đơn hàng thành công',
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      data: [],
+      message: 'Lỗi' + error.message,
+    });
+  }
 };

@@ -43,11 +43,14 @@ exports.listPayment = async (req, res, next) => {
                     {
                         $match: {
                             $or: [
+                                { status: -2 },
                                 { status: -1 },
                                 { status: 0 },
                                 { status: 1 },
+                                { status: 2 },
                                 { status: 3 },
                                 { status: 4 },
+                                { status: 5 },
                             ],
                             // $or: [
                             //     { "idCustommer": { $eq: fullName } }, 
@@ -75,10 +78,10 @@ exports.listPayment = async (req, res, next) => {
                         $group: {
                             _id:null,
                             listPayment: { $push: "$$ROOT" },
-                            totalOfTotal3: { $sum: "$total" },
                             totalOfTotal4: { $sum: { $cond: { if: { $eq: ["$status", 4] }, then: "$total", else: 0 } } },
-                            totalOfFee3: { $sum: "$fee" },
+                            totalOfTotal5: { $sum: { $cond: { if: { $eq: ["$status", 5] }, then: "$total", else: 0 } } },
                             totalOfFee4: { $sum: { $cond: { if: { $eq: ["$status", 4] }, then: "$fee", else: 0 } } },
+                            totalOfFee5: { $sum: { $cond: { if: { $eq: ["$status", 5] }, then: "$fee", else: 0 } } },
                             totalPayments: { $sum: 1 },
                             totalStatusMinusOne: {
                                 $sum: { $cond: { if: { $eq: ["$status", -1] }, then: 1, else: 0 } }
@@ -87,16 +90,25 @@ exports.listPayment = async (req, res, next) => {
                                 $sum: { $cond: { if: { $eq: ["$status", 0] }, then: 1, else: 0 } }
                             },
                             totalStatusOne: {
-                                $sum: { $cond: { if: { $eq: ["$status", 1] }, then: 1, else: 0 } }
+                                $sum: {
+                                    $cond: {
+                                        if: {
+                                            $in: ["$status", [1, 2, 3, 4, 5]]
+                                        },
+                                        then: 1,
+                                        else: 0
+                                    }
+                                }
                             }
+                            
                         }
                     },
                     {
                         $project: {
-                          totalOfTotal3: 1,
                           totalOfTotal4: 1,
-                          totalOfFee3: 1,
+                          totalOfTotal5: 1,
                           totalOfFee4: 1,
+                          totalOfFee5: 1,
                           totalPayments: 1,
                           totalStatusMinusOne: 1,
                           totalStatusZero: 1,
@@ -121,11 +133,14 @@ exports.listPayment = async (req, res, next) => {
                     {
                         $match: {
                             $or: [
+                                { status: -2 },
                                 { status: -1 },
                                 { status: 0 },
                                 { status: 1 },
+                                { status: 2 },
                                 { status: 3 },
-                                { status: 4 }
+                                { status: 4 },
+                                { status: 5 },
                             ],
                             createAt: { $gte: startDate, $lte: endDate },
                         }
@@ -152,28 +167,36 @@ exports.listPayment = async (req, res, next) => {
                         $group: {
                             _id: null,
                             listPayment: { $push: "$$ROOT" },
-                            totalOfTotal3: { $sum: "$total" },
                             totalOfTotal4: { $sum: { $cond: { if: { $eq: ["$status", 4] }, then: "$total", else: 0 } } },
-                            totalOfFee3: { $sum: "$fee" },
+                            totalOfTotal5: { $sum: { $cond: { if: { $eq: ["$status", 5] }, then: "$total", else: 0 } } },
                             totalOfFee4: { $sum: { $cond: { if: { $eq: ["$status", 4] }, then: "$fee", else: 0 } } },
+                            totalOfFee5: { $sum: { $cond: { if: { $eq: ["$status", 5] }, then: "$fee", else: 0 } } },
                             totalPayments: { $sum: 1 },
                             totalStatusMinusOne: {
                                 $sum: { $cond: { if: { $eq: ["$status", -1] }, then: 1, else: 0 } }
                             },
-                            totalStatusZero: {
+                            totalStatusZero: {  
                                 $sum: { $cond: { if: { $eq: ["$status", 0] }, then: 1, else: 0 } }
                             },
                             totalStatusOne: {
-                                $sum: { $cond: { if: { $eq: ["$status", 1] }, then: 1, else: 0 } }
+                                $sum: {
+                                    $cond: {
+                                        if: {
+                                            $in: ["$status", [1, 2, 3, 4, 5]]
+                                        },
+                                        then: 1,
+                                        else: 0
+                                    }
+                                }
                             }
                         }
                     },
                     {
                         $project: {
-                          totalOfTotal3: 1,
                           totalOfTotal4: 1,
-                          totalOfFee3: 1,
+                          totalOfTotal5: 1,
                           totalOfFee4: 1,
+                          totalOfFee5: 1,
                           totalPayments: 1,
                           totalStatusMinusOne: 1,
                           totalStatusZero: 1,
@@ -205,7 +228,7 @@ exports.listPayment = async (req, res, next) => {
                     adminLogin:req.session.adLogin
                 });
             }
-            const {totalOfTotal3, totalOfTotal4, totalOfFee3, totalOfFee4,totalStatusMinusOne,totalStatusZero,totalStatusOne } = results[0];
+            const {totalOfTotal4, totalOfTotal5, totalOfFee4, totalOfFee5,totalStatusMinusOne,totalStatusZero,totalStatusOne } = results[0];
             const totalPayments = results[0].totalPayments;
             const totalPages = Math.ceil(totalPayments / perPage);
 
@@ -222,12 +245,10 @@ exports.listPayment = async (req, res, next) => {
                 totalStatusMinusOne: totalStatusMinusOne,
                 totalStatusZero: totalStatusZero,
                 totalStatusOne: totalStatusOne,
-                totalOfTotal3: totalOfTotal3,
                 totalOfTotal4: totalOfTotal4,
-                totalOfFee3: totalOfFee3,
+                totalOfTotal5: totalOfTotal5,
                 totalOfFee4: totalOfFee4,
-                totalOfProfit3: totalOfTotal3 - totalOfFee3,
-                totalOfProfit4: totalOfTotal4 - totalOfFee4,
+                totalOfFee5: totalOfFee5,      
                 selectedInterval: selectedInterval,
                 perPage:perPage,
                 msg: msg,

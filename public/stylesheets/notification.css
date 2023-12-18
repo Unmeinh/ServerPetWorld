@@ -139,7 +139,7 @@ body {
 .user_img {
     height: 70px;
     width: 70px;
-    border: 1.5px solid #f5f6fa;
+    border: 1.5px solid transparent;
 
 }
 

@@ -22,6 +22,7 @@ const {
 } = require("../../function/hashFunction");
 const { sendFCMNotification } = require("../../function/notice");
 const { serverModal } = require("../../model/server.modal");
+const { TransactionModal } = require("../../model/transaction.modal");
 
 exports.listShop = async (req, res, next) => {
   let filterSearch = null;
@@ -813,8 +814,12 @@ exports.confirmBill = async (req, res, next) => {
         let billProduct = await mdBill.findOne({
           _id: idBill,
           idShop: req.shop._id,
+        }).populate('idUser').populate('idShop');
+        let transaction = await TransactionModal.findOne({
+          idBill: idBill,
+          idShop: req.shop._id,
         });
-        if (!billProduct) {
+        if (!billProduct || !transaction || (!transaction && !billProduct)) {
           return res.status(500).json({
             success: false,
             data: {},
@@ -825,6 +830,8 @@ exports.confirmBill = async (req, res, next) => {
           billProduct.deliveryStatus = 1;
           billProduct.billDate.confirmedAt = new Date();
           await mdBill.findByIdAndUpdate(billProduct._id, billProduct);
+          transaction.status = 1;
+          await TransactionModal.findByIdAndUpdate(transaction._id, transaction);
           let statusBill = {};
           statusBill.status = 1;
           statusBill.colorStatus = "#001858";
@@ -841,6 +848,22 @@ exports.confirmBill = async (req, res, next) => {
             );
             if (status) {
               if (statusCode === 200) {
+                await sendFCMNotification(
+                  billProduct?.idShop?.tokenDevice,
+                  'Xác nhận đơn hàng thành công!',
+                  `Đơn hàng trị giá ${Number(Number(billProduct?.total)).toLocaleString()} ₫ đã được xác nhận.\nĐơn hàng đã được giao cho ${nameShipper} để giao hàng vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+                  'SELLER',
+                  [],
+                  billProduct?.idShop?._id,
+                );
+                await sendFCMNotification(
+                  billProduct?.idUser?.tokenDevice,
+                  'Đơn hàng đã được xác nhận!',
+                  `Đơn hàng trị giá ${Number(Number(billProduct?.total) + Number(billProduct?.moneyShip)).toLocaleString()} ₫ đã được xác nhận.\nĐơn hàng đã được giao cho ${nameShipper} để giao hàng vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+                  'CLIENT',
+                  [],
+                  billProduct?.idUser?._id,
+                );
                 return res.status(201).json({
                   success: true,
                   data: statusBill,
@@ -848,6 +871,22 @@ exports.confirmBill = async (req, res, next) => {
                     "Xác nhận đơn hàng thành công.\nĐơn hàng đã được giao cho người giao hàng cùng khu vực.",
                 });
               } else {
+                await sendFCMNotification(
+                  billProduct?.idShop?.tokenDevice,
+                  'Xác nhận đơn hàng thành công!',
+                  `Đơn hàng trị giá ${Number(Number(billProduct?.total)).toLocaleString()} ₫ đã được xác nhận.\nHiện tại chưa có người giao hàng nào trong khu vực để nhận giao đơn hàng.\nBạn có thể yêu cầu tìm lại người giao hàng, theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+                  'SELLER',
+                  [],
+                  billProduct?.idShop?._id,
+                );
+                await sendFCMNotification(
+                  billProduct?.idUser?.tokenDevice,
+                  'Xác nhận đơn hàng thành công!',
+                  `Đơn hàng trị giá ${Number(Number(billProduct?.total) + Number(billProduct?.moneyShip)).toLocaleString()} ₫ đã được xác nhận.\nHiện tại chưa có người giao hàng nào trong khu vực để nhận giao đơn hàng.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+                  'CLIENT',
+                  [],
+                  billProduct?.idUser?._id,
+                );
                 return res.status(201).json({
                   success: true,
                   data: statusBill,
@@ -856,6 +895,22 @@ exports.confirmBill = async (req, res, next) => {
                 });
               }
             } else {
+              await sendFCMNotification(
+                billProduct?.idShop?.tokenDevice,
+                'Xác nhận đơn hàng thành công!',
+                `Đơn hàng trị giá ${Number(Number(billProduct?.total)).toLocaleString()} ₫ đã được xác nhận.\nHiện tại chưa có người giao hàng nào trong khu vực để nhận giao đơn hàng.\nBạn có thể yêu cầu tìm lại người giao hàng, theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+                'SELLER',
+                [],
+                billProduct?.idShop?._id,
+              );
+              await sendFCMNotification(
+                billProduct?.idUser?.tokenDevice,
+                'Xác nhận đơn hàng thành công!',
+                `Đơn hàng trị giá ${Number(Number(billProduct?.total) + Number(billProduct?.moneyShip)).toLocaleString()} ₫ đã được xác nhận.\nHiện tại chưa có người giao hàng nào trong khu vực để nhận giao đơn hàng.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+                'CLIENT',
+                [],
+                billProduct?.idUser?._id,
+              );
               return res.status(500).json({
                 success: false,
                 data: statusBill,
@@ -875,6 +930,8 @@ exports.confirmBill = async (req, res, next) => {
         if (isConfirm == 1) {
           billProduct.deliveryStatus = -1;
           await mdBill.findByIdAndUpdate(billProduct._id, billProduct);
+          transaction.status = -1;
+          await TransactionModal.findByIdAndUpdate(transaction._id, transaction);
           if (billProduct?.idShipper) {
             const shipper = await mdShiper
               .findById(billProduct.idShipper)
@@ -898,6 +955,22 @@ exports.confirmBill = async (req, res, next) => {
           statusBill.nameStatus = "Đơn bị hủy";
           statusBill.iconStatus = "clipboard-remove-outline";
           statusBill.descStatus = "Đơn hàng đã bị hủy.";
+          await sendFCMNotification(
+            billProduct?.idShop?.tokenDevice,
+            'Đơn hàng đã bị hủy!',
+            `Đơn hàng trị giá ${Number(Number(billProduct?.total)).toLocaleString()} ₫ đã bị hủy.\nBạn có thể xem đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+            'SELLER',
+            [],
+            billProduct?.idShop?._id,
+          );
+          await sendFCMNotification(
+            billProduct?.idUser?.tokenDevice,
+            'Đơn hàng đã bị hủy!',
+            `Đơn hàng trị giá ${Number(Number(billProduct?.total) + Number(billProduct?.moneyShip)).toLocaleString()} ₫ đã bị cửa hàng hủy.\nBạn có thể xem đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+            'CLIENT',
+            [],
+            billProduct?.idUser?._id,
+          );
           return res.status(201).json({
             success: true,
             data: statusBill,
@@ -953,6 +1026,12 @@ exports.confirmBillAll = async (req, res, next) => {
               bill.deliveryStatus = 1;
               bill.billDate.confirmedAt = new Date();
               await mdBill.findByIdAndUpdate(bill._id, bill);
+              let transaction = await TransactionModal.findOne({
+                idBill: bill._id,
+                idShop: req.shop._id,
+              });
+              transaction.status = 1;
+              transaction.save();
               const location = bill?.locationDetail?.location;
               let locationArray = location.split(", ").reverse();
               const [status, message, statusCode, nameShipper] = await addBillForShipper(
@@ -961,6 +1040,39 @@ exports.confirmBillAll = async (req, res, next) => {
               );
               if (status && statusCode === 500) {
                 statusAddBillForShipper = false;
+                await sendFCMNotification(
+                  req?.shop?.tokenDevice,
+                  'Xác nhận đơn hàng thành công!',
+                  `Đơn hàng trị giá ${Number(Number(bill?.total)).toLocaleString()} ₫ đã được xác nhận.\nHiện tại chưa có người giao hàng nào trong khu vực để nhận giao đơn hàng.\nBạn có thể yêu cầu tìm lại người giao hàng, theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+                  'SELLER',
+                  [],
+                  req?.shop?._id,
+                );
+                await sendFCMNotification(
+                  bill?.idUser?.tokenDevice,
+                  'Xác nhận đơn hàng thành công!',
+                  `Đơn hàng trị giá ${Number(Number(bill?.total) + Number(bill?.moneyShip)).toLocaleString()} ₫ đã được xác nhận.\nHiện tại chưa có người giao hàng nào trong khu vực để nhận giao đơn hàng.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+                  'CLIENT',
+                  [],
+                  bill?.idUser?._id,
+                );
+              } else {
+                await sendFCMNotification(
+                  req?.shop?.tokenDevice,
+                  'Xác nhận đơn hàng thành công!',
+                  `Đơn hàng trị giá ${Number(Number(bill?.total)).toLocaleString()} ₫ đã được xác nhận.\nĐơn hàng đã được giao cho ${nameShipper} để giao hàng vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+                  'SELLER',
+                  [],
+                  req?.shop?._id,
+                );
+                await sendFCMNotification(
+                  bill?.idUser?.tokenDevice,
+                  'Đơn hàng đã được xác nhận!',
+                  `Đơn hàng trị giá ${Number(Number(bill?.total) + Number(bill?.moneyShip)).toLocaleString()} ₫ đã được xác nhận.\nĐơn hàng đã được giao cho ${nameShipper} để giao hàng vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+                  'CLIENT',
+                  [],
+                  bill?.idUser?._id,
+                );
               }
               if (!status) {
                 error = true;
@@ -1002,6 +1114,12 @@ exports.confirmBillAll = async (req, res, next) => {
             bill.deliveryStatus = -1;
             bill.billDate.cancelledAt = new Date();
             await mdBill.findByIdAndUpdate(bill._id, bill);
+            let transaction = await TransactionModal.findOne({
+              idBill: bill._id,
+              idShop: req.shop._id,
+            });
+            transaction.status = -1;
+            transaction.save();
           }
           return res.status(201).json({
             success: true,
@@ -1027,6 +1145,10 @@ exports.confirmBillAll = async (req, res, next) => {
 exports.findShipper = async (req, res, next) => {
   try {
     if (req?.body?.location && req.method == "POST") {
+      let billProduct = await mdBill.findOne({
+        _id: req?.body?.idBill,
+        idShop: req.shop._id,
+      }).populate('idUser');
       let location = req?.body?.location.split(", ").reverse();
       const [status, message, statusCode, nameShipper] = await addBillForShipper(
         (location.length > 3) ? `${location[2]}, ${location[1]}, ${location[0]}` : "",
@@ -1037,10 +1159,18 @@ exports.findShipper = async (req, res, next) => {
           await sendFCMNotification(
             req.shop.tokenDevice,
             'Tìm người giao hàng thành công!',
-            `Đơn hàng ${req?.body?.nameBill} đã giao cho ${nameShipper} vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+            `Đơn hàng trị giá ${Number(Number(billProduct?.total)).toLocaleString()} ₫ đã giao cho ${nameShipper} vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
             'SELLER',
             [],
             req.shop._id,
+          );
+          await sendFCMNotification(
+            billProduct?.idUser?.tokenDevice,
+            'Đơn hàng đã tìm được người giao hàng!',
+            `Đơn hàng trị giá ${Number(Number(billProduct?.total) + Number(billProduct?.moneyShip)).toLocaleString()} ₫ đã giao cho ${nameShipper} vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+            'CLIENT',
+            [],
+            billProduct?.idUser?._id,
           );
           return res.status(201).json({
             success: true,
