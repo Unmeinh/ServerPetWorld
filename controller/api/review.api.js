@@ -120,6 +120,7 @@ exports.addReview = async (req, res, next) => {
         let newObj = new mdReview.ReviewModel();
         newObj.idProduct = idProduct;
         newObj.idUser = req.user._id;
+        newObj.idBill = idBill;
         /** Image review */
         let images = await onUploadImages(req.files, "review");
         if (images != [] && images[0] == false) {

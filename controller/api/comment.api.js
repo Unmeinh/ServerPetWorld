@@ -1,3 +1,4 @@
+const { sendFCMNotification } = require("../../function/notice");
 let mdComment = require("../../model/comment.model");
 let mdBlog = require("../../model/blog.model").BlogModel;
 
@@ -48,10 +49,19 @@ exports.addComment = async (req, res, next) => {
 
         await newComment.save();
         let comment = await newComment.populate("idUser");
-        let blog = await mdBlog.findById(idBlog);
+        let blog = await mdBlog.findById(idBlog).populate('idUser');
         if (blog) {
           blog.comments++;
           await mdBlog.findByIdAndUpdate(idBlog, blog);
+          await sendFCMNotification(
+            blog.idUser?.tokenDevice,
+            `${(req.user._id == blog?.idUser?._id) ? req.user.fullName : "Bạn"} đã bình luận bài viết của bạn!`,
+            `${(req.user._id == blog?.idUser?._id) ? req.user.fullName : "Bạn"} đã thêm một bình luận: ${(content.length > 50) ? content.substring(0, 50) + "..." : content}.`,
+            'CLIENT',
+            [req.user.avatarUser],
+            blog.idUser?._id,
+            3
+          );
         }
         return res
           .status(201)
