@@ -1467,10 +1467,12 @@ exports.detailOwner = async (req, res, next) => {
         let nameIdentity = decodeFromSha256(decodeObj.nameIdentity);
         let numberIdentity = decodeFromSha256(decodeObj.numberIdentity);
         let dateIdentity = decodeFromSha256(decodeObj.dateIdentity);
-        let nameCard = "VU TRONG HOANG LINH";
-        let numberCard = "1234 5678 9101 1278";
-        let nameBank = "MBBank";
-        let expirationDate = "05/25";
+        // let nameCard = "VU TRONG HOANG LINH";
+        // let numberCard = "1234 5678 9101 1278";
+        // let nameBank = "MBBank";
+        // let expirationDate = "05/25";
+        let paymentMethod = decodeObj.paymentMethod;
+        let stkPayment = decodeFromSha256(decodeObj.stkPayment);
         let createdAt = objShop.createdAt;
         objOwner = {
           nameIdentity: encodeName(removeVietnameseTones(nameIdentity)),
@@ -1481,14 +1483,18 @@ exports.detailOwner = async (req, res, next) => {
               .replace(/[0-9]/g, "*") +
             numberIdentity.substring(numberIdentity.length - 2),
           dateIdentity: dateIdentity,
-          nameCard: encodeName(removeVietnameseTones(nameCard)),
-          numberCard:
-            numberCard
-              .substring(0, numberCard.length - 3)
-              .replace(/[0-9]/g, "*") +
-            numberCard.substring(numberCard.length - 3),
-          nameBank: nameBank,
-          expirationDate: expirationDate,
+          // nameCard: encodeName(removeVietnameseTones(nameCard)),
+          // numberCard:
+          //   numberCard
+          //     .substring(0, numberCard.length - 3)
+          //     .replace(/[0-9]/g, "*") +
+          //   numberCard.substring(numberCard.length - 3),
+          // nameBank: nameBank,
+          // expirationDate: expirationDate,
+          paymentMethod: paymentMethod,
+          stkPayment: stkPayment.substring(0, stkPayment.length - 3)
+            .replace(/[0-9]/g, "*") +
+            stkPayment.substring(stkPayment.length - 3),
           createdAt: moment(createdAt).format("DD/MM/YYYY HH:mm A"),
         };
       }
@@ -1684,6 +1690,8 @@ exports.registerShop = async (req, res, next) => {
       numberIdentity: encodeToSha256(String(req.body.numberIdentity)),
       dateIdentity: encodeToSha256(String(req.body.dateIdentity)),
       imageIdentity: [encodeToSha256(images[1]), encodeToSha256(images[2])],
+      paymentMethod: req.body.paymentMethod,
+      stkPayment: encodeToSha256(String(req.body.stkPayment))
     });
     await newShop.encodeOwnerIdentity(newShop, encodeToAscii(ownerIdentity));
 

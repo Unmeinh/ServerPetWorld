@@ -11,4 +11,6 @@ router.get('/update',mdJWT.api_user_auth, noticeCtrl.editNotice);
 
 router.delete('/delete/:idNotice',mdJWT.api_user_auth, noticeCtrl.deleteNotice);
 
+router.post('/reading',mdJWT.api_user_auth, noticeCtrl.onReadingNotice);
+
 module.exports = router;
