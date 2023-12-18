@@ -457,7 +457,7 @@ exports.editBlog = async (req, res, next) => {
             .json({ success: false, data: {}, message: images[1].message });
         }
       }
-      if (JSON.parse(req.body.oldImages) != []) {
+      if (req.body.oldImages && JSON.parse(req.body.oldImages) != []) {
         oldBlog.imageBlogs = [...JSON.parse(req.body.oldImages), ...images];
       } else {
         oldBlog.imageBlogs = [...images];
@@ -469,6 +469,7 @@ exports.editBlog = async (req, res, next) => {
         .status(201)
         .json({ success: true, data: blog, message: "Đã sửa bài viết" });
     } catch (error) {
+      console.log(error);
       let message = "";
       if (error.message.match(new RegExp(".+`contentBlog` is require+."))) {
         message = "Bạn chưa nhập nội dung!";
