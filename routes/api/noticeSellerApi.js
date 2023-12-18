@@ -11,4 +11,6 @@ router.get('/update/:idNotice',mdJWT.api_shop_auth, noticeSellerCtrl.editNoticeS
 
 router.delete('/delete/:idNotice',mdJWT.api_shop_auth, noticeSellerCtrl.deleteNoticeSeller);
 
+router.post('/reading',mdJWT.api_shop_auth, noticeSellerCtrl.onReadingNotice);
+
 module.exports = router;
