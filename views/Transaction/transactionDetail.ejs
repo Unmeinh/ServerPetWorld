@@ -119,8 +119,15 @@
                             </tr>
                             <tr>
                                 <td>
+                                    <% if (row.idProduct && row.idProduct.nameProduct) { %>
+                                        <%= row.idProduct.nameProduct %>
+                                            <% } else if (row.idProduct && row.idProduct.namePet) { %>
+                                                <%= row.idProduct.namePet %>
+                                                    <% } else { %>
+                                                        No name available
+                                                        <% } %>
 
-                                    <%= row.idProduct.nameProduct %>
+
 
                                 </td>
 
@@ -162,7 +169,7 @@
                                             </label>
                                             <% } else { %>
                                                 <label type="text" style="width: 200px;">
-                                                    Không có khách hàng
+                                                    Lỗi không xác định
                                                 </label>
                                                 <% } %>
 
@@ -189,23 +196,26 @@
                                                             Đang giao
                                                         </label>
                                                         <% } else if (listDetailPayment.status===3) { %>
-                                                            <label type="text" style="width: 200px;color: #8bf08f;">
+                                                            <label type="text" style="width: 200px;color: #6fc570;">
                                                                 Giao hàng thành công
                                                             </label>
                                                             <% } else if (listDetailPayment.status===4) { %>
-                                                                <label type="text" style="width: 200px;color: green;">
-                                                                    Thanh toán thành công
+                                                                <label type="text"
+                                                                    style="width: 200px;color: rgb(10, 190, 10);">
+                                                                    Đã nhận
                                                                 </label>
-                                                                <% } else { %>
-                                                                    <label type="text" style="width: 200px;">
-                                                                        Không có khách hàng
+                                                                <% } else if (listDetailPayment.status===5) { %>
+                                                                    <label type="text"
+                                                                        style="width: 200px;color: rgb(10, 190, 10);">
+                                                                        Hoàn tất giao dịch
                                                                     </label>
-                                                                    <% } %>
-
-
+                                                                    <% } else { %>
+                                                                        <label type="text" style="width: 200px;">
+                                                                            Lỗi không xác định
+                                                                        </label>
+                                                                        <% } %>
 
                                 </td>
-
 
                             </tr>
 

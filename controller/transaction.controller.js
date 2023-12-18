@@ -78,7 +78,7 @@ exports.listPayment = async (req, res, next) => {
                         $group: {
                             _id:null,
                             listPayment: { $push: "$$ROOT" },
-                            totalOfTotal4: { $sum: { $cond: { if: { $eq: ["$status", 4] }, then: "$total", else: 0 } } },
+                            totalOfTotal4: { $sum: { $cond: { if: { $in: ["$status", [0, 1, 2, 3, 4]] }, then: "$total", else: 0 } } },
                             totalOfTotal5: { $sum: { $cond: { if: { $eq: ["$status", 5] }, then: "$total", else: 0 } } },
                             totalOfFee4: { $sum: { $cond: { if: { $eq: ["$status", 4] }, then: "$fee", else: 0 } } },
                             totalOfFee5: { $sum: { $cond: { if: { $eq: ["$status", 5] }, then: "$fee", else: 0 } } },
@@ -167,7 +167,7 @@ exports.listPayment = async (req, res, next) => {
                         $group: {
                             _id: null,
                             listPayment: { $push: "$$ROOT" },
-                            totalOfTotal4: { $sum: { $cond: { if: { $eq: ["$status", 4] }, then: "$total", else: 0 } } },
+                            totalOfTotal4: { $sum: { $cond: { if: { $in: ["$status", [0, 1, 2, 3, 4]] }, then: "$total", else: 0 } } },
                             totalOfTotal5: { $sum: { $cond: { if: { $eq: ["$status", 5] }, then: "$total", else: 0 } } },
                             totalOfFee4: { $sum: { $cond: { if: { $eq: ["$status", 4] }, then: "$fee", else: 0 } } },
                             totalOfFee5: { $sum: { $cond: { if: { $eq: ["$status", 5] }, then: "$fee", else: 0 } } },
@@ -280,12 +280,17 @@ exports.detailPayment = async (req, res, next) => {
             
             let listDetailPayment = await mdTransaction.TransactionModal.findById(idTransaction)
             .populate('idCustommer')
-            .populate('idBill')
             .populate({
                 path: "idBill",
                 populate: {
                     path: "products.idProduct",
                     model: 'ProductModel'
+                }
+            }).populate({
+                path: "idBill",
+                populate: {
+                    path: "products.idProduct",
+                    model: 'PetModel'
                 }
             })
             .skip(skip)
