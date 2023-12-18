@@ -417,8 +417,8 @@ exports.billProductUser = async (req, res) => {
 };
 
 exports.getCountBill = async (req, res) => {
-  const { _id } = req.user;
-  const statusArray = [0, 1, 2, 3];
+  const {_id} = req.user;
+  const statusArray = [0, 2, 3];
   try {
     const pipeline = [
       {

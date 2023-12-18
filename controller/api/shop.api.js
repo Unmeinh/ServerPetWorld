@@ -916,6 +916,7 @@ exports.confirmBill = async (req, res, next) => {
                   'SELLER',
                   [],
                   billProduct?.idShop?._id,
+                  3
                 );
                 await sendFCMNotification(
                   billProduct?.idUser?.tokenDevice,
@@ -924,6 +925,7 @@ exports.confirmBill = async (req, res, next) => {
                   'CLIENT',
                   [],
                   billProduct?.idUser?._id,
+                  3
                 );
                 return res.status(201).json({
                   success: true,
@@ -939,6 +941,7 @@ exports.confirmBill = async (req, res, next) => {
                   'SELLER',
                   [],
                   billProduct?.idShop?._id,
+                  3
                 );
                 await sendFCMNotification(
                   billProduct?.idUser?.tokenDevice,
@@ -947,6 +950,7 @@ exports.confirmBill = async (req, res, next) => {
                   'CLIENT',
                   [],
                   billProduct?.idUser?._id,
+                  3
                 );
                 return res.status(201).json({
                   success: true,
@@ -963,6 +967,7 @@ exports.confirmBill = async (req, res, next) => {
                 'SELLER',
                 [],
                 billProduct?.idShop?._id,
+                3
               );
               await sendFCMNotification(
                 billProduct?.idUser?.tokenDevice,
@@ -971,6 +976,7 @@ exports.confirmBill = async (req, res, next) => {
                 'CLIENT',
                 [],
                 billProduct?.idUser?._id,
+                3
               );
               return res.status(500).json({
                 success: false,
@@ -1023,6 +1029,7 @@ exports.confirmBill = async (req, res, next) => {
             'SELLER',
             [],
             billProduct?.idShop?._id,
+            3
           );
           await sendFCMNotification(
             billProduct?.idUser?.tokenDevice,
@@ -1031,6 +1038,7 @@ exports.confirmBill = async (req, res, next) => {
             'CLIENT',
             [],
             billProduct?.idUser?._id,
+            3
           );
           return res.status(201).json({
             success: true,
@@ -1108,6 +1116,7 @@ exports.confirmBillAll = async (req, res, next) => {
                   'SELLER',
                   [],
                   req?.shop?._id,
+                  3
                 );
                 await sendFCMNotification(
                   bill?.idUser?.tokenDevice,
@@ -1116,6 +1125,7 @@ exports.confirmBillAll = async (req, res, next) => {
                   'CLIENT',
                   [],
                   bill?.idUser?._id,
+                  3
                 );
               } else {
                 await sendFCMNotification(
@@ -1125,6 +1135,7 @@ exports.confirmBillAll = async (req, res, next) => {
                   'SELLER',
                   [],
                   req?.shop?._id,
+                  3
                 );
                 await sendFCMNotification(
                   bill?.idUser?.tokenDevice,
@@ -1133,6 +1144,7 @@ exports.confirmBillAll = async (req, res, next) => {
                   'CLIENT',
                   [],
                   bill?.idUser?._id,
+                  3
                 );
               }
               if (!status) {
@@ -1224,6 +1236,7 @@ exports.findShipper = async (req, res, next) => {
             'SELLER',
             [],
             req.shop._id,
+            3
           );
           await sendFCMNotification(
             billProduct?.idUser?.tokenDevice,
@@ -1232,6 +1245,7 @@ exports.findShipper = async (req, res, next) => {
             'CLIENT',
             [],
             billProduct?.idUser?._id,
+            3
           );
           return res.status(201).json({
             success: true,
@@ -1531,14 +1545,6 @@ exports.detailShop = async (req, res, next) => {
 exports.checkPhoneNumber = async (req, res, next) => {
   try {
     if (req.method == "POST") {
-      let objHL = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
-      if (objHL) {
-        return res.status(201).json({
-          success: false,
-          data: objHL,
-          message: "Số điện thoại đã được sử dụng.",
-        });
-      }
       if (req.body.userName) {
         let objUN = await mdShop.ShopModel.findOne({
           userName: req.body.userName,
@@ -1550,6 +1556,14 @@ exports.checkPhoneNumber = async (req, res, next) => {
             message: "Tên đăng nhập đã được sử dụng.",
           });
         }
+      }
+      let objHL = await mdShop.ShopModel.findOne({ hotline: req.body.hotline });
+      if (objHL) {
+        return res.status(201).json({
+          success: false,
+          data: objHL,
+          message: "Số điện thoại đã được sử dụng.",
+        });
       }
       return res.status(201).json({
         success: true,
@@ -1966,6 +1980,7 @@ exports.updatePassword = async (req, res, next) => {
       'SELLER',
       [],
       req.shop._id,
+      3
     );
     return res.status(201).json({
       success: true,
@@ -1996,6 +2011,7 @@ exports.changePassword = async (req, res, next) => {
           'SELLER',
           [],
           shop._id,
+          3
         );
         return res.status(201).json({
           success: true,
