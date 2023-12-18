@@ -1,5 +1,5 @@
 <%- include('../inc/top',{title:'Quản lý sản phẩm'}) %>
-  <div class="container-fluid " style="width: 98%;display: flex; flex-direction: column" >
+  <div class="container-fluid " style="width: 98%;display: flex; flex-direction: column">
     <div class="row col m-3">
       <form action="" class="row col-3 me-2" method="get">
         <div
@@ -16,22 +16,18 @@
         </div>
       </form>
 
-      <% if (typeof(listProduct) !== 'undefined' && listProduct.length > 0) { %>
-        <form action="" method="get" id="sortForm" class="row col-4 me-5"
-          style="display: flex; flex-direction: row; justify-content: space-between;">
-          <select name="sortOption" id="sortOption" class="row col-10 form-select"
-            style="background-color: #F0F4F8;border-radius: 20px;border: none;box-shadow: none; width: 80%;">
-            <option selected disabled>Sắp xếp tên sản phẩm</option>
-            <option value="1"><button type="submit">Sắp xếp từ a-z</button></option>
-            <option value="-1"><button type="submit">Sắp xếp từ z-a</button></option>
-          </select>
-        </form>
-        <% } else { %>
-          <div class="row col-4 me-5"></div>
-          <% } %>
-      <div class="row col-3">
-      
-      </div>
+      <form action="" method="get" id="sortForm" class="row col-4 me-5"
+        style="display: flex; flex-direction: row; justify-content: space-between;">
+        <select <%= hidden %> name="sortOption" id="sortOption" class="row col-10 form-select"
+          style="background-color: #F0F4F8;border-radius: 20px;border: none;box-shadow: none; width: 80%;">
+          <option selected disabled>Sắp xếp tên sản phẩm</option>
+          <option value="1"><button type="submit">Sắp xếp từ a-z</button></option>
+          <option value="-1"><button type="submit">Sắp xếp từ z-a</button></option>
+        </select>
+      </form>
+
+      <div class="row col-3"></div>
+
       <div class="row col-2 ms-1" style="align-items: center;">
         <a href="/category-product"
           style="text-decoration: none; background-color: #66d9f3; border-radius: 6px;text-align: center;padding: 7px;">
@@ -39,90 +35,94 @@
         </a>
       </div>
     </div>
-    <% if (typeof(listProduct) != ' undefined' && listProduct.length> 0) { %>
-  <table class="table align-middle" style="border: white; ">
-    <tr style="background-color: #8BD3DD;">
-      <th style="border-radius: 6px 0 0 6px;">Tên sản phẩm</th>
-      <th>Giá tiền</th>
-      <th>Số lượng</th>
-      <th>Ngày tạo</th>
-      <th style="border-radius: 0 6px 6px 0;"></th>
-      <% listProduct.forEach((row)=> { %>
-    </tr>
-    <tr>
-      <td>
-        <div class="box" style="line-height: 8px;margin: 5px;">
+    
+    <% if (typeof(listProduct) !='undefined' && listProduct.length> 0) { %>
+      <table class="table align-middle" style="border: white; ">
+        <tr style="background-color: #8BD3DD;">
+          <th style="border-radius: 6px 0 0 6px;">Tên sản phẩm</th>
+          <th>Giá tiền</th>
+          <th>Số lượng</th>
+          <th>Ngày tạo</th>
+          <th style="border-radius: 0 6px 6px 0;"></th>
+          <% listProduct.forEach((row)=> { %>
+        </tr>
+        <tr>
+          <td>
+            <div class="box" style="line-height: 8px;margin: 5px;">
+              <p>
+                <% if(row.nameProduct.length> 40 ){ %>
+                  <%= row.nameProduct.substring(0,39) %> ...
+                    <% } else { %>
+                      <%= row.nameProduct %>
+                        <% }%>
+              </p>
+              <a href="/product/delete/<%= row._id %>" style="text-decoration: none;color: rgb(171, 169, 169);">Xóa</a>
+            </div>
+          </td>
+          <td style="font-weight: bold; color: rgb(92, 90, 90);">
+            <%= row.priceProduct.toLocaleString('vi-VN') %> VNĐ
+          </td>
+          <td>
+            <%= row.amountProduct %>
+          </td>
+          <td>
+            <%= moment(row.createdAt).format('DD/MM/YYYY hh:mm:ss a') %>
+          </td>
+          <td>
+            <a href="/product/detail/<%= row._id%>"
+              style="background-color: #F582AE;padding: 8px;border-radius: 10px;text-decoration: none;color: white; font-weight: bold;">Chi
+              tiết</a>
+            </td>
+        </tr>
+        <% }) %>
+      </table>
 
-          <p>
-            <% if(row.nameProduct.length> 41 ){ %>
-              <%= row.nameProduct.substring(0,40) %> ...
-                <% } else { %>
-                  <%= row.nameProduct %>
-                    <% }%>
-          </p>
-          <a href="/product/delete/<%= row._id %>" style="text-decoration: none;color: rgb(171, 169, 169);">Xóa</a>
-        </div>
-      </td>
-      <td style="font-weight: bold; color: rgb(92, 90, 90);">
-        <%= row.priceProduct.toLocaleString('vi-VN') %> VNĐ
-      </td>
-      <td>
-        <%= row.amountProduct %>
-      </td>
-      <td>
-        <%= moment(row.createdAt).format('DD/MM/YYYY hh:mm:ss a') %>
-      </td>
-      <td><a href="/product/detail/<%= row._id%>"
-          style="background-color: #F582AE;padding: 8px;border-radius: 10px;text-decoration: none;color: white; font-weight: bold;">Chi
-          tiết</a></td>
-    </tr>
-    <% }) %>
-  </table>
-
-  <div
-    style="display: flex; flex-direction: row; align-items: center;justify-content: space-between;position:absolute ; bottom: 0; width: 96%;">
-    <p> Số bản ghi: <span style="font-weight: bold;">
-        <%= countNowProduct %>/<%= countAllProduct %>
-      </span></p>
-    <nav>
-      <ul class="pagination">
-        <% if (currentPage> 1) { %>
-          <li class="page-item">
-            <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
-              <span aria-hidden="true">&laquo;</span>
-            </a>
-          </li>
-          <% } %>
-            <% for (let i=1; i <=totalPages; i++) { %>
-              <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                <a class="page-link" href="?page=<%= i %>">
-                  <%= i %>
+      <div
+        style="display: flex; flex-direction: row; align-items: center;justify-content: space-between;position:absolute ; bottom: 0; width: 96%;">
+        <p> Số bản ghi: <span style="font-weight: bold;">
+            <%= countNowProduct %>/<%= countAllProduct %>
+          </span></p>
+        <nav>
+          <ul class="pagination">
+            <% if (currentPage> 1) { %>
+              <li class="page-item">
+                <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
                 </a>
               </li>
               <% } %>
-
-                <% if (currentPage < totalPages) { %>
-                  <li class="page-item">
-                    <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
-                      <span aria-hidden="true">&raquo;</span>
+                <% for (let i=1; i <=totalPages; i++) { %>
+                  <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                    <a class="page-link" href="?page=<%= i %>">
+                      <%= i %>
                     </a>
                   </li>
                   <% } %>
-      </ul>
-    </nav>
-  </div>
-  <% } else { %>
-    <div class="no-results-message" style="text-align: center;">
-      <p style="color: #F582AE; font-size: 24px; margin-top: 100px; ">Không tìm thấy sản phẩm này!</p>
-      <img src="https://png.pngtree.com/png-clipart/20190924/original/pngtree-empty-box-icon-for-your-project-png-image_4820798.jpg" alt="No data" style="width: 20%; height: 20%;" />
-  </div>
-    <% } %>
+
+                    <% if (currentPage < totalPages) { %>
+                      <li class="page-item">
+                        <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                          <span aria-hidden="true">&raquo;</span>
+                        </a>
+                      </li>
+                      <% } %>
+          </ul>
+        </nav>
       </div>
-      <%- include('../inc/bottom') %>
-        <script>
-          const sortOptionDropdown = document.getElementById('sortOption');
-          const sortForm = document.getElementById('sortForm');
-          sortOptionDropdown.addEventListener('change', function () {
-            sortForm.submit();
-          });
-        </script>
+      <% } else { %>
+        <div class="no-results-message" style="text-align: center;">
+          <p style="color: #F582AE; font-size: 24px; margin-top: 100px; ">Không tìm thấy sản phẩm này!</p>
+          <img
+            src="https://png.pngtree.com/png-clipart/20190924/original/pngtree-empty-box-icon-for-your-project-png-image_4820798.jpg"
+            alt="No data" style="width: 20%; height: 20%;" />
+        </div>
+        <% } %>
+  </div>
+  <%- include('../inc/bottom') %>
+    <script>
+      const sortOptionDropdown = document.getElementById('sortOption');
+      const sortForm = document.getElementById('sortForm');
+      sortOptionDropdown.addEventListener('change', function () {
+        sortForm.submit();
+      });
+    </script>

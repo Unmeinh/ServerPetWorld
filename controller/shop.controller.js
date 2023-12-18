@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const string_word_secret = process.env.TOKEN_SEC_KEY;
 const {decodeFromSha256, decodeFromAscii} = require('../function/hashFunction');
 const fs = require('fs');
+const { sendFCMNotification } = require('../function/notice');
 
 exports.listShop = async (req, res, next) => {
   const perPage = 7;
@@ -61,7 +62,7 @@ exports.listShop = async (req, res, next) => {
       console.log('Không lấy được danh sách Shop: ' + msg);
     }
   }
-  res.render('Shop/listShop', {msg: msg});
+  res.render('Shop/listShop', {msg: msg, adminLogin: req.session.adLogin});
 };
 
 exports.listShopConfirm = async (req, res, next) => {
@@ -173,6 +174,15 @@ exports.updateShopStatus = async (req, res, next) => {
   if (req.method == 'POST') {
     try {
       await mdShop.ShopModel.findByIdAndUpdate(ObjShop._id, {status: 1});
+      // Send notify SUCCESS for shop
+      await sendFCMNotification (
+          ObjShop.tokenDevice,
+          `Admin đã phê duyệt tài khoản shop: ${ObjShop.nameShop}!`,
+          `Bạn đã trở thành shop trong OurPet Seller`,
+          'SELLER',
+          null,
+          ObjShop._id,
+      );
       return res.redirect('/shop/confirm');
     } catch (error) {
       message = error.message;
@@ -190,6 +200,15 @@ exports.updateHideShopStatus = async (req, res, next) => {
   if (req.method == 'POST') {
     try {
       await mdShop.ShopModel.findByIdAndUpdate(idShop, {status: -1});
+      // Send notify FAILED for shop
+      await sendFCMNotification (
+          ObjShop.tokenDevice,
+          `Admin đã từ chối tài khoản shop: ${ObjShop.nameShop}!`,
+          `Bạn vẫn chưa phải là shop trong OurPet Seller`,
+          'SELLER',
+          null,
+          ObjShop._id,
+      );
       return res.redirect('/shop/confirm');
     } catch (error) {
       message = error.message;
