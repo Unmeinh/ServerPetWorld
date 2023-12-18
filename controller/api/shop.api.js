@@ -23,6 +23,7 @@ const {
 const { sendFCMNotification } = require("../../function/notice");
 const { serverModal } = require("../../model/server.modal");
 const { TransactionModal } = require("../../model/transaction.modal");
+const { ReviewModel } = require("../../model/review.model");
 
 exports.listShop = async (req, res, next) => {
   let filterSearch = null;
@@ -267,7 +268,10 @@ exports.listDeliveredBill = async (req, res, next) => {
         const searchTerm = req.query.filterSearch.trim();
         filterSearch = { fullName: new RegExp(searchTerm, "i") };
       }
-      let listBill = await getListBill(req.shop._id, 3);
+      let listBill = await getListBill(req.shop._id, {
+        $gte: 3,
+        $lte: 4
+      });
       if (listBill && listBill.length > 0) {
         let list = await onFinalProcessingListBill(listBill);
         listBill = [...list];
@@ -278,6 +282,7 @@ exports.listDeliveredBill = async (req, res, next) => {
         message: "Lấy danh sách đơn hàng thành công",
       });
     } catch (error) {
+      console.log(error);
       return res
         .status(500)
         .json({ success: false, data: [], message: "Lỗi: " + error.message });
@@ -297,7 +302,7 @@ exports.listEvaluatedBill = async (req, res, next) => {
         const searchTerm = req.query.filterSearch.trim();
         filterSearch = { fullName: new RegExp(searchTerm, "i") };
       }
-      let listBill = await getListBill(req.shop._id, 5);
+      let listBill = await getListBill(req.shop._id, 4);
       if (listBill && listBill.length > 0) {
         let list = await onFinalProcessingListBill(listBill);
         listBill = [...list];
@@ -335,6 +340,62 @@ exports.listCancelledBill = async (req, res, next) => {
       return res.status(200).json({
         success: true,
         data: listBill,
+        message: "Lấy danh sách đơn hàng thành công",
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ success: false, data: [], message: "Lỗi: " + error.message });
+    }
+  }
+};
+
+exports.getReviewBill = async (req, res, next) => {
+  let filterSearch = null;
+
+  if (req.method == "GET" && req.params.idBill) {
+    try {
+      let listReview = await ReviewModel.find({ idBill: req.params.idBill });
+      if (!listReview && listReview.length <= 0) {
+        return res.status(200).json({
+          success: false,
+          data: [],
+          message: "Lấy danh sách đơn hàng thành công",
+        });
+      }
+      let listNew = [];
+      for (let i = 0; i < listReview.length; i++) {
+        let stars = [];
+        const review = listReview[i].toObject();
+        if (review?.ratingNumber) {
+          for (let j = 0; j < 5; j++) {
+            if (j <= review?.ratingNumber) {
+              stars.push({
+                nameIcon: "star",
+                colorIcon: '#E2E53F'
+              })
+            } else {
+              stars.push({
+                nameIcon: "star-outline",
+                colorIcon: '#001858'
+              })
+            }
+          }
+          review.stars = stars;
+        }
+        let product = await mdProduct.findById(review.idProduct);
+        let pet = await mdPet.findById(review.idProduct);
+        if (product) {
+          review.idProduct = product;
+        }
+        if (pet) {
+          review.idProduct = pet;
+        }
+        listNew.push(review);
+      }
+      return res.status(200).json({
+        success: true,
+        data: listNew,
         message: "Lấy danh sách đơn hàng thành công",
       });
     } catch (error) {
@@ -1321,7 +1382,7 @@ exports.myShopDetail = async (req, res, next) => {
     if (listBill) {
       req.shop = req?.shop.toObject();
       req.shop.billCount = listBill.length;
-      const statusArray = [0, 1, 2, 3, 5];
+      const statusArray = [0, 1, 2, 3];
       try {
         const pipeline = [
           {
@@ -1352,13 +1413,11 @@ exports.myShopDetail = async (req, res, next) => {
               statusCountObject["0"] = result.count;
             }
           } else {
-            if (result._id == 5) {
-              statusCountObject["3"] = result.count;
-            } else {
-              statusCountObject[String(result._id - 1)] = result.count;
-            }
+            statusCountObject[String(result._id - 1)] = result.count;
           }
         }
+        const countReview = await mdBill.find({ idShop: _id, statusReview: false, deliveryStatus: 4 }).count();
+        statusCountObject['3'] = (countReview) ? countReview : 0;
         req.shop.objCountBills = statusCountObject;
         return res.status(200).json({
           success: true,
@@ -2230,6 +2289,7 @@ async function getListBill(idShop, billStatus) {
           deliveryStatus: { $first: "$deliveryStatus" },
           discountBill: { $first: "$discountBill" },
           billDate: { $first: "$billDate" },
+          statusReview: { $first: "$statusReview" },
           productInfo: { $push: "$productInfo" },
           petInfo: { $first: "$petInfo" },
           userInfo: { $first: "$userLookup" },
@@ -2246,6 +2306,7 @@ async function getListBill(idShop, billStatus) {
           discountBill: 1,
           billDate: 1,
           shipperInfo: 1,
+          statusReview: 1,
           "productInfo.idProduct": 1,
           "productInfo.amount": 1,
           "productInfo.price": 1,
@@ -2373,15 +2434,22 @@ async function onFinalProcessingListBill(listBill) {
     //       break;
     //   }
     // }
-    if (bill.productInfo != undefined) {
-      let arrProduct = bill?.productInfo[0];
-      if (arrProduct.length > 0) {
-        let total = 0;
-        for (let i = 0; i < arrProduct.length; i++) {
-          const element = arrProduct[i];
-          total += Number(element?.price) * Number(element?.amount);
+    if (bill.productInfo && typeof (bill.productInfo) == 'object'
+      && Object.keys(bill.productInfo).length > 0 && bill.productInfo[0].length > 0) {
+      try {
+        if (bill.productInfo.length > 0) {
+          let arrProduct = [];
+          let total = 0;
+          for (let i = 0; i < bill.productInfo.length; i++) {
+            const element = bill.productInfo[i][0];
+            total += Number(element?.price) * Number(element?.amount);
+            arrProduct.push(element);
+          }
+          bill.productInfo[0] = arrProduct;
+          bill.totalProduct = total;
         }
-        bill.totalProduct = total;
+      } catch (error) {
+        console.log(error);
       }
     }
     if (listPayment.length > 0 && bill.paymentMethods != undefined) {
@@ -2400,6 +2468,7 @@ async function getTotalBill(shopId, previusDate, nowDate) {
         $gte: new Date(previusDate),
         $lte: new Date(nowDate),
       },
+      deliveryStatus: 4
     },
   };
   var group_stage = {
@@ -2426,6 +2495,7 @@ async function getTotalProduct(shopId, previusDate, nowDate) {
         $gte: new Date(previusDate),
         $lte: new Date(nowDate),
       },
+      deliveryStatus: 4
     },
   };
 
