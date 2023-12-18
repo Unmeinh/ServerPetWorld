@@ -212,7 +212,7 @@ exports.cancelBill = async (req, res) => {
         if (product) {
           product.quantitySold = Number(product.quantitySold) - (bill.amount);
           product.amountProduct = Number(product.amountProduct) + (bill.amount);
-          product.save();
+          await product.save();
         }
       }
     } else {
@@ -222,13 +222,13 @@ exports.cancelBill = async (req, res) => {
         if (product) {
           product.quantitySold = Number(product.quantitySold) - (first.amount);
           product.amountProduct = Number(product.amountProduct) + (first.amount);
-          product.save();
+          await product.save();
         } else {
           let pet = await mdPet.PetModel.findById(first.idProduct);
           if (pet) {
             pet.quantitySold = Number(pet.quantitySold) - (first.amount);
             pet.amountPet = Number(pet.amountPet) + (first.amount);
-            pet.save();
+            await pet.save();
           }
         }
       }
