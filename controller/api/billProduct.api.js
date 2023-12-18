@@ -481,6 +481,7 @@ exports.completedBill = async (req, res) => {
   const idBill = req.params.id;
   try {
     if (idBill) {
+      let bill = await mdbillProduct.billProductModel.findById(idBill).populate('idShop');
       await Promise.all([
         await mdbillProduct.billProductModel.findByIdAndUpdate(idBill, {
           deliveryStatus: 4,
@@ -489,6 +490,12 @@ exports.completedBill = async (req, res) => {
           { idBill: idBill },
           {
             status: 4,
+          },
+        ),
+        await mdShop.ShopModel.findByIdAndUpdate(
+          bill.idShop._id,
+          {
+            revenue: Number(bill.total) + Number(bill.idShop.revenue),
           },
         ),
       ]);

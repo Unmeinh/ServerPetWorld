@@ -1,5 +1,6 @@
 let mdUser = require('../../model/user.model').UserModel;
 const unidecode = require('unidecode');
+const { sendFCMNotification } = require('../../function/notice');
 
 exports.myFollowing = async (req, res, next) => {
     try {
@@ -120,21 +121,39 @@ exports.insertFollow = async (req, res, next) => {
             }
             let listUser = await mdUser.find({ _id: idFollow }).populate('idAccount');
             if (listUser) {
+                let userFollow = listUser[0].toObject();
                 req.user = req.user.toObject();
                 let isFlwing = req.user.followings.find((follow) => String(follow.idFollow) == String(idFollow));
                 if (isFlwing) {
                     if (String(isFlw) == "false") {
                         req.user.followings.splice(req.user.followings.indexOf(isFlwing), 1);
                         await mdUser.findByIdAndUpdate(req.user._id, req.user);
-                    } 
+                        // await sendFCMNotification(
+                        //     req.user?.tokenDevice,
+                        //     `Bỏ theo dõi thành công!`,
+                        //     `Bạn đã bỏ theo dõi ${userFollow.fullName}.`,
+                        //     'CLIENT',
+                        //     [],
+                        //     req.user?._id,
+                        //     1
+                        // );
+                    }
                 } else {
                     if (String(isFlw) == "true") {
                         req.user.followings.push({ idFollow: idFollow });
                         await mdUser.findByIdAndUpdate(req.user._id, req.user);
+                        await sendFCMNotification(
+                            req.user?.tokenDevice,
+                            `Theo dõi thành công!`,
+                            `Bạn đã theo dõi ${userFollow.fullName}.`,
+                            'CLIENT',
+                            [],
+                            req.user?._id,
+                            1
+                        );
                     }
                 }
 
-                let userFollow = listUser[0].toObject();
                 let isFlwer = userFollow.followers.find((follow) => String(follow.idFollow) == String(req.user._id));
                 if (isFlwer) {
                     if (String(isFlw) == "false") {
@@ -148,6 +167,15 @@ exports.insertFollow = async (req, res, next) => {
                     if (String(isFlw) == "true") {
                         userFollow.followers.push({ idFollow: req.user._id });
                         await mdUser.findByIdAndUpdate(userFollow._id, userFollow);
+                        await sendFCMNotification(
+                            userFollow?.tokenDevice,
+                            `${req.user.fullName} đã theo dõi bạn!`,
+                            `Bạn đã được theo dõi bởi ${req.user.fullName}.`,
+                            'CLIENT',
+                            [req.user.avatarUser],
+                            userFollow?._id,
+                            3
+                        );
                         userFollow.isFollowed = true;
                     } else {
                         userFollow.isFollowed = false;
