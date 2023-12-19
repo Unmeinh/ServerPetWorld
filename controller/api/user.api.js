@@ -40,7 +40,8 @@ exports.myDetail = async (req, res, next) => {
     }
     if (req?.query?.isReadBill && String(req.query.isReadBill) == "true") {
       let dataCalculator = await calculatorBill(_id);
-      billCount = dataCalculator.count;
+      let countCalculator = await calculatorCount(_id);
+      billCount = countCalculator.count;
       totalPurchased = dataCalculator?.total?.sumTotal + dataCalculator?.total?.sumShip;
     }
     let user = req.user.toObject();
@@ -709,6 +710,41 @@ async function calculatorBill(uID) {
       $match: {
         idUser: uID,
         deliveryStatus: 4
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        sumTotal: { $sum: "$total" },
+        sumShip: { $sum: "$moneyShip" },
+      },
+    },
+    {
+      $project: { _id: 0, sumTotal: "$sumTotal", sumShip: "$sumShip" },
+    }
+  ]);
+  if (totalBills[0] != undefined && billCount != undefined) {
+    return {
+      count: billCount,
+      total: totalBills[0]
+    };
+  } else {
+    return {
+      count: 0,
+      total: {
+        sumTotal: 0,
+        sumShip: 0
+      }
+    };
+  }
+}
+
+async function calculatorCount(uID) {
+  let billCount = await billProductModel.find({ idUser: uID }).count();
+  let totalBills = await billProductModel.aggregate([
+    {
+      $match: {
+        idUser: uID,
       },
     },
     {
