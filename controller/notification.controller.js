@@ -113,7 +113,6 @@ exports.getChatMessages = async (req, res, next) => {
   const db = admin.database();
   const role = req.query.role;
   const messagesRef = db.ref().child("chat_messages").child(role);
-
   try {
     const snapshot = await messagesRef.orderByChild("timestamp").once("value");
     const messages = [];
