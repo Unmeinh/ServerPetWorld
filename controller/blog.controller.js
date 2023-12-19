@@ -6,6 +6,7 @@ let hashFunction = require("../function/hashFunction");
 
 exports.listAllBlog = async (req, res, next) => {
   let msg = "";
+  let hidden = "";
   let filterSearch = null;
   let sortOption = null;
   let perPage = 10;
@@ -18,26 +19,34 @@ exports.listAllBlog = async (req, res, next) => {
         req.query.filterSearch.trim() !== ""
       ) {
         const searchTerm = req.query.filterSearch.trim();
-        filterSearch = { contentBlog: new RegExp(searchTerm, "i") };
+        filterSearch = {
+          $and: [
+            { contentBlog: { $regex: searchTerm, $options: "i" } }
+          ],
+        };
       }
       if (typeof req.query.sortOption != "undefined") {
         sortOption = { contentBlog: req.query.sortOption };
       }
 
-      let totalCount = await mdBlog.BlogModel.countDocuments(filterSearch);
+      const totalCount = await mdBlog.BlogModel.countDocuments(filterSearch);
       const totalPage = Math.ceil(totalCount / perPage);
 
-      if (currentPage < 1) currentPage = 1;
-      if (currentPage > totalPage) currentPage = totalPage;
-      let skipCount = (currentPage - 1) * perPage;
+      // if (currentPage < 1) currentPage = 1;
+      // if (currentPage > totalPage) currentPage = totalPage;
+      const skipCount = (currentPage - 1) * perPage;
 
       let listAllBlog = await mdBlog.BlogModel.find(filterSearch)
         .populate("idUser")
         .sort(sortOption)
+        .sort({ createdAt: -1 })
         .skip(skipCount)
         .limit(perPage);
+      if (listAllBlog.length == 0) {
+        hidden = "hidden";
+      }
+
       msg = "Lấy danh sách tất cả blog thành công";
-      // console.log(listAllBlog);
       return res.render("Blog/listBlog", {
         listAllBlog: listAllBlog,
         countAllBlog: totalCount,
@@ -46,20 +55,22 @@ exports.listAllBlog = async (req, res, next) => {
         moment: moment,
         currentPage: currentPage,
         totalPage: totalPage,
-        adminLogin: req.session.adLogin
+        adminLogin: req.session.adLogin,
+        hidden: hidden
       });
     } catch (error) {
       msg = "Lỗi: " + error.message;
       console.log(msg);
     }
   }
+  res.render("Blog/listBlog", {
+    msg: "Không tìm thấy kết quả phù hợp",
+    moment: moment,
+    adminLogin: req.session.adLogin,
+    hidden: hidden
+  });
 };
-// exports.listBlogFromIdUser = async (req, res, next) => {
-//     let idUser = req.params.idUser;
 
-//     let listBlogUser = await mdBlog.BlogModel.find({ idUser: idUser }).populate('idUser');
-//     res.render('');
-// }
 exports.detailBlog = async (req, res, next) => {
   let idBlog = req.params.idBlog;
   let objB = await mdBlog.BlogModel.findById(idBlog).populate("idUser");

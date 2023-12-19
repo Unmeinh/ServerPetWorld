@@ -1,13 +1,13 @@
 <%- include('../inc/top',{title:'Quản lý tất cả bài viết'}) %>
     <div class="container-fluid " style="width: 98%;">
         <div class="row col m-3">
-
             <form action="" class="row col-3 me-2" method="get">
                 <div
                     style="background-color: #F0F4F8;border-radius: 25px;align-items: center;display: flex;flex-direction: row;">
                     <div style="width: 10%;">
-                        <button type="submit" style="border: none;"><img src="/upload/iconFind.png"
-                                style="width: 20px;height: 20px;"></button>
+                        <button type="submit" style="border: none;">
+                            <img src="/upload/iconFind.png" style="width: 20px;height: 20px;">
+                        </button>
                     </div>
                     <div style="width: 90%;">
                         <input name="filterSearch"
@@ -16,22 +16,20 @@
                     </div>
                 </div>
             </form>
-
+ 
             <form action="" method="get" id="sortForm" class="row col-4 me-5"
                 style="display: flex; flex-direction: row; justify-content: space-between;">
-                <select name="sortOption" id="sortOption" class="row col-10 form-select"
+                <select <%= hidden %> name="sortOption" id="sortOption" class="row col-10 form-select"
                     style="background-color: #F0F4F8;border-radius: 20px;border: none;box-shadow: none; width: 80%;">
                     <option selected disabled>Sắp xếp nội dung</option>
                     <option value="1">Sắp xếp từ a-z</option>
                     <option value="-1">Sắp xếp từ z-a</option>
                 </select>
             </form>
-
         </div>
 
-        <% if (typeof listAllBlog !='undefined' && listAllBlog.length> 0) { %>
+        <% if (typeof listAllBlog != 'undefined' && listAllBlog.length> 0) { %>
             <table class="table table-curved  align-middle" style="border: white;">
-
                 <tr style="background: #8BD3DD;border-radius: 15px;">
                     <th style="border-radius: 6px 0 0 6px;">Ảnh bài viết</th>
                     <th>Nội dung</th>
@@ -53,11 +51,11 @@
                             </a>
                         </td>
                         <td class="col-5">
-                            <% if(row.contentBlog.length > 53 ){ %>
+                            <% if(row.contentBlog.length> 53 ){ %>
                                 <%= row.contentBlog.substring(0,52) %> ...
-                            <% } else { %>
-                                <%= row.contentBlog %>
-                                <% }%>
+                                    <% } else { %>
+                                        <%= row.contentBlog %>
+                                            <% }%>
 
                         </td>
                         <td>
@@ -86,7 +84,8 @@
                 <p> Số bản ghi: <span style="font-weight: bold;">
 
                         <%= countNowBlog%>/<%= countAllBlog %>
-                    </span></p>
+                    </span>
+                </p>
 
                 <nav>
                     <ul class="pagination">
@@ -118,8 +117,12 @@
                 </nav>
             </div>
             <% } else { %>
-                <div class="no-results-message">
-                    <p>Không tìm thấy kết quả</p>
+                <div class="row m-auto" style="width: 97%;">
+                    <span class="p-3"
+                        style="background-color: rgb(175, 214, 239); border-radius: 10px;color: red;font-weight: bold;">Không
+                        tìm
+                        thấy kết quả
+                    </span>
                 </div>
                 <% } %>
     </div>

@@ -7,16 +7,16 @@
           <div style="width: 10%;">
             <button type="submit" style="border: none;">
               <img src="/upload/iconFind.png" style="width: 20px; height: 20px;">
-              </button>
+            </button>
           </div>
           <div style="width: 90%;">
             <input name="filterSearch"
-              style="border: none; background-color: #F0F4F8; border-radius: 25px; box-shadow: none;" class="form-control"
-              placeholder="Tìm kiếm">
+              style="border: none; background-color: #F0F4F8; border-radius: 25px; box-shadow: none;"
+              class="form-control" placeholder="Tìm kiếm">
           </div>
         </div>
       </form>
-      
+
       <form action="" method="get" id="sortForm" class="row col-4 me-5"
         style="display: flex; flex-direction: row; justify-content: space-between;">
         <select <%= hidden %> name="sortOption" id="sortOption" class="row col-10 form-select"
@@ -28,7 +28,7 @@
       </form>
 
       <div class="row col-3"></div>
-      
+
       <div class="row col-2 ms-1" style="align-items: center;">
         <a href="/category-pet"
           style="text-decoration: none; background-color: #66d9f3; border-radius: 6px;text-align: center;padding: 7px;">
@@ -45,39 +45,39 @@
           <th scope="col">Số lượng</th>
           <th scope="col">Ngày tạo</th>
           <th scope="col" style="border-radius: 0 6px 6px 0;"></th>
-          <% listpet.forEach((row)=> { %>
         </tr>
-        <tr>
-          <td>
-            <div class="box" style="line-height: 8px;margin: 5px;">
-              <p>
-                <% if(row.namePet.length> 40 ){ %>
-                  <%= row.namePet.substring(0,39) %> ...
-                    <% } else { %>
-                      <%= row.namePet %>
-                        <% }%>
-              </p>
-              <a href="/pet/delete/<%= row._id %>" style="text-decoration: none;color: rgb(171, 169, 169);">
-                Xóa
-              </a>
-            </div>
-          </td>
-          <td style="font-weight: bold; color: rgb(92, 90, 90);">
-            <%= row.pricePet.toLocaleString('vi-VN') %> VNĐ
-          </td>
-          <td>
-            <%= row.amountPet %>
-          </td>
-          <td>
-            <%= moment(row.createdAt).format('DD/MM/ YYYY hh:mm:ss a') %>
-          </td>
-          <td>
-            <a href="/pet/detail/<%= row._id%>"
-              style="background-color: #F582AE;padding: 8px;border-radius: 10px;text-decoration: none;color: white; font-weight: bold;">Chi
-              tiết</a>
+        <% listpet.forEach((row)=> { %>
+          <tr>
+            <td>
+              <div class="box" style="line-height: 8px;margin: 5px;">
+                <p>
+                  <% if(row.namePet.length> 40 ){ %>
+                    <%= row.namePet.substring(0,39) %> ...
+                      <% } else { %>
+                        <%= row.namePet %>
+                          <% }%>
+                </p>
+                <a href="/pet/delete/<%= row._id %>" style="text-decoration: none;color: rgb(171, 169, 169);">
+                  Xóa
+                </a>
+              </div>
             </td>
-        </tr>
-        <% }) %>
+            <td style="font-weight: bold; color: rgb(92, 90, 90);">
+              <%= row.pricePet.toLocaleString('vi-VN') %> VNĐ
+            </td>
+            <td>
+              <%= row.amountPet %>
+            </td>
+            <td>
+              <%= moment(row.createdAt).format('DD/MM/ YYYY hh:mm:ss a') %>
+            </td>
+            <td>
+              <a href="/pet/detail/<%= row._id%>"
+                style="background-color: #F582AE;padding: 8px;border-radius: 10px;text-decoration: none;color: white; font-weight: bold;">Chi
+                tiết</a>
+            </td>
+          </tr>
+          <% }) %>
       </table>
 
       <div
