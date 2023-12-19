@@ -1580,7 +1580,7 @@ exports.checkPhoneNumber = async (req, res, next) => {
         if (objUN) {
           return res.status(201).json({
             success: false,
-            data: objHL,
+            data: objUN,
             message: "Tên đăng nhập đã được sử dụng.",
           });
         }
