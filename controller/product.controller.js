@@ -2,35 +2,31 @@ let mdProduct = require('../model/product.model');
 var moment = require('moment')
 
 exports.listProduct = async (req, res, next) => {
+    let currentPage = parseInt(req.query.page) || 1;
     const perPage = 7;
     let msg = '';
+    let hidden = "";
     let sortOption = null;
-    let filterSearch = null;
-    let currentPage = parseInt(req.query.page) || 1;
+    let filterSearch = { status: 0 };
 
     if (req.method == 'GET') {
         try {
             if (typeof req.query.filterSearch !== 'undefined' && req.query.filterSearch.trim() !== '') {
                 const searchTerm = req.query.filterSearch.trim();
-                filterSearch = { nameProduct: new RegExp(searchTerm, 'i') };
-        
+                filterSearch = {
+                    $and: [
+                        { nameProduct: { $regex: searchTerm, $options: "i" } },
+                        { status: 0 }
+                    ]
+                };
             }
 
-            sortOption = { createdAt: -1 };
+            if (typeof req.query.sortOption != "undefined") {
+                sortOption = { nameProduct: req.query.sortOption };
+            }
+
             const totalCount = await mdProduct.ProductModel.countDocuments(filterSearch);
             const totalPages = Math.ceil(totalCount / perPage);
-            if (currentPage > totalPages || currentPage < 1) {
-                msg = 'Không có dữ liệu.';
-                return res.render('Product/listProduct', {
-                    listUser: [],
-                    countAllUser: 0,
-                    countNowUser: 0,
-                    msg: msg,
-                    currentPage: currentPage,
-                    totalCount: totalCount,
-                    adminLogin: req.session.adLogin
-                });
-            }
 
             const skipCount = (currentPage - 1) * perPage;
             let listProduct = await mdProduct.ProductModel.find(filterSearch)
@@ -38,7 +34,9 @@ exports.listProduct = async (req, res, next) => {
                 .sort(sortOption)
                 .skip(skipCount)
                 .limit(perPage);
-
+            if (listProduct.length == 0) {
+                hidden = "hidden";
+            }
             msg = 'Lấy danh sách sản phẩm thành công';
             return res.render('Product/listProduct', {
                 listProduct: listProduct,
@@ -48,7 +46,8 @@ exports.listProduct = async (req, res, next) => {
                 currentPage: currentPage,
                 totalPages: totalPages,
                 moment: moment,
-                adminLogin: req.session.adLogin
+                adminLogin: req.session.adLogin,
+                hidden: hidden
             });
         } catch (error) {
             msg = '' + error.message;
@@ -76,13 +75,11 @@ exports.deleteProduct = async (req, res, next) => {
     let ObjProduct = await mdProduct.ProductModel.findById(idPR);
     if (req.method == 'POST') {
         try {
-            await mdProduct.ProductModel.findByIdAndDelete(idPR);
-        
+            await mdProduct.ProductModel.findByIdAndUpdate(idPR,{status: 1});
             return res.redirect('/product');
         } catch (error) {
             console.log(error.message);
         }
     }
-
-    res.render('Product/deleteProduct', { message: message, ObjProduct: ObjProduct, adminLogin: req.session.adLogin  });
+    res.render('Product/deleteProduct', { message: message, ObjProduct: ObjProduct, adminLogin: req.session.adLogin });
 }
