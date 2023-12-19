@@ -130,7 +130,7 @@ exports.updateDeliveryStatus = async (req, res, next) => {
     await sendFCMNotification(
       ObjBillPr?.idShop?.tokenDevice,
       'Đơn hàng của bạn đang được giao!',
-      `Đơn hàng đã được chuyển cho shipper vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+      `Đơn hàng của bạn đã được người giao hàng bắt đầu giao lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
       'SELLER',
       [],
       ObjBillPr?.idShop?._id,
@@ -138,7 +138,7 @@ exports.updateDeliveryStatus = async (req, res, next) => {
     await sendFCMNotification(
       ObjBillPr?.idUser?.tokenDevice,
       'Đơn hàng của bạn đang được giao!',
-      `Đơn hàng đã được chuyển cho shipper vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+      `Đơn hàng của bạn đã được người giao hàng bắt đầu giao lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
       'CLIENT',
       [],
       ObjBillPr?.idUser?._id,
@@ -193,7 +193,7 @@ exports.updateDeliveryStatus1 = async (req, res, next) => {
     await sendFCMNotification(
       ObjBillPr?.idShop?.tokenDevice,
       'Đơn hàng của bạn đang được giao lại!',
-      `Đơn hàng đã được chuyển cho shipper vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+      `Đơn hàng của bạn đã được người giao hàng bắt đầu giao lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
       'SELLER',
       [],
       ObjBillPr?.idShop?._id,
@@ -201,7 +201,7 @@ exports.updateDeliveryStatus1 = async (req, res, next) => {
     await sendFCMNotification(
       ObjBillPr?.idUser?.tokenDevice,
       'Đơn hàng của bạn đang được giao lại!',
-      `Đơn hàng đã được chuyển cho shipper vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+      `Đơn hàng của bạn đã được người giao hàng bắt đầu giao lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
       'CLIENT',
       [],
       ObjBillPr?.idUser?._id,
