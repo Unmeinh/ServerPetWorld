@@ -177,8 +177,8 @@ exports.updateShopStatus = async (req, res, next) => {
       // Send notify SUCCESS for shop
       await sendFCMNotification (
           ObjShop.tokenDevice,
-          `Admin đã phê duyệt tài khoản shop: ${ObjShop.nameShop}!`,
-          `Bạn đã trở thành shop trong OurPet Seller`,
+          `Quản trị viên đã phê duyệt tài khoản của bạn!`,
+          `Chúc mừng ${ObjShop.nameShop}, bạn đã trở thành cửa hàng trong hệ thống của chúng tôi!`,
           'SELLER',
           null,
           ObjShop._id,
@@ -203,8 +203,8 @@ exports.updateHideShopStatus = async (req, res, next) => {
       // Send notify FAILED for shop
       await sendFCMNotification (
           ObjShop.tokenDevice,
-          `Admin đã từ chối tài khoản shop: ${ObjShop.nameShop}!`,
-          `Bạn vẫn chưa phải là shop trong OurPet Seller`,
+          `Quản trị viên đã từ chối tài khoản của bạn!`,
+          `Xin lỗi ${ObjShop.nameShop}, bạn chưa đủ điều kiện để trở thành cửa hàng trong hệ thống của chúng tôi!`,
           'SELLER',
           null,
           ObjShop._id,
