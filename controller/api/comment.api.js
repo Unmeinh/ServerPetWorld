@@ -55,10 +55,10 @@ exports.addComment = async (req, res, next) => {
           await mdBlog.findByIdAndUpdate(idBlog, blog);
           await sendFCMNotification(
             blog.idUser?.tokenDevice,
-            `${(req.user._id == blog?.idUser?._id) ? req.user.fullName : "Bạn"} đã bình luận bài viết của bạn!`,
-            `${(req.user._id == blog?.idUser?._id) ? req.user.fullName : "Bạn"} đã thêm một bình luận: ${(content.length > 50) ? content.substring(0, 50) + "..." : content}.`,
+            `${(req.user._id == blog?.idUser?._id) ? "Bạn" : req.user.fullName} đã bình luận bài viết của bạn!`,
+            `${(req.user._id == blog?.idUser?._id) ? "Bạn" : req.user.fullName} đã thêm một bình luận: ${(content.length > 50) ? content.substring(0, 50) + "..." : content}.`,
             'CLIENT',
-            [req.user.avatarUser],
+            [],
             blog.idUser?._id,
             3
           );

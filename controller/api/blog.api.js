@@ -432,7 +432,7 @@ exports.addBlog = async (req, res, next) => {
             `${req.user.fullName} đã đăng bài viết mới!`,
             `${req.user.fullName} đã đăng một bài viết mới: ${(newBlog.contentBlog.length > 50) ? newBlog.contentBlog.substring(0, 50) + "..." : newBlog.contentBlog}.\nHãy vào ứng dụng để xem ${req.user.fullName} muốn chia sẻ điều gì ngay thôi nào.`,
             'CLIENT',
-            [(newBlog.imageBlogs && newBlog.imageBlogs.length > 0) ? newBlog.imageBlogs[0] : req.user.avatarUser],
+            [],
             follower?.idFollow?._id,
             3
           );
@@ -551,17 +551,17 @@ exports.interactPost = async (req, res, next) => {
             arr_Interact.splice(arr_Interact.indexOf(req.user._id), 1);
           } else {
             arr_Interact.push(req.user._id);
+            await sendFCMNotification(
+              objBlog?.idUser?.tokenDevice,
+              `${(req.user._id == objBlog?.idUser?._id) ? "Bạn" : req.user.fullName} đã thích bài viết của bạn!`,
+              `${(req.user._id == objBlog?.idUser?._id) ? "Bạn" : req.user.fullName} đã thích bài viết: ${(objBlog.contentBlog.length > 50) ? objBlog.contentBlog.substring(0, 50) + "..." : objBlog.contentBlog}.\nHãy vào ứng dụng để xem số tương tác bài viết của bạn ngay thôi nào.`,
+              'CLIENT',
+              [],
+              objBlog?.idUser?._id,
+              3
+            );
           }
           await mdBlog.BlogModel.findByIdAndUpdate(idBlog, objBlog);
-          await sendFCMNotification(
-            objBlog?.idUser?.tokenDevice,
-            `${(req.user._id == objBlog?.idUser?._id) ? req.user.fullName : "Bạn"} đã thích bài viết của bạn!`,
-            `${(req.user._id == objBlog?.idUser?._id) ? req.user.fullName : "Bạn"} đã thích bài viết: ${(objBlog.contentBlog.length > 50) ? objBlog.contentBlog.substring(0, 50) + "..." : objBlog.contentBlog}.\nHãy vào ứng dụng để xem số tương tác bài viết của bạn ngay thôi nào.`,
-            'CLIENT',
-            [req?.user?.avatarUser],
-            objBlog?.idUser?._id,
-            3
-          );
         }
 
         return res

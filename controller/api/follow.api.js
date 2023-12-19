@@ -172,7 +172,7 @@ exports.insertFollow = async (req, res, next) => {
                             `${req.user.fullName} đã theo dõi bạn!`,
                             `Bạn đã được theo dõi bởi ${req.user.fullName}.`,
                             'CLIENT',
-                            [req.user.avatarUser],
+                            [],
                             userFollow?._id,
                             3
                         );
