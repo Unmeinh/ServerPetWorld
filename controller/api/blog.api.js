@@ -551,7 +551,7 @@ exports.interactPost = async (req, res, next) => {
             arr_Interact.splice(arr_Interact.indexOf(req.user._id), 1);
           } else {
             arr_Interact.push(req.user._id);
-            if (req.user._id != objBlog.idUser._id) {
+            if (String(req.user._id) != String(objBlog.idUser._id)) {
               await sendFCMNotification(
                 objBlog?.idUser?.tokenDevice,
                 `${req.user.fullName} đã thích bài viết của bạn!`,

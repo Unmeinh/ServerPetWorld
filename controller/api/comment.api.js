@@ -53,7 +53,7 @@ exports.addComment = async (req, res, next) => {
         if (blog) {
           blog.comments++;
           await mdBlog.findByIdAndUpdate(idBlog, blog);
-          if (req.user._id != blog.idUser?._id) {
+          if (String(req.user._id) != String(blog.idUser?._id)) {
             await sendFCMNotification(
               blog.idUser?.tokenDevice,
               `${req.user.fullName} đã bình luận bài viết của bạn!`,
