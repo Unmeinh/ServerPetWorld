@@ -5,6 +5,10 @@ let { decodeFromSha256 } = require('../function/hashFunction');
 let mdbillProduct = require("../model/billProduct.model");
 let mdSever = require("../model/server.modal");
 let mdTransaction = require("../model/transaction.modal");
+let mdProduct = require("../model/product.model")
+let mdPet = require("../model/pet.model")
+const { sendFCMNotification } = require('../function/notice');
+let moment = require("moment");
 exports.login = async (req, res, next) => {
   let msg = '';
   if (req.method == 'POST') {
@@ -94,7 +98,7 @@ exports.updateDeliveryStatus = async (req, res, next) => {
   let idBill = req.params.idBill;
   let newDeliveryStatus = 2;
   try {
-    let ObjBillPr = await mdbillProduct.billProductModel.findById(idBill);
+    let ObjBillPr = await mdbillProduct.billProductModel.findById(idBill).populate("idUser", "tokenDevice").populate("idShop", "tokenDevice");
     const totalCount = await mdbillProduct.billProductModel.countDocuments({ idBill: idBill });
     const totalPage = Math.ceil(totalCount / perPage);
     if (!ObjBillPr) {
@@ -123,15 +127,23 @@ exports.updateDeliveryStatus = async (req, res, next) => {
       }
     });
     await shipper.save();
+    await sendFCMNotification(
+      ObjBillPr?.idShop?.tokenDevice,
+      'Đơn hàng của bạn đang được giao!',
+      `Đơn hàng của bạn đã được người giao hàng bắt đầu giao lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+      'SELLER',
+      [],
+      ObjBillPr?.idShop?._id,
+    )
+    await sendFCMNotification(
+      ObjBillPr?.idUser?.tokenDevice,
+      'Đơn hàng của bạn đang được giao!',
+      `Đơn hàng của bạn đã được người giao hàng bắt đầu giao lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+      'CLIENT',
+      [],
+      ObjBillPr?.idUser?._id,
+    )
 
-    // return res.render('OrderList/listOder', {
-    //   listBillProducts: ObjBillPr,
-    //   countAllBillProducts: totalCount,
-    //   countNowBillProducts: ObjBillPr.length,
-    //   msg: msg,
-    //   currentPage: currentPage,
-    //   totalPage: totalPage
-    // });
     return res.redirect("/accountShipper/listBillProduct")
   } catch (error) {
     return res.status(500).json({
@@ -149,7 +161,7 @@ exports.updateDeliveryStatus1 = async (req, res, next) => {
   let idBill = req.params.idBill;
   let newDeliveryStatus = 2;
   try {
-    let ObjBillPr = await mdbillProduct.billProductModel.findById(idBill);
+    let ObjBillPr = await mdbillProduct.billProductModel.findById(idBill).populate("idUser", "tokenDevice").populate("idShop", "tokenDevice");
     const totalCount = await mdbillProduct.billProductModel.countDocuments({ idBill: idBill });
     const totalPage = Math.ceil(totalCount / perPage);
     if (!ObjBillPr) {
@@ -178,15 +190,22 @@ exports.updateDeliveryStatus1 = async (req, res, next) => {
       }
     });
     await shipper.save();
-
-    // return res.render('OrderList/listOder', {
-    //   listBillProducts: ObjBillPr,
-    //   countAllBillProducts: totalCount,
-    //   countNowBillProducts: ObjBillPr.length,
-    //   msg: msg,
-    //   currentPage: currentPage,
-    //   totalPage: totalPage
-    // });
+    await sendFCMNotification(
+      ObjBillPr?.idShop?.tokenDevice,
+      'Đơn hàng của bạn đang được giao lại!',
+      `Đơn hàng của bạn đã được người giao hàng bắt đầu giao lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+      'SELLER',
+      [],
+      ObjBillPr?.idShop?._id,
+    )
+    await sendFCMNotification(
+      ObjBillPr?.idUser?.tokenDevice,
+      'Đơn hàng của bạn đang được giao lại!',
+      `Đơn hàng của bạn đã được người giao hàng bắt đầu giao lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+      'CLIENT',
+      [],
+      ObjBillPr?.idUser?._id,
+    )
     return res.redirect("/accountShipper/listbillDeliveryFall")
   } catch (error) {
     return res.status(500).json({
@@ -206,7 +225,7 @@ exports.updateDeliveryStatusSuccset = async (req, res, next) => {
   let idBill = req.params.idBill;
   let newDeliveryStatus = 3;
   try {
-    let ObjBillPr = await mdbillProduct.billProductModel.findById(idBill);
+    let ObjBillPr = await mdbillProduct.billProductModel.findById(idBill).populate("idUser", "tokenDevice").populate("idShop", "tokenDevice");
     const totalCount = await mdbillProduct.billProductModel.countDocuments({ idBill: idBill });
     const totalPage = Math.ceil(totalCount / perPage);
     const serverRecord = await mdSever.serverModal.findOne();
@@ -254,14 +273,22 @@ exports.updateDeliveryStatusSuccset = async (req, res, next) => {
     });
     await shipper.save();
 
-    // return res.render('OrderList/listOder', {
-    //   listBillProducts: ObjBillPr,
-    //   countAllBillProducts: totalCount,
-    //   countNowBillProducts: ObjBillPr.length,
-    //   msg: msg,
-    //   currentPage: currentPage,
-    //   totalPage: totalPage
-    // });
+    await sendFCMNotification(
+      ObjBillPr?.idShop?.tokenDevice,
+      'Đơn hàng của bạn đang được giao thành công!',
+      `Đơn hàng đã được giao thành công vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+      'SELLER',
+      [],
+      ObjBillPr?.idShop?._id,
+    )
+    await sendFCMNotification(
+      ObjBillPr?.idUser?.tokenDevice,
+      'Đơn hàng của bạn đang được giao thành công!',
+      `Đơn hàng đã được giao thành công vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+      'CLIENT',
+      [],
+      ObjBillPr?.idUser?._id,
+    )
     return res.redirect("/accountShipper/listbillDelivering")
 
 
@@ -283,7 +310,7 @@ exports.updateDeliveryStatusFall = async (req, res, next) => {
   let idBill = req.params.idBill;
   let newDeliveryStatus = -2;
   try {
-    let ObjBillPr = await mdbillProduct.billProductModel.findById(idBill);
+    let ObjBillPr = await mdbillProduct.billProductModel.findById(idBill).populate("idUser", "tokenDevice").populate("idShop", "tokenDevice");
     const totalCount = await mdbillProduct.billProductModel.countDocuments({ idBill: idBill });
     const totalPage = Math.ceil(totalCount / perPage);
     if (!ObjBillPr) {
@@ -337,21 +364,33 @@ exports.updateDeliveryStatusFall = async (req, res, next) => {
             newDeliveryStatus = -1;
             bill.discountBillFall = 0;
             bill.status = newDeliveryStatus;
-            // shouldUpdateStatus = false; // Không cần cập nhật status nếu discountBillFall = 3
+
           }
         } else {
           bill.discountBillFall = 1;
         }
-        // Chỉ cập nhật status nếu shouldUpdateStatus là true
-
       }
     });
     await shipper.save();
-
+    await sendFCMNotification(
+      ObjBillPr?.idShop?.tokenDevice,
+      'Đơn hàng của bạn giao không thành công!',
+      `Đơn hàng đã giao không thành công vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+      'SELLER',
+      [],
+      ObjBillPr?.idShop?._id,
+    )
+    await sendFCMNotification(
+      ObjBillPr?.idUser?.tokenDevice,
+      'Đơn hàng của bạn giao không thành công!',
+      `Đơn hàng đã giao không thành công vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+      'CLIENT',
+      [],
+      ObjBillPr?.idUser?._id,
+    )
     if (newDeliveryStatus === -1) {
       ObjBillPr.deliveryStatus = newDeliveryStatus;
       await ObjBillPr.save();
-
       const transactions = await mdTransaction.TransactionModal.find({ idBill: idBill });
       for (const transaction of transactions) {
         transaction.status = newDeliveryStatus;
@@ -362,15 +401,51 @@ exports.updateDeliveryStatusFall = async (req, res, next) => {
         serverRecord.totalOrderFailed += 1;
         await serverRecord.save();
       }
+      if (ObjBillPr.products.length > 1) {
+        for (let i = 0; i < ObjBillPr.products.length; i++) {
+          const bill = ObjBillPr.products[i];
+          let product = await mdProduct.ProductModel.findById(bill.idProduct);
+          if (product) {
+            product.quantitySold = Number(product.quantitySold) - (bill.amount);
+            product.amountProduct = Number(product.amountProduct) + (bill.amount);
+            await product.save();
+          }
+        }
+      } else {
+        if (ObjBillPr.products.length > 0) {
+          let first = ObjBillPr.products[0];
+          let product = await mdProduct.ProductModel.findById(first.idProduct);
+          if (product) {
+            product.quantitySold = Number(product.quantitySold) - (first.amount);
+            product.amountProduct = Number(product.amountProduct) + (first.amount);
+            await product.save();
+          } else {
+            let pet = await mdPet.PetModel.findById(first.idProduct);
+            if (pet) {
+              pet.quantitySold = Number(pet.quantitySold) - (first.amount);
+              pet.amountPet = Number(pet.amountPet) + (first.amount);
+              await pet.save();
+            }
+          }
+        }
+      }
+      await sendFCMNotification(
+        ObjBillPr?.idShop?.tokenDevice,
+        'Đơn hàng của bạn đã được hủy!',
+        `Đơn hàng đã được hủy vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+        'SELLER',
+        [],
+        ObjBillPr?.idShop?._id,
+      )
+      await sendFCMNotification(
+        ObjBillPr?.idUser?.tokenDevice,
+        'Đơn hàng của bạn đã được hủy!',
+        `Đơn hàng đã được hủy vào lúc ${moment(new Date()).format('HH:mm:SS A - DD/MM/YYYY')}.\nBạn có thể theo dõi tiến độ đơn hàng ở Quản lý đơn hàng và Chi tiết đơn hàng.`,
+        'CLIENT',
+        [],
+        ObjBillPr?.idUser?._id,
+      )
     }
-    // return res.render('OrderList/listOder', {
-    //   listBillProducts: ObjBillPr,
-    //   countAllBillProducts: totalCount,
-    //   countNowBillProducts: ObjBillPr.length,
-    //   msg: msg,
-    //   currentPage: currentPage,
-    //   totalPage: totalPage
-    // });
     return res.redirect("/accountShipper/listbillDelivering")
 
   } catch (error) {
@@ -631,8 +706,8 @@ exports.updateShipper = async (req, res, next) => {
       selectedProvince = req.body.selectedProvince;
       selectedDistrict = req.body.selectedDistrict;
       selectedWard = req.body.selectedWard;
-      const phoneNumberRegex = /^\+?[0-9]{8,}$/; 
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+      const phoneNumberRegex = /^\+?[0-9]{8,}$/;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (
         !phoneNumberRegex.test(updatedShipper.phoneNumber) ||
         !emailRegex.test(updatedShipper.email) ||
