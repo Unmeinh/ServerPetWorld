@@ -95,15 +95,14 @@
     <script>
         const sellerMessages = [];
         const clientMessages = [];
-        let role = '';
-
+        let role = 'client';
         document.addEventListener('DOMContentLoaded', () => {
             const clientButton = document.querySelector('#clientButton');
             const sellerButton = document.querySelector('#sellerButton');
             const userTypeSpan = document.querySelector('#userType');
             const imgClick = document.querySelector('#imgClick');
 
-            let role = 'client';
+            role = 'client';
             userTypeSpan.textContent = 'Client';
             imgClick.src = '../../upload/ourpet_logo.png';
 
@@ -250,6 +249,7 @@
         }
 
         async function fetchMessages(role) {
+
             try {
                 const response = await fetch(`/notification/messages?role=${role}`);
                 if (response.ok) {
